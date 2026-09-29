@@ -7,6 +7,7 @@
 .cache/
 tmp/
 temp/
+references/downloads/
 
 # Operating system files
 .DS_Store

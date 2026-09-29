@@ -6,7 +6,7 @@ The FPGA will recreate the SNES motherboard environment and provide a protected,
 
 ## Current status
 
-**Planning and research. No completed or tested SN 64 hardware exists yet.** The repository currently contains the source specification, engineering plan, and peripheral research. It does not yet contain a validated schematic, PCB, FPGA implementation, or printable enclosure.
+**Reference collection and adaptation planning. No completed or tested SN 64 hardware exists yet.** Existing SNES FPGA sources, SNES and N64 schematics/PCBs, connector footprints, and cartridge CAD have been downloaded locally. Connector and mounting dimensions have been extracted from native CAD. It does not yet contain a validated SN 64 schematic, PCB, FPGA implementation, or printable enclosure.
 
 Every target in the original specification remains in scope, including PAL, protection, save integrity, telemetry, independent recovery, factory testing, and the additional requirements. Independent digital A/V is an initial validation path. M64 single-HDMI operation remains a required target with an unresolved dependency on a supported M64 integration mechanism; reserving resources does not establish compatibility.
 
@@ -15,6 +15,10 @@ Every target in the original specification remains in scope, including PAL, prot
 - [Engineering specification, Rev A](SN_64_Engineering_Specification_Rev_A.docx)
 - [Engineering implementation plan](docs/superpowers/plans/2026-09-28-sn64-engineering-plan.md)
 - [Peripheral research and current decisions](docs/research/snes-peripherals.md)
+- [Reusable SNES circuits, layouts and FPGA source](docs/research/reusable-designs.md)
+- [Connector, cartridge and mounting dimensions](docs/dimensions.md)
+- [Official M64 schematics and mechanical references](docs/research/m64-reference-files.md)
+- [Local reference collection and source manifests](references/README.md)
 
 Current input decisions are standard, configurable N64-to-SNES controller mapping; no multitap; and undecided Super Scope/Justifier support. Virtual SNES mouse control using an N64 controller is deferred to a later FPGA/firmware update. The initial design must preserve the necessary input data, update path, and justified resource margins. Other researched accessories are candidates, not selected features.
 
@@ -25,7 +29,7 @@ Current input decisions are standard, configurable N64-to-SNES controller mappin
 - **Blender:** available for visualization and mesh work.
 - FPGA synthesis, simulation, and programming tools will be selected with the FPGA.
 
-Research starts with online native CAD, component drawings, public hardware sources, and developer documentation. Dimensions and interface assumptions must retain their provenance and be cross-checked. Physical measurements and fit tests will resolve remaining gaps before manufacturing release. CAD checks and manufacturer review do not replace functional hardware validation.
+Start by adapting working upstream designs: reuse their HDL, circuits, layouts, footprints and mechanical CAD where they fit. The main custom work is integrating the physical SNES cartridge bridge with the SNES core, protected power, the N64 host endpoint, A/V and enclosure. Dimensions and interface assumptions retain their provenance and are cross-checked. Physical fit and functional tests follow adaptation.
 
 ## Planned outputs
 

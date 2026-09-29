@@ -14,6 +14,7 @@
 
 ## Global constraints
 
+- Reuse existing working HDL, schematics, PCB layouts, connector footprints and shell CAD first. Adapt proven blocks instead of recreating them; the user's explicit preference is to concentrate original engineering on integration. The initial [reuse map](../../research/reusable-designs.md) and [dimension extraction](../../dimensions.md) are now available.
 - Every specification requirement stays in scope, including PAL, future M64 single-HDMI integration, production provisions, and the items headed Additional Requirements Worth Adding.
 - N64 and M64 share the standard N64 cartridge interface. Do not invent a second connector or assume private M64 capabilities.
 - Original SNES/SFC cartridges, Super EverDrive X5 and X6, and FXPAK Pro are mandatory targets.

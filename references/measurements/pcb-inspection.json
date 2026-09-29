@@ -1,0 +1,20 @@
+{
+  "source_commit": "a1e7996d2cbece686820a5c785029c68514f17b0",
+  "pcb_thickness_setting_mm": 1.2,
+  "n64_footprint_origin_mm": [
+    150.0,
+    125.0
+  ],
+  "mounting_holes": [
+    {
+      "x_mm": 102.5,
+      "y_mm": 128.25,
+      "diameter_mm": 2.5
+    },
+    {
+      "x_mm": 197.5,
+      "y_mm": 128.25,
+      "diameter_mm": 2.5
+    }
+  ]
+}
