@@ -66,6 +66,12 @@ The current [evaluation report](../fpga/reports/evaluation.md) and [JSON snapsho
 - Two bugs found and fixed during development: (1) deciding ownership from the delayed socket strobes shortened the effective write pulse; (2) the bench's SRAM model latched after the address had advanced. Both are recorded in the implementation note.
 - `evaluate.py --mode sim` now runs seven checks. CIC, EXPAND, analog audio, HDMA/PPU/APU responder cases, fault-input wiring and hardware timing remain open.
 
+## 2026-09-29 — N64/M64 host endpoint implemented in simulation
+
+- Vendored SummerCart64's N64 PI controller, FIFO and bus interfaces unmodified (GPL-3.0, commit `a1e7996d`, [provenance](../fpga/vendor/summercart64/provenance.json)) and wrote [sn64_n64_endpoint.sv](../fpga/rtl/sn64_n64_endpoint.sv): a bootstrap ROM window at `0x1000_0000` and a mailbox register block at `0x1FFF_0000` for controller state, run request, status and build identity. The run request is cleared by host reset. [Implementation notes and register map](design/n64-endpoint-implementation.md).
+- Added a host-model testbench driving the PI protocol (ALE_H/ALE_L latch, read/write strobes) with AD-bus ownership checks. Passes ROM burst/offset reads, mailbox read/write/readback and reset behaviour in 4,595 clocks. Added to `evaluate.py --mode sim`. Two host-model mistakes (ALE hold time, ALE order) were fixed in the bench and recorded as guidance for the bootstrap.
+- CIC lockout (SummerCart64's soft-CPU implementation), /INT and the libdragon bootstrap remain open; the register map is the bootstrap's contract.
+
 ## Remaining work
 
 Select and validate the FPGA/storage and physical-cartridge bridge, complete system/cartridge power and protection, N64 endpoint, controller/firmware functions, clocks, A/V and diagnostics. Retain PAL and the required M64 single-HDMI target; its supported integration mechanism remains unresolved. Complete PCB placement/routing and the FreeCAD enclosure, then perform electrical, programming, compatibility and fit tests on prototypes before producing a PCBWay release. No working SN 64 hardware or fabrication-ready package exists yet.

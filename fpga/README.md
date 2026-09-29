@@ -7,12 +7,13 @@ This directory contains a reproducible **console-only engineering candidate** bu
 - [Diagnostic](tests/tb_console_boot.sv): original instruction program; no commercial game image.
 - [WRAM bus diagnostic](tests/tb_wram_bus.sv): active-cycle RAM data, direct/mirrored addresses, RAM port and B-to-A DMA.
 - [Cartridge bridge](rtl/sn64_cart_bridge.sv) and [socket-facing top](rtl/sn64_console_with_bridge.sv): data-bus ownership with one released clock at every turnaround; [physical-bus diagnostic](tests/tb_cart_bridge.sv) with contention monitor and a fault-injected run. See [implementation notes](../docs/design/cartridge-bridge-implementation.md).
+- [N64/M64 endpoint](rtl/sn64_n64_endpoint.sv): vendored [SummerCart64 PI controller](vendor/summercart64/provenance.json) (GPL-3.0, unmodified) with an SN64 bootstrap ROM window and mailbox; [host-model diagnostic](tests/tb_n64_endpoint.sv). See [endpoint notes](../docs/design/n64-endpoint-implementation.md).
 - [Recorded evaluation](reports/evaluation.md) and [machine-readable evidence](reports/evaluation.json).
 - [Physical-cartridge bridge work](../docs/design/physical-cartridge-bridge.md) and [FPGA selection](../docs/design/fpga-board-selection.md).
 
 ## What is reused and changed
 
-The 35 vendored files come from SNESTang commit `5f0ef193145f67bded7f73f2c477ac8da4d85f7e`. They retain their upstream content except newline normalization recorded per file. The ROM-loader/cartridge-emulation wrapper is excluded so the real cartridge retains its ROM, save memory and enhancement hardware.
+SummerCart64's PI controller is vendored separately under `vendor/summercart64/` with its own provenance and GPL-3.0 license. The 35 SNESTang files come from SNESTang commit `5f0ef193145f67bded7f73f2c477ac8da4d85f7e`. They retain their upstream content except newline normalization recorded per file. The ROM-loader/cartridge-emulation wrapper is excluded so the real cartridge retains its ROM, save memory and enhancement hardware.
 
 `tools/prepare_core.py` verifies every source hash and writes generated copies under ignored `build/`. It selects the upstream `VERILATOR` inferred-memory branch, omits ten simulation-only diagnostic statements, connects HIGH_RES, exports PHI2, ties the open TURBO input low and exports the CPU/DMA/HDMA address **before** the upstream WRAM mirror conversion. Internal RAM decoding keeps its original address path. The generated preparation manifest lists changes and hashes. No vendor file is patched in place.
 

@@ -1,0 +1,38 @@
+{
+  "upstream": "https://github.com/Polprzewodnikowy/SummerCart64",
+  "upstream_commit": "a1e7996d2cbece686820a5c785029c68514f17b0",
+  "license": "GPL-3.0 (repository LICENSE, software); hardware files use CERN-OHL-S-2.0 separately",
+  "note": "Unmodified copies of the N64 PI endpoint and its bus interfaces. SN64 uses them through a wrapper (fpga/rtl/sn64_n64_endpoint.sv); no vendored file is edited.",
+  "files": [
+    {
+      "path": "fw/rtl/memory/mem_bus.sv",
+      "sha256": "e510ccaf5b1ec7faca7e1913c959eb38d3d782f974c3f49a964acca7517c11d2",
+      "bytes": 581
+    },
+    {
+      "path": "fw/rtl/n64/n64_pi.sv",
+      "sha256": "2a6dc471072392c20a53fa34039cad437ba233828320c75aeb9b821a208d615a",
+      "bytes": 16411
+    },
+    {
+      "path": "fw/rtl/n64/n64_pi_fifo.sv",
+      "sha256": "f08d2e0d3ce64560c07f5149b1e9c6377d5513d43109b3b6314b906fed808951",
+      "bytes": 1038
+    },
+    {
+      "path": "fw/rtl/n64/n64_reg_bus.sv",
+      "sha256": "895c76d93ab7545196a1fb9a815f8d3dcae413f94e223a8eebb7c9202098f10c",
+      "bytes": 1460
+    },
+    {
+      "path": "fw/rtl/n64/n64_scb.sv",
+      "sha256": "f34cb7291dda8da56f39a152d91db1d8c0962a0e338c479d7b67b51a84bd37e4",
+      "bytes": 6216
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "8b1ba204bb69a0ade2bfcf65ef294a920f6bb361b317dba43c7ef29d96332b9b",
+      "bytes": 35148
+    }
+  ]
+}

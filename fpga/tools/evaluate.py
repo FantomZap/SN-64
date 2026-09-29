@@ -118,6 +118,20 @@ def main():
         fault_exe = fault_obj / ('Vtb_cart_bridge.exe' if os.name == 'nt' else 'Vtb_cart_bridge')
         run('cart-bridge-no-guard', [str(fault_exe)], 'without release clock')
         report['simulation']['injected_bridge_fault'] = 'Rejected: owner change without a released clock is detected'
+        # N64/M64 host endpoint: vendored SummerCart64 PI controller plus the SN64 ROM/mailbox wrapper.
+        n64_sources = ['fpga/vendor/summercart64/fw/rtl/memory/mem_bus.sv', 'fpga/rtl/sn64_n64_reg_bus.sv',
+                       'fpga/vendor/summercart64/fw/rtl/n64/n64_scb.sv', 'fpga/vendor/summercart64/fw/rtl/n64/n64_pi_fifo.sv',
+                       'fpga/vendor/summercart64/fw/rtl/n64/n64_pi.sv', 'fpga/rtl/sn64_n64_endpoint.sv',
+                       'fpga/tests/tb_n64_endpoint.sv']
+        n64_obj = obj / 'n64-endpoint'
+        run('n64-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+            '--top-module', 'tb_n64_endpoint', '--Mdir', str(n64_obj).replace('\\', '/')] + n64_sources)
+        n64_exe = n64_obj / ('Vtb_n64_endpoint.exe' if os.name == 'nt' else 'Vtb_n64_endpoint')
+        n64_body = run('n64-endpoint', [str(n64_exe)])
+        n64_pass = next((line for line in n64_body.splitlines() if line.startswith('PASS:')), None)
+        if n64_pass is None:
+            raise RuntimeError('N64 endpoint test exited without its acceptance marker')
+        report['simulation']['n64_endpoint'] = n64_pass
         report['simulation']['limit'] = ('Same master clock in all runs; PAL clocks/video and PPU/APU not qualified; '
                                          'bridge bus model is behavioural (no analog levels or translator delays)')
 

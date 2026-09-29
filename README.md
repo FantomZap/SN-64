@@ -6,7 +6,7 @@ The FPGA will recreate the SNES motherboard environment and provide a protected,
 
 ## Current status
 
-**The project now includes a simulated SNES console candidate with a contention-checked physical cartridge bridge, editable mechanical reference parts, and the KiCad cartridge/USB circuit draft. No completed or tested SN 64 hardware exists yet.** The [core evaluation](fpga/README.md) reuses pinned SNESTang sources and includes original diagnostics, synthesis and internal FPGA fit experiments. The [mechanical package](mechanical/README.md) contains FreeCAD, STEP and STL files for a socket hole-pattern coupon and source N64 board reference; these are not a final enclosure. The [editable schematic](hardware/sn64/README.md), revision `0.2-usb`, contains both cartridge connectors and a real [USB programmer child sheet](hardware/sn64/usb-programmer.kicad_sch): USB-C, protection, bridge power, FT232HL, crystal, optional EEPROM, isolated JTAG and service access.
+**The project now includes a simulated SNES console candidate with a contention-checked physical cartridge bridge and a simulated N64/M64 host endpoint (reused SummerCart64 PI controller with an SN64 ROM window and mailbox), editable mechanical reference parts, and the KiCad cartridge/USB circuit draft. No completed or tested SN 64 hardware exists yet.** The [core evaluation](fpga/README.md) reuses pinned SNESTang sources and includes original diagnostics, synthesis and internal FPGA fit experiments. The [mechanical package](mechanical/README.md) contains FreeCAD, STEP and STL files for a socket hole-pattern coupon and source N64 board reference; these are not a final enclosure. The [editable schematic](hardware/sn64/README.md), revision `0.2-usb`, contains both cartridge connectors and a real [USB programmer child sheet](hardware/sn64/usb-programmer.kicad_sch): USB-C, protection, bridge power, FT232HL, crystal, optional EEPROM, isolated JTAG and service access.
 
 Independent static checks passed **30 cartridge-interface checks and 64 USB checks**. These verify source agreement and schematic connectivity, not working hardware or USB compliance. The [136-entry requirements register](docs/requirements.md) preserves every specification target and records partial evidence separately from acceptance. Final FPGA/BOM selection, configuration storage and its programming hookup, system/cartridge power circuitry, the physical bus bridge, host and A/V integration, PCB layout, enclosure and hardware tests remain pending. **This is not fabrication ready.**
 
@@ -21,6 +21,7 @@ Every target in the original specification remains in scope, including PAL, prot
 - [Console-core evaluation and reproducible builds](fpga/README.md)
 - [Physical cartridge bridge design and open tests](docs/design/physical-cartridge-bridge.md)
 - [Cartridge bridge implementation and simulation evidence](docs/design/cartridge-bridge-implementation.md)
+- [N64/M64 endpoint implementation and mailbox map](docs/design/n64-endpoint-implementation.md)
 - [Cartridge data-bus source evidence and unresolved behavior](docs/design/bus-electrical-evidence.md)
 - [FPGA/package, supply and board reuse review](docs/design/fpga-board-selection.md)
 - [Power architecture, including M64 USB power](docs/design/power-architecture.md)
