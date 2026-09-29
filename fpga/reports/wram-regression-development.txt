@@ -1,0 +1,21 @@
+WRAM cartridge-output regression development — 2026-09-29
+
+Before the wrapper selected current WRAM Q, the new cartridge-output test
+failed during the active read window for $7E0010 (expected $A5):
+
+[12385000] %Fatal: tb_wram_bus.sv:58: Assertion failed in tb_wram_bus: Direct WRAM read exposes stale data: 7e
+%Error: fpga/tests\tb_wram_bus.sv:58: Verilog $stop
+Aborting...
+
+This is preserved development evidence from .local/wram-red.log. The test
+was subsequently extended with source-valid reset/pause assertions, so the
+line numbers above refer to that earlier test revision. The negative run
+is not part of the final evaluator's fresh command list.
+
+The current source and its hashes, fresh positive regression, complete
+evaluator commands, exit codes and log hashes are in evaluation.json.
+simulation-results.txt contains the current diagnostic output. Reproduce
+the current test with evaluate.py --mode sim using fpga/README.md.
+
+The correction selects WRAM Q during CE/OE qualified by reset and enable.
+It establishes no electrical tri-state, translator OE or socket timing.

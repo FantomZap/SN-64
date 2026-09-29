@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-09-29T04:27:50.453559+00:00",
+  "generated_utc": "2026-09-29T04:52:50.713422+00:00",
   "scope": "Console candidate only; no board pin/timing qualification or hardware proof",
   "mode": "all",
   "commands": [
@@ -24,7 +24,7 @@
         "--top-module",
         "tb_console_boot",
         "--Mdir",
-        "C:/Users/RyanB/.codex/tools/sn64-build/sim-console",
+        "C:/Users/RyanB/.codex/tools/sn64-build/cartridge-bus",
         "-Ibuild/generated/snestang/src",
         "-Ibuild/generated/snestang/src/spc700",
         "-Ibuild/generated/snestang/src/65C816",
@@ -34,33 +34,65 @@
         "fpga/tests/tb_console_boot.sv"
       ],
       "exit_code": 0,
-      "log_sha256": "398b5d35be884485ad1edb54ef4c36a007d0d4a5e3daf101d12682515b0018a1"
+      "log_sha256": "64b0fcdab1a16333699362de92e91f578a7c24d51fc73d283607ca48f5c337c3"
     },
     {
       "label": "ntsc-mode",
       "argv": [
-        "C:\\Users\\RyanB\\.codex\\tools\\sn64-build\\sim-console\\Vtb_console_boot.exe"
+        "C:\\Users\\RyanB\\.codex\\tools\\sn64-build\\cartridge-bus\\Vtb_console_boot.exe"
       ],
       "exit_code": 0,
-      "log_sha256": "84556dd0501d8e7c12154be115246394236f95a205e4c3400468a09175d61102"
+      "log_sha256": "1e61e914ac16758abdfd84f4252a92c56f87651f7f9ccd0b35cdb621660f91a7"
     },
     {
       "label": "pal-mode-bit",
       "argv": [
-        "C:\\Users\\RyanB\\.codex\\tools\\sn64-build\\sim-console\\Vtb_console_boot.exe",
+        "C:\\Users\\RyanB\\.codex\\tools\\sn64-build\\cartridge-bus\\Vtb_console_boot.exe",
         "+pal"
       ],
       "exit_code": 0,
-      "log_sha256": "73d25b35ef24d9a35d717c548f2b75cad6aa9a74296c4f26ef499bb80474f51f"
+      "log_sha256": "c4563dab394942b5ba36f6eb78ecea5f914183a6cee0a323fdeb69f0b0d10bb4"
     },
     {
       "label": "corrupt-cartridge-read",
       "argv": [
-        "C:\\Users\\RyanB\\.codex\\tools\\sn64-build\\sim-console\\Vtb_console_boot.exe",
+        "C:\\Users\\RyanB\\.codex\\tools\\sn64-build\\cartridge-bus\\Vtb_console_boot.exe",
         "+corrupt_read"
       ],
       "exit_code": 1,
       "log_sha256": "c7d16a9d3bfef1877e244b1aa77d47f3b56e0384d6f0a14c63185c5af08fe048"
+    },
+    {
+      "label": "wram-build",
+      "argv": [
+        "C:\\Users\\RyanB\\.codex\\tools\\oss-cad-suite-20260928\\oss-cad-suite\\bin\\verilator_bin.EXE",
+        "--binary",
+        "--timing",
+        "--build-jobs",
+        "4",
+        "-Wno-fatal",
+        "--top-module",
+        "tb_wram_bus",
+        "--Mdir",
+        "C:/Users/RyanB/.codex/tools/sn64-build/cartridge-bus/wram-bus",
+        "-Ibuild/generated/snestang/src",
+        "-Ibuild/generated/snestang/src/spc700",
+        "-Ibuild/generated/snestang/src/65C816",
+        "-f",
+        "build/core-sources.f",
+        "fpga/rtl/sn64_console_candidate.sv",
+        "fpga/tests/tb_wram_bus.sv"
+      ],
+      "exit_code": 0,
+      "log_sha256": "1056cfcb8cdb8645d7278f78d2931ae9efcb7b232a27205ff37a4db7703d67fd"
+    },
+    {
+      "label": "wram-bus",
+      "argv": [
+        "C:\\Users\\RyanB\\.codex\\tools\\sn64-build\\cartridge-bus\\wram-bus\\Vtb_wram_bus.exe"
+      ],
+      "exit_code": 0,
+      "log_sha256": "f5526d61d7ef1d4db69214cec2c451587a25bbde3575ab52a56af3fa12b086d1"
     },
     {
       "label": "yosys-version",
@@ -81,7 +113,7 @@
         "plugin -i slang; scratchpad -set abc9.xaiger 1; read_slang --top sn64_console_candidate -DVERILATOR -Ibuild/generated/snestang/src -Ibuild/generated/snestang/src/spc700 -f build/core-sources.f fpga/rtl/sn64_console_candidate.sv; synth_ecp5 -top sn64_console_candidate -json build/console-ecp5.json; stat"
       ],
       "exit_code": 0,
-      "log_sha256": "f3406b09ad9ce08f96d8db2c6a2590e0f78c4e81e310bcf7de19857312ba35a3"
+      "log_sha256": "5e649f446944ab20cb0ffdfd0fa295ad87ea753602972a8473169ba0664cc6f1"
     },
     {
       "label": "nextpnr-version",
@@ -110,14 +142,15 @@
         "build/console-ecp5-pnr.json"
       ],
       "exit_code": 0,
-      "log_sha256": "558fe648233330a0d2a7c8b3e72fc84fcf4fc7527e63db006cbf65b3c0380c05"
+      "log_sha256": "26fcaf9cbbdf409aad0cfae2020530223bff48ca0a0ce52e357c7eba6421928a"
     }
   ],
   "inputs": {
     "fpga/core-sources.f": "450d7a281fe2fc876a3f397e560a49cec6aa274ecc624afd9a579663bc577c49",
-    "fpga/rtl/sn64_console_candidate.sv": "ab06de50a2455319f9d53e8cda226ded2551bdf301220f36e134d6b4daae9afe",
-    "fpga/tests/tb_console_boot.sv": "1e3658a003d4cb491c24a3f4fe8a546a466791b2ff82215feea98ea80cb51f6d",
-    "fpga/tools/evaluate.py": "a9fd0d2512bd5a09728f82c61ddf0034c062a4ae9718ad8e6cfdfdcf7696f618",
+    "fpga/rtl/sn64_console_candidate.sv": "d6f97b6ad1a116410aa287380ace6c3fd560fa523f9ba7ddb2d0921eada2020f",
+    "fpga/tests/tb_console_boot.sv": "9f6177b2ba1c66d286ba3854807f29e713186fff49978f19891d5102902cc923",
+    "fpga/tests/tb_wram_bus.sv": "b0afd6efe67ec1b46413935123430a76e8d3932d8ded1d4a50822b2b4f16bc55",
+    "fpga/tools/evaluate.py": "cdd9deaa2607707f5149c4853c53ee72b748a8967a901522029989d8eaeef8ad",
     "fpga/tools/prepare_core.py": "e6ef68569a3acb25215e1091c21f89782dcf927e1b947610e21a82fa121a1bfb",
     "fpga/vendor/snestang/src/65C816/adder4.v": "2e5355a23ef7fcb0c8b655e13e30142b83e6d264b9317bfa7e909f47d7d909e4",
     "fpga/vendor/snestang/src/65C816/AddrGen.v": "74f0338b4182f0502ea61b3a37bb93bb8ed56842f96dfede5681e0304ea35d71",
@@ -157,23 +190,24 @@
     "ntsc-mode": "PASS: reset/native CPU, cartridge R/W, WRAM, B-bus, DMA, PHI2; PAL flag=0; 1336 clocks",
     "pal-mode-bit": "PASS: reset/native CPU, cartridge R/W, WRAM, B-bus, DMA, PHI2; PAL flag=1; 1336 clocks",
     "injected_bad_read": "Rejected with expected cartridge low readback assertion",
+    "wram_bus": "PASS: active-cycle WRAM data, both mirrors, WRAM-port reads, B-to-A DMA, pause/reset source validity (1089 clocks)",
     "limit": "Same master clock in both runs; PAL clocks/video and PPU/APU not qualified"
   },
   "synthesis": {
     "cells": {
-      "CCU2C": 1036,
+      "CCU2C": 1030,
       "DP16KD": 139,
-      "L6MUX21": 1675,
-      "LUT4": 27817,
+      "L6MUX21": 855,
+      "LUT4": 26669,
       "MULT18X18D": 19,
-      "PFUMX": 5227,
+      "PFUMX": 4392,
       "TRELLIS_DPR16X4": 34,
       "TRELLIS_FF": 10775
     },
     "normal_cpu_speed_control": [
       "0"
     ],
-    "netlist_sha256": "ae8b081e30f267b52466124da6f9314e8fc325c9a4bced20df6973bf38c18c55",
+    "netlist_sha256": "da43318240ff16cfc0e9e6f4fc61443f6aaaf7737611bfde08c8dafdfa4e93a2",
     "warnings": [
       "build\\generated\\snestang\\src\\65C816\\mcode.sv:2363:13: warning: asynchronous load value missing for variable '\\console.CPU.P65C816.MCode.$15.STATE2'",
       "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.PPU.FlipPlane.bp [7]:",
@@ -273,7 +307,7 @@
   "placement_route": {
     "fmax": {
       "$glbnet$clk$TRELLIS_IO_IN": {
-        "achieved": 27.99160385131836,
+        "achieved": 29.9069881439209,
         "constraint": 21.477272033691406
       }
     },
@@ -368,7 +402,7 @@
       },
       "TRELLIS_COMB": {
         "available": 83640,
-        "used": 30821
+        "used": 29657
       },
       "TRELLIS_ECLKBUF": {
         "available": 8,
@@ -380,7 +414,7 @@
       },
       "TRELLIS_IO": {
         "available": 365,
-        "used": 142
+        "used": 143
       },
       "TRELLIS_RAMW": {
         "available": 10455,
@@ -392,6 +426,6 @@
       }
     },
     "constraint_limit": "Unconstrained trial I/O; internal fit experiment only",
-    "netlist_sha256": "ae8b081e30f267b52466124da6f9314e8fc325c9a4bced20df6973bf38c18c55"
+    "netlist_sha256": "da43318240ff16cfc0e9e6f4fc61443f6aaaf7737611bfde08c8dafdfa4e93a2"
   }
 }

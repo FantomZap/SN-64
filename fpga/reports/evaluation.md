@@ -1,6 +1,6 @@
 # Console candidate evaluation — 2026-09-29
 
-**The current console candidate passes its diagnostic, synthesizes, and completes a trial ECP5-85F place-and-route.** This is an internal feasibility experiment, not a complete SN64 design or proof of real-cartridge compatibility.
+**The current console candidate passes its boot and WRAM diagnostics, synthesizes, and completes a trial ECP5-85F place-and-route.** This is an internal feasibility experiment, not a complete SN64 design or proof of real-cartridge compatibility.
 
 The [JSON snapshot](evaluation.json) records source hashes, exact tool commands, exit codes, log hashes, memory/logic counts and timing. [Toolchain provenance](toolchain.json) and [reproduction instructions](../README.md) accompany it. The full run used `fpga/tools/evaluate.py --mode all`; raw logs remain in ignored `build/evaluation/` and can be regenerated. No FPGA bitstream, board pinout or manufacturing files were emitted.
 
@@ -11,38 +11,40 @@ The [JSON snapshot](evaluation.json) records source hashes, exact tool commands,
 | NTSC mode diagnostic | PASS, 1,336 master clocks | Original diagnostic program; no game image or physical cartridge |
 | PAL mode-bit diagnostic | PASS, 1,336 master clocks | Same 46.56 ns test clock; PAL master clock/video/audio not qualified |
 | Corrupted cartridge read | Expected nonzero exit and `cartridge low readback` assertion | Demonstrates data checking catches the injected error |
+| WRAM bus regression | PASS, 1,089 master clocks | Current data during direct/two-mirror reads, data-port reads and B-to-A DMA; source-valid reset/pause gating, without an electrical bus model |
 | Normal-speed CPU control | Synthesized TURBO net is constant `0` | External PHI2 frequency/phase still needs full timing tests |
 | Yosys final netlist check | Zero reported problems; synthesis exit 0 | Earlier warnings retained and discussed below |
-| ECP5-85F / CABGA381 / grade 6 trial route | Completed; internal clock **27.99 MHz** achieved against **21.477273 MHz** constraint | Arbitrary unconstrained trial I/O; no external timing or final bank/pin qualification |
+| ECP5-85F / CABGA381 / grade 6 trial route | Completed; internal clock **29.91 MHz** achieved against **21.477273 MHz** constraint | Arbitrary unconstrained trial I/O; no external timing or final bank/pin qualification |
 
-The diagnostic checks reset-vector fetch, native CPU execution, external 16-bit reads/writes, WRAM readback, a mirrored WRAM write with raw address `$00:0010`, a peripheral B-bus write, two-byte A-to-B cartridge-to-WRAM DMA and PHI2 activity. It checks neither PHI2's full cycle-period matrix nor the unresolved physical D-bus read/ownership behavior. Refer to the [bridge design](../../docs/design/physical-cartridge-bridge.md) for those pending tests.
+The boot diagnostic checks reset-vector fetch, native CPU execution, external 16-bit reads/writes, WRAM readback, a mirrored WRAM write with raw address `$00:0010`, a peripheral B-bus write, two-byte A-to-B cartridge-to-WRAM DMA and PHI2 activity. The new WRAM diagnostic checks current bytes throughout the observed A-side read window, RAM data-port reads, B-to-A DMA writes and immediate source-valid disable when reset/enable changes with the master clock stopped. Neither diagnostic establishes PHI2's full cycle-period matrix or electrical D-bus ownership/turnaround. Refer to the [bridge design](../../docs/design/physical-cartridge-bridge.md) for those pending tests.
 
 | Synthesized resource | Count |
 |---|---:|
-| LUT4 | 27,817 |
+| LUT4 | 26,669 |
 | TRELLIS_FF | 10,775 |
 | DP16KD | 139 of 208 EBRs |
 | MULT18X18D | 19 |
-| CCU2C | 1,036 |
-| PFUMX / L6MUX21 | 5,227 / 1,675 |
+| CCU2C | 1,030 |
+| PFUMX / L6MUX21 | 4,392 / 855 |
 | TRELLIS_DPR16X4 | 34 |
 
-Placement packs 30,821 TRELLIS_COMB sites and 10,775 FF sites. Do not add these figures to the prepacking cell counts as if they were separate logic. The route report's architecture-wide I/O availability is not the bonded BG381 user-pin count. Actual product pin/bank allocation is still pending.
+Placement packs 29,657 TRELLIS_COMB sites and 10,775 FF sites. Do not add these figures to the prepacking cell counts as if they were separate logic. The route report's architecture-wide I/O availability is not the bonded BG381 user-pin count. Actual product pin/bank allocation is still pending.
 
-The 139 EBRs include 64 for WRAM, 16+16 for VRAM, 32 for ARAM and 11 for other core memories. This leaves 69 EBRs before host, A/V buffers and remaining integration. The candidate already includes 256 KiB main RAM, but no resource margin is yet reserved or accepted for the complete product. Final mapped netlist SHA-256: `ae8b081e30f267b52466124da6f9314e8fc325c9a4bced20df6973bf38c18c55`.
+The 139 EBRs include 64 for WRAM, 16+16 for VRAM, 32 for ARAM and 11 for other core memories. This leaves 69 EBRs before host, A/V buffers and remaining integration. The candidate already includes 256 KiB main RAM, but no resource margin is yet reserved or accepted for the complete product. Final mapped netlist SHA-256: `da43318240ff16cfc0e9e6f4fc61443f6aaaf7737611bfde08c8dafdfa4e93a2`.
 
 ## Bugs found during reuse and regression evidence
 
 - Upstream left SCPU's TURBO input open. A first mapped-netlist check failed with `normal-speed control is not tied low: ['x']`. The generated source now ties it to zero; the evaluator verifies the mapped constant. A passing two-state simulation alone had not caught this issue.
 - Upstream's exported CA converted low-bank WRAM mirrors into bank `$7E`. The new mirror diagnostic failed with `WRAM mirror address changed on cartridge bus: 7e0010`. Generated SCPU now exports the CPU/DMA/HDMA-selected raw address separately; SNES forwards it and the wrapper uses it. Internal WRAM keeps the old converted CA path. The current diagnostic passes without changing the expected address.
+- The previous wrapper exposed stale `$7E` instead of current `$A5` during a direct WRAM read. The [preserved development failure](wram-regression-development.txt) preceded the current WRAM mux fix. The wrapper now selects WRAM Q during qualified CE/OE and exports reset/enable-qualified source validity. This flag is not a translator output enable. The [bus evidence audit](../../docs/design/bus-electrical-evidence.md) supports the WRAM change while leaving CPU-register electrical behavior unresolved.
 - The diagnostic additionally runs with a deliberately corrupted external low byte. It fails at the expected readback assertion, confirming that a successful process exit is not the sole acceptance condition.
 
-The source patches are generated by [prepare_core.py](../tools/prepare_core.py); original vendor sources remain pinned. The earlier 27,248-LUT/28.97-MHz experiment preceded these fixes and is superseded for current implementation results.
+The upstream source patches are generated by [prepare_core.py](../tools/prepare_core.py); original vendor sources remain pinned. Earlier 27,248-LUT/28.97-MHz and 27,817-LUT/27.99-MHz experiments preceded the current WRAM correction and are superseded for current implementation results. Differences in this unconstrained trial mapping are not evidence of improved physical cartridge timing.
 
 ## Warnings and interpretation
 
 This is **not a warning-free build**. Slang reports an unreset local `STATE2` temporary in the CPU microcode process; source inspection shows it assigned with blocking assignment before use, while MI has an explicit reset. Early Yosys checks report shared static-function argument aliases in the pure `FlipPlane` and `CLAMP16` functions; those aliases disappear during mapping and the final check reports zero problems. Unused debug outputs are also undriven; the candidate ties debug controls off. These observations justify a bounded experiment, not full PPU/DSP equivalence or gameplay correctness. ABC reports its box/internal-fanout and combinational-network warnings; its internal mapping equivalence check passes.
 
-The complete Verilator compilation immediately before the evaluator produced 29 missing-timescale warnings, preserved in [compiler diagnostics](compiler-diagnostics.txt). The evaluator reused that compiled model, so its incremental build log does not repeat those warnings. The build uses `-Wno-fatal` and therefore must not be described as lint clean. [Simulation output](simulation-results.txt) preserves both passing runs and the injected failure. Graphics, sound, ARAM timing, open-bus/partially driven reads, HDMA, save integrity, real translators, rail sequencing, fault timing, cartridge clocks, CIC, host operation and USB initial loading still require dedicated verification.
+The fresh evaluator compiled both diagnostics: the boot build produced 29 warnings and the WRAM build produced 29. Their warning summaries are preserved in [compiler diagnostics](compiler-diagnostics.txt); exact full-log hashes are in the JSON snapshot. The build uses `-Wno-fatal` and therefore must not be described as lint clean. [Simulation output](simulation-results.txt) preserves all three passing runs and the injected failure. Graphics, sound, ARAM timing, open-bus/partially driven reads, HDMA, save integrity, real translators, rail sequencing, fault timing, cartridge clocks, CIC, host operation and USB initial loading still require dedicated verification.
 
 ECP5 resource fit is useful evidence for the 85F candidate. It does not fix the BOM, determine power consumption, prove PCB routability or establish original-N64/M64 compatibility.

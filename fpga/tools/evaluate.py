@@ -83,6 +83,18 @@ def main():
             report['simulation'][name] = passed
         run('corrupt-cartridge-read', [str(executable), '+corrupt_read'], 'cartridge low readback')
         report['simulation']['injected_bad_read'] = 'Rejected with expected cartridge low readback assertion'
+        wram_obj = obj / 'wram-bus'
+        run('wram-build', [verilator, '--binary', '--timing', '--build-jobs', '4',
+            '-Wno-fatal', '--top-module', 'tb_wram_bus', '--Mdir', str(wram_obj).replace('\\', '/'),
+            '-Ibuild/generated/snestang/src', '-Ibuild/generated/snestang/src/spc700',
+            '-Ibuild/generated/snestang/src/65C816', '-f', 'build/core-sources.f',
+            'fpga/rtl/sn64_console_candidate.sv', 'fpga/tests/tb_wram_bus.sv'])
+        wram_exe = wram_obj / ('Vtb_wram_bus.exe' if os.name == 'nt' else 'Vtb_wram_bus')
+        wram_body = run('wram-bus', [str(wram_exe)])
+        wram_pass = next((line for line in wram_body.splitlines() if line.startswith('PASS:')), None)
+        if wram_pass is None:
+            raise RuntimeError('WRAM bus test exited without its acceptance marker')
+        report['simulation']['wram_bus'] = wram_pass
         report['simulation']['limit'] = 'Same master clock in both runs; PAL clocks/video and PPU/APU not qualified'
 
     if args.mode in ('synth', 'all'):

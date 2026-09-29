@@ -7,6 +7,7 @@ module sn64_console_candidate (
     input wire cart_irq_n,
     output wire [23:0] cart_address,
     output wire [7:0] cart_data_out, cart_peripheral_address,
+    output wire cart_wram_read_valid,
     output wire cart_rd_n, cart_wr_n, cart_prd_n, cart_pwr_n,
     output wire cart_romsel_n, cart_wramsel_n, cart_refresh, cart_phi2,
     input wire [1:0] joy1_di, joy2_di,
@@ -19,7 +20,13 @@ module sn64_console_candidate (
 );
     wire [16:0] wa;
     wire [7:0] wd,wq;
-    wire wce_n,wwe_n;
+    wire wce_n,wwe_n,woe_n;
+    wire [7:0] legacy_cart_data;
+    // WRAM shares the physical data bus with the cartridge. Upstream DO
+    // otherwise retains the previous CPU byte until the read cycle ends.
+    // This source-valid flag is NOT a complete socket/translator output enable.
+    assign cart_wram_read_valid = reset_n && enable && !wce_n && !woe_n;
+    assign cart_data_out = cart_wram_read_valid ? wq : legacy_cart_data;
     wire [15:0] va,vb,aa;
     wire [7:0] vad,vbd,vaq,vbq,ad,aq;
     wire vaw_n,vbw_n,ace_n,awe_n;
@@ -33,11 +40,11 @@ module sn64_console_candidate (
         .CA(),.RAW_CA(cart_address),.CPURD_N(cart_rd_n),.CPUWR_N(cart_wr_n),.PHI2(cart_phi2),
         .CPURD_CYC_N(),.DOT_CLK_CE(),
         .PA(cart_peripheral_address),.PARD_N(cart_prd_n),.PAWR_N(cart_pwr_n),
-        .DI(cart_data_in),.DO(cart_data_out),.IRQ_N(cart_irq_n),
+        .DI(cart_data_in),.DO(legacy_cart_data),.IRQ_N(cart_irq_n),
         .RAMSEL_N(cart_wramsel_n),.ROMSEL_N(cart_romsel_n),
         .SYSCLKF_CE(),.SYSCLKR_CE(),.SNES_REFRESH(cart_refresh),
         .WRAM_ADDR(wa),.WRAM_D(wd),.WRAM_Q(wq),.WRAM_CE_N(wce_n),
-        .WRAM_OE_N(),.WRAM_WE_N(wwe_n),.WRAM_RD_N(),
+        .WRAM_OE_N(woe_n),.WRAM_WE_N(wwe_n),.WRAM_RD_N(),
         .VRAM_ADDRA(va),.VRAM_ADDRB(vb),.VRAM_DAI(vaq),.VRAM_DBI(vbq),
         .VRAM_DAO(vad),.VRAM_DBO(vbd),.VRAM_WRA_N(vaw_n),.VRAM_WRB_N(vbw_n),.VRAM_RD_N(),
         .ARAM_ADDR(aa),.ARAM_D(ad),.ARAM_Q(aq),.ARAM_CE_N(ace_n),.ARAM_OE_N(),.ARAM_WE_N(awe_n),
