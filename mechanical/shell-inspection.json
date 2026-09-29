@@ -1,0 +1,98 @@
+[
+  {
+    "filename": "sfc_cart.stl",
+    "sha256": "94613e68ed244d4abb16ccb863066fc95d09367d8a8a2f4ae9904ac3ac60f677",
+    "bounds": {
+      "min": [
+        -168.99990844726562,
+        42.00025939941406,
+        18.0
+      ],
+      "max": [
+        -80.99990844726562,
+        170.00025939941406,
+        30.500001907348633
+      ],
+      "size": [
+        88.0,
+        128.0,
+        12.500001907348633
+      ]
+    },
+    "facets": 35956,
+    "closed_mesh": false,
+    "units_note": "STL has no unit declaration; mm assumed from source application, not verified on a cartridge."
+  },
+  {
+    "filename": "SnesDrone_Shell_Bottom_V0.1.1.stl",
+    "sha256": "624669975c53994c086d581a6eb675f9a2426e9fa4d0c2eb49281831cbcd2f41",
+    "bounds": {
+      "min": [
+        -54.297000885009766,
+        -67.0,
+        2.440000057220459
+      ],
+      "max": [
+        59.0,
+        61.27000045776367,
+        12.237000465393066
+      ],
+      "size": [
+        113.29700088500977,
+        128.27000045776367,
+        9.797000408172607
+      ]
+    },
+    "facets": 31406,
+    "closed_mesh": false,
+    "units_note": "STL has no unit declaration; mm assumed from source application, not verified on a cartridge."
+  },
+  {
+    "filename": "SnesDrone_Shell_Top_V0.1.1.stl",
+    "sha256": "cde7f463d126c3c822c1e00ee82531a01673c3a7e7fac4c6699198522b07541f",
+    "bounds": {
+      "min": [
+        -52.994998931884766,
+        -67.0,
+        10.295000076293945
+      ],
+      "max": [
+        60.0,
+        61.0,
+        24.69300079345703
+      ],
+      "size": [
+        112.99499893188477,
+        128.0,
+        14.398000717163086
+      ]
+    },
+    "facets": 15258,
+    "closed_mesh": false,
+    "units_note": "STL has no unit declaration; mm assumed from source application, not verified on a cartridge."
+  },
+  {
+    "filename": "sc64_shell.stp",
+    "sha256": "211ab021159991aed6c4fb4fd107460b9103f4b121b863f27c6e29735c4453fe",
+    "bounds": {
+      "min": [
+        -58.0589680361636,
+        -12.308421348639,
+        -9.02921849029458
+      ],
+      "max": [
+        58.0572849942239,
+        77.06268342754115,
+        9.02712127275927
+      ],
+      "size": [
+        116.1162530303875,
+        89.37110477618015,
+        18.05633976305385
+      ]
+    },
+    "valid": true,
+    "solids": 2,
+    "units_note": "STEP mm"
+  }
+]

@@ -1,0 +1,54 @@
+{
+  "freecad": [
+    "1",
+    "1",
+    "4",
+    "20260928 (Git shallow)",
+    "Unknown",
+    "2026/09/28 13:46:34",
+    "(HEAD detached at 4fd3bf320)",
+    "4fd3bf320d9566a27e60069fc8387448aaa3a094"
+  ],
+  "models": [
+    {
+      "model": "snes-hole-pattern-coupon",
+      "valid_solid": true,
+      "step_roundtrip_valid": true,
+      "stl_closed": true,
+      "volume_mm3": 2234.761156266167,
+      "bounds_mm": [
+        95.0,
+        15.0,
+        1.6
+      ],
+      "freecad_objects": 66,
+      "files": {
+        ".FCStd": "a696780a423b490c1275f63fab38140d23c25ac89387c20597a52c506ff4a9d7",
+        ".step": "b3105dc794587126d2bd32bf255d0ac736e2436d9ccfd511696db24e8b9be8b7",
+        ".stl": "7e68fcb3947339667baf58577ee81cebfe102c497d2b650eebb189acd8bb8eec"
+      }
+    },
+    {
+      "model": "n64-sc64-board-reference",
+      "valid_solid": true,
+      "step_roundtrip_valid": true,
+      "stl_closed": true,
+      "volume_mm3": 6660.387027549038,
+      "bounds_mm": [
+        101.80000000000001,
+        57.8,
+        1.2
+      ],
+      "freecad_objects": 7,
+      "files": {
+        ".FCStd": "00f09003bc008664c237e078e797dc6922caa95de2eab81f8bd99e32ce706ab6",
+        ".step": "af50d31695af03b5cffb25394ea61f65c80d56e9f78cd3e022f76326167be656",
+        ".stl": "a1a8e06278219fcb692cfe0acfd4736e1b412b1e252c3d4461bb861209813a1e"
+      }
+    }
+  ],
+  "limitations": [
+    "Numerical/solid checks only; no printed-part, socket, cartridge or host fit test.",
+    "Independent references use separate datums; they are not an assembled adapter."
+  ]
+}
