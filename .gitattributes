@@ -34,3 +34,6 @@ mechanical/licenses/*.txt -text whitespace=-blank-at-eof
 fpga/vendor/snestang/LICENSE -text whitespace=-blank-at-eof
 # Preserve pinned third-party HDL verbatim; do not "fix" its whitespace.
 fpga/vendor/snestang/** text eol=lf whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab
+
+# Preserve vendored SummerCart64 files byte-for-byte (provenance.json records their SHA-256).
+fpga/vendor/summercart64/** -text
