@@ -1,6 +1,6 @@
 # SN 64 project work log
 
-This log records local engineering artifacts and evidence. It does not certify working hardware, manufacturing readiness or publication to GitHub. Every target in [specification Rev A](../SN_64_Engineering_Specification_Rev_A.docx) remains in scope, subject to the explicit user decisions recorded in the [engineering plan](superpowers/plans/2026-09-28-sn64-engineering-plan.md).
+This log records engineering artifacts, evidence and publication. It does not certify working hardware or manufacturing readiness. Every target in [specification Rev A](../SN_64_Engineering_Specification_Rev_A.docx) remains in scope, subject to the explicit user decisions recorded in the [engineering plan](superpowers/plans/2026-09-28-sn64-engineering-plan.md).
 
 ## 2026-09-28 — References and cartridge-interface draft
 
@@ -16,6 +16,12 @@ This log records local engineering artifacts and evidence. It does not certify w
 - Exported the schematic/netlist and ran independent static checks. The saved reports show [30 cartridge-interface checks passed](../hardware/sn64/validation/interface-check.json) and [64 USB checks passed](../hardware/sn64/validation/usb-check.json), with zero failures. The ERC report retains 90 isolated-label warnings at the unfinished cartridge interfaces. Static connectivity checks do not demonstrate hardware operation or USB compliance.
 
 The first hardware revision must provide externally accessible, side-mounted USB-C for initial loading, later updates and recovery without a successful N64/M64 boot. The drawn bridge powers only its own interface; FPGA selection, persistent storage, target programming power and hookup, boot straps, loading software and cold-boot recovery tests are still required to fulfill that requirement.
+
+## 2026-09-29 — GitHub publication
+
+Published the current design and earlier reference/interface work as [draft pull request #1](https://github.com/FantomZap/SN-64/pull/1), branch `codex/usb-programmer`. A fresh Git fetch verified that the published design commit `d3db0f4f9429eb83c969087c73f5e3363d037a52` and local design commit `7094cacce50dbb26ff0d79bc2e650ac01cc8259c` have the identical file tree `20c06d39eb0ad66bb94ad47702d34fa73e29d65c`.
+
+The main project folder contains the new work. GitHub's `main` branch remains at the earlier reviewed baseline; the complete current draft is on the linked pull request. Local commit history was retained. Publication used the connected GitHub app because command-line Git had no usable login, so the remote publication commit differs from the local development commits while preserving identical files. This work-log entry is a subsequent documentation update to that same pull request. No files were sent to PCBWay and no manufacturing order was placed.
 
 ## Remaining work
 
