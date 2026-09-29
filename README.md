@@ -1,12 +1,14 @@
 # SN 64
 
-SN 64 is an active engineering project for an FPGA-based SNES/Super Famicom cartridge adapter. **The same adapter will work with both an original Nintendo 64 and ModRetro M64 through the standard N64 cartridge interface, without internal console modifications.**
+SN 64 is an active engineering project for an FPGA-based SNES/Super Famicom cartridge adapter. **The target is one adapter for both an original Nintendo 64 and ModRetro M64 through the standard N64 cartridge interface, without internal console modifications.** Compatibility has not yet been demonstrated on hardware.
 
 The FPGA will recreate the SNES motherboard environment and provide a protected, complete SNES cartridge interface. Original SNES/SFC cartridges, Super EverDrive X5/X6, and FXPAK Pro are primary compatibility targets. The host console supplies controller input and runs the adapter's configuration and diagnostics bootstrap.
 
 ## Current status
 
-**Planning and research. No completed or tested SN 64 hardware exists yet.** The repository currently contains the source specification, engineering plan, and peripheral research. It does not yet contain a validated schematic, PCB, FPGA implementation, or printable enclosure.
+**Cartridge interfaces and a USB programming circuit are drafted in KiCad. No completed or tested SN 64 hardware exists yet.** Existing SNES FPGA sources, schematics/PCBs, connector footprints, and cartridge CAD have been downloaded locally. Connector and mounting dimensions have been extracted from native CAD. The [editable schematic](hardware/sn64/README.md), revision `0.2-usb`, contains both cartridge connectors and a real [USB programmer child sheet](hardware/sn64/usb-programmer.kicad_sch): USB-C, protection, bridge power, FT232HL, crystal, optional EEPROM, isolated JTAG and service access.
+
+Independent static checks passed **30 cartridge-interface checks and 64 USB checks**. These verify source agreement and schematic connectivity, not working hardware or USB compliance. FPGA selection, configuration storage and its programming hookup, system/cartridge power, the remaining interfaces and firmware, PCB layout, enclosure and hardware tests remain pending. **This is not fabrication ready.**
 
 Every target in the original specification remains in scope, including PAL, protection, save integrity, telemetry, independent recovery, factory testing, and the additional requirements. Independent digital A/V is an initial validation path. M64 single-HDMI operation remains a required target with an unresolved dependency on a supported M64 integration mechanism; reserving resources does not establish compatibility.
 
@@ -15,8 +17,21 @@ Every target in the original specification remains in scope, including PAL, prot
 - [Engineering specification, Rev A](SN_64_Engineering_Specification_Rev_A.docx)
 - [Engineering implementation plan](docs/superpowers/plans/2026-09-28-sn64-engineering-plan.md)
 - [Peripheral research and current decisions](docs/research/snes-peripherals.md)
+- [Reusable SNES circuits, layouts and FPGA source](docs/research/reusable-designs.md)
+- [Connector, cartridge and mounting dimensions](docs/dimensions.md)
+- [Official M64 schematics and mechanical references](docs/research/m64-reference-files.md)
+- [Local reference collection and source manifests](references/README.md)
+- [KiCad cartridge-interface draft and verification](hardware/sn64/README.md)
+- [SNES signal directions and electrical notes](docs/design/snes-interface-notes.md)
+- [N64/M64 signal directions and power references](docs/design/n64-interface-notes.md)
+- [sd2snes level-shifter reuse review](docs/design/translation-reuse-review.md)
+- [USB programming architecture and remaining integration](docs/design/usb-programming-architecture.md)
+- [USB connector mechanics and crystal selection](docs/design/usb-connector-mechanics.md)
+- [Dated project work log](docs/project-work-log.md)
 
 Current input decisions are standard, configurable N64-to-SNES controller mapping; no multitap; and undecided Super Scope/Justifier support. Virtual SNES mouse control using an N64 controller is deferred to a later FPGA/firmware update. The initial design must preserve the necessary input data, update path, and justified resource margins. Other researched accessories are candidates, not selected features.
+
+**USB-C is mandatory in the first hardware revision.** Provide a side-mounted, externally accessible USB-C data port for initial firmware/FPGA programming, subsequent updates and recovery from a computer. It must be usable without a successful N64 or M64 boot. Include the connector, supporting programming circuitry and enclosure opening in the initial design; a power-only port or a future hardware addition does not satisfy this requirement. The bridge circuit is now drawn, but blank-board loading, persistent image programming and recovery still require the selected FPGA/storage, their power design, host software and bench validation.
 
 ## Tools and research approach
 
@@ -25,11 +40,11 @@ Current input decisions are standard, configurable N64-to-SNES controller mappin
 - **Blender:** available for visualization and mesh work.
 - FPGA synthesis, simulation, and programming tools will be selected with the FPGA.
 
-Research starts with online native CAD, component drawings, public hardware sources, and developer documentation. Dimensions and interface assumptions must retain their provenance and be cross-checked. Physical measurements and fit tests will resolve remaining gaps before manufacturing release. CAD checks and manufacturer review do not replace functional hardware validation.
+Start by adapting working upstream designs: reuse their HDL, circuits, layouts, footprints and mechanical CAD where they fit. The main custom work is integrating the physical SNES cartridge bridge with the SNES core, protected power, the N64 host endpoint, A/V and enclosure. Dimensions and interface assumptions retain their provenance and are cross-checked. Physical fit and functional tests follow adaptation.
 
 ## Planned outputs
 
-These directories describe future work; they are not claims that implementations already exist.
+These directories describe the intended outputs. The cartridge/USB schematic draft and reference collection exist; the remaining implementations are future work.
 
 | Planned directory | Contents |
 |---|---|

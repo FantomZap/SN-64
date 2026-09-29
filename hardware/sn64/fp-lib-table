@@ -1,0 +1,1 @@
+(fp_lib_table (version 7) (lib (name "SN64") (type "KiCad") (uri "${KIPRJMOD}/libraries/SN64.pretty") (options "") (descr "Upstream reference footprints; see THIRD_PARTY.md")) (lib (name "SN64_USB") (type "KiCad") (uri "${KIPRJMOD}/libraries/SN64_USB.pretty") (options "") (descr "USB programmer draft; see THIRD_PARTY.md")))

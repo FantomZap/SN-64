@@ -1,0 +1,16 @@
+{
+  "status": "reference footprints only; no final socket MPN, PCB outline, fit or release approval",
+  "snes_footprint": {
+    "project": "sanni/cartreader",
+    "commit": "060d8ae0bf4be40bfc6a368bf6fbf7b594b3884d",
+    "sha256": "9cd8ac2eb5323928023d6f4d098a65bf5e8cd3ab9f97d42e3b2fc1197432aac6",
+    "changes": "none; byte-identical copy"
+  },
+  "n64_footprint": {
+    "project": "Polprzewodnikowy/SummerCart64",
+    "commit": "a1e7996d2cbece686820a5c785029c68514f17b0",
+    "source_board_sha256": "7991e3105a4be609be6904c9c69d507e98fec3db5f51d3d91d43cc540a16295a",
+    "source_reference": "J_N1",
+    "changes": "Extracted with KiCad 10 pcbnew; origin at source (150,125), renamed reference/value/library ID, pad net assignments removed; source pad geometry and copper sides retained. Six source Edge.Cuts segments retain the open connector-edge profile; no complete PCB perimeter or mounting holes. Do not duplicate the retained profile during layout."
+  }
+}

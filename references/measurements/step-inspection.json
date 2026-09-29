@@ -1,0 +1,90 @@
+[
+  {
+    "file": "references/downloads/summercart64/hw/shell/injection mold/sc64_bottom.step",
+    "valid": true,
+    "solids": 1,
+    "bounds_mm": {
+      "min": [
+        -58.0589680361636,
+        -76.88803965768085,
+        19.8397698729469
+      ],
+      "max": [
+        58.057656470497534,
+        12.482451762165237,
+        28.9206129782804
+      ],
+      "size": [
+        116.11662450666114,
+        89.37049141984609,
+        9.0808431053335
+      ]
+    }
+  },
+  {
+    "file": "references/downloads/summercart64/hw/shell/injection mold/sc64_top.step",
+    "valid": true,
+    "solids": 1,
+    "bounds_mm": {
+      "min": [
+        -58.0130436452751,
+        -12.308421348639,
+        -9.02921849029458
+      ],
+      "max": [
+        58.0089036711417,
+        77.06268342754115,
+        1.000000000005457
+      ],
+      "size": [
+        116.0219473164168,
+        89.37110477618015,
+        10.029218490300037
+      ]
+    }
+  },
+  {
+    "file": "references/downloads/summercart64/hw/shell/injection mold/sc64_shell.stp",
+    "valid": true,
+    "solids": 2,
+    "bounds_mm": {
+      "min": [
+        -58.0589680361636,
+        -12.308421348639,
+        -9.02921849029458
+      ],
+      "max": [
+        58.0572849942239,
+        77.06268342754115,
+        9.02712127275927
+      ],
+      "size": [
+        116.1162530303875,
+        89.37110477618015,
+        18.05633976305385
+      ]
+    }
+  },
+  {
+    "file": ".local/research/exports/sc64-board-reference.step",
+    "valid": true,
+    "solids": 1,
+    "bounds_mm": {
+      "min": [
+        99.1,
+        -135.5,
+        0.0
+      ],
+      "max": [
+        200.9,
+        -77.7,
+        1.11
+      ],
+      "size": [
+        101.80000000000001,
+        57.8,
+        1.11
+      ]
+    }
+  }
+]

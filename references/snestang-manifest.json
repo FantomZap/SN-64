@@ -1,0 +1,29 @@
+{
+  "commit": "5f0ef193145f67bded7f73f2c477ac8da4d85f7e",
+  "files": [
+    {
+      "file": "references/downloads/snestang/snestang-5f0ef193145f67bded7f73f2c477ac8da4d85f7e.zip",
+      "url": "https://codeload.github.com/nand2mario/snestang/zip/5f0ef193145f67bded7f73f2c477ac8da4d85f7e",
+      "bytes": 3782104,
+      "sha256": "09adb16244d16fa7210ec3aafa32f15550ada98f65531c9579a7f1d6f9120d13"
+    },
+    {
+      "file": "references/downloads/snestang/README.md",
+      "url": "https://raw.githubusercontent.com/nand2mario/snestang/5f0ef193145f67bded7f73f2c477ac8da4d85f7e/README.md",
+      "bytes": 4180,
+      "sha256": "b710e439eff2912cad349dacd6a80aa30dfbcdb04e85f638cbb4488e40ee9403"
+    },
+    {
+      "file": "references/downloads/snestang/design.md",
+      "url": "https://raw.githubusercontent.com/nand2mario/snestang/5f0ef193145f67bded7f73f2c477ac8da4d85f7e/doc/design.md",
+      "bytes": 17654,
+      "sha256": "f58c4af89a08ddcc8c2611df89c1af7aebe1b5861af4bcd708ee3c2965ee88ff"
+    },
+    {
+      "file": "references/downloads/snestang/LICENSE",
+      "url": "https://raw.githubusercontent.com/nand2mario/snestang/5f0ef193145f67bded7f73f2c477ac8da4d85f7e/LICENSE",
+      "bytes": 35149,
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+    }
+  ]
+}

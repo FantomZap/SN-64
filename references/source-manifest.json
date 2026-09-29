@@ -1,0 +1,155 @@
+{
+  "retrieved": "2026-09-29",
+  "files": [
+    {
+      "project": "summercart64",
+      "repository": "Polprzewodnikowy/SummerCart64",
+      "commit": "a1e7996d2cbece686820a5c785029c68514f17b0",
+      "path": "LICENSE",
+      "url": "https://raw.githubusercontent.com/Polprzewodnikowy/SummerCart64/a1e7996d2cbece686820a5c785029c68514f17b0/LICENSE",
+      "local_path": "references/downloads/summercart64/LICENSE",
+      "bytes": 35148,
+      "sha256": "8b1ba204bb69a0ade2bfcf65ef294a920f6bb361b317dba43c7ef29d96332b9b"
+    },
+    {
+      "project": "summercart64",
+      "repository": "Polprzewodnikowy/SummerCart64",
+      "commit": "a1e7996d2cbece686820a5c785029c68514f17b0",
+      "path": "hw/pcb/LICENSE",
+      "url": "https://raw.githubusercontent.com/Polprzewodnikowy/SummerCart64/a1e7996d2cbece686820a5c785029c68514f17b0/hw/pcb/LICENSE",
+      "local_path": "references/downloads/summercart64/hw/pcb/LICENSE",
+      "bytes": 13419,
+      "sha256": "253ad3f89603e728abfa60c36fbcaf8225cf55c1eab12725f19fb3d74d647f3a"
+    },
+    {
+      "project": "summercart64",
+      "repository": "Polprzewodnikowy/SummerCart64",
+      "commit": "a1e7996d2cbece686820a5c785029c68514f17b0",
+      "path": "hw/pcb/sc64v2.kicad_pcb",
+      "url": "https://raw.githubusercontent.com/Polprzewodnikowy/SummerCart64/a1e7996d2cbece686820a5c785029c68514f17b0/hw/pcb/sc64v2.kicad_pcb",
+      "local_path": "references/downloads/summercart64/hw/pcb/sc64v2.kicad_pcb",
+      "bytes": 1407146,
+      "sha256": "7991e3105a4be609be6904c9c69d507e98fec3db5f51d3d91d43cc540a16295a"
+    },
+    {
+      "project": "summercart64",
+      "repository": "Polprzewodnikowy/SummerCart64",
+      "commit": "a1e7996d2cbece686820a5c785029c68514f17b0",
+      "path": "hw/pcb/sc64v2.kicad_sch",
+      "url": "https://raw.githubusercontent.com/Polprzewodnikowy/SummerCart64/a1e7996d2cbece686820a5c785029c68514f17b0/hw/pcb/sc64v2.kicad_sch",
+      "local_path": "references/downloads/summercart64/hw/pcb/sc64v2.kicad_sch",
+      "bytes": 644544,
+      "sha256": "3632363de2514f6633fb0a8841b0511a9de255275e0a73d8b04ae62058ff8cbc"
+    },
+    {
+      "project": "summercart64",
+      "repository": "Polprzewodnikowy/SummerCart64",
+      "commit": "a1e7996d2cbece686820a5c785029c68514f17b0",
+      "path": "hw/shell/injection mold/sc64_bottom.step",
+      "url": "https://raw.githubusercontent.com/Polprzewodnikowy/SummerCart64/a1e7996d2cbece686820a5c785029c68514f17b0/hw/shell/injection%20mold/sc64_bottom.step",
+      "local_path": "references/downloads/summercart64/hw/shell/injection mold/sc64_bottom.step",
+      "bytes": 1587268,
+      "sha256": "44ab439e20bf4487134fe9bf5f4061267559e70a94365d571ec7b3b154440420"
+    },
+    {
+      "project": "summercart64",
+      "repository": "Polprzewodnikowy/SummerCart64",
+      "commit": "a1e7996d2cbece686820a5c785029c68514f17b0",
+      "path": "hw/shell/injection mold/sc64_top.step",
+      "url": "https://raw.githubusercontent.com/Polprzewodnikowy/SummerCart64/a1e7996d2cbece686820a5c785029c68514f17b0/hw/shell/injection%20mold/sc64_top.step",
+      "local_path": "references/downloads/summercart64/hw/shell/injection mold/sc64_top.step",
+      "bytes": 1085167,
+      "sha256": "91cb2ddce30b869ead46f49471481bec2f38b022515764a08d9c75ff798aa11f"
+    },
+    {
+      "project": "summercart64",
+      "repository": "Polprzewodnikowy/SummerCart64",
+      "commit": "a1e7996d2cbece686820a5c785029c68514f17b0",
+      "path": "hw/shell/injection mold/sc64_shell.stp",
+      "url": "https://raw.githubusercontent.com/Polprzewodnikowy/SummerCart64/a1e7996d2cbece686820a5c785029c68514f17b0/hw/shell/injection%20mold/sc64_shell.stp",
+      "local_path": "references/downloads/summercart64/hw/shell/injection mold/sc64_shell.stp",
+      "bytes": 2375657,
+      "sha256": "211ab021159991aed6c4fb4fd107460b9103f4b121b863f27c6e29735c4453fe"
+    },
+    {
+      "project": "summercart64",
+      "repository": "Polprzewodnikowy/SummerCart64",
+      "commit": "a1e7996d2cbece686820a5c785029c68514f17b0",
+      "path": "hw/shell/sc64_shell_back.stl",
+      "url": "https://raw.githubusercontent.com/Polprzewodnikowy/SummerCart64/a1e7996d2cbece686820a5c785029c68514f17b0/hw/shell/sc64_shell_back.stl",
+      "local_path": "references/downloads/summercart64/hw/shell/sc64_shell_back.stl",
+      "bytes": 1031484,
+      "sha256": "de7ce3a63e7c45dda766194ecea33756f90ea1cb7c230b36578b99e8a291a1b8"
+    },
+    {
+      "project": "summercart64",
+      "repository": "Polprzewodnikowy/SummerCart64",
+      "commit": "a1e7996d2cbece686820a5c785029c68514f17b0",
+      "path": "hw/shell/sc64_shell_front.stl",
+      "url": "https://raw.githubusercontent.com/Polprzewodnikowy/SummerCart64/a1e7996d2cbece686820a5c785029c68514f17b0/hw/shell/sc64_shell_front.stl",
+      "local_path": "references/downloads/summercart64/hw/shell/sc64_shell_front.stl",
+      "bytes": 985884,
+      "sha256": "f7ffb27e53ab95321665bec0255cc70de8e6329c25c01822331bb97c0b5b4968"
+    },
+    {
+      "project": "sanni",
+      "repository": "sanni/cartreader",
+      "commit": "060d8ae0bf4be40bfc6a368bf6fbf7b594b3884d",
+      "path": "LICENSE",
+      "url": "https://raw.githubusercontent.com/sanni/cartreader/060d8ae0bf4be40bfc6a368bf6fbf7b594b3884d/LICENSE",
+      "local_path": "references/downloads/sanni/LICENSE",
+      "bytes": 35149,
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+    },
+    {
+      "project": "sanni",
+      "repository": "sanni/cartreader",
+      "commit": "060d8ae0bf4be40bfc6a368bf6fbf7b594b3884d",
+      "path": "hardware/LICENSE.txt",
+      "url": "https://raw.githubusercontent.com/sanni/cartreader/060d8ae0bf4be40bfc6a368bf6fbf7b594b3884d/hardware/LICENSE.txt",
+      "local_path": "references/downloads/sanni/hardware/LICENSE.txt",
+      "bytes": 18657,
+      "sha256": "9ba9550ad48438d0836ddab3da480b3b69ffa0aac7b7878b5a0039e7ab429411"
+    },
+    {
+      "project": "sanni",
+      "repository": "sanni/cartreader",
+      "commit": "060d8ae0bf4be40bfc6a368bf6fbf7b594b3884d",
+      "path": "hardware/footprints/!OSCR.pretty/SNES Slot.kicad_mod",
+      "url": "https://raw.githubusercontent.com/sanni/cartreader/060d8ae0bf4be40bfc6a368bf6fbf7b594b3884d/hardware/footprints/!OSCR.pretty/SNES%20Slot.kicad_mod",
+      "local_path": "references/downloads/sanni/hardware/footprints/!OSCR.pretty/SNES Slot.kicad_mod",
+      "bytes": 9192,
+      "sha256": "9cd8ac2eb5323928023d6f4d098a65bf5e8cd3ab9f97d42e3b2fc1197432aac6"
+    },
+    {
+      "project": "sanni",
+      "repository": "sanni/cartreader",
+      "commit": "060d8ae0bf4be40bfc6a368bf6fbf7b594b3884d",
+      "path": "hardware/snes_adapter/snes_adapter.kicad_pcb",
+      "url": "https://raw.githubusercontent.com/sanni/cartreader/060d8ae0bf4be40bfc6a368bf6fbf7b594b3884d/hardware/snes_adapter/snes_adapter.kicad_pcb",
+      "local_path": "references/downloads/sanni/hardware/snes_adapter/snes_adapter.kicad_pcb",
+      "bytes": 136924,
+      "sha256": "c2205db9f609edd6d8fef3309c9a1709d5bd10caa0705a1c600c9ce7eaf547b1"
+    },
+    {
+      "project": "sanni",
+      "repository": "sanni/cartreader",
+      "commit": "060d8ae0bf4be40bfc6a368bf6fbf7b594b3884d",
+      "path": "hardware/snes_adapter/snes_adapter.kicad_sch",
+      "url": "https://raw.githubusercontent.com/sanni/cartreader/060d8ae0bf4be40bfc6a368bf6fbf7b594b3884d/hardware/snes_adapter/snes_adapter.kicad_sch",
+      "local_path": "references/downloads/sanni/hardware/snes_adapter/snes_adapter.kicad_sch",
+      "bytes": 133618,
+      "sha256": "a36994e14b1b35b3d9487c950e9203abfd1b2fab77e596a52280330a5dbaca26"
+    },
+    {
+      "project": "sanni",
+      "repository": "sanni/cartreader",
+      "commit": "060d8ae0bf4be40bfc6a368bf6fbf7b594b3884d",
+      "path": "hardware/snes_adapter/snes_adapter.kicad_pro",
+      "url": "https://raw.githubusercontent.com/sanni/cartreader/060d8ae0bf4be40bfc6a368bf6fbf7b594b3884d/hardware/snes_adapter/snes_adapter.kicad_pro",
+      "local_path": "references/downloads/sanni/hardware/snes_adapter/snes_adapter.kicad_pro",
+      "bytes": 9944,
+      "sha256": "115f7ac315606bdef4da22d2943ed875ff3f3e637917783a36a34d40edd33c7a"
+    }
+  ]
+}

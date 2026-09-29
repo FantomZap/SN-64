@@ -1,0 +1,1392 @@
+{
+    "$schema": "https://schemas.kicad.org/erc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-09-28T23:59:56",
+    "ignored_checks": [
+        {
+            "description": "Global label only appears once in the schematic",
+            "key": "single_global_label"
+        },
+        {
+            "description": "Four connection points are joined together",
+            "key": "four_way_junction"
+        },
+        {
+            "description": "SPICE model issue",
+            "key": "simulation_model_issue"
+        },
+        {
+            "description": "Assigned footprint doesn't match footprint filters",
+            "key": "footprint_filter"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning"
+    ],
+    "kicad_version": "10.0.6",
+    "sheets": [
+        {
+            "path": "/",
+            "uuid_path": "/e2505a21-9627-547b-aef4-ab0d2c57bd10",
+            "violations": [
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_AD15'",
+                            "pos": {
+                                "x": 0.4572,
+                                "y": 0.762
+                            },
+                            "uuid": "8697cc40-422a-5831-b5a6-14e6b68024c4"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_AD14'",
+                            "pos": {
+                                "x": 0.4572,
+                                "y": 0.8128
+                            },
+                            "uuid": "761e211f-9478-5188-a21c-fb763b1b97d4"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_AD13'",
+                            "pos": {
+                                "x": 0.4572,
+                                "y": 0.8636
+                            },
+                            "uuid": "3321df71-5a02-540a-bed4-1e53af8c6901"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_AD12'",
+                            "pos": {
+                                "x": 0.4572,
+                                "y": 0.9652
+                            },
+                            "uuid": "b55e72cf-afb1-50b3-b056-3cccdc347e99"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_WRITE_N'",
+                            "pos": {
+                                "x": 0.4572,
+                                "y": 1.016
+                            },
+                            "uuid": "1f4598f6-5ec8-55e5-b195-b3a0741064f4"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_READ_N'",
+                            "pos": {
+                                "x": 0.4572,
+                                "y": 1.1176
+                            },
+                            "uuid": "ba73bb3c-bf0b-52f0-bd0f-2e4ed6e00a61"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_AD11'",
+                            "pos": {
+                                "x": 0.4572,
+                                "y": 1.1684
+                            },
+                            "uuid": "3db9c349-cf23-5911-a9b7-0cafe0209f10"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_AD10'",
+                            "pos": {
+                                "x": 0.4572,
+                                "y": 1.2192
+                            },
+                            "uuid": "bfd2d94a-553f-5298-bfbf-94deffa7acda"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_KEY1_RESERVED'",
+                            "pos": {
+                                "x": 0.4572,
+                                "y": 1.3208
+                            },
+                            "uuid": "d59d6cec-5985-5092-a64f-272ff816ba11"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_AD9'",
+                            "pos": {
+                                "x": 0.4572,
+                                "y": 1.3716
+                            },
+                            "uuid": "0e9ac819-5a29-5424-9fd0-d47d88ddbde0"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_AD8'",
+                            "pos": {
+                                "x": 0.4572,
+                                "y": 1.4224
+                            },
+                            "uuid": "252851bd-aefa-5a63-86f8-112349d92339"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_CIC_DATA'",
+                            "pos": {
+                                "x": 0.4572,
+                                "y": 1.524
+                            },
+                            "uuid": "190004f8-cf0d-5a0c-8ef8-41ca6edfc73b"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_PIF_CLK'",
+                            "pos": {
+                                "x": 0.4572,
+                                "y": 1.5748
+                            },
+                            "uuid": "8d9dad02-73e3-583f-ae21-fd5d66fb054b"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_RESET_N'",
+                            "pos": {
+                                "x": 0.4572,
+                                "y": 1.6256
+                            },
+                            "uuid": "0bd4a89d-5937-5d68-9a48-f1374d60d899"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_JOYBUS'",
+                            "pos": {
+                                "x": 0.4572,
+                                "y": 1.6764
+                            },
+                            "uuid": "e960bdb0-7f21-5ca5-b393-c5dd1c31b264"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_AUDIO_L'",
+                            "pos": {
+                                "x": 0.4572,
+                                "y": 1.8288
+                            },
+                            "uuid": "8fe14bde-c820-5785-9e6e-56b7e8161de1"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_AD0'",
+                            "pos": {
+                                "x": 1.5748,
+                                "y": 0.762
+                            },
+                            "uuid": "d31bb888-9ae4-5777-884e-fc628e107612"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_AD1'",
+                            "pos": {
+                                "x": 1.5748,
+                                "y": 0.8128
+                            },
+                            "uuid": "b3d25beb-7e3b-5717-9942-44325263ac2d"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_AD2'",
+                            "pos": {
+                                "x": 1.5748,
+                                "y": 0.8636
+                            },
+                            "uuid": "de8df34e-2e26-5276-8881-c1212b5af807"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_AD3'",
+                            "pos": {
+                                "x": 1.5748,
+                                "y": 0.9652
+                            },
+                            "uuid": "40c7d3e0-e7c2-58ec-b805-ae78dcc6de4b"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_ALE_L'",
+                            "pos": {
+                                "x": 1.5748,
+                                "y": 1.016
+                            },
+                            "uuid": "6ac90835-141d-59ec-a558-86c42b161450"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_ALE_H'",
+                            "pos": {
+                                "x": 1.5748,
+                                "y": 1.1176
+                            },
+                            "uuid": "dc88b07e-47af-5307-97de-d9ad4b6c7267"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_AD4'",
+                            "pos": {
+                                "x": 1.5748,
+                                "y": 1.1684
+                            },
+                            "uuid": "8b2def83-34dd-5e48-9be0-9075f695ad21"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_AD5'",
+                            "pos": {
+                                "x": 1.5748,
+                                "y": 1.2192
+                            },
+                            "uuid": "3c255745-9a1d-5de1-94a1-8cf07721373f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_KEY2_RESERVED'",
+                            "pos": {
+                                "x": 1.5748,
+                                "y": 1.3208
+                            },
+                            "uuid": "0ca215ab-d0dd-57d6-aa51-1a0ef3cdba1f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_AD6'",
+                            "pos": {
+                                "x": 1.5748,
+                                "y": 1.3716
+                            },
+                            "uuid": "b2a5cd65-60d0-5929-b9db-9c047e01708e"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_AD7'",
+                            "pos": {
+                                "x": 1.5748,
+                                "y": 1.4224
+                            },
+                            "uuid": "e655d4d5-31fe-5ae4-8cfb-422208b96106"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_CIC_CLK'",
+                            "pos": {
+                                "x": 1.5748,
+                                "y": 1.524
+                            },
+                            "uuid": "157f2d9a-0b8c-554f-9ade-8fb665d3e653"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_INT_N'",
+                            "pos": {
+                                "x": 1.5748,
+                                "y": 1.5748
+                            },
+                            "uuid": "ef114da1-c03d-5c03-b0d1-24dc451bfcd5"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_NMI_N'",
+                            "pos": {
+                                "x": 1.5748,
+                                "y": 1.6256
+                            },
+                            "uuid": "ffd1abe5-b0d9-58b1-9b53-4109832a96ca"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_VIDEO_SYNC_RESERVED'",
+                            "pos": {
+                                "x": 1.5748,
+                                "y": 1.6764
+                            },
+                            "uuid": "d8aba420-b50b-5cfc-9223-43565dcf83d1"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'N64_AUDIO_R'",
+                            "pos": {
+                                "x": 1.5748,
+                                "y": 1.8288
+                            },
+                            "uuid": "00c63017-a12a-50d5-8efd-927c2e300a15"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_SYSTEM_CLK'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 0.508
+                            },
+                            "uuid": "135d0f39-5b87-5817-b5e1-b0e4a32d5140"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_EXPAND'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 0.5588
+                            },
+                            "uuid": "26a20bf7-699b-50f3-9ab2-19e41740d9f8"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_PA6'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 0.6096
+                            },
+                            "uuid": "e973146c-5664-58b2-96e2-36c3c14c4a02"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_PRD_N'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 0.6604
+                            },
+                            "uuid": "276c1cbb-e00f-5f8f-93ec-caaf06d4db74"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_A11'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 0.762
+                            },
+                            "uuid": "4f656ac6-b21a-5245-a6dd-be826bddbafd"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_A10'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 0.8128
+                            },
+                            "uuid": "87a75e82-a1a6-5990-b873-531e9a0a2bff"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_A9'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 0.8636
+                            },
+                            "uuid": "8d4b9265-631d-5395-88d0-b4177356ac66"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_A8'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 0.9144
+                            },
+                            "uuid": "5c889dcc-c395-5e18-8e14-eb54000ecc74"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_A7'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 0.9652
+                            },
+                            "uuid": "3f0e34fd-1aeb-52cf-abc6-5957fca00b28"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_A6'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 1.016
+                            },
+                            "uuid": "7ff12ec3-5c9b-5cfc-9393-21eecf36f485"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_A5'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 1.0668
+                            },
+                            "uuid": "96193f51-ebec-553f-82ed-b0c3daf3e69c"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_A4'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 1.1176
+                            },
+                            "uuid": "d7e033e9-5d9f-5684-8988-194777dbe3ba"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_A3'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 1.1684
+                            },
+                            "uuid": "6765804a-e50a-58d5-af33-daf6f15926b0"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_A2'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 1.2192
+                            },
+                            "uuid": "ea6102f8-69b6-5487-8a66-bdb1849f6215"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_A1'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 1.27
+                            },
+                            "uuid": "f6de03b7-ea04-53fd-bb70-c258c3899831"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_A0'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 1.3208
+                            },
+                            "uuid": "4573dabc-bb9a-52a0-a261-661fed1de1d3"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_IRQ_N'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 1.3716
+                            },
+                            "uuid": "771e4133-28ad-57a6-9337-50118356bda5"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_D0'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 1.4224
+                            },
+                            "uuid": "15102d8b-6ef5-51ae-a80e-1c892035f969"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_D1'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 1.4732
+                            },
+                            "uuid": "c51223b4-0a31-5a7e-b229-fff2064472a5"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_D2'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 1.524
+                            },
+                            "uuid": "60d25545-6a74-5998-b882-8c4ecc15659e"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_D3'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 1.5748
+                            },
+                            "uuid": "095f9d93-3a30-5753-8f32-6d492705b449"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_RD_N'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 1.6256
+                            },
+                            "uuid": "cbb636b3-749b-536f-8b6b-8aed233088c4"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_CIC_DATA1'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 1.6764
+                            },
+                            "uuid": "93e605dd-a5aa-5102-8323-414a3655c76f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_CIC_SLAVE_RESET'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 1.7272
+                            },
+                            "uuid": "3031a204-f45e-5682-b35e-7923202fa1d9"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_RESET_N'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 1.778
+                            },
+                            "uuid": "bd7fc91d-773a-50f5-9330-092e5610f11f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_PA0'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 1.8796
+                            },
+                            "uuid": "07037cb8-fb30-5df3-9ae5-9cff919329b6"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_PA2'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 1.9304
+                            },
+                            "uuid": "8bdf2730-389f-503e-9a57-79cd1aef7717"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_PA4'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 1.9812
+                            },
+                            "uuid": "66b5ba17-826d-5397-8400-9643e2fe2811"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_AUDIO_L_IN'",
+                            "pos": {
+                                "x": 2.3622,
+                                "y": 2.032
+                            },
+                            "uuid": "4b0d9d9b-80f1-5412-a334-7fedf16e57aa"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_WRAMSEL_N'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 0.508
+                            },
+                            "uuid": "960c9a0d-43e8-5d17-9a05-ce686cb8c92a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_REFRESH'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 0.5588
+                            },
+                            "uuid": "00c3dc51-5607-5626-ab32-4b3428d9ae39"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_PA7'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 0.6096
+                            },
+                            "uuid": "f8156dc2-4ddf-50af-af8f-30e6c5303e1a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_PWR_N'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 0.6604
+                            },
+                            "uuid": "7a051f25-0a5c-57ab-b365-354fd0d5bc4d"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_A12'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 0.762
+                            },
+                            "uuid": "48f98621-4e8f-5f97-862f-c4490de0a23d"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_A13'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 0.8128
+                            },
+                            "uuid": "48130032-8a32-50e8-b49e-1a36e8e57840"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_A14'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 0.8636
+                            },
+                            "uuid": "7e75acf8-6d83-57bc-8ebb-c5aa4a82c0e2"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_A15'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 0.9144
+                            },
+                            "uuid": "7baf3645-0293-51a9-b328-83b3724dc282"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_A16'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 0.9652
+                            },
+                            "uuid": "6a332671-6b42-5291-9b7d-9552c58a2ada"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_A17'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 1.016
+                            },
+                            "uuid": "e4b7a0e7-a4b9-5743-ab8d-861c62fbb95b"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_A18'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 1.0668
+                            },
+                            "uuid": "a58fce21-ba23-5b85-b293-f01b57597c90"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_A19'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 1.1176
+                            },
+                            "uuid": "46e635dc-abdb-51aa-9787-55b76c9dcd26"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_A20'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 1.1684
+                            },
+                            "uuid": "552f714f-feb9-58a3-a469-5b8390974b80"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_A21'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 1.2192
+                            },
+                            "uuid": "35d7afcd-1bae-5ed9-8bab-bd635b645ab9"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_A22'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 1.27
+                            },
+                            "uuid": "92ac4325-5a85-5efe-bd2f-77f299333860"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_A23'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 1.3208
+                            },
+                            "uuid": "a8695ec3-be7b-5b58-a73a-b5400a0e12cd"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_ROMSEL_N'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 1.3716
+                            },
+                            "uuid": "8fb4d214-78b0-56a1-9632-3cb5c7fbe201"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_D4'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 1.4224
+                            },
+                            "uuid": "38c55252-533f-57b9-980c-c51a2fd81cae"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_D5'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 1.4732
+                            },
+                            "uuid": "8c041b23-1319-58fb-b5c9-99aff6a5f95d"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_D6'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 1.524
+                            },
+                            "uuid": "aa04c013-74d1-5a39-aff3-c71140451515"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_D7'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 1.5748
+                            },
+                            "uuid": "810a0524-aabf-5042-8cb5-6fe34ede9062"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_WR_N'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 1.6256
+                            },
+                            "uuid": "7ed2e908-0230-508a-b850-e387a2513b1a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_CIC_DATA0'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 1.6764
+                            },
+                            "uuid": "1cf82aa6-3c58-56e6-921c-7c748ce0385c"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_CIC_CLK'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 1.7272
+                            },
+                            "uuid": "25087296-d71b-58c2-9e4e-b1604cd5957f"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_PHI2'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 1.778
+                            },
+                            "uuid": "16d8311c-b45c-5739-a909-6b023e3337b1"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_PA1'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 1.8796
+                            },
+                            "uuid": "7bc521de-6e16-505d-9873-0d8a491b9028"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_PA3'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 1.9304
+                            },
+                            "uuid": "6e5b869b-e17f-56b5-a7d7-96b7ca8b6057"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_PA5'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 1.9812
+                            },
+                            "uuid": "391a3143-debc-5c8e-8963-a49f1c838d47"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Label 'SNES_AUDIO_R_IN'",
+                            "pos": {
+                                "x": 3.4798,
+                                "y": 2.032
+                            },
+                            "uuid": "a705868d-3d52-5189-82c9-8e5d78328409"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                }
+            ]
+        },
+        {
+            "path": "/USB-C programmer/",
+            "uuid_path": "/e2505a21-9627-547b-aef4-ab0d2c57bd10/56555fbf-4808-59ed-83be-e09275d01434",
+            "violations": []
+        }
+    ],
+    "source": "sn64.kicad_sch"
+}

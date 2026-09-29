@@ -6,8 +6,13 @@
 *.kicad_sch text eol=lf
 *.kicad_pcb text eol=lf
 *.kicad_sym text eol=lf
+fp-lib-table text eol=lf
+sym-lib-table text eol=lf
 *.kicad_mod text eol=lf
 *.py text eol=lf
+*.json text eol=lf
+*.csv text eol=lf
+*.xml text eol=lf
 *.v text eol=lf
 *.sv text eol=lf
 *.vhd text eol=lf
@@ -18,3 +23,6 @@
 *.png binary
 *.jpg binary
 *.zip binary
+
+# Retain exact upstream license text, including its final blank line.
+hardware/sn64/licenses/*.txt -text whitespace=-blank-at-eof

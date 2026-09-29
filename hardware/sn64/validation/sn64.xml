@@ -1,0 +1,2291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<export version="E">
+  <design>
+    <source>C:\Users\RyanB\.codex\worktrees\sn64-usbc-programming\SN 64 Project\hardware\sn64\sn64.kicad_sch</source>
+    <date>2026-09-28T23:59:55</date>
+    <tool>Eeschema 10.0.6</tool>
+    <sheet number="1" name="/" tstamps="/">
+      <title_block>
+        <title>SN 64 - cartridge interfaces</title>
+        <company>SN 64</company>
+        <rev>0.2-usb</rev>
+        <date>2026-09-28</date>
+        <source>sn64.kicad_sch</source>
+        <comment number="1" value="INTERFACE DRAFT ONLY - NOT FOR MANUFACTURE"/>
+        <comment number="2" value="Source attribution and limits: hardware/sn64/README.md"/>
+        <comment number="3" value=""/>
+        <comment number="4" value=""/>
+        <comment number="5" value=""/>
+        <comment number="6" value=""/>
+        <comment number="7" value=""/>
+        <comment number="8" value=""/>
+        <comment number="9" value=""/>
+      </title_block>
+    </sheet>
+    <sheet number="2" name="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/">
+      <title_block>
+        <title>SN 64 - side USB-C programmer</title>
+        <company>SN 64</company>
+        <rev>0.2-usb</rev>
+        <date>2026-09-29</date>
+        <source>usb-programmer.kicad_sch</source>
+        <comment number="1" value="DESIGN DRAFT - NOT FOR MANUFACTURE"/>
+        <comment number="2" value=""/>
+        <comment number="3" value=""/>
+        <comment number="4" value=""/>
+        <comment number="5" value=""/>
+        <comment number="6" value=""/>
+        <comment number="7" value=""/>
+        <comment number="8" value=""/>
+        <comment number="9" value=""/>
+      </title_block>
+    </sheet>
+  </design>
+  <components>
+    <comp ref="J1">
+      <value>N64_Cartridge_Edge_50</value>
+      <footprint>SN64:N64_Edge_SC64_Reference</footprint>
+      <description>Interface draft only; see hardware/sn64/README.md</description>
+      <fields>
+        <field name="Footprint">SN64:N64_Edge_SC64_Reference</field>
+        <field name="Datasheet"/>
+        <field name="Description">Interface draft only; see hardware/sn64/README.md</field>
+      </fields>
+      <libsource lib="SN64" part="N64_Cartridge_Edge_50" description="Reference-verified connector; passive pin types. See interface CSV for endpoint directions."/>
+      <property name="Sheetname" value="sn64"/>
+      <property name="Sheetfile" value="sn64.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>5ca43a7f-5bd2-57fc-9cc8-fb50e39d7e7a</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+            <pin num="5"/>
+            <pin num="6"/>
+            <pin num="7"/>
+            <pin num="8"/>
+            <pin num="9"/>
+            <pin num="10"/>
+            <pin num="11"/>
+            <pin num="12"/>
+            <pin num="13"/>
+            <pin num="14"/>
+            <pin num="15"/>
+            <pin num="16"/>
+            <pin num="17"/>
+            <pin num="18"/>
+            <pin num="19"/>
+            <pin num="20"/>
+            <pin num="21"/>
+            <pin num="22"/>
+            <pin num="23"/>
+            <pin num="24"/>
+            <pin num="25"/>
+            <pin num="26"/>
+            <pin num="27"/>
+            <pin num="28"/>
+            <pin num="29"/>
+            <pin num="30"/>
+            <pin num="31"/>
+            <pin num="32"/>
+            <pin num="33"/>
+            <pin num="34"/>
+            <pin num="35"/>
+            <pin num="36"/>
+            <pin num="37"/>
+            <pin num="38"/>
+            <pin num="39"/>
+            <pin num="40"/>
+            <pin num="41"/>
+            <pin num="42"/>
+            <pin num="43"/>
+            <pin num="44"/>
+            <pin num="45"/>
+            <pin num="46"/>
+            <pin num="47"/>
+            <pin num="48"/>
+            <pin num="49"/>
+            <pin num="50"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J2">
+      <value>SNES_Female_Slot_62</value>
+      <footprint>SN64:SNES Slot</footprint>
+      <description>Interface draft only; see hardware/sn64/README.md</description>
+      <fields>
+        <field name="Footprint">SN64:SNES Slot</field>
+        <field name="Datasheet"/>
+        <field name="Description">Interface draft only; see hardware/sn64/README.md</field>
+      </fields>
+      <libsource lib="SN64" part="SNES_Female_Slot_62" description="Reference-verified connector; passive pin types. See interface CSV for endpoint directions."/>
+      <property name="Sheetname" value="sn64"/>
+      <property name="Sheetfile" value="sn64.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>4a91d81f-6393-5545-a855-934ae95e4a27</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+            <pin num="5"/>
+            <pin num="6"/>
+            <pin num="7"/>
+            <pin num="8"/>
+            <pin num="9"/>
+            <pin num="10"/>
+            <pin num="11"/>
+            <pin num="12"/>
+            <pin num="13"/>
+            <pin num="14"/>
+            <pin num="15"/>
+            <pin num="16"/>
+            <pin num="17"/>
+            <pin num="18"/>
+            <pin num="19"/>
+            <pin num="20"/>
+            <pin num="21"/>
+            <pin num="22"/>
+            <pin num="23"/>
+            <pin num="24"/>
+            <pin num="25"/>
+            <pin num="26"/>
+            <pin num="27"/>
+            <pin num="28"/>
+            <pin num="29"/>
+            <pin num="30"/>
+            <pin num="31"/>
+            <pin num="32"/>
+            <pin num="33"/>
+            <pin num="34"/>
+            <pin num="35"/>
+            <pin num="36"/>
+            <pin num="37"/>
+            <pin num="38"/>
+            <pin num="39"/>
+            <pin num="40"/>
+            <pin num="41"/>
+            <pin num="42"/>
+            <pin num="43"/>
+            <pin num="44"/>
+            <pin num="45"/>
+            <pin num="46"/>
+            <pin num="47"/>
+            <pin num="48"/>
+            <pin num="49"/>
+            <pin num="50"/>
+            <pin num="51"/>
+            <pin num="52"/>
+            <pin num="53"/>
+            <pin num="54"/>
+            <pin num="55"/>
+            <pin num="56"/>
+            <pin num="57"/>
+            <pin num="58"/>
+            <pin num="59"/>
+            <pin num="60"/>
+            <pin num="61"/>
+            <pin num="62"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C101">
+      <value>4.7uF 10V</value>
+      <footprint>SN64_USB:C_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:C_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>33ed2b1f-e7c8-5270-9966-b63d0a644f64</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C102">
+      <value>1uF 10V</value>
+      <footprint>SN64_USB:C_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:C_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>0e0f8367-f276-53dc-8d57-4b856d42457c</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C103">
+      <value>4.7uF 10V</value>
+      <footprint>SN64_USB:C_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:C_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>5cd53096-1d43-599a-8090-256c3a3f932a</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C104">
+      <value>100nF</value>
+      <footprint>SN64_USB:C_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:C_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>e6a910d2-0233-52c1-a536-8b5f52793b78</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C105">
+      <value>100nF</value>
+      <footprint>SN64_USB:C_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:C_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>b1f37824-18cc-514c-a7f7-37ed4ddb33aa</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C106">
+      <value>100nF</value>
+      <footprint>SN64_USB:C_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:C_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>4406b593-cc17-57ad-a409-dda64ab20191</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C107">
+      <value>100nF</value>
+      <footprint>SN64_USB:C_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:C_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>390603e8-e86d-5c44-80b7-a849b0138367</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C108">
+      <value>100nF</value>
+      <footprint>SN64_USB:C_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:C_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>dd08b5df-fa10-5161-93fd-54e9b3966d15</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C109">
+      <value>100nF</value>
+      <footprint>SN64_USB:C_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:C_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>0c4b92df-d1da-5dae-9030-f3415aa46246</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C110">
+      <value>100nF</value>
+      <footprint>SN64_USB:C_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:C_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>f7976ece-6863-57d9-b3cc-2d41d15d7d30</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C111">
+      <value>100nF</value>
+      <footprint>SN64_USB:C_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:C_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>b758a551-0a44-522f-ab56-70f2ef1ab2d3</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C112">
+      <value>100nF</value>
+      <footprint>SN64_USB:C_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:C_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>8d14d29c-6631-547c-ba6c-50e2660bba34</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C113">
+      <value>100nF</value>
+      <footprint>SN64_USB:C_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:C_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>76e78ea7-543e-5ccc-8013-fa5fbe18ea71</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C114">
+      <value>100nF</value>
+      <footprint>SN64_USB:C_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:C_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>36be44db-2880-57e8-82e2-b904fb42ff91</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C115">
+      <value>11pF C0G (tune)</value>
+      <footprint>SN64_USB:C_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:C_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>727afeb6-48f4-5d31-b441-b4977361a903</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C116">
+      <value>11pF C0G (tune)</value>
+      <footprint>SN64_USB:C_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:C_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>863a266a-54f1-5a62-b935-ad578debea9a</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J101">
+      <value>DX07S016JA3R1500</value>
+      <footprint>SN64_USB:USB_C_JAE_DX07S016JA3R1500</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:USB_C_JAE_DX07S016JA3R1500</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="USB_C_Receptacle_USB2.0" description="USB 2.0-only Type-C Receptacle connector"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="usb universal serial bus type-C USB2.0"/>
+      <property name="ki_fp_filters" value="USB*C*Receptacle*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>289b9345-c978-5400-9643-3c1bc4ba67bb</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="S1"/>
+            <pin num="A1"/>
+            <pin num="A12"/>
+            <pin num="B1"/>
+            <pin num="B12"/>
+            <pin num="A4"/>
+            <pin num="A9"/>
+            <pin num="B4"/>
+            <pin num="B9"/>
+            <pin num="A5"/>
+            <pin num="B5"/>
+            <pin num="A7"/>
+            <pin num="B7"/>
+            <pin num="A6"/>
+            <pin num="B6"/>
+            <pin num="A8"/>
+            <pin num="B8"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J102">
+      <value>JTAG_SERVICE</value>
+      <footprint>SN64_USB:PinHeader_1x06_P2.54mm_Vertical</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:PinHeader_1x06_P2.54mm_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="Conn_01x06" description="Generic connector, single row, 01x06, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="connector"/>
+      <property name="ki_fp_filters" value="Connector*:*_1x??_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>cfe48004-a9c5-55c8-82ab-62e322b7aa9b</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+            <pin num="5"/>
+            <pin num="6"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="L101">
+      <value>470R @ 100MHz</value>
+      <footprint>SN64_USB:L_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:L_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="L" description="Inductor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="inductor choke coil reactor magnetic"/>
+      <property name="ki_fp_filters" value="Choke_* *Coil* Inductor_* L_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>f6d9640b-a242-54d3-b406-4a23325b5487</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="L102">
+      <value>470R @ 100MHz</value>
+      <footprint>SN64_USB:L_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:L_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="L" description="Inductor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="inductor choke coil reactor magnetic"/>
+      <property name="ki_fp_filters" value="Choke_* *Coil* Inductor_* L_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>fca57a58-9143-5b59-b19e-f7f919be9042</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R101">
+      <value>5.1k 1%</value>
+      <footprint>SN64_USB:R_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:R_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="R" description="Resistor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>d69b7ce5-d555-5e2f-b706-256528264b49</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R102">
+      <value>5.1k 1%</value>
+      <footprint>SN64_USB:R_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:R_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="R" description="Resistor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>61c66aab-d92d-524c-a48e-cfcfe3734b85</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R103">
+      <value>12k 1%</value>
+      <footprint>SN64_USB:R_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:R_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="R" description="Resistor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>167ea04c-c2ab-5fcd-a219-5d7bcc711cf7</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R104">
+      <value>12k</value>
+      <footprint>SN64_USB:R_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:R_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="R" description="Resistor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>67a34726-9b24-5d14-bb64-e464251b6eee</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R105">
+      <value>10k</value>
+      <footprint>SN64_USB:R_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:R_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="R" description="Resistor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>430e52a6-9544-5d02-bbca-91e57a839059</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R106">
+      <value>2.2k</value>
+      <footprint>SN64_USB:R_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:R_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="R" description="Resistor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>4e49e7a8-4a61-5052-bf47-45ef02b34fbe</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R107">
+      <value>10k</value>
+      <footprint>SN64_USB:R_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:R_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="R" description="Resistor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>a6da1c02-0e8b-5fa2-a100-09d51b319698</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R108">
+      <value>33</value>
+      <footprint>SN64_USB:R_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:R_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="R" description="Resistor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>281bf9ce-c969-5729-b66a-67c8d477ff55</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R109">
+      <value>33</value>
+      <footprint>SN64_USB:R_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:R_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="R" description="Resistor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>1158f71c-1909-507e-8f0a-2c2d0f61214c</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R110">
+      <value>33</value>
+      <footprint>SN64_USB:R_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:R_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="R" description="Resistor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>62c11f46-a801-5011-b042-5fc61d05e733</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R111">
+      <value>33</value>
+      <footprint>SN64_USB:R_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:R_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="R" description="Resistor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>29b5174d-81dc-5c50-9938-e34475653c83</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R112">
+      <value>10k</value>
+      <footprint>SN64_USB:R_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:R_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="R" description="Resistor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>30de5578-be3f-532c-b1d7-ff4d907eeff8</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R113">
+      <value>10k</value>
+      <footprint>SN64_USB:R_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:R_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="R" description="Resistor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>98380cf4-6134-57c0-8b5e-997950050cc0</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R114">
+      <value>10k</value>
+      <footprint>SN64_USB:R_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:R_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="R" description="Resistor"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>5d7d824f-7b95-5712-9477-c595efa0e213</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="U101">
+      <value>USBLC6-2SC6</value>
+      <footprint>SN64_USB:SOT-23-6</footprint>
+      <datasheet>https://www.st.com/resource/en/datasheet/usblc6-2.pdf</datasheet>
+      <fields>
+        <field name="Footprint">SN64_USB:SOT-23-6</field>
+        <field name="Datasheet">https://www.st.com/resource/en/datasheet/usblc6-2.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="USBLC6-2SC6" description="Very low capacitance ESD protection diode, 2 data-line, SOT-23-6"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="usb ethernet video"/>
+      <property name="ki_fp_filters" value="SOT?23*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>29bb0438-c428-53b0-be3c-61e6adb91743</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="3"/>
+            <pin num="5"/>
+            <pin num="2"/>
+            <pin num="6"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="U102">
+      <value>USBLC6-2SC6</value>
+      <footprint>SN64_USB:SOT-23-6</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:SOT-23-6</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="USBLC6-2SC6" description="Very low capacitance ESD protection diode, 2 data-line, SOT-23-6"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="usb ethernet video"/>
+      <property name="ki_fp_filters" value="SOT?23*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>346fa0a0-3dc5-5e7c-920a-ec1696549a5c</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="3"/>
+            <pin num="5"/>
+            <pin num="2"/>
+            <pin num="6"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="U103">
+      <value>AP2112K-3.3TRG1</value>
+      <footprint>SN64_USB:SOT-23-5</footprint>
+      <datasheet>https://www.diodes.com/assets/Datasheets/AP2112.pdf</datasheet>
+      <fields>
+        <field name="Footprint">SN64_USB:SOT-23-5</field>
+        <field name="Datasheet">https://www.diodes.com/assets/Datasheets/AP2112.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="AP2112K-3.3" description="600mA low dropout linear regulator, with enable pin, 3.8V-6V input voltage range, 3.3V fixed positive output, SOT-23-5"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="linear regulator ldo fixed positive"/>
+      <property name="ki_fp_filters" value="SOT?23?5*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>7216d3f7-d795-5fa9-8f55-0980e045b234</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="3"/>
+            <pin num="2"/>
+            <pin num="4"/>
+            <pin num="5"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="U104">
+      <value>FT232HL (rev C)</value>
+      <footprint>SN64_USB:LQFP-48_7x7mm_P0.5mm</footprint>
+      <datasheet>https://www.ftdichip.cn/Support/Documents/DataSheets/ICs/DS_FT232H.pdf</datasheet>
+      <fields>
+        <field name="Footprint">SN64_USB:LQFP-48_7x7mm_P0.5mm</field>
+        <field name="Datasheet">https://www.ftdichip.cn/Support/Documents/DataSheets/ICs/DS_FT232H.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="FT232H" description="Hi Speed Single Channel USB UART/FIFO, LQFP/QFN-48"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="FTDI USB Single UART FIFO"/>
+      <property name="ki_fp_filters" value="QFN*1EP*8x8mm*P0.5mm* LQFP*7x7mm*P0.5mm*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>90837723-9ea4-5054-a151-d24225abb48d</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="40"/>
+            <pin num="39"/>
+            <pin num="38"/>
+            <pin num="37"/>
+            <pin num="6"/>
+            <pin num="7"/>
+            <pin num="34"/>
+            <pin num="5"/>
+            <pin num="45"/>
+            <pin num="44"/>
+            <pin num="43"/>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="42"/>
+            <pin num="4"/>
+            <pin num="9"/>
+            <pin num="3"/>
+            <pin num="41"/>
+            <pin num="8"/>
+            <pin num="10"/>
+            <pin num="12"/>
+            <pin num="11"/>
+            <pin num="24"/>
+            <pin num="22"/>
+            <pin num="46"/>
+            <pin num="23"/>
+            <pin num="35"/>
+            <pin num="36"/>
+            <pin num="47"/>
+            <pin num="48"/>
+            <pin num="13"/>
+            <pin num="14"/>
+            <pin num="15"/>
+            <pin num="16"/>
+            <pin num="17"/>
+            <pin num="18"/>
+            <pin num="19"/>
+            <pin num="20"/>
+            <pin num="21"/>
+            <pin num="25"/>
+            <pin num="26"/>
+            <pin num="27"/>
+            <pin num="28"/>
+            <pin num="29"/>
+            <pin num="30"/>
+            <pin num="31"/>
+            <pin num="32"/>
+            <pin num="33"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="U105">
+      <value>SN74AXC4T774PWR</value>
+      <footprint>SN64_USB:TSSOP-16_4.4x5mm_P0.65mm</footprint>
+      <datasheet>https://www.ti.com/lit/ds/symlink/sn74axc4t774.pdf</datasheet>
+      <fields>
+        <field name="Footprint">SN64_USB:TSSOP-16_4.4x5mm_P0.65mm</field>
+        <field name="Datasheet">https://www.ti.com/lit/ds/symlink/sn74axc4t774.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="SN74AXC4T774PW" description=""/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>de86e9fd-f42f-554a-8739-107fcdc6b209</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="16"/>
+            <pin num="3"/>
+            <pin num="4"/>
+            <pin num="5"/>
+            <pin num="6"/>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="9"/>
+            <pin num="15"/>
+            <pin num="14"/>
+            <pin num="13"/>
+            <pin num="12"/>
+            <pin num="11"/>
+            <pin num="7"/>
+            <pin num="8"/>
+            <pin num="10"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="U106">
+      <value>93AA56BT-I/OT (DNP)</value>
+      <footprint>SN64_USB:SOT-23-6</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:SOT-23-6</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="93AAxxBT-xOT" description="Serial EEPROM, 93 Series, 16-bit word, 1.8V, SOT-23"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="dnp"/>
+      <property name="ki_keywords" value="EEPROM memory Microwire"/>
+      <property name="ki_fp_filters" value="SOT?23*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>feee29f4-3e97-59bd-b274-214c8ae872c2</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="5"/>
+            <pin num="6"/>
+            <pin num="2"/>
+            <pin num="4"/>
+            <pin num="3"/>
+            <pin num="1"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="Y101">
+      <value>ABM3B-12.000MHZ-10-1-U-T</value>
+      <footprint>SN64_USB:Crystal_SMD_Abracon_ABM3B-4Pin_5.0x3.2mm</footprint>
+      <fields>
+        <field name="Footprint">SN64_USB:Crystal_SMD_Abracon_ABM3B-4Pin_5.0x3.2mm</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="SN64_USB" part="Crystal_GND24" description="Four pin crystal, GND on pins 2 and 4"/>
+      <property name="Sheetname" value="USB-C programmer"/>
+      <property name="Sheetfile" value="usb-programmer.kicad_sch"/>
+      <property name="ki_keywords" value="quartz ceramic resonator oscillator"/>
+      <property name="ki_fp_filters" value="Crystal*"/>
+      <sheetpath names="/USB-C programmer/" tstamps="/56555fbf-4808-59ed-83be-e09275d01434/"/>
+      <tstamps>668ac1e8-1696-5e85-a99d-826cc9a76f24</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="4"/>
+            <pin num="3"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+  </components>
+  <libparts>
+    <libpart lib="SN64" part="N64_Cartridge_Edge_50">
+      <description>Reference-verified connector; passive pin types. See interface CSV for endpoint directions.</description>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">N64_Cartridge_Edge_50</field>
+        <field name="Footprint">SN64:N64_Edge_SC64_Reference</field>
+        <field name="Datasheet"/>
+        <field name="Description">Reference-verified connector; passive pin types. See interface CSV for endpoint directions.</field>
+      </fields>
+      <pins>
+        <pin num="1" name="GND" type="passive"/>
+        <pin num="2" name="GND" type="passive"/>
+        <pin num="3" name="AD15" type="passive"/>
+        <pin num="4" name="AD14" type="passive"/>
+        <pin num="5" name="AD13" type="passive"/>
+        <pin num="6" name="GND" type="passive"/>
+        <pin num="7" name="AD12" type="passive"/>
+        <pin num="8" name="/WRITE" type="passive"/>
+        <pin num="9" name="3V3" type="passive"/>
+        <pin num="10" name="/READ" type="passive"/>
+        <pin num="11" name="AD11" type="passive"/>
+        <pin num="12" name="AD10" type="passive"/>
+        <pin num="13" name="12V" type="passive"/>
+        <pin num="14" name="KEY1_RESERVED" type="passive"/>
+        <pin num="15" name="AD9" type="passive"/>
+        <pin num="16" name="AD8" type="passive"/>
+        <pin num="17" name="3V3" type="passive"/>
+        <pin num="18" name="CIC_DATA" type="passive"/>
+        <pin num="19" name="PIF_CLK" type="passive"/>
+        <pin num="20" name="/RESET" type="passive"/>
+        <pin num="21" name="JOYBUS" type="passive"/>
+        <pin num="22" name="GND" type="passive"/>
+        <pin num="23" name="GND" type="passive"/>
+        <pin num="24" name="AUDIO_L" type="passive"/>
+        <pin num="25" name="GND" type="passive"/>
+        <pin num="26" name="GND" type="passive"/>
+        <pin num="27" name="GND" type="passive"/>
+        <pin num="28" name="AD0" type="passive"/>
+        <pin num="29" name="AD1" type="passive"/>
+        <pin num="30" name="AD2" type="passive"/>
+        <pin num="31" name="GND" type="passive"/>
+        <pin num="32" name="AD3" type="passive"/>
+        <pin num="33" name="ALE_L" type="passive"/>
+        <pin num="34" name="3V3" type="passive"/>
+        <pin num="35" name="ALE_H" type="passive"/>
+        <pin num="36" name="AD4" type="passive"/>
+        <pin num="37" name="AD5" type="passive"/>
+        <pin num="38" name="12V" type="passive"/>
+        <pin num="39" name="KEY2_RESERVED" type="passive"/>
+        <pin num="40" name="AD6" type="passive"/>
+        <pin num="41" name="AD7" type="passive"/>
+        <pin num="42" name="3V3" type="passive"/>
+        <pin num="43" name="CIC_CLK" type="passive"/>
+        <pin num="44" name="/INT" type="passive"/>
+        <pin num="45" name="/NMI" type="passive"/>
+        <pin num="46" name="VIDEO_SYNC_RESERVED" type="passive"/>
+        <pin num="47" name="GND" type="passive"/>
+        <pin num="48" name="GND" type="passive"/>
+        <pin num="49" name="AUDIO_R" type="passive"/>
+        <pin num="50" name="GND" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SN64" part="SNES_Female_Slot_62">
+      <description>Reference-verified connector; passive pin types. See interface CSV for endpoint directions.</description>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">SNES_Female_Slot_62</field>
+        <field name="Footprint">SN64:SNES Slot</field>
+        <field name="Datasheet"/>
+        <field name="Description">Reference-verified connector; passive pin types. See interface CSV for endpoint directions.</field>
+      </fields>
+      <pins>
+        <pin num="1" name="SYSTEM_CLK" type="passive"/>
+        <pin num="2" name="EXPAND" type="passive"/>
+        <pin num="3" name="PA6" type="passive"/>
+        <pin num="4" name="/PRD" type="passive"/>
+        <pin num="5" name="GND" type="passive"/>
+        <pin num="6" name="A11" type="passive"/>
+        <pin num="7" name="A10" type="passive"/>
+        <pin num="8" name="A9" type="passive"/>
+        <pin num="9" name="A8" type="passive"/>
+        <pin num="10" name="A7" type="passive"/>
+        <pin num="11" name="A6" type="passive"/>
+        <pin num="12" name="A5" type="passive"/>
+        <pin num="13" name="A4" type="passive"/>
+        <pin num="14" name="A3" type="passive"/>
+        <pin num="15" name="A2" type="passive"/>
+        <pin num="16" name="A1" type="passive"/>
+        <pin num="17" name="A0" type="passive"/>
+        <pin num="18" name="/IRQ" type="passive"/>
+        <pin num="19" name="D0" type="passive"/>
+        <pin num="20" name="D1" type="passive"/>
+        <pin num="21" name="D2" type="passive"/>
+        <pin num="22" name="D3" type="passive"/>
+        <pin num="23" name="/RD" type="passive"/>
+        <pin num="24" name="CIC_DATA1" type="passive"/>
+        <pin num="25" name="CIC_SLAVE_RESET" type="passive"/>
+        <pin num="26" name="/RESET" type="passive"/>
+        <pin num="27" name="+5V_CART" type="passive"/>
+        <pin num="28" name="PA0" type="passive"/>
+        <pin num="29" name="PA2" type="passive"/>
+        <pin num="30" name="PA4" type="passive"/>
+        <pin num="31" name="AUDIO_L_IN" type="passive"/>
+        <pin num="32" name="/WRAMSEL" type="passive"/>
+        <pin num="33" name="REFRESH" type="passive"/>
+        <pin num="34" name="PA7" type="passive"/>
+        <pin num="35" name="/PWR" type="passive"/>
+        <pin num="36" name="GND" type="passive"/>
+        <pin num="37" name="A12" type="passive"/>
+        <pin num="38" name="A13" type="passive"/>
+        <pin num="39" name="A14" type="passive"/>
+        <pin num="40" name="A15" type="passive"/>
+        <pin num="41" name="A16" type="passive"/>
+        <pin num="42" name="A17" type="passive"/>
+        <pin num="43" name="A18" type="passive"/>
+        <pin num="44" name="A19" type="passive"/>
+        <pin num="45" name="A20" type="passive"/>
+        <pin num="46" name="A21" type="passive"/>
+        <pin num="47" name="A22" type="passive"/>
+        <pin num="48" name="A23" type="passive"/>
+        <pin num="49" name="/ROMSEL" type="passive"/>
+        <pin num="50" name="D4" type="passive"/>
+        <pin num="51" name="D5" type="passive"/>
+        <pin num="52" name="D6" type="passive"/>
+        <pin num="53" name="D7" type="passive"/>
+        <pin num="54" name="/WR" type="passive"/>
+        <pin num="55" name="CIC_DATA0" type="passive"/>
+        <pin num="56" name="CIC_CLK" type="passive"/>
+        <pin num="57" name="PHI2" type="passive"/>
+        <pin num="58" name="+5V_CART" type="passive"/>
+        <pin num="59" name="PA1" type="passive"/>
+        <pin num="60" name="PA3" type="passive"/>
+        <pin num="61" name="PA5" type="passive"/>
+        <pin num="62" name="AUDIO_R_IN" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SN64_USB" part="93AAxxBT-xOT">
+      <description>Serial EEPROM, 93 Series, 16-bit word, 1.8V, SOT-23</description>
+      <docs>http://ww1.microchip.com/downloads/en/DeviceDoc/20001749K.pdf</docs>
+      <footprints>
+        <fp>SOT?23*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">93AAxxBT-xOT</field>
+        <field name="Footprint">Package_TO_SOT_SMD:SOT-23-6</field>
+        <field name="Datasheet">http://ww1.microchip.com/downloads/en/DeviceDoc/20001749K.pdf</field>
+        <field name="Description">Serial EEPROM, 93 Series, 16-bit word, 1.8V, SOT-23</field>
+      </fields>
+      <pins>
+        <pin num="1" name="DO" type="tri_state"/>
+        <pin num="2" name="Vss" type="power_in"/>
+        <pin num="3" name="DI" type="input"/>
+        <pin num="4" name="CLK" type="input"/>
+        <pin num="5" name="CS" type="input"/>
+        <pin num="6" name="Vсс" type="power_in"/>
+      </pins>
+    </libpart>
+    <libpart lib="SN64_USB" part="AP2112K-3.3">
+      <description>600mA low dropout linear regulator, with enable pin, 3.8V-6V input voltage range, 3.3V fixed positive output, SOT-23-5</description>
+      <docs>https://www.diodes.com/assets/Datasheets/AP2112.pdf</docs>
+      <footprints>
+        <fp>SOT?23?5*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">AP2112K-3.3</field>
+        <field name="Footprint">Package_TO_SOT_SMD:SOT-23-5</field>
+        <field name="Datasheet">https://www.diodes.com/assets/Datasheets/AP2112.pdf</field>
+        <field name="Description">600mA low dropout linear regulator, with enable pin, 3.8V-6V input voltage range, 3.3V fixed positive output, SOT-23-5</field>
+      </fields>
+      <pins>
+        <pin num="1" name="VIN" type="power_in"/>
+        <pin num="2" name="GND" type="power_in"/>
+        <pin num="3" name="EN" type="input"/>
+        <pin num="4" name="NC" type="no_connect"/>
+        <pin num="5" name="VOUT" type="power_out"/>
+      </pins>
+    </libpart>
+    <libpart lib="SN64_USB" part="C">
+      <description>Unpolarized capacitor</description>
+      <footprints>
+        <fp>C_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">C</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Unpolarized capacitor</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SN64_USB" part="Conn_01x06">
+      <description>Generic connector, single row, 01x06, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <footprints>
+        <fp>Connector*:*_1x??_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x06</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Generic connector, single row, 01x06, script generated (kicad-library-utils/schlib/autogen/connector/)</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+        <pin num="2" name="Pin_2" type="passive"/>
+        <pin num="3" name="Pin_3" type="passive"/>
+        <pin num="4" name="Pin_4" type="passive"/>
+        <pin num="5" name="Pin_5" type="passive"/>
+        <pin num="6" name="Pin_6" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SN64_USB" part="Crystal_GND24">
+      <description>Four pin crystal, GND on pins 2 and 4</description>
+      <footprints>
+        <fp>Crystal*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">Y</field>
+        <field name="Value">Crystal_GND24</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Four pin crystal, GND on pins 2 and 4</field>
+        <field name="KLC_S3.3">The rectangle is not a symbol body but a graphical element</field>
+        <field name="KLC_S4.1">Some pins are on 50mil grid to make the symbol small</field>
+      </fields>
+      <pins>
+        <pin num="1" name="1" type="passive"/>
+        <pin num="2" name="G" type="passive"/>
+        <pin num="3" name="3" type="passive"/>
+        <pin num="4" name="G" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SN64_USB" part="FT232H">
+      <description>Hi Speed Single Channel USB UART/FIFO, LQFP/QFN-48</description>
+      <docs>https://www.ftdichip.com/Support/Documents/DataSheets/ICs/DS_FT232H.pdf</docs>
+      <footprints>
+        <fp>QFN*1EP*8x8mm*P0.5mm*</fp>
+        <fp>LQFP*7x7mm*P0.5mm*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">FT232H</field>
+        <field name="Footprint"/>
+        <field name="Datasheet">https://www.ftdichip.com/Support/Documents/DataSheets/ICs/DS_FT232H.pdf</field>
+        <field name="Description">Hi Speed Single Channel USB UART/FIFO, LQFP/QFN-48</field>
+      </fields>
+      <pins>
+        <pin num="1" name="XCSI" type="input"/>
+        <pin num="2" name="XCSO" type="output"/>
+        <pin num="3" name="VPHY" type="power_in"/>
+        <pin num="4" name="AGND" type="power_in"/>
+        <pin num="5" name="REF" type="input"/>
+        <pin num="6" name="DM" type="bidirectional"/>
+        <pin num="7" name="DP" type="bidirectional"/>
+        <pin num="8" name="VPLL" type="power_in"/>
+        <pin num="9" name="AGND" type="power_in"/>
+        <pin num="10" name="GND" type="power_in"/>
+        <pin num="11" name="GND" type="power_in"/>
+        <pin num="12" name="VCCIO" type="power_in"/>
+        <pin num="13" name="ADBUS0" type="bidirectional"/>
+        <pin num="14" name="ADBUS1" type="bidirectional"/>
+        <pin num="15" name="ADBUS2" type="bidirectional"/>
+        <pin num="16" name="ADBUS3" type="bidirectional"/>
+        <pin num="17" name="ADBUS4" type="bidirectional"/>
+        <pin num="18" name="ADBUS5" type="bidirectional"/>
+        <pin num="19" name="ADBUS6" type="bidirectional"/>
+        <pin num="20" name="ADBUS7" type="bidirectional"/>
+        <pin num="21" name="ACBUS0" type="bidirectional"/>
+        <pin num="22" name="GND" type="power_in"/>
+        <pin num="23" name="GND" type="power_in"/>
+        <pin num="24" name="VCCIO" type="power_in"/>
+        <pin num="25" name="ACBUS1" type="bidirectional"/>
+        <pin num="26" name="ACBUS2" type="bidirectional"/>
+        <pin num="27" name="ACBUS3" type="bidirectional"/>
+        <pin num="28" name="ACBUS4" type="bidirectional"/>
+        <pin num="29" name="ACBUS5" type="bidirectional"/>
+        <pin num="30" name="ACBUS6" type="bidirectional"/>
+        <pin num="31" name="ACBUS7" type="bidirectional"/>
+        <pin num="32" name="ACBUS8" type="bidirectional"/>
+        <pin num="33" name="ACBUS9" type="bidirectional"/>
+        <pin num="34" name="~{RESET}" type="input"/>
+        <pin num="35" name="GND" type="power_in"/>
+        <pin num="36" name="GND" type="power_in"/>
+        <pin num="37" name="VCCA" type="power_out"/>
+        <pin num="38" name="VCCCORE" type="power_out"/>
+        <pin num="39" name="VCCD" type="power_in"/>
+        <pin num="40" name="VREGIN" type="power_in"/>
+        <pin num="41" name="AGND" type="power_in"/>
+        <pin num="42" name="TEST" type="input"/>
+        <pin num="43" name="EEDATA" type="bidirectional"/>
+        <pin num="44" name="EECLK" type="output"/>
+        <pin num="45" name="EECS" type="output"/>
+        <pin num="46" name="VCCIO" type="power_in"/>
+        <pin num="47" name="GND" type="power_in"/>
+        <pin num="48" name="GND" type="power_in"/>
+      </pins>
+    </libpart>
+    <libpart lib="SN64_USB" part="L">
+      <description>Inductor</description>
+      <footprints>
+        <fp>Choke_*</fp>
+        <fp>*Coil*</fp>
+        <fp>Inductor_*</fp>
+        <fp>L_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">L</field>
+        <field name="Value">L</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Inductor</field>
+      </fields>
+      <pins>
+        <pin num="1" name="1" type="passive"/>
+        <pin num="2" name="2" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SN64_USB" part="R">
+      <description>Resistor</description>
+      <footprints>
+        <fp>R_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">R</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Resistor</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SN64_USB" part="SN74AXC4T774PW">
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">SN74AXC4T774PW</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <pins>
+        <pin num="1" name="DIR1" type="input"/>
+        <pin num="2" name="DIR2" type="input"/>
+        <pin num="3" name="A1" type="bidirectional"/>
+        <pin num="4" name="A2" type="bidirectional"/>
+        <pin num="5" name="A3" type="bidirectional"/>
+        <pin num="6" name="A4" type="bidirectional"/>
+        <pin num="7" name="DIR3" type="input"/>
+        <pin num="8" name="DIR4" type="input"/>
+        <pin num="9" name="~{OE}" type="input"/>
+        <pin num="10" name="GND" type="power_in"/>
+        <pin num="11" name="B4" type="bidirectional"/>
+        <pin num="12" name="B3" type="bidirectional"/>
+        <pin num="13" name="B2" type="bidirectional"/>
+        <pin num="14" name="B1" type="bidirectional"/>
+        <pin num="15" name="VCCB" type="power_in"/>
+        <pin num="16" name="VCCA" type="power_in"/>
+      </pins>
+    </libpart>
+    <libpart lib="SN64_USB" part="USBLC6-2SC6">
+      <description>Very low capacitance ESD protection diode, 2 data-line, SOT-23-6</description>
+      <docs>https://www.st.com/resource/en/datasheet/usblc6-2.pdf</docs>
+      <footprints>
+        <fp>SOT?23*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">USBLC6-2SC6</field>
+        <field name="Footprint">Package_TO_SOT_SMD:SOT-23-6</field>
+        <field name="Datasheet">https://www.st.com/resource/en/datasheet/usblc6-2.pdf</field>
+        <field name="Description">Very low capacitance ESD protection diode, 2 data-line, SOT-23-6</field>
+      </fields>
+      <pins>
+        <pin num="1" name="I/O1" type="passive"/>
+        <pin num="2" name="GND" type="passive"/>
+        <pin num="3" name="I/O2" type="passive"/>
+        <pin num="4" name="I/O2" type="passive"/>
+        <pin num="5" name="VBUS" type="passive"/>
+        <pin num="6" name="I/O1" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SN64_USB" part="USB_C_Receptacle_USB2.0">
+      <description>USB 2.0-only Type-C Receptacle connector</description>
+      <docs>https://www.usb.org/sites/default/files/documents/usb_type-c.zip</docs>
+      <footprints>
+        <fp>USB*C*Receptacle*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">USB_C_Receptacle_USB2.0</field>
+        <field name="Footprint"/>
+        <field name="Datasheet">https://www.usb.org/sites/default/files/documents/usb_type-c.zip</field>
+        <field name="Description">USB 2.0-only Type-C Receptacle connector</field>
+      </fields>
+      <pins>
+        <pin num="A1" name="GND" type="passive"/>
+        <pin num="A4" name="VBUS" type="passive"/>
+        <pin num="A5" name="CC1" type="bidirectional"/>
+        <pin num="A6" name="D+" type="bidirectional"/>
+        <pin num="A7" name="D-" type="bidirectional"/>
+        <pin num="A8" name="SBU1" type="bidirectional"/>
+        <pin num="A9" name="VBUS" type="passive"/>
+        <pin num="A12" name="GND" type="passive"/>
+        <pin num="B1" name="GND" type="passive"/>
+        <pin num="B4" name="VBUS" type="passive"/>
+        <pin num="B5" name="CC2" type="bidirectional"/>
+        <pin num="B6" name="D+" type="bidirectional"/>
+        <pin num="B7" name="D-" type="bidirectional"/>
+        <pin num="B8" name="SBU2" type="bidirectional"/>
+        <pin num="B9" name="VBUS" type="passive"/>
+        <pin num="B12" name="GND" type="passive"/>
+        <pin num="S1" name="SHIELD" type="passive"/>
+      </pins>
+    </libpart>
+  </libparts>
+  <libraries>
+    <library logical="SN64">
+      <uri>${KIPRJMOD}/libraries/SN64.kicad_sym</uri>
+    </library>
+    <library logical="SN64_USB">
+      <uri>${KIPRJMOD}/libraries/SN64_USB.kicad_sym</uri>
+    </library>
+  </libraries>
+  <nets>
+    <net code="1" name="/GND" class="Default">
+      <node ref="C101" pin="2" pintype="passive"/>
+      <node ref="C102" pin="2" pintype="passive"/>
+      <node ref="C103" pin="2" pintype="passive"/>
+      <node ref="C104" pin="2" pintype="passive"/>
+      <node ref="C105" pin="2" pintype="passive"/>
+      <node ref="C106" pin="2" pintype="passive"/>
+      <node ref="C107" pin="2" pintype="passive"/>
+      <node ref="C108" pin="2" pintype="passive"/>
+      <node ref="C109" pin="2" pintype="passive"/>
+      <node ref="C110" pin="2" pintype="passive"/>
+      <node ref="C111" pin="2" pintype="passive"/>
+      <node ref="C112" pin="2" pintype="passive"/>
+      <node ref="C113" pin="2" pintype="passive"/>
+      <node ref="C114" pin="2" pintype="passive"/>
+      <node ref="C115" pin="2" pintype="passive"/>
+      <node ref="C116" pin="2" pintype="passive"/>
+      <node ref="J1" pin="1" pinfunction="GND_1" pintype="passive"/>
+      <node ref="J1" pin="2" pinfunction="GND_2" pintype="passive"/>
+      <node ref="J1" pin="22" pinfunction="GND_22" pintype="passive"/>
+      <node ref="J1" pin="23" pinfunction="GND_23" pintype="passive"/>
+      <node ref="J1" pin="25" pinfunction="GND_25" pintype="passive"/>
+      <node ref="J1" pin="26" pinfunction="GND_26" pintype="passive"/>
+      <node ref="J1" pin="27" pinfunction="GND_27" pintype="passive"/>
+      <node ref="J1" pin="31" pinfunction="GND_31" pintype="passive"/>
+      <node ref="J1" pin="47" pinfunction="GND_47" pintype="passive"/>
+      <node ref="J1" pin="48" pinfunction="GND_48" pintype="passive"/>
+      <node ref="J1" pin="50" pinfunction="GND_50" pintype="passive"/>
+      <node ref="J1" pin="6" pinfunction="GND_6" pintype="passive"/>
+      <node ref="J101" pin="A1" pinfunction="GND_A1" pintype="passive"/>
+      <node ref="J101" pin="A12" pinfunction="GND_A12" pintype="passive"/>
+      <node ref="J101" pin="B1" pinfunction="GND_B1" pintype="passive"/>
+      <node ref="J101" pin="B12" pinfunction="GND_B12" pintype="passive"/>
+      <node ref="J101" pin="S1" pinfunction="SHIELD_S1" pintype="passive"/>
+      <node ref="J102" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="J2" pin="36" pinfunction="GND_36" pintype="passive"/>
+      <node ref="J2" pin="5" pinfunction="GND_5" pintype="passive"/>
+      <node ref="R101" pin="2" pintype="passive"/>
+      <node ref="R102" pin="2" pintype="passive"/>
+      <node ref="R103" pin="2" pintype="passive"/>
+      <node ref="R112" pin="2" pintype="passive"/>
+      <node ref="U101" pin="2" pinfunction="GND_2" pintype="passive"/>
+      <node ref="U102" pin="2" pinfunction="GND_2" pintype="passive"/>
+      <node ref="U103" pin="2" pinfunction="GND_2" pintype="power_in"/>
+      <node ref="U104" pin="10" pinfunction="GND_10" pintype="power_in"/>
+      <node ref="U104" pin="11" pinfunction="GND_11" pintype="power_in"/>
+      <node ref="U104" pin="22" pinfunction="GND_22" pintype="power_in"/>
+      <node ref="U104" pin="23" pinfunction="GND_23" pintype="power_in"/>
+      <node ref="U104" pin="35" pinfunction="GND_35" pintype="power_in"/>
+      <node ref="U104" pin="36" pinfunction="GND_36" pintype="power_in"/>
+      <node ref="U104" pin="4" pinfunction="AGND_4" pintype="power_in"/>
+      <node ref="U104" pin="41" pinfunction="AGND_41" pintype="power_in"/>
+      <node ref="U104" pin="42" pinfunction="TEST_42" pintype="input"/>
+      <node ref="U104" pin="47" pinfunction="GND_47" pintype="power_in"/>
+      <node ref="U104" pin="48" pinfunction="GND_48" pintype="power_in"/>
+      <node ref="U104" pin="9" pinfunction="AGND_9" pintype="power_in"/>
+      <node ref="U105" pin="10" pinfunction="GND_10" pintype="power_in"/>
+      <node ref="U105" pin="7" pinfunction="DIR3_7" pintype="input"/>
+      <node ref="U106" pin="2" pinfunction="Vss_2" pintype="power_in"/>
+      <node ref="Y101" pin="2" pinfunction="G_2" pintype="passive"/>
+      <node ref="Y101" pin="4" pinfunction="G_4" pintype="passive"/>
+    </net>
+    <net code="2" name="/HOST_3V3" class="Default">
+      <node ref="J1" pin="17" pinfunction="3V3_17" pintype="passive"/>
+      <node ref="J1" pin="34" pinfunction="3V3_34" pintype="passive"/>
+      <node ref="J1" pin="42" pinfunction="3V3_42" pintype="passive"/>
+      <node ref="J1" pin="9" pinfunction="3V3_9" pintype="passive"/>
+    </net>
+    <net code="3" name="/HOST_12V" class="Default">
+      <node ref="J1" pin="13" pinfunction="12V_13" pintype="passive"/>
+      <node ref="J1" pin="38" pinfunction="12V_38" pintype="passive"/>
+    </net>
+    <net code="4" name="/N64_AD0" class="Default">
+      <node ref="J1" pin="28" pinfunction="AD0_28" pintype="passive"/>
+    </net>
+    <net code="5" name="/N64_AD1" class="Default">
+      <node ref="J1" pin="29" pinfunction="AD1_29" pintype="passive"/>
+    </net>
+    <net code="6" name="/N64_AD2" class="Default">
+      <node ref="J1" pin="30" pinfunction="AD2_30" pintype="passive"/>
+    </net>
+    <net code="7" name="/N64_AD3" class="Default">
+      <node ref="J1" pin="32" pinfunction="AD3_32" pintype="passive"/>
+    </net>
+    <net code="8" name="/N64_AD4" class="Default">
+      <node ref="J1" pin="36" pinfunction="AD4_36" pintype="passive"/>
+    </net>
+    <net code="9" name="/N64_AD5" class="Default">
+      <node ref="J1" pin="37" pinfunction="AD5_37" pintype="passive"/>
+    </net>
+    <net code="10" name="/N64_AD6" class="Default">
+      <node ref="J1" pin="40" pinfunction="AD6_40" pintype="passive"/>
+    </net>
+    <net code="11" name="/N64_AD7" class="Default">
+      <node ref="J1" pin="41" pinfunction="AD7_41" pintype="passive"/>
+    </net>
+    <net code="12" name="/N64_AD8" class="Default">
+      <node ref="J1" pin="16" pinfunction="AD8_16" pintype="passive"/>
+    </net>
+    <net code="13" name="/N64_AD9" class="Default">
+      <node ref="J1" pin="15" pinfunction="AD9_15" pintype="passive"/>
+    </net>
+    <net code="14" name="/N64_AD10" class="Default">
+      <node ref="J1" pin="12" pinfunction="AD10_12" pintype="passive"/>
+    </net>
+    <net code="15" name="/N64_AD11" class="Default">
+      <node ref="J1" pin="11" pinfunction="AD11_11" pintype="passive"/>
+    </net>
+    <net code="16" name="/N64_AD12" class="Default">
+      <node ref="J1" pin="7" pinfunction="AD12_7" pintype="passive"/>
+    </net>
+    <net code="17" name="/N64_AD13" class="Default">
+      <node ref="J1" pin="5" pinfunction="AD13_5" pintype="passive"/>
+    </net>
+    <net code="18" name="/N64_AD14" class="Default">
+      <node ref="J1" pin="4" pinfunction="AD14_4" pintype="passive"/>
+    </net>
+    <net code="19" name="/N64_AD15" class="Default">
+      <node ref="J1" pin="3" pinfunction="AD15_3" pintype="passive"/>
+    </net>
+    <net code="20" name="/N64_ALE_H" class="Default">
+      <node ref="J1" pin="35" pinfunction="ALE_H_35" pintype="passive"/>
+    </net>
+    <net code="21" name="/N64_ALE_L" class="Default">
+      <node ref="J1" pin="33" pinfunction="ALE_L_33" pintype="passive"/>
+    </net>
+    <net code="22" name="/N64_AUDIO_L" class="Default">
+      <node ref="J1" pin="24" pinfunction="AUDIO_L_24" pintype="passive"/>
+    </net>
+    <net code="23" name="/N64_AUDIO_R" class="Default">
+      <node ref="J1" pin="49" pinfunction="AUDIO_R_49" pintype="passive"/>
+    </net>
+    <net code="24" name="/N64_CIC_CLK" class="Default">
+      <node ref="J1" pin="43" pinfunction="CIC_CLK_43" pintype="passive"/>
+    </net>
+    <net code="25" name="/N64_CIC_DATA" class="Default">
+      <node ref="J1" pin="18" pinfunction="CIC_DATA_18" pintype="passive"/>
+    </net>
+    <net code="26" name="/N64_INT_N" class="Default">
+      <node ref="J1" pin="44" pinfunction="/INT_44" pintype="passive"/>
+    </net>
+    <net code="27" name="/N64_JOYBUS" class="Default">
+      <node ref="J1" pin="21" pinfunction="JOYBUS_21" pintype="passive"/>
+    </net>
+    <net code="28" name="/N64_KEY1_RESERVED" class="Default">
+      <node ref="J1" pin="14" pinfunction="KEY1_RESERVED_14" pintype="passive"/>
+    </net>
+    <net code="29" name="/N64_KEY2_RESERVED" class="Default">
+      <node ref="J1" pin="39" pinfunction="KEY2_RESERVED_39" pintype="passive"/>
+    </net>
+    <net code="30" name="/N64_NMI_N" class="Default">
+      <node ref="J1" pin="45" pinfunction="/NMI_45" pintype="passive"/>
+    </net>
+    <net code="31" name="/N64_PIF_CLK" class="Default">
+      <node ref="J1" pin="19" pinfunction="PIF_CLK_19" pintype="passive"/>
+    </net>
+    <net code="32" name="/N64_READ_N" class="Default">
+      <node ref="J1" pin="10" pinfunction="/READ_10" pintype="passive"/>
+    </net>
+    <net code="33" name="/N64_RESET_N" class="Default">
+      <node ref="J1" pin="20" pinfunction="/RESET_20" pintype="passive"/>
+    </net>
+    <net code="34" name="/N64_VIDEO_SYNC_RESERVED" class="Default">
+      <node ref="J1" pin="46" pinfunction="VIDEO_SYNC_RESERVED_46" pintype="passive"/>
+    </net>
+    <net code="35" name="/N64_WRITE_N" class="Default">
+      <node ref="J1" pin="8" pinfunction="/WRITE_8" pintype="passive"/>
+    </net>
+    <net code="36" name="/SNES_5V_CART" class="Default">
+      <node ref="J2" pin="27" pinfunction="+5V_CART_27" pintype="passive"/>
+      <node ref="J2" pin="58" pinfunction="+5V_CART_58" pintype="passive"/>
+    </net>
+    <net code="37" name="/SNES_A0" class="Default">
+      <node ref="J2" pin="17" pinfunction="A0_17" pintype="passive"/>
+    </net>
+    <net code="38" name="/SNES_A1" class="Default">
+      <node ref="J2" pin="16" pinfunction="A1_16" pintype="passive"/>
+    </net>
+    <net code="39" name="/SNES_A2" class="Default">
+      <node ref="J2" pin="15" pinfunction="A2_15" pintype="passive"/>
+    </net>
+    <net code="40" name="/SNES_A3" class="Default">
+      <node ref="J2" pin="14" pinfunction="A3_14" pintype="passive"/>
+    </net>
+    <net code="41" name="/SNES_A4" class="Default">
+      <node ref="J2" pin="13" pinfunction="A4_13" pintype="passive"/>
+    </net>
+    <net code="42" name="/SNES_A5" class="Default">
+      <node ref="J2" pin="12" pinfunction="A5_12" pintype="passive"/>
+    </net>
+    <net code="43" name="/SNES_A6" class="Default">
+      <node ref="J2" pin="11" pinfunction="A6_11" pintype="passive"/>
+    </net>
+    <net code="44" name="/SNES_A7" class="Default">
+      <node ref="J2" pin="10" pinfunction="A7_10" pintype="passive"/>
+    </net>
+    <net code="45" name="/SNES_A8" class="Default">
+      <node ref="J2" pin="9" pinfunction="A8_9" pintype="passive"/>
+    </net>
+    <net code="46" name="/SNES_A9" class="Default">
+      <node ref="J2" pin="8" pinfunction="A9_8" pintype="passive"/>
+    </net>
+    <net code="47" name="/SNES_A10" class="Default">
+      <node ref="J2" pin="7" pinfunction="A10_7" pintype="passive"/>
+    </net>
+    <net code="48" name="/SNES_A11" class="Default">
+      <node ref="J2" pin="6" pinfunction="A11_6" pintype="passive"/>
+    </net>
+    <net code="49" name="/SNES_A12" class="Default">
+      <node ref="J2" pin="37" pinfunction="A12_37" pintype="passive"/>
+    </net>
+    <net code="50" name="/SNES_A13" class="Default">
+      <node ref="J2" pin="38" pinfunction="A13_38" pintype="passive"/>
+    </net>
+    <net code="51" name="/SNES_A14" class="Default">
+      <node ref="J2" pin="39" pinfunction="A14_39" pintype="passive"/>
+    </net>
+    <net code="52" name="/SNES_A15" class="Default">
+      <node ref="J2" pin="40" pinfunction="A15_40" pintype="passive"/>
+    </net>
+    <net code="53" name="/SNES_A16" class="Default">
+      <node ref="J2" pin="41" pinfunction="A16_41" pintype="passive"/>
+    </net>
+    <net code="54" name="/SNES_A17" class="Default">
+      <node ref="J2" pin="42" pinfunction="A17_42" pintype="passive"/>
+    </net>
+    <net code="55" name="/SNES_A18" class="Default">
+      <node ref="J2" pin="43" pinfunction="A18_43" pintype="passive"/>
+    </net>
+    <net code="56" name="/SNES_A19" class="Default">
+      <node ref="J2" pin="44" pinfunction="A19_44" pintype="passive"/>
+    </net>
+    <net code="57" name="/SNES_A20" class="Default">
+      <node ref="J2" pin="45" pinfunction="A20_45" pintype="passive"/>
+    </net>
+    <net code="58" name="/SNES_A21" class="Default">
+      <node ref="J2" pin="46" pinfunction="A21_46" pintype="passive"/>
+    </net>
+    <net code="59" name="/SNES_A22" class="Default">
+      <node ref="J2" pin="47" pinfunction="A22_47" pintype="passive"/>
+    </net>
+    <net code="60" name="/SNES_A23" class="Default">
+      <node ref="J2" pin="48" pinfunction="A23_48" pintype="passive"/>
+    </net>
+    <net code="61" name="/SNES_AUDIO_L_IN" class="Default">
+      <node ref="J2" pin="31" pinfunction="AUDIO_L_IN_31" pintype="passive"/>
+    </net>
+    <net code="62" name="/SNES_AUDIO_R_IN" class="Default">
+      <node ref="J2" pin="62" pinfunction="AUDIO_R_IN_62" pintype="passive"/>
+    </net>
+    <net code="63" name="/SNES_CIC_CLK" class="Default">
+      <node ref="J2" pin="56" pinfunction="CIC_CLK_56" pintype="passive"/>
+    </net>
+    <net code="64" name="/SNES_CIC_DATA0" class="Default">
+      <node ref="J2" pin="55" pinfunction="CIC_DATA0_55" pintype="passive"/>
+    </net>
+    <net code="65" name="/SNES_CIC_DATA1" class="Default">
+      <node ref="J2" pin="24" pinfunction="CIC_DATA1_24" pintype="passive"/>
+    </net>
+    <net code="66" name="/SNES_CIC_SLAVE_RESET" class="Default">
+      <node ref="J2" pin="25" pinfunction="CIC_SLAVE_RESET_25" pintype="passive"/>
+    </net>
+    <net code="67" name="/SNES_D0" class="Default">
+      <node ref="J2" pin="19" pinfunction="D0_19" pintype="passive"/>
+    </net>
+    <net code="68" name="/SNES_D1" class="Default">
+      <node ref="J2" pin="20" pinfunction="D1_20" pintype="passive"/>
+    </net>
+    <net code="69" name="/SNES_D2" class="Default">
+      <node ref="J2" pin="21" pinfunction="D2_21" pintype="passive"/>
+    </net>
+    <net code="70" name="/SNES_D3" class="Default">
+      <node ref="J2" pin="22" pinfunction="D3_22" pintype="passive"/>
+    </net>
+    <net code="71" name="/SNES_D4" class="Default">
+      <node ref="J2" pin="50" pinfunction="D4_50" pintype="passive"/>
+    </net>
+    <net code="72" name="/SNES_D5" class="Default">
+      <node ref="J2" pin="51" pinfunction="D5_51" pintype="passive"/>
+    </net>
+    <net code="73" name="/SNES_D6" class="Default">
+      <node ref="J2" pin="52" pinfunction="D6_52" pintype="passive"/>
+    </net>
+    <net code="74" name="/SNES_D7" class="Default">
+      <node ref="J2" pin="53" pinfunction="D7_53" pintype="passive"/>
+    </net>
+    <net code="75" name="/SNES_EXPAND" class="Default">
+      <node ref="J2" pin="2" pinfunction="EXPAND_2" pintype="passive"/>
+    </net>
+    <net code="76" name="/SNES_IRQ_N" class="Default">
+      <node ref="J2" pin="18" pinfunction="/IRQ_18" pintype="passive"/>
+    </net>
+    <net code="77" name="/SNES_PA0" class="Default">
+      <node ref="J2" pin="28" pinfunction="PA0_28" pintype="passive"/>
+    </net>
+    <net code="78" name="/SNES_PA1" class="Default">
+      <node ref="J2" pin="59" pinfunction="PA1_59" pintype="passive"/>
+    </net>
+    <net code="79" name="/SNES_PA2" class="Default">
+      <node ref="J2" pin="29" pinfunction="PA2_29" pintype="passive"/>
+    </net>
+    <net code="80" name="/SNES_PA3" class="Default">
+      <node ref="J2" pin="60" pinfunction="PA3_60" pintype="passive"/>
+    </net>
+    <net code="81" name="/SNES_PA4" class="Default">
+      <node ref="J2" pin="30" pinfunction="PA4_30" pintype="passive"/>
+    </net>
+    <net code="82" name="/SNES_PA5" class="Default">
+      <node ref="J2" pin="61" pinfunction="PA5_61" pintype="passive"/>
+    </net>
+    <net code="83" name="/SNES_PA6" class="Default">
+      <node ref="J2" pin="3" pinfunction="PA6_3" pintype="passive"/>
+    </net>
+    <net code="84" name="/SNES_PA7" class="Default">
+      <node ref="J2" pin="34" pinfunction="PA7_34" pintype="passive"/>
+    </net>
+    <net code="85" name="/SNES_PHI2" class="Default">
+      <node ref="J2" pin="57" pinfunction="PHI2_57" pintype="passive"/>
+    </net>
+    <net code="86" name="/SNES_PRD_N" class="Default">
+      <node ref="J2" pin="4" pinfunction="/PRD_4" pintype="passive"/>
+    </net>
+    <net code="87" name="/SNES_PWR_N" class="Default">
+      <node ref="J2" pin="35" pinfunction="/PWR_35" pintype="passive"/>
+    </net>
+    <net code="88" name="/SNES_RD_N" class="Default">
+      <node ref="J2" pin="23" pinfunction="/RD_23" pintype="passive"/>
+    </net>
+    <net code="89" name="/SNES_REFRESH" class="Default">
+      <node ref="J2" pin="33" pinfunction="REFRESH_33" pintype="passive"/>
+    </net>
+    <net code="90" name="/SNES_RESET_N" class="Default">
+      <node ref="J2" pin="26" pinfunction="/RESET_26" pintype="passive"/>
+    </net>
+    <net code="91" name="/SNES_ROMSEL_N" class="Default">
+      <node ref="J2" pin="49" pinfunction="/ROMSEL_49" pintype="passive"/>
+    </net>
+    <net code="92" name="/SNES_SYSTEM_CLK" class="Default">
+      <node ref="J2" pin="1" pinfunction="SYSTEM_CLK_1" pintype="passive"/>
+    </net>
+    <net code="93" name="/SNES_WRAMSEL_N" class="Default">
+      <node ref="J2" pin="32" pinfunction="/WRAMSEL_32" pintype="passive"/>
+    </net>
+    <net code="94" name="/SNES_WR_N" class="Default">
+      <node ref="J2" pin="54" pinfunction="/WR_54" pintype="passive"/>
+    </net>
+    <net code="95" name="/USB-C programmer/EE_CLK" class="Default">
+      <node ref="U104" pin="44" pinfunction="EECLK_44" pintype="output"/>
+      <node ref="U106" pin="4" pinfunction="CLK_4" pintype="input"/>
+    </net>
+    <net code="96" name="/USB-C programmer/EE_CS" class="Default">
+      <node ref="U104" pin="45" pinfunction="EECS_45" pintype="output"/>
+      <node ref="U106" pin="5" pinfunction="CS_5" pintype="input"/>
+    </net>
+    <net code="97" name="/USB-C programmer/EE_DATA" class="Default">
+      <node ref="R106" pin="2" pintype="passive"/>
+      <node ref="U104" pin="43" pinfunction="EEDATA_43" pintype="bidirectional"/>
+      <node ref="U106" pin="3" pinfunction="DI_3" pintype="input"/>
+    </net>
+    <net code="98" name="/USB-C programmer/EE_DO" class="Default">
+      <node ref="R106" pin="1" pintype="passive"/>
+      <node ref="R107" pin="2" pintype="passive"/>
+      <node ref="U106" pin="1" pinfunction="DO_1" pintype="tri_state"/>
+    </net>
+    <net code="99" name="/USB-C programmer/FT_1V8A" class="Default">
+      <node ref="C110" pin="1" pintype="passive"/>
+      <node ref="U104" pin="37" pinfunction="VCCA_37" pintype="power_out"/>
+    </net>
+    <net code="100" name="/USB-C programmer/FT_1V8CORE" class="Default">
+      <node ref="C111" pin="1" pintype="passive"/>
+      <node ref="U104" pin="38" pinfunction="VCCCORE_38" pintype="power_out"/>
+    </net>
+    <net code="101" name="/USB-C programmer/FT_REF" class="Default">
+      <node ref="R103" pin="1" pintype="passive"/>
+      <node ref="U104" pin="5" pinfunction="REF_5" pintype="input"/>
+    </net>
+    <net code="102" name="/USB-C programmer/FT_RESET_N" class="Default">
+      <node ref="R104" pin="2" pintype="passive"/>
+      <node ref="U104" pin="34" pinfunction="~{RESET}_34" pintype="input"/>
+    </net>
+    <net code="103" name="/USB-C programmer/FT_TCK" class="Default">
+      <node ref="U104" pin="13" pinfunction="ADBUS0_13" pintype="bidirectional"/>
+      <node ref="U105" pin="3" pinfunction="A1_3" pintype="bidirectional"/>
+    </net>
+    <net code="104" name="/USB-C programmer/FT_TDI" class="Default">
+      <node ref="U104" pin="14" pinfunction="ADBUS1_14" pintype="bidirectional"/>
+      <node ref="U105" pin="4" pinfunction="A2_4" pintype="bidirectional"/>
+    </net>
+    <net code="105" name="/USB-C programmer/FT_TDO" class="Default">
+      <node ref="U104" pin="15" pinfunction="ADBUS2_15" pintype="bidirectional"/>
+      <node ref="U105" pin="5" pinfunction="A3_5" pintype="bidirectional"/>
+    </net>
+    <net code="106" name="/USB-C programmer/FT_TMS" class="Default">
+      <node ref="U104" pin="16" pinfunction="ADBUS3_16" pintype="bidirectional"/>
+      <node ref="U105" pin="6" pinfunction="A4_6" pintype="bidirectional"/>
+    </net>
+    <net code="107" name="/USB-C programmer/FT_VPHY" class="Default">
+      <node ref="C104" pin="1" pintype="passive"/>
+      <node ref="L101" pin="2" pinfunction="2_2" pintype="passive"/>
+      <node ref="U104" pin="3" pinfunction="VPHY_3" pintype="power_in"/>
+    </net>
+    <net code="108" name="/USB-C programmer/FT_VPLL" class="Default">
+      <node ref="C105" pin="1" pintype="passive"/>
+      <node ref="L102" pin="2" pinfunction="2_2" pintype="passive"/>
+      <node ref="U104" pin="8" pinfunction="VPLL_8" pintype="power_in"/>
+    </net>
+    <net code="109" name="/USB-C programmer/JTAG_OE_N" class="Default">
+      <node ref="R105" pin="2" pintype="passive"/>
+      <node ref="U104" pin="30" pinfunction="ACBUS6_30" pintype="bidirectional"/>
+      <node ref="U105" pin="9" pinfunction="~{OE}_9" pintype="input"/>
+    </net>
+    <net code="110" name="/USB-C programmer/JTAG_TCK" class="Default">
+      <node ref="J102" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="R108" pin="2" pintype="passive"/>
+      <node ref="R112" pin="1" pintype="passive"/>
+    </net>
+    <net code="111" name="/USB-C programmer/JTAG_TDI" class="Default">
+      <node ref="J102" pin="4" pinfunction="Pin_4_4" pintype="passive"/>
+      <node ref="R109" pin="2" pintype="passive"/>
+      <node ref="R113" pin="2" pintype="passive"/>
+    </net>
+    <net code="112" name="/USB-C programmer/JTAG_TDO" class="Default">
+      <node ref="J102" pin="5" pinfunction="Pin_5_5" pintype="passive"/>
+      <node ref="R110" pin="2" pintype="passive"/>
+    </net>
+    <net code="113" name="/USB-C programmer/JTAG_TMS" class="Default">
+      <node ref="J102" pin="6" pinfunction="Pin_6_6" pintype="passive"/>
+      <node ref="R111" pin="2" pintype="passive"/>
+      <node ref="R114" pin="2" pintype="passive"/>
+    </net>
+    <net code="114" name="/USB-C programmer/TARGET_VREF" class="Default">
+      <node ref="C113" pin="1" pintype="passive"/>
+      <node ref="J102" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="R113" pin="1" pintype="passive"/>
+      <node ref="R114" pin="1" pintype="passive"/>
+      <node ref="U105" pin="15" pinfunction="VCCB_15" pintype="power_in"/>
+    </net>
+    <net code="115" name="/USB-C programmer/TCK_DRV" class="Default">
+      <node ref="R108" pin="1" pintype="passive"/>
+      <node ref="U105" pin="14" pinfunction="B1_14" pintype="bidirectional"/>
+    </net>
+    <net code="116" name="/USB-C programmer/TDI_DRV" class="Default">
+      <node ref="R109" pin="1" pintype="passive"/>
+      <node ref="U105" pin="13" pinfunction="B2_13" pintype="bidirectional"/>
+    </net>
+    <net code="117" name="/USB-C programmer/TDO_RCV" class="Default">
+      <node ref="R110" pin="1" pintype="passive"/>
+      <node ref="U105" pin="12" pinfunction="B3_12" pintype="bidirectional"/>
+    </net>
+    <net code="118" name="/USB-C programmer/TMS_DRV" class="Default">
+      <node ref="R111" pin="1" pintype="passive"/>
+      <node ref="U105" pin="11" pinfunction="B4_11" pintype="bidirectional"/>
+    </net>
+    <net code="119" name="/USB-C programmer/USB_3V3" class="Default">
+      <node ref="C103" pin="1" pintype="passive"/>
+      <node ref="C106" pin="1" pintype="passive"/>
+      <node ref="C107" pin="1" pintype="passive"/>
+      <node ref="C108" pin="1" pintype="passive"/>
+      <node ref="C109" pin="1" pintype="passive"/>
+      <node ref="C112" pin="1" pintype="passive"/>
+      <node ref="C114" pin="1" pintype="passive"/>
+      <node ref="L101" pin="1" pinfunction="1_1" pintype="passive"/>
+      <node ref="L102" pin="1" pinfunction="1_1" pintype="passive"/>
+      <node ref="R104" pin="1" pintype="passive"/>
+      <node ref="R105" pin="1" pintype="passive"/>
+      <node ref="R107" pin="1" pintype="passive"/>
+      <node ref="U103" pin="5" pinfunction="VOUT_5" pintype="power_out"/>
+      <node ref="U104" pin="12" pinfunction="VCCIO_12" pintype="power_in"/>
+      <node ref="U104" pin="24" pinfunction="VCCIO_24" pintype="power_in"/>
+      <node ref="U104" pin="39" pinfunction="VCCD_39" pintype="power_in"/>
+      <node ref="U104" pin="40" pinfunction="VREGIN_40" pintype="power_in"/>
+      <node ref="U104" pin="46" pinfunction="VCCIO_46" pintype="power_in"/>
+      <node ref="U105" pin="1" pinfunction="DIR1_1" pintype="input"/>
+      <node ref="U105" pin="16" pinfunction="VCCA_16" pintype="power_in"/>
+      <node ref="U105" pin="2" pinfunction="DIR2_2" pintype="input"/>
+      <node ref="U105" pin="8" pinfunction="DIR4_8" pintype="input"/>
+      <node ref="U106" pin="6" pinfunction="Vсс_6" pintype="power_in"/>
+    </net>
+    <net code="120" name="/USB-C programmer/USB_CC1" class="Default">
+      <node ref="J101" pin="A5" pinfunction="CC1_A5" pintype="bidirectional"/>
+      <node ref="R101" pin="1" pintype="passive"/>
+      <node ref="U102" pin="1" pinfunction="I/O1_1" pintype="passive"/>
+      <node ref="U102" pin="6" pinfunction="I/O1_6" pintype="passive"/>
+    </net>
+    <net code="121" name="/USB-C programmer/USB_CC2" class="Default">
+      <node ref="J101" pin="B5" pinfunction="CC2_B5" pintype="bidirectional"/>
+      <node ref="R102" pin="1" pintype="passive"/>
+      <node ref="U102" pin="3" pinfunction="I/O2_3" pintype="passive"/>
+      <node ref="U102" pin="4" pinfunction="I/O2_4" pintype="passive"/>
+    </net>
+    <net code="122" name="/USB-C programmer/USB_DM" class="Default">
+      <node ref="J101" pin="A7" pinfunction="D-_A7" pintype="bidirectional"/>
+      <node ref="J101" pin="B7" pinfunction="D-_B7" pintype="bidirectional"/>
+      <node ref="U101" pin="1" pinfunction="I/O1_1" pintype="passive"/>
+      <node ref="U101" pin="6" pinfunction="I/O1_6" pintype="passive"/>
+      <node ref="U104" pin="6" pinfunction="DM_6" pintype="bidirectional"/>
+    </net>
+    <net code="123" name="/USB-C programmer/USB_DP" class="Default">
+      <node ref="J101" pin="A6" pinfunction="D+_A6" pintype="bidirectional"/>
+      <node ref="J101" pin="B6" pinfunction="D+_B6" pintype="bidirectional"/>
+      <node ref="U101" pin="3" pinfunction="I/O2_3" pintype="passive"/>
+      <node ref="U101" pin="4" pinfunction="I/O2_4" pintype="passive"/>
+      <node ref="U104" pin="7" pinfunction="DP_7" pintype="bidirectional"/>
+    </net>
+    <net code="124" name="/USB-C programmer/USB_VBUS" class="Default">
+      <node ref="C101" pin="1" pintype="passive"/>
+      <node ref="C102" pin="1" pintype="passive"/>
+      <node ref="J101" pin="A4" pinfunction="VBUS_A4" pintype="passive"/>
+      <node ref="J101" pin="A9" pinfunction="VBUS_A9" pintype="passive"/>
+      <node ref="J101" pin="B4" pinfunction="VBUS_B4" pintype="passive"/>
+      <node ref="J101" pin="B9" pinfunction="VBUS_B9" pintype="passive"/>
+      <node ref="U101" pin="5" pinfunction="VBUS_5" pintype="passive"/>
+      <node ref="U102" pin="5" pinfunction="VBUS_5" pintype="passive"/>
+      <node ref="U103" pin="1" pinfunction="VIN_1" pintype="power_in"/>
+      <node ref="U103" pin="3" pinfunction="EN_3" pintype="input"/>
+    </net>
+    <net code="125" name="/USB-C programmer/XTAL_IN" class="Default">
+      <node ref="C115" pin="1" pintype="passive"/>
+      <node ref="U104" pin="1" pinfunction="XCSI_1" pintype="input"/>
+      <node ref="Y101" pin="1" pinfunction="1_1" pintype="passive"/>
+    </net>
+    <net code="126" name="/USB-C programmer/XTAL_OUT" class="Default">
+      <node ref="C116" pin="1" pintype="passive"/>
+      <node ref="U104" pin="2" pinfunction="XCSO_2" pintype="output"/>
+      <node ref="Y101" pin="3" pinfunction="3_3" pintype="passive"/>
+    </net>
+    <net code="127" name="unconnected-(J101-SBU1-PadA8)" class="Default">
+      <node ref="J101" pin="A8" pinfunction="SBU1_A8" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="128" name="unconnected-(J101-SBU2-PadB8)" class="Default">
+      <node ref="J101" pin="B8" pinfunction="SBU2_B8" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="129" name="unconnected-(U103-NC-Pad4)" class="Default">
+      <node ref="U103" pin="4" pinfunction="NC_4" pintype="no_connect"/>
+    </net>
+    <net code="130" name="unconnected-(U104-ACBUS0-Pad21)" class="Default">
+      <node ref="U104" pin="21" pinfunction="ACBUS0_21" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="131" name="unconnected-(U104-ACBUS1-Pad25)" class="Default">
+      <node ref="U104" pin="25" pinfunction="ACBUS1_25" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="132" name="unconnected-(U104-ACBUS2-Pad26)" class="Default">
+      <node ref="U104" pin="26" pinfunction="ACBUS2_26" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="133" name="unconnected-(U104-ACBUS3-Pad27)" class="Default">
+      <node ref="U104" pin="27" pinfunction="ACBUS3_27" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="134" name="unconnected-(U104-ACBUS4-Pad28)" class="Default">
+      <node ref="U104" pin="28" pinfunction="ACBUS4_28" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="135" name="unconnected-(U104-ACBUS5-Pad29)" class="Default">
+      <node ref="U104" pin="29" pinfunction="ACBUS5_29" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="136" name="unconnected-(U104-ACBUS7-Pad31)" class="Default">
+      <node ref="U104" pin="31" pinfunction="ACBUS7_31" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="137" name="unconnected-(U104-ACBUS8-Pad32)" class="Default">
+      <node ref="U104" pin="32" pinfunction="ACBUS8_32" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="138" name="unconnected-(U104-ACBUS9-Pad33)" class="Default">
+      <node ref="U104" pin="33" pinfunction="ACBUS9_33" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="139" name="unconnected-(U104-ADBUS4-Pad17)" class="Default">
+      <node ref="U104" pin="17" pinfunction="ADBUS4_17" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="140" name="unconnected-(U104-ADBUS5-Pad18)" class="Default">
+      <node ref="U104" pin="18" pinfunction="ADBUS5_18" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="141" name="unconnected-(U104-ADBUS6-Pad19)" class="Default">
+      <node ref="U104" pin="19" pinfunction="ADBUS6_19" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="142" name="unconnected-(U104-ADBUS7-Pad20)" class="Default">
+      <node ref="U104" pin="20" pinfunction="ADBUS7_20" pintype="bidirectional+no_connect"/>
+    </net>
+  </nets>
+</export>

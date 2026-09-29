@@ -1,0 +1,450 @@
+{
+  "schema_version": 1,
+  "recorded_date": "2026-09-29",
+  "scope": "USB programmer child-sheet library sources and changes; not a manufacturing or functional-validation release. Paths in local assets are relative to hardware/sn64; source paths are relative to their stated root.",
+  "source_roots": {
+    "original_workspace": "C:/Users/RyanB/Documents/Codex/SN 64 Project",
+    "installed_kicad_share": "C:/Program Files/KiCad/10.0/share/kicad"
+  },
+  "tool_version": "KiCad 10.0.6",
+  "installed_library_version": "Installed KiCad 10.0.6 snapshot; library Git revision not established. File content is identified by SHA-256.",
+  "summercart64": {
+    "commit": "a1e7996d2cbece686820a5c785029c68514f17b0",
+    "attribution": "SummerCart64, designed by Mateusz Faderewski; upstream contributors retain their notices.",
+    "project_url": "https://summercart64.dev",
+    "repository_url": "https://github.com/Polprzewodnikowy/SummerCart64",
+    "files": [
+      {
+        "path": "references/downloads/summercart64/hw/pcb/sc64v2.kicad_sch",
+        "bytes": 644544,
+        "sha256": "3632363de2514f6633fb0a8841b0511a9de255275e0a73d8b04ae62058ff8cbc"
+      },
+      {
+        "path": "references/downloads/summercart64/hw/pcb/sc64v2.kicad_pcb",
+        "bytes": 1407146,
+        "sha256": "7991e3105a4be609be6904c9c69d507e98fec3db5f51d3d91d43cc540a16295a"
+      },
+      {
+        "path": "references/downloads/summercart64/hw/pcb/LICENSE",
+        "bytes": 13419,
+        "sha256": "253ad3f89603e728abfa60c36fbcaf8225cf55c1eab12725f19fb3d74d647f3a"
+      }
+    ],
+    "license": "CERN-OHL-S-2.0 for hw/pcb; repository software GPL is separate."
+  },
+  "local_symbol_library": {
+    "path": "libraries/SN64_USB.kicad_sym",
+    "bytes": 37924,
+    "sha256": "f26ef1391fa4cfc9e1da1ab88492ed9628f75d8df63a385852dbe0ca17650fc1"
+  },
+  "symbols": [
+    {
+      "local_id": "SN64_USB:USB_C_Receptacle_USB2.0",
+      "source_id": "Connector:USB_C_Receptacle_USB2.0",
+      "source": "SummerCart64 schematic embedded lib_symbols",
+      "source_path": "references/downloads/summercart64/hw/pcb/sc64v2.kicad_sch",
+      "modifications": [
+        "Library identifier renamed to project-local SN64_USB namespace."
+      ]
+    },
+    {
+      "local_id": "SN64_USB:R",
+      "source_id": "Device:R",
+      "source": "SummerCart64 schematic embedded lib_symbols",
+      "source_path": "references/downloads/summercart64/hw/pcb/sc64v2.kicad_sch",
+      "modifications": [
+        "Library identifier renamed to project-local SN64_USB namespace."
+      ]
+    },
+    {
+      "local_id": "SN64_USB:C",
+      "source_id": "Device:C",
+      "source": "SummerCart64 schematic embedded lib_symbols",
+      "source_path": "references/downloads/summercart64/hw/pcb/sc64v2.kicad_sch",
+      "modifications": [
+        "Library identifier renamed to project-local SN64_USB namespace."
+      ]
+    },
+    {
+      "local_id": "SN64_USB:L",
+      "source_id": "Device:L",
+      "source": "SummerCart64 schematic embedded lib_symbols",
+      "source_path": "references/downloads/summercart64/hw/pcb/sc64v2.kicad_sch",
+      "modifications": [
+        "Library identifier renamed to project-local SN64_USB namespace."
+      ]
+    },
+    {
+      "local_id": "SN64_USB:FT232H",
+      "source_id": "Interface_USB:FT232H",
+      "source": "SummerCart64 schematic embedded lib_symbols",
+      "source_path": "references/downloads/summercart64/hw/pcb/sc64v2.kicad_sch",
+      "modifications": [
+        "Library identifier renamed to project-local SN64_USB namespace.",
+        "Physical pins 44 EECLK and 45 EECS electrical types corrected from input to output against FTDI datasheet table 3.3; pin numbers and geometry unchanged."
+      ]
+    },
+    {
+      "local_id": "SN64_USB:93AAxxBT-xOT",
+      "source_id": "Memory_EEPROM:93AAxxBT-xOT",
+      "source": "SummerCart64 schematic embedded lib_symbols",
+      "source_path": "references/downloads/summercart64/hw/pcb/sc64v2.kicad_sch",
+      "modifications": [
+        "Library identifier renamed to project-local SN64_USB namespace."
+      ]
+    },
+    {
+      "local_id": "SN64_USB:Conn_01x06",
+      "source_id": "Connector_Generic:Conn_01x06",
+      "source": "Installed KiCad 10.0.6 library snapshot; source Git commit not established",
+      "source_path": "symbols/Connector_Generic.kicad_sym",
+      "source_inheritance_chain": [],
+      "modifications": [
+        "Library identifier renamed to project-local SN64_USB namespace; library serialization regenerated."
+      ]
+    },
+    {
+      "local_id": "SN64_USB:Crystal_GND24",
+      "source_id": "Device:Crystal_GND24",
+      "source": "Installed KiCad 10.0.6 library snapshot; source Git commit not established",
+      "source_path": "symbols/Device.kicad_sym",
+      "source_inheritance_chain": [],
+      "modifications": [
+        "Library identifier renamed to project-local SN64_USB namespace; library serialization regenerated."
+      ]
+    },
+    {
+      "local_id": "SN64_USB:USBLC6-2SC6",
+      "source_id": "Power_Protection:USBLC6-2SC6",
+      "source": "Installed KiCad 10.0.6 library snapshot; source Git commit not established",
+      "source_path": "symbols/Power_Protection.kicad_sym",
+      "source_inheritance_chain": [
+        "USBLC6-2P6"
+      ],
+      "modifications": [
+        "Library identifier renamed to project-local SN64_USB namespace; library serialization regenerated.",
+        "Inherited base symbol resolved into a standalone symbol, preserving derived properties."
+      ]
+    },
+    {
+      "local_id": "SN64_USB:AP2112K-3.3",
+      "source_id": "Regulator_Linear:AP2112K-3.3",
+      "source": "Installed KiCad 10.0.6 library snapshot; source Git commit not established",
+      "source_path": "symbols/Regulator_Linear.kicad_sym",
+      "source_inheritance_chain": [
+        "AP2204K-1.5"
+      ],
+      "modifications": [
+        "Library identifier renamed to project-local SN64_USB namespace; library serialization regenerated.",
+        "Inherited base symbol resolved into a standalone symbol, preserving derived properties."
+      ]
+    },
+    {
+      "local_id": "SN64_USB:PWR_FLAG",
+      "source_id": "power:PWR_FLAG",
+      "source": "Installed KiCad 10.0.6 library snapshot; source Git commit not established",
+      "source_path": "symbols/power.kicad_sym",
+      "source_inheritance_chain": [],
+      "modifications": [
+        "Library identifier renamed to project-local SN64_USB namespace; library serialization regenerated."
+      ]
+    },
+    {
+      "local_id": "SN64_USB:SN74AXC4T774PW",
+      "source": "Newly drawn symbol using factual pin identities from Texas Instruments SN74AXC4T774 Rev C, PW 16-pin package; no manufacturer graphics copied",
+      "reference": "https://www.ti.com/lit/ds/symlink/sn74axc4t774.pdf",
+      "reference_file": "references/downloads/usb/SN74AXC4T774.pdf",
+      "modifications": [
+        "New rectangle, pins, labels and electrical types authored by the project; no pre-existing symbol copied."
+      ]
+    }
+  ],
+  "installed_symbol_source_files": [
+    {
+      "path": "symbols/Connector_Generic.kicad_sym",
+      "bytes": 7299661,
+      "sha256": "1ae3b346fe1c4e874fecb72abc7df4e94a253780db183439dbfefc4e2ff3a0be"
+    },
+    {
+      "path": "symbols/Device.kicad_sym",
+      "bytes": 2579453,
+      "sha256": "e03831d421787531315439a4af4229e5d5d88ee51c7f36ba3f658ddf2978cda9"
+    },
+    {
+      "path": "symbols/Power_Protection.kicad_sym",
+      "bytes": 630427,
+      "sha256": "e7af99c758ff17246e4fdb360f106602b6c38681e49dcd0e990f5c3039a65e16"
+    },
+    {
+      "path": "symbols/Regulator_Linear.kicad_sym",
+      "bytes": 3080738,
+      "sha256": "c3a0dfcf5a2404287b17bc758d59a50afe998dfe3ebcc46e58270a21e2b1a58d"
+    },
+    {
+      "path": "symbols/power.kicad_sym",
+      "bytes": 211219,
+      "sha256": "9f49ee941555a5194f330db1363f24f339b88272a2a60c6e15da8ba11ec6d114"
+    }
+  ],
+  "footprints": [
+    {
+      "local": {
+        "path": "libraries/SN64_USB.pretty/C_0603_1608Metric.kicad_mod",
+        "bytes": 1928,
+        "sha256": "fe0dbfefbb181a0466f93a8de52d84ba7b00fcd9acdbb69575f4128a0af4e405"
+      },
+      "source": "Installed KiCad 10.0.6 library snapshot; source Git commit not established",
+      "source_file": {
+        "path": "footprints/Capacitor_SMD.pretty/C_0603_1608Metric.kicad_mod",
+        "bytes": 2040,
+        "sha256": "d45eebd5cb9faace255d4ec95a0f9484efde898359507b02e2ba9bbb3ef6d857"
+      },
+      "modifications": [
+        "CRLF line endings normalized to LF only; all geometry and existing 3D-model references retained."
+      ]
+    },
+    {
+      "local": {
+        "path": "libraries/SN64_USB.pretty/Crystal_SMD_Abracon_ABM3B-4Pin_5.0x3.2mm.kicad_mod",
+        "bytes": 2762,
+        "sha256": "f13e1c96dece87570cfe3aa0acc35fcb44eef56af4b44500d7f853974446c0c0"
+      },
+      "source": "Installed KiCad 10.0.6 library snapshot; source Git commit not established",
+      "source_file": {
+        "path": "footprints/Crystal.pretty/Crystal_SMD_Abracon_ABM3B-4Pin_5.0x3.2mm.kicad_mod",
+        "bytes": 2936,
+        "sha256": "b5d57f3e31837206fe3e9af860d0e565eded5d9b217d9cf05fa85494f702d46e"
+      },
+      "modifications": [
+        "CRLF line endings normalized to LF only; all geometry and existing 3D-model references retained."
+      ]
+    },
+    {
+      "local": {
+        "path": "libraries/SN64_USB.pretty/LQFP-48_7x7mm_P0.5mm.kicad_mod",
+        "bytes": 11179,
+        "sha256": "1ccc5ad4d95398a4c6eb4b4cd1c429865368d06b8373613c6fcb332b53106ee0"
+      },
+      "source": "Installed KiCad 10.0.6 library snapshot; source Git commit not established",
+      "source_file": {
+        "path": "footprints/Package_QFP.pretty/LQFP-48_7x7mm_P0.5mm.kicad_mod",
+        "bytes": 11809,
+        "sha256": "45081ea5c4d19be9769235d5791edc54fc2336b9c31622722b4313e61d975027"
+      },
+      "modifications": [
+        "CRLF line endings normalized to LF only; all geometry and existing 3D-model references retained."
+      ]
+    },
+    {
+      "local": {
+        "path": "libraries/SN64_USB.pretty/L_0603_1608Metric.kicad_mod",
+        "bytes": 1896,
+        "sha256": "a2a9c562208496756e22f3ab19e0bd6db2341d14da92e7c767d5eafd1bb45d38"
+      },
+      "source": "Installed KiCad 10.0.6 library snapshot; source Git commit not established",
+      "source_file": {
+        "path": "footprints/Inductor_SMD.pretty/L_0603_1608Metric.kicad_mod",
+        "bytes": 2008,
+        "sha256": "3fcbaea27d33b968bc9da19e1fb7973635671eb634e8d84dbc897255cfda1478"
+      },
+      "modifications": [
+        "CRLF line endings normalized to LF only; all geometry and existing 3D-model references retained."
+      ]
+    },
+    {
+      "local": {
+        "path": "libraries/SN64_USB.pretty/PinHeader_1x06_P2.54mm_Vertical.kicad_mod",
+        "bytes": 3332,
+        "sha256": "5f2993c50dbd5024384bf6fa972fcd10d40d0837039e1e371b326a27d9f5b8b7"
+      },
+      "source": "Installed KiCad 10.0.6 library snapshot; source Git commit not established",
+      "source_file": {
+        "path": "footprints/Connector_PinHeader_2.54mm.pretty/PinHeader_1x06_P2.54mm_Vertical.kicad_mod",
+        "bytes": 3545,
+        "sha256": "e3c3501f520fc1fc39eeb5d72137e680e509c0df2348ca77fef1b9db6ab974f0"
+      },
+      "modifications": [
+        "CRLF line endings normalized to LF only; all geometry and existing 3D-model references retained."
+      ]
+    },
+    {
+      "local": {
+        "path": "libraries/SN64_USB.pretty/R_0603_1608Metric.kicad_mod",
+        "bytes": 1943,
+        "sha256": "7190ac4a00125b807e54129ef0d87d87f2a658eeb74d025a7028203419b09f23"
+      },
+      "source": "Installed KiCad 10.0.6 library snapshot; source Git commit not established",
+      "source_file": {
+        "path": "footprints/Resistor_SMD.pretty/R_0603_1608Metric.kicad_mod",
+        "bytes": 2055,
+        "sha256": "03fc7902b2661df01b4d828fdb6eab9eddf974e7130ed2b98892607387a50c4b"
+      },
+      "modifications": [
+        "CRLF line endings normalized to LF only; all geometry and existing 3D-model references retained."
+      ]
+    },
+    {
+      "local": {
+        "path": "libraries/SN64_USB.pretty/SOT-23-5.kicad_mod",
+        "bytes": 4745,
+        "sha256": "455a3f7c3e5eb5b8847eaa5df23e18651e78ab9f75afd09a0883758a0d901761"
+      },
+      "source": "Installed KiCad 10.0.6 library snapshot; source Git commit not established",
+      "source_file": {
+        "path": "footprints/Package_TO_SOT_SMD.pretty/SOT-23-5.kicad_mod",
+        "bytes": 5072,
+        "sha256": "684a94089f59798a46492dac8dd0242edfa4d915e76a210abdca369e4faa4f9b"
+      },
+      "modifications": [
+        "CRLF line endings normalized to LF only; all geometry and existing 3D-model references retained."
+      ]
+    },
+    {
+      "local": {
+        "path": "libraries/SN64_USB.pretty/SOT-23-6.kicad_mod",
+        "bytes": 4280,
+        "sha256": "f341c73aac9dcb553456f68bf3fee3d26eb14acf6d8a1cae82b50418fe1d71ca"
+      },
+      "source": "Installed KiCad 10.0.6 library snapshot; source Git commit not established",
+      "source_file": {
+        "path": "footprints/Package_TO_SOT_SMD.pretty/SOT-23-6.kicad_mod",
+        "bytes": 4568,
+        "sha256": "ea29040bed73e5dfa455e36f2c9324b0de7782c5a6cf79040b7d885ff766fdb4"
+      },
+      "modifications": [
+        "CRLF line endings normalized to LF only; all geometry and existing 3D-model references retained."
+      ]
+    },
+    {
+      "local": {
+        "path": "libraries/SN64_USB.pretty/TSSOP-16_4.4x5mm_P0.65mm.kicad_mod",
+        "bytes": 5268,
+        "sha256": "fbac79fc5f310754726589d67071a422c429216f843ecd6013bbe2e6a49e7064"
+      },
+      "source": "Installed KiCad 10.0.6 library snapshot; source Git commit not established",
+      "source_file": {
+        "path": "footprints/Package_SO.pretty/TSSOP-16_4.4x5mm_P0.65mm.kicad_mod",
+        "bytes": 5580,
+        "sha256": "639c5bfa7d9f028326a201ce1507171d1a2093361a4b16c0db055b2bf858ab9f"
+      },
+      "modifications": [
+        "CRLF line endings normalized to LF only; all geometry and existing 3D-model references retained."
+      ]
+    },
+    {
+      "local": {
+        "path": "libraries/SN64_USB.pretty/USB_C_JAE_DX07S016JA3R1500.kicad_mod",
+        "bytes": 7256,
+        "sha256": "02afa58b6d1f29925fbf75815f9c4aac88b84f3c903e01d03f58dbeff5d8ed6a"
+      },
+      "source": "SummerCart64 PCB footprint J1",
+      "source_path": "references/downloads/summercart64/hw/pcb/sc64v2.kicad_pcb",
+      "source_footprint_id": "Connector_USB:USB_C_Receptacle_JAE_DX07S016JA1R1500",
+      "source_component_value": "DX07S016JA3R1500",
+      "modifications": [
+        "Extracted using KiCad 10.0.6 pcbnew; local origin and rotation normalized, library identifier/reference/value updated, pad net assignments cleared.",
+        "Both upstream 3D-model references removed; no vendor CAD is packaged.",
+        "Source pad geometry, pad numbers, coincident paired contacts, shell slots, locating holes and footprint graphics retained.",
+        "Saved text uses LF line endings."
+      ],
+      "mechanical_evidence": "docs/design/usb-connector-mechanics.md: source JA1 name does not identify the selected part; native lands were compared against manufacturer-authored JAE SJ122205 rev2 for JA3. Board thickness and enclosure placement still require layout verification."
+    }
+  ],
+  "license_files": [
+    {
+      "local": {
+        "path": "licenses/SummerCart64-CERN-OHL-S-2.0.txt",
+        "bytes": 13419,
+        "sha256": "253ad3f89603e728abfa60c36fbcaf8225cf55c1eab12725f19fb3d74d647f3a"
+      },
+      "source_file": {
+        "path": "references/downloads/summercart64/hw/pcb/LICENSE",
+        "bytes": 13419,
+        "sha256": "253ad3f89603e728abfa60c36fbcaf8225cf55c1eab12725f19fb3d74d647f3a"
+      },
+      "byte_identical": true
+    },
+    {
+      "local": {
+        "path": "licenses/Sanni-CC-BY-4.0.txt",
+        "bytes": 18657,
+        "sha256": "9ba9550ad48438d0836ddab3da480b3b69ffa0aac7b7878b5a0039e7ab429411"
+      },
+      "source_file": {
+        "path": "references/downloads/sanni/hardware/LICENSE.txt",
+        "bytes": 18657,
+        "sha256": "9ba9550ad48438d0836ddab3da480b3b69ffa0aac7b7878b5a0039e7ab429411"
+      },
+      "byte_identical": true
+    },
+    {
+      "local": {
+        "path": "licenses/KiCad-symbols-LICENSE.md",
+        "bytes": 2105,
+        "sha256": "285b027a721577d0bc0198f36e948c6c282ddaa4b58fef8ed826749576eb0aef"
+      },
+      "source_url": "https://raw.githubusercontent.com/KiCad/kicad-symbols/4e17d7595f9691d45d97aea8ad64572652fb5bed/LICENSE.md",
+      "license_source_commit": "4e17d7595f9691d45d97aea8ad64572652fb5bed",
+      "note": "Original official repository LICENSE.md, including CC-BY-SA-4.0 link and KiCad exception, copied byte-for-byte. This commit identifies the license document only, not the installed library version."
+    },
+    {
+      "local": {
+        "path": "licenses/KiCad-footprints-LICENSE.md",
+        "bytes": 2105,
+        "sha256": "285b027a721577d0bc0198f36e948c6c282ddaa4b58fef8ed826749576eb0aef"
+      },
+      "source_url": "https://raw.githubusercontent.com/KiCad/kicad-footprints/7ebfa6b23cc292a56f751b7b5f4a0e12eeef69dd/LICENSE.md",
+      "license_source_commit": "7ebfa6b23cc292a56f751b7b5f4a0e12eeef69dd",
+      "note": "Original official repository LICENSE.md, including CC-BY-SA-4.0 link and KiCad exception, copied byte-for-byte. This commit identifies the license document only, not the installed library version."
+    }
+  ],
+  "kicad_attribution": "KiCad library contributors; CC-BY-SA-4.0 with KiCad library exception. https://www.kicad.org/libraries/license/",
+  "datasheet_references": [
+    {
+      "file": {
+        "path": "references/downloads/usb/FT232H.pdf",
+        "bytes": 1970484,
+        "sha256": "173a0f21910258a8036d956ef623fa81a98c079559b01e640af11b96c9371032"
+      },
+      "url": "https://www.ftdichip.cn/Support/Documents/DataSheets/ICs/DS_FT232H.pdf",
+      "note": "FTDI datasheet v2.2; retained as a research reference, not a KiCad asset license."
+    },
+    {
+      "file": {
+        "path": "references/downloads/usb/SN74AXC4T774.pdf",
+        "bytes": 2480293,
+        "sha256": "f45cd62a9675b9f6071519d149a060d4124f49944f3c3af44160a76796f3bf20"
+      },
+      "url": "https://www.ti.com/lit/ds/symlink/sn74axc4t774.pdf",
+      "note": "TI datasheet revision C; factual pinout reference."
+    },
+    {
+      "file": {
+        "path": ".local/usb-research/JAE-SJ122205-rev2-JA3.pdf",
+        "bytes": 360983,
+        "sha256": "1472b5aeb53034e2ba96b989faafaebd5e9defc49b932e70ab029df6f92d6bbf"
+      },
+      "url": "https://store.comet.bg/download-file.php?id=31838",
+      "note": "JAE-authored drawing SJ122205 revision 2, distributor-hosted; no redistribution license inferred."
+    },
+    {
+      "file": {
+        "path": ".local/usb-research/Abracon-ABM3B-rev-U.pdf",
+        "bytes": 735461,
+        "sha256": "17b7417ea2fa9bdde04c2dd11db78dea61bf362fbbf2009aa94b340d74ecc210"
+      },
+      "url": "https://abracon.com/Resonators/abm3b.pdf",
+      "note": "Abracon revision U crystal reference."
+    }
+  ],
+  "circuit_adaptations": [
+    "USB inlet/independent CC termination and FT232HL support/optional 93AA56 EEPROM circuit adapted from SummerCart64.",
+    "FT232H is used in host-selected MPSSE JTAG mode; upstream FT1248 EEPROM template and MCU-primer dependency are not copied. U106 is DNP by default.",
+    "SummerCart64 powered oscillator replaced by Abracon ABM3B 12 MHz crystal plus provisional 11 pF C0G load capacitors; physical startup/frequency verification pending.",
+    "Added USBLC6-2SC6 data and CC ESD arrays; these are new components, absent from the inspected SC64 USB inlet.",
+    "Added separate AP2112K-3.3 USB bridge supply; SC64 host/USB power multiplexer not copied. USB power and host rails remain separate with common ground.",
+    "Added SN74AXC4T774PW direction-controlled JTAG translation, ACBUS6-controlled active-low OE with 10k pull-up, target-side service header, damping and target-side bias resistors.",
+    "Changed FT232H EECLK/EECS electrical types to outputs in both the local library and embedded child-sheet symbol."
+  ],
+  "excluded": "No manufacturer 3D CAD or Tigard circuit/library file is included by this USB reuse package. Original source downloads and existing cartridge footprints were not modified."
+}
