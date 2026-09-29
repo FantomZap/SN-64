@@ -2,7 +2,7 @@
 <export version="E">
   <design>
     <source>C:\Users\RyanB\.claude\projects\SN64\hardware\sn64\sn64.kicad_sch</source>
-    <date>2026-09-29T17:58:22</date>
+    <date>2026-09-29T18:14:48</date>
     <tool>Eeschema 10.0.6</tool>
     <sheet number="1" name="/" tstamps="/">
       <title_block>
@@ -44,7 +44,7 @@
       <title_block>
         <title>SN 64 - SNES cartridge interface</title>
         <company>SN 64</company>
-        <rev>0.3-cart</rev>
+        <rev>0.3.1-cart</rev>
         <date>2026-09-29</date>
         <source>cart-interface.kicad_sch</source>
         <comment number="1" value="DESIGN DRAFT - NOT FOR MANUFACTURE"/>
@@ -1946,10 +1946,10 @@
       </units>
     </comp>
     <comp ref="C228">
-      <value>10uF 10V</value>
-      <footprint>Capacitor_SMD:C_0805_2012Metric</footprint>
+      <value>100nF</value>
+      <footprint>Capacitor_SMD:C_0603_1608Metric</footprint>
       <fields>
-        <field name="Footprint">Capacitor_SMD:C_0805_2012Metric</field>
+        <field name="Footprint">Capacitor_SMD:C_0603_1608Metric</field>
         <field name="Datasheet"/>
         <field name="Description"/>
       </fields>
@@ -1970,6 +1970,78 @@
       </units>
     </comp>
     <comp ref="C229">
+      <value>100nF</value>
+      <footprint>Capacitor_SMD:C_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">Capacitor_SMD:C_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="SNES cartridge interface"/>
+      <property name="Sheetfile" value="cart-interface.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/SNES cartridge interface/" tstamps="/2176e4e6-adfa-5800-a82d-fd9d5a866057/"/>
+      <tstamps>e45761fb-a350-52d0-8bff-07f08f358755</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C230">
+      <value>100nF</value>
+      <footprint>Capacitor_SMD:C_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">Capacitor_SMD:C_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="SNES cartridge interface"/>
+      <property name="Sheetfile" value="cart-interface.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/SNES cartridge interface/" tstamps="/2176e4e6-adfa-5800-a82d-fd9d5a866057/"/>
+      <tstamps>6d2bdaae-27f9-510b-b653-ff8a63cb0e2e</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C231">
+      <value>100nF</value>
+      <footprint>Capacitor_SMD:C_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">Capacitor_SMD:C_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="SNES cartridge interface"/>
+      <property name="Sheetfile" value="cart-interface.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/SNES cartridge interface/" tstamps="/2176e4e6-adfa-5800-a82d-fd9d5a866057/"/>
+      <tstamps>9d4f51be-b5cd-5cf0-8d6e-3cdb2a031dec</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C232">
       <value>10uF 10V</value>
       <footprint>Capacitor_SMD:C_0805_2012Metric</footprint>
       <fields>
@@ -1983,7 +2055,31 @@
       <property name="ki_keywords" value="cap capacitor"/>
       <property name="ki_fp_filters" value="C_*"/>
       <sheetpath names="/SNES cartridge interface/" tstamps="/2176e4e6-adfa-5800-a82d-fd9d5a866057/"/>
-      <tstamps>e45761fb-a350-52d0-8bff-07f08f358755</tstamps>
+      <tstamps>d8c97332-9bfb-5e72-ba6c-46c6198da3b3</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C233">
+      <value>10uF 10V</value>
+      <footprint>Capacitor_SMD:C_0805_2012Metric</footprint>
+      <fields>
+        <field name="Footprint">Capacitor_SMD:C_0805_2012Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="SNES cartridge interface"/>
+      <property name="Sheetfile" value="cart-interface.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/SNES cartridge interface/" tstamps="/2176e4e6-adfa-5800-a82d-fd9d5a866057/"/>
+      <tstamps>61be1909-f248-5f29-b3e7-9f11be9071fa</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -2331,7 +2427,7 @@
       </units>
     </comp>
     <comp ref="R214">
-      <value>100k</value>
+      <value>33</value>
       <footprint>Resistor_SMD:R_0603_1608Metric</footprint>
       <fields>
         <field name="Footprint">Resistor_SMD:R_0603_1608Metric</field>
@@ -2345,6 +2441,174 @@
       <property name="ki_fp_filters" value="R_*"/>
       <sheetpath names="/SNES cartridge interface/" tstamps="/2176e4e6-adfa-5800-a82d-fd9d5a866057/"/>
       <tstamps>e5c86338-979d-5afd-865c-7a69da3e79b5</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R215">
+      <value>33</value>
+      <footprint>Resistor_SMD:R_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">Resistor_SMD:R_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="SNES cartridge interface"/>
+      <property name="Sheetfile" value="cart-interface.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/SNES cartridge interface/" tstamps="/2176e4e6-adfa-5800-a82d-fd9d5a866057/"/>
+      <tstamps>4dfe2079-6430-515d-8485-c27a7c541ca5</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R216">
+      <value>10k</value>
+      <footprint>Resistor_SMD:R_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">Resistor_SMD:R_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="SNES cartridge interface"/>
+      <property name="Sheetfile" value="cart-interface.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/SNES cartridge interface/" tstamps="/2176e4e6-adfa-5800-a82d-fd9d5a866057/"/>
+      <tstamps>467c82ce-890e-5993-a765-96623c666be6</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R217">
+      <value>10k</value>
+      <footprint>Resistor_SMD:R_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">Resistor_SMD:R_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="SNES cartridge interface"/>
+      <property name="Sheetfile" value="cart-interface.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/SNES cartridge interface/" tstamps="/2176e4e6-adfa-5800-a82d-fd9d5a866057/"/>
+      <tstamps>83d9d401-d5b8-5bd0-a14b-7c2868ebae58</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R218">
+      <value>100k</value>
+      <footprint>Resistor_SMD:R_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">Resistor_SMD:R_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="SNES cartridge interface"/>
+      <property name="Sheetfile" value="cart-interface.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/SNES cartridge interface/" tstamps="/2176e4e6-adfa-5800-a82d-fd9d5a866057/"/>
+      <tstamps>082bacec-9732-5e17-8225-92c1c4e9877d</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R219">
+      <value>100k</value>
+      <footprint>Resistor_SMD:R_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">Resistor_SMD:R_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="SNES cartridge interface"/>
+      <property name="Sheetfile" value="cart-interface.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/SNES cartridge interface/" tstamps="/2176e4e6-adfa-5800-a82d-fd9d5a866057/"/>
+      <tstamps>2fffba82-337f-520d-965c-aa5615eb7d22</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R220">
+      <value>10k</value>
+      <footprint>Resistor_SMD:R_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">Resistor_SMD:R_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="SNES cartridge interface"/>
+      <property name="Sheetfile" value="cart-interface.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/SNES cartridge interface/" tstamps="/2176e4e6-adfa-5800-a82d-fd9d5a866057/"/>
+      <tstamps>9002d80f-1c50-579e-8372-abf45cfcedbc</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="R221">
+      <value>10k</value>
+      <footprint>Resistor_SMD:R_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">Resistor_SMD:R_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value="SNES cartridge interface"/>
+      <property name="Sheetfile" value="cart-interface.kicad_sch"/>
+      <property name="ki_keywords" value="R res resistor"/>
+      <property name="ki_fp_filters" value="R_*"/>
+      <sheetpath names="/SNES cartridge interface/" tstamps="/2176e4e6-adfa-5800-a82d-fd9d5a866057/"/>
+      <tstamps>f3718387-75de-5908-b3ec-731fa2bb26e0</tstamps>
       <units>
         <unit name="A">
           <pins>
@@ -3284,6 +3548,68 @@
         </unit>
       </units>
     </comp>
+    <comp ref="U215">
+      <value>SN74LVC1T45DBVR</value>
+      <footprint>Package_TO_SOT_SMD:SOT-23-6</footprint>
+      <datasheet>https://www.ti.com/lit/ds/symlink/sn74lvc1t45.pdf</datasheet>
+      <fields>
+        <field name="LCSC">C7843</field>
+        <field name="Footprint">Package_TO_SOT_SMD:SOT-23-6</field>
+        <field name="Datasheet">https://www.ti.com/lit/ds/symlink/sn74lvc1t45.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Logic_LevelTranslator" part="SN74LVC1T45DBV" description="Single-Bit Dual-Supply Bus Transceiver With Configurable Voltage Translation and 3-State Outputs, SOT-23-6"/>
+      <property name="LCSC" value="C7843"/>
+      <property name="Sheetname" value="SNES cartridge interface"/>
+      <property name="Sheetfile" value="cart-interface.kicad_sch"/>
+      <property name="ki_keywords" value="Level-Shifter CMOS-TTL-Translation"/>
+      <property name="ki_fp_filters" value="SOT?23*"/>
+      <sheetpath names="/SNES cartridge interface/" tstamps="/2176e4e6-adfa-5800-a82d-fd9d5a866057/"/>
+      <tstamps>260f64d4-3ab5-51df-8f8d-2b453bacdd47</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="3"/>
+            <pin num="5"/>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="6"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="U216">
+      <value>SN74LVC1T45DBVR</value>
+      <footprint>Package_TO_SOT_SMD:SOT-23-6</footprint>
+      <datasheet>https://www.ti.com/lit/ds/symlink/sn74lvc1t45.pdf</datasheet>
+      <fields>
+        <field name="LCSC">C7843</field>
+        <field name="Footprint">Package_TO_SOT_SMD:SOT-23-6</field>
+        <field name="Datasheet">https://www.ti.com/lit/ds/symlink/sn74lvc1t45.pdf</field>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Logic_LevelTranslator" part="SN74LVC1T45DBV" description="Single-Bit Dual-Supply Bus Transceiver With Configurable Voltage Translation and 3-State Outputs, SOT-23-6"/>
+      <property name="LCSC" value="C7843"/>
+      <property name="Sheetname" value="SNES cartridge interface"/>
+      <property name="Sheetfile" value="cart-interface.kicad_sch"/>
+      <property name="ki_keywords" value="Level-Shifter CMOS-TTL-Translation"/>
+      <property name="ki_fp_filters" value="SOT?23*"/>
+      <sheetpath names="/SNES cartridge interface/" tstamps="/2176e4e6-adfa-5800-a82d-fd9d5a866057/"/>
+      <tstamps>7c723dcf-cc99-5144-aae0-1067bb44bd17</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="3"/>
+            <pin num="5"/>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="6"/>
+            <pin num="4"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
   </components>
   <libparts>
     <libpart lib="74xGxx" part="74LVC1G06">
@@ -3407,6 +3733,28 @@
         <pin num="6" name="R3.2" type="passive"/>
         <pin num="7" name="R2.2" type="passive"/>
         <pin num="8" name="R1.2" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Logic_LevelTranslator" part="SN74LVC1T45DBV">
+      <description>Single-Bit Dual-Supply Bus Transceiver With Configurable Voltage Translation and 3-State Outputs, SOT-23-6</description>
+      <docs>http://www.ti.com/lit/ds/symlink/sn74lvc1t45.pdf</docs>
+      <footprints>
+        <fp>SOT?23*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">SN74LVC1T45DBV</field>
+        <field name="Footprint">Package_TO_SOT_SMD:SOT-23-6</field>
+        <field name="Datasheet">http://www.ti.com/lit/ds/symlink/sn74lvc1t45.pdf</field>
+        <field name="Description">Single-Bit Dual-Supply Bus Transceiver With Configurable Voltage Translation and 3-State Outputs, SOT-23-6</field>
+      </fields>
+      <pins>
+        <pin num="1" name="VCCA" type="power_in"/>
+        <pin num="2" name="GND" type="power_in"/>
+        <pin num="3" name="A" type="bidirectional"/>
+        <pin num="4" name="B" type="bidirectional"/>
+        <pin num="5" name="DIR" type="input"/>
+        <pin num="6" name="VCCB" type="power_in"/>
       </pins>
     </libpart>
     <libpart lib="SN64" part="N64_Cartridge_Edge_50">
@@ -3931,6 +4279,9 @@
     <library logical="Device">
       <uri>${KICAD10_SYMBOL_DIR}/Device.kicad_sym</uri>
     </library>
+    <library logical="Logic_LevelTranslator">
+      <uri>${KICAD10_SYMBOL_DIR}/Logic_LevelTranslator.kicad_sym</uri>
+    </library>
     <library logical="SN64">
       <uri>${KIPRJMOD}/libraries/SN64.kicad_sym</uri>
     </library>
@@ -3991,6 +4342,10 @@
       <node ref="C227" pin="2" pintype="passive"/>
       <node ref="C228" pin="2" pintype="passive"/>
       <node ref="C229" pin="2" pintype="passive"/>
+      <node ref="C230" pin="2" pintype="passive"/>
+      <node ref="C231" pin="2" pintype="passive"/>
+      <node ref="C232" pin="2" pintype="passive"/>
+      <node ref="C233" pin="2" pintype="passive"/>
       <node ref="J1" pin="1" pinfunction="GND_1" pintype="passive"/>
       <node ref="J1" pin="2" pinfunction="GND_2" pintype="passive"/>
       <node ref="J1" pin="22" pinfunction="GND_22" pintype="passive"/>
@@ -4018,7 +4373,12 @@
       <node ref="R112" pin="2" pintype="passive"/>
       <node ref="R209" pin="2" pintype="passive"/>
       <node ref="R210" pin="2" pintype="passive"/>
-      <node ref="R214" pin="2" pintype="passive"/>
+      <node ref="R216" pin="2" pintype="passive"/>
+      <node ref="R217" pin="2" pintype="passive"/>
+      <node ref="R218" pin="2" pintype="passive"/>
+      <node ref="R219" pin="2" pintype="passive"/>
+      <node ref="R220" pin="2" pintype="passive"/>
+      <node ref="R221" pin="2" pintype="passive"/>
       <node ref="U101" pin="2" pinfunction="GND_2" pintype="passive"/>
       <node ref="U102" pin="2" pinfunction="GND_2" pintype="passive"/>
       <node ref="U103" pin="2" pinfunction="GND_2" pintype="power_in"/>
@@ -4064,21 +4424,26 @@
       <node ref="U206" pin="15" pinfunction="B7_15" pintype="bidirectional"/>
       <node ref="U206" pin="16" pinfunction="B6_16" pintype="bidirectional"/>
       <node ref="U206" pin="17" pinfunction="B5_17" pintype="bidirectional"/>
+      <node ref="U206" pin="18" pinfunction="B4_18" pintype="bidirectional"/>
       <node ref="U206" pin="2" pinfunction="DIR_2" pintype="input"/>
       <node ref="U207" pin="11" pinfunction="GND_11" pintype="power_in"/>
       <node ref="U207" pin="12" pinfunction="GND_12" pintype="power_in"/>
       <node ref="U207" pin="13" pinfunction="GND_13" pintype="power_in"/>
       <node ref="U209" pin="1" pinfunction="~{1OE}_1" pintype="input"/>
       <node ref="U209" pin="10" pinfunction="GND_10" pintype="power_in"/>
+      <node ref="U209" pin="11" pinfunction="2A1_11" pintype="input"/>
       <node ref="U209" pin="13" pinfunction="2A2_13" pintype="input"/>
       <node ref="U209" pin="15" pinfunction="2A3_15" pintype="input"/>
       <node ref="U209" pin="17" pinfunction="2A4_17" pintype="input"/>
       <node ref="U209" pin="19" pinfunction="~{2OE}_19" pintype="input"/>
+      <node ref="U209" pin="8" pinfunction="1A4_8" pintype="input"/>
       <node ref="U210" pin="3" pinfunction="GND_3" pintype="power_in"/>
       <node ref="U211" pin="3" pinfunction="GND_3" pintype="power_in"/>
       <node ref="U212" pin="3" pinfunction="GND_3" pintype="power_in"/>
       <node ref="U213" pin="3" pinfunction="GND_3" pintype="power_in"/>
       <node ref="U214" pin="3" pinfunction="GND_3" pintype="power_in"/>
+      <node ref="U215" pin="2" pinfunction="GND_2" pintype="power_in"/>
+      <node ref="U216" pin="2" pinfunction="GND_2" pintype="power_in"/>
       <node ref="Y101" pin="2" pinfunction="G_2" pintype="passive"/>
       <node ref="Y101" pin="4" pinfunction="G_4" pintype="passive"/>
     </net>
@@ -4233,7 +4598,9 @@
       <node ref="C225" pin="1" pintype="passive"/>
       <node ref="C226" pin="1" pintype="passive"/>
       <node ref="C227" pin="1" pintype="passive"/>
-      <node ref="C229" pin="1" pintype="passive"/>
+      <node ref="C228" pin="1" pintype="passive"/>
+      <node ref="C230" pin="1" pintype="passive"/>
+      <node ref="C233" pin="1" pintype="passive"/>
       <node ref="R206" pin="1" pintype="passive"/>
       <node ref="R207" pin="1" pintype="passive"/>
       <node ref="R208" pin="1" pintype="passive"/>
@@ -4257,6 +4624,8 @@
       <node ref="U212" pin="5" pinfunction="VCC_5" pintype="power_in"/>
       <node ref="U213" pin="5" pinfunction="VCC_5" pintype="power_in"/>
       <node ref="U214" pin="5" pinfunction="VCC_5" pintype="power_in"/>
+      <node ref="U215" pin="1" pinfunction="VCCA_1" pintype="power_in"/>
+      <node ref="U216" pin="1" pinfunction="VCCA_1" pintype="power_in"/>
     </net>
     <net code="41" name="/SNES cartridge interface/RESET_GATE_5V" class="Default">
       <node ref="Q201" pin="1" pinfunction="G_1" pintype="input"/>
@@ -4363,306 +4732,317 @@
       <node ref="RN211" pin="2" pinfunction="R2.1_2" pintype="passive"/>
       <node ref="U206" pin="4" pinfunction="A2_4" pintype="bidirectional"/>
     </net>
-    <net code="67" name="/SNES cartridge interface/XA_CIC_DATA0" class="Default">
-      <node ref="RN211" pin="4" pinfunction="R4.1_4" pintype="passive"/>
-      <node ref="U206" pin="6" pinfunction="A4_6" pintype="bidirectional"/>
-    </net>
-    <net code="68" name="/SNES cartridge interface/XA_CIC_SLAVE_RESET" class="Default">
+    <net code="67" name="/SNES cartridge interface/XA_CIC_SLAVE_RESET" class="Default">
       <node ref="RN211" pin="3" pinfunction="R3.1_3" pintype="passive"/>
       <node ref="U206" pin="5" pinfunction="A3_5" pintype="bidirectional"/>
     </net>
-    <net code="69" name="/SNES cartridge interface/XA_D0" class="Default">
+    <net code="68" name="/SNES cartridge interface/XA_D0" class="Default">
       <node ref="RN212" pin="1" pinfunction="R1.1_1" pintype="passive"/>
       <node ref="U207" pin="3" pinfunction="A1_3" pintype="bidirectional"/>
     </net>
-    <net code="70" name="/SNES cartridge interface/XA_D1" class="Default">
+    <net code="69" name="/SNES cartridge interface/XA_D1" class="Default">
       <node ref="RN212" pin="2" pinfunction="R2.1_2" pintype="passive"/>
       <node ref="U207" pin="4" pinfunction="A2_4" pintype="bidirectional"/>
     </net>
-    <net code="71" name="/SNES cartridge interface/XA_D2" class="Default">
+    <net code="70" name="/SNES cartridge interface/XA_D2" class="Default">
       <node ref="RN212" pin="3" pinfunction="R3.1_3" pintype="passive"/>
       <node ref="U207" pin="5" pinfunction="A3_5" pintype="bidirectional"/>
     </net>
-    <net code="72" name="/SNES cartridge interface/XA_D3" class="Default">
+    <net code="71" name="/SNES cartridge interface/XA_D3" class="Default">
       <node ref="RN212" pin="4" pinfunction="R4.1_4" pintype="passive"/>
       <node ref="U207" pin="6" pinfunction="A4_6" pintype="bidirectional"/>
     </net>
-    <net code="73" name="/SNES cartridge interface/XA_D4" class="Default">
+    <net code="72" name="/SNES cartridge interface/XA_D4" class="Default">
       <node ref="RN213" pin="1" pinfunction="R1.1_1" pintype="passive"/>
       <node ref="U207" pin="7" pinfunction="A5_7" pintype="bidirectional"/>
     </net>
-    <net code="74" name="/SNES cartridge interface/XA_D5" class="Default">
+    <net code="73" name="/SNES cartridge interface/XA_D5" class="Default">
       <node ref="RN213" pin="2" pinfunction="R2.1_2" pintype="passive"/>
       <node ref="U207" pin="8" pinfunction="A6_8" pintype="bidirectional"/>
     </net>
-    <net code="75" name="/SNES cartridge interface/XA_D6" class="Default">
+    <net code="74" name="/SNES cartridge interface/XA_D6" class="Default">
       <node ref="RN213" pin="3" pinfunction="R3.1_3" pintype="passive"/>
       <node ref="U207" pin="9" pinfunction="A7_9" pintype="bidirectional"/>
     </net>
-    <net code="76" name="/SNES cartridge interface/XA_D7" class="Default">
+    <net code="75" name="/SNES cartridge interface/XA_D7" class="Default">
       <node ref="RN213" pin="4" pinfunction="R4.1_4" pintype="passive"/>
       <node ref="U207" pin="10" pinfunction="A8_10" pintype="bidirectional"/>
     </net>
-    <net code="77" name="/SNES cartridge interface/XA_PA0" class="Default">
+    <net code="76" name="/SNES cartridge interface/XA_PA0" class="Default">
       <node ref="RN207" pin="1" pinfunction="R1.1_1" pintype="passive"/>
       <node ref="U204" pin="3" pinfunction="A1_3" pintype="bidirectional"/>
     </net>
-    <net code="78" name="/SNES cartridge interface/XA_PA1" class="Default">
+    <net code="77" name="/SNES cartridge interface/XA_PA1" class="Default">
       <node ref="RN207" pin="2" pinfunction="R2.1_2" pintype="passive"/>
       <node ref="U204" pin="4" pinfunction="A2_4" pintype="bidirectional"/>
     </net>
-    <net code="79" name="/SNES cartridge interface/XA_PA2" class="Default">
+    <net code="78" name="/SNES cartridge interface/XA_PA2" class="Default">
       <node ref="RN207" pin="3" pinfunction="R3.1_3" pintype="passive"/>
       <node ref="U204" pin="5" pinfunction="A3_5" pintype="bidirectional"/>
     </net>
-    <net code="80" name="/SNES cartridge interface/XA_PA3" class="Default">
+    <net code="79" name="/SNES cartridge interface/XA_PA3" class="Default">
       <node ref="RN207" pin="4" pinfunction="R4.1_4" pintype="passive"/>
       <node ref="U204" pin="6" pinfunction="A4_6" pintype="bidirectional"/>
     </net>
-    <net code="81" name="/SNES cartridge interface/XA_PA4" class="Default">
+    <net code="80" name="/SNES cartridge interface/XA_PA4" class="Default">
       <node ref="RN208" pin="1" pinfunction="R1.1_1" pintype="passive"/>
       <node ref="U204" pin="7" pinfunction="A5_7" pintype="bidirectional"/>
     </net>
-    <net code="82" name="/SNES cartridge interface/XA_PA5" class="Default">
+    <net code="81" name="/SNES cartridge interface/XA_PA5" class="Default">
       <node ref="RN208" pin="2" pinfunction="R2.1_2" pintype="passive"/>
       <node ref="U204" pin="8" pinfunction="A6_8" pintype="bidirectional"/>
     </net>
-    <net code="83" name="/SNES cartridge interface/XA_PA6" class="Default">
+    <net code="82" name="/SNES cartridge interface/XA_PA6" class="Default">
       <node ref="RN208" pin="3" pinfunction="R3.1_3" pintype="passive"/>
       <node ref="U204" pin="9" pinfunction="A7_9" pintype="bidirectional"/>
     </net>
-    <net code="84" name="/SNES cartridge interface/XA_PA7" class="Default">
+    <net code="83" name="/SNES cartridge interface/XA_PA7" class="Default">
       <node ref="RN208" pin="4" pinfunction="R4.1_4" pintype="passive"/>
       <node ref="U204" pin="10" pinfunction="A8_10" pintype="bidirectional"/>
     </net>
-    <net code="85" name="/SNES cartridge interface/XA_PHI2" class="Default">
+    <net code="84" name="/SNES cartridge interface/XA_PHI2" class="Default">
       <node ref="RN210" pin="4" pinfunction="R4.1_4" pintype="passive"/>
       <node ref="U205" pin="10" pinfunction="A8_10" pintype="bidirectional"/>
     </net>
-    <net code="86" name="/SNES cartridge interface/XA_PRD_N" class="Default">
+    <net code="85" name="/SNES cartridge interface/XA_PRD_N" class="Default">
       <node ref="RN209" pin="3" pinfunction="R3.1_3" pintype="passive"/>
       <node ref="U205" pin="5" pinfunction="A3_5" pintype="bidirectional"/>
     </net>
-    <net code="87" name="/SNES cartridge interface/XA_PWR_N" class="Default">
+    <net code="86" name="/SNES cartridge interface/XA_PWR_N" class="Default">
       <node ref="RN209" pin="4" pinfunction="R4.1_4" pintype="passive"/>
       <node ref="U205" pin="6" pinfunction="A4_6" pintype="bidirectional"/>
     </net>
-    <net code="88" name="/SNES cartridge interface/XA_RD_N" class="Default">
+    <net code="87" name="/SNES cartridge interface/XA_RD_N" class="Default">
       <node ref="RN209" pin="1" pinfunction="R1.1_1" pintype="passive"/>
       <node ref="U205" pin="3" pinfunction="A1_3" pintype="bidirectional"/>
     </net>
-    <net code="89" name="/SNES cartridge interface/XA_REFRESH" class="Default">
+    <net code="88" name="/SNES cartridge interface/XA_REFRESH" class="Default">
       <node ref="RN210" pin="3" pinfunction="R3.1_3" pintype="passive"/>
       <node ref="U205" pin="9" pinfunction="A7_9" pintype="bidirectional"/>
     </net>
-    <net code="90" name="/SNES cartridge interface/XA_ROMSEL_N" class="Default">
+    <net code="89" name="/SNES cartridge interface/XA_ROMSEL_N" class="Default">
       <node ref="RN210" pin="1" pinfunction="R1.1_1" pintype="passive"/>
       <node ref="U205" pin="7" pinfunction="A5_7" pintype="bidirectional"/>
     </net>
-    <net code="91" name="/SNES cartridge interface/XA_SYSTEM_CLK" class="Default">
+    <net code="90" name="/SNES cartridge interface/XA_SYSTEM_CLK" class="Default">
       <node ref="RN211" pin="1" pinfunction="R1.1_1" pintype="passive"/>
       <node ref="U206" pin="3" pinfunction="A1_3" pintype="bidirectional"/>
     </net>
-    <net code="92" name="/SNES cartridge interface/XA_WRAMSEL_N" class="Default">
+    <net code="91" name="/SNES cartridge interface/XA_WRAMSEL_N" class="Default">
       <node ref="RN210" pin="2" pinfunction="R2.1_2" pintype="passive"/>
       <node ref="U205" pin="8" pinfunction="A6_8" pintype="bidirectional"/>
     </net>
-    <net code="93" name="/SNES cartridge interface/XA_WR_N" class="Default">
+    <net code="92" name="/SNES cartridge interface/XA_WR_N" class="Default">
       <node ref="RN209" pin="2" pinfunction="R2.1_2" pintype="passive"/>
       <node ref="U205" pin="4" pinfunction="A2_4" pintype="bidirectional"/>
     </net>
-    <net code="94" name="/SNES cartridge interface/cart_address0" class="Default">
+    <net code="93" name="/SNES cartridge interface/XB_CIC_DATA0" class="Default">
+      <node ref="R214" pin="1" pintype="passive"/>
+      <node ref="U215" pin="4" pinfunction="B_4" pintype="bidirectional"/>
+    </net>
+    <net code="94" name="/SNES cartridge interface/XB_CIC_DATA1" class="Default">
+      <node ref="R215" pin="1" pintype="passive"/>
+      <node ref="U216" pin="4" pinfunction="B_4" pintype="bidirectional"/>
+    </net>
+    <net code="95" name="/SNES cartridge interface/cart_address0" class="Default">
       <node ref="U201" pin="21" pinfunction="B1_21" pintype="bidirectional"/>
     </net>
-    <net code="95" name="/SNES cartridge interface/cart_address1" class="Default">
+    <net code="96" name="/SNES cartridge interface/cart_address1" class="Default">
       <node ref="U201" pin="20" pinfunction="B2_20" pintype="bidirectional"/>
     </net>
-    <net code="96" name="/SNES cartridge interface/cart_address2" class="Default">
+    <net code="97" name="/SNES cartridge interface/cart_address2" class="Default">
       <node ref="U201" pin="19" pinfunction="B3_19" pintype="bidirectional"/>
     </net>
-    <net code="97" name="/SNES cartridge interface/cart_address3" class="Default">
+    <net code="98" name="/SNES cartridge interface/cart_address3" class="Default">
       <node ref="U201" pin="18" pinfunction="B4_18" pintype="bidirectional"/>
     </net>
-    <net code="98" name="/SNES cartridge interface/cart_address4" class="Default">
+    <net code="99" name="/SNES cartridge interface/cart_address4" class="Default">
       <node ref="U201" pin="17" pinfunction="B5_17" pintype="bidirectional"/>
     </net>
-    <net code="99" name="/SNES cartridge interface/cart_address5" class="Default">
+    <net code="100" name="/SNES cartridge interface/cart_address5" class="Default">
       <node ref="U201" pin="16" pinfunction="B6_16" pintype="bidirectional"/>
     </net>
-    <net code="100" name="/SNES cartridge interface/cart_address6" class="Default">
+    <net code="101" name="/SNES cartridge interface/cart_address6" class="Default">
       <node ref="U201" pin="15" pinfunction="B7_15" pintype="bidirectional"/>
     </net>
-    <net code="101" name="/SNES cartridge interface/cart_address7" class="Default">
+    <net code="102" name="/SNES cartridge interface/cart_address7" class="Default">
       <node ref="U201" pin="14" pinfunction="B8_14" pintype="bidirectional"/>
     </net>
-    <net code="102" name="/SNES cartridge interface/cart_address8" class="Default">
+    <net code="103" name="/SNES cartridge interface/cart_address8" class="Default">
       <node ref="U202" pin="21" pinfunction="B1_21" pintype="bidirectional"/>
     </net>
-    <net code="103" name="/SNES cartridge interface/cart_address9" class="Default">
+    <net code="104" name="/SNES cartridge interface/cart_address9" class="Default">
       <node ref="U202" pin="20" pinfunction="B2_20" pintype="bidirectional"/>
     </net>
-    <net code="104" name="/SNES cartridge interface/cart_address10" class="Default">
+    <net code="105" name="/SNES cartridge interface/cart_address10" class="Default">
       <node ref="U202" pin="19" pinfunction="B3_19" pintype="bidirectional"/>
     </net>
-    <net code="105" name="/SNES cartridge interface/cart_address11" class="Default">
+    <net code="106" name="/SNES cartridge interface/cart_address11" class="Default">
       <node ref="U202" pin="18" pinfunction="B4_18" pintype="bidirectional"/>
     </net>
-    <net code="106" name="/SNES cartridge interface/cart_address12" class="Default">
+    <net code="107" name="/SNES cartridge interface/cart_address12" class="Default">
       <node ref="U202" pin="17" pinfunction="B5_17" pintype="bidirectional"/>
     </net>
-    <net code="107" name="/SNES cartridge interface/cart_address13" class="Default">
+    <net code="108" name="/SNES cartridge interface/cart_address13" class="Default">
       <node ref="U202" pin="16" pinfunction="B6_16" pintype="bidirectional"/>
     </net>
-    <net code="108" name="/SNES cartridge interface/cart_address14" class="Default">
+    <net code="109" name="/SNES cartridge interface/cart_address14" class="Default">
       <node ref="U202" pin="15" pinfunction="B7_15" pintype="bidirectional"/>
     </net>
-    <net code="109" name="/SNES cartridge interface/cart_address15" class="Default">
+    <net code="110" name="/SNES cartridge interface/cart_address15" class="Default">
       <node ref="U202" pin="14" pinfunction="B8_14" pintype="bidirectional"/>
     </net>
-    <net code="110" name="/SNES cartridge interface/cart_address16" class="Default">
+    <net code="111" name="/SNES cartridge interface/cart_address16" class="Default">
       <node ref="U203" pin="21" pinfunction="B1_21" pintype="bidirectional"/>
     </net>
-    <net code="111" name="/SNES cartridge interface/cart_address17" class="Default">
+    <net code="112" name="/SNES cartridge interface/cart_address17" class="Default">
       <node ref="U203" pin="20" pinfunction="B2_20" pintype="bidirectional"/>
     </net>
-    <net code="112" name="/SNES cartridge interface/cart_address18" class="Default">
+    <net code="113" name="/SNES cartridge interface/cart_address18" class="Default">
       <node ref="U203" pin="19" pinfunction="B3_19" pintype="bidirectional"/>
     </net>
-    <net code="113" name="/SNES cartridge interface/cart_address19" class="Default">
+    <net code="114" name="/SNES cartridge interface/cart_address19" class="Default">
       <node ref="U203" pin="18" pinfunction="B4_18" pintype="bidirectional"/>
     </net>
-    <net code="114" name="/SNES cartridge interface/cart_address20" class="Default">
+    <net code="115" name="/SNES cartridge interface/cart_address20" class="Default">
       <node ref="U203" pin="17" pinfunction="B5_17" pintype="bidirectional"/>
     </net>
-    <net code="115" name="/SNES cartridge interface/cart_address21" class="Default">
+    <net code="116" name="/SNES cartridge interface/cart_address21" class="Default">
       <node ref="U203" pin="16" pinfunction="B6_16" pintype="bidirectional"/>
     </net>
-    <net code="116" name="/SNES cartridge interface/cart_address22" class="Default">
+    <net code="117" name="/SNES cartridge interface/cart_address22" class="Default">
       <node ref="U203" pin="15" pinfunction="B7_15" pintype="bidirectional"/>
     </net>
-    <net code="117" name="/SNES cartridge interface/cart_address23" class="Default">
+    <net code="118" name="/SNES cartridge interface/cart_address23" class="Default">
       <node ref="U203" pin="14" pinfunction="B8_14" pintype="bidirectional"/>
     </net>
-    <net code="119" name="/SNES cartridge interface/cart_data0" class="Default">
+    <net code="120" name="/SNES cartridge interface/cart_data0" class="Default">
       <node ref="U207" pin="21" pinfunction="B1_21" pintype="bidirectional"/>
     </net>
-    <net code="120" name="/SNES cartridge interface/cart_data1" class="Default">
+    <net code="121" name="/SNES cartridge interface/cart_data1" class="Default">
       <node ref="U207" pin="20" pinfunction="B2_20" pintype="bidirectional"/>
     </net>
-    <net code="121" name="/SNES cartridge interface/cart_data2" class="Default">
+    <net code="122" name="/SNES cartridge interface/cart_data2" class="Default">
       <node ref="U207" pin="19" pinfunction="B3_19" pintype="bidirectional"/>
     </net>
-    <net code="122" name="/SNES cartridge interface/cart_data3" class="Default">
+    <net code="123" name="/SNES cartridge interface/cart_data3" class="Default">
       <node ref="U207" pin="18" pinfunction="B4_18" pintype="bidirectional"/>
     </net>
-    <net code="123" name="/SNES cartridge interface/cart_data4" class="Default">
+    <net code="124" name="/SNES cartridge interface/cart_data4" class="Default">
       <node ref="U207" pin="17" pinfunction="B5_17" pintype="bidirectional"/>
     </net>
-    <net code="124" name="/SNES cartridge interface/cart_data5" class="Default">
+    <net code="125" name="/SNES cartridge interface/cart_data5" class="Default">
       <node ref="U207" pin="16" pinfunction="B6_16" pintype="bidirectional"/>
     </net>
-    <net code="125" name="/SNES cartridge interface/cart_data6" class="Default">
+    <net code="126" name="/SNES cartridge interface/cart_data6" class="Default">
       <node ref="U207" pin="15" pinfunction="B7_15" pintype="bidirectional"/>
     </net>
-    <net code="126" name="/SNES cartridge interface/cart_data7" class="Default">
+    <net code="127" name="/SNES cartridge interface/cart_data7" class="Default">
       <node ref="U207" pin="14" pinfunction="B8_14" pintype="bidirectional"/>
     </net>
-    <net code="128" name="/SNES cartridge interface/cart_irq_n" class="Default">
+    <net code="129" name="/SNES cartridge interface/cart_irq_n" class="Default">
       <node ref="U209" pin="18" pinfunction="1Y1_18" pintype="tri_state+no_connect"/>
     </net>
-    <net code="129" name="/SNES cartridge interface/cart_pa0" class="Default">
+    <net code="130" name="/SNES cartridge interface/cart_pa0" class="Default">
       <node ref="U204" pin="21" pinfunction="B1_21" pintype="bidirectional"/>
     </net>
-    <net code="130" name="/SNES cartridge interface/cart_pa1" class="Default">
+    <net code="131" name="/SNES cartridge interface/cart_pa1" class="Default">
       <node ref="U204" pin="20" pinfunction="B2_20" pintype="bidirectional"/>
     </net>
-    <net code="131" name="/SNES cartridge interface/cart_pa2" class="Default">
+    <net code="132" name="/SNES cartridge interface/cart_pa2" class="Default">
       <node ref="U204" pin="19" pinfunction="B3_19" pintype="bidirectional"/>
     </net>
-    <net code="132" name="/SNES cartridge interface/cart_pa3" class="Default">
+    <net code="133" name="/SNES cartridge interface/cart_pa3" class="Default">
       <node ref="U204" pin="18" pinfunction="B4_18" pintype="bidirectional"/>
     </net>
-    <net code="133" name="/SNES cartridge interface/cart_pa4" class="Default">
+    <net code="134" name="/SNES cartridge interface/cart_pa4" class="Default">
       <node ref="U204" pin="17" pinfunction="B5_17" pintype="bidirectional"/>
     </net>
-    <net code="134" name="/SNES cartridge interface/cart_pa5" class="Default">
+    <net code="135" name="/SNES cartridge interface/cart_pa5" class="Default">
       <node ref="U204" pin="16" pinfunction="B6_16" pintype="bidirectional"/>
     </net>
-    <net code="135" name="/SNES cartridge interface/cart_pa6" class="Default">
+    <net code="136" name="/SNES cartridge interface/cart_pa6" class="Default">
       <node ref="U204" pin="15" pinfunction="B7_15" pintype="bidirectional"/>
     </net>
-    <net code="136" name="/SNES cartridge interface/cart_pa7" class="Default">
+    <net code="137" name="/SNES cartridge interface/cart_pa7" class="Default">
       <node ref="U204" pin="14" pinfunction="B8_14" pintype="bidirectional"/>
     </net>
-    <net code="138" name="/SNES cartridge interface/cart_phi2" class="Default">
+    <net code="139" name="/SNES cartridge interface/cart_phi2" class="Default">
       <node ref="U205" pin="14" pinfunction="B8_14" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="139" name="/SNES cartridge interface/cart_prd_n" class="Default">
+    <net code="140" name="/SNES cartridge interface/cart_prd_n" class="Default">
       <node ref="U205" pin="19" pinfunction="B3_19" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="140" name="/SNES cartridge interface/cart_pwr_n" class="Default">
+    <net code="141" name="/SNES cartridge interface/cart_pwr_n" class="Default">
       <node ref="U205" pin="18" pinfunction="B4_18" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="141" name="/SNES cartridge interface/cart_rd_n" class="Default">
+    <net code="142" name="/SNES cartridge interface/cart_rd_n" class="Default">
       <node ref="U205" pin="21" pinfunction="B1_21" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="142" name="/SNES cartridge interface/cart_refresh" class="Default">
+    <net code="143" name="/SNES cartridge interface/cart_refresh" class="Default">
       <node ref="U205" pin="15" pinfunction="B7_15" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="143" name="/SNES cartridge interface/cart_reset_n_sense" class="Default">
+    <net code="144" name="/SNES cartridge interface/cart_reset_n_sense" class="Default">
       <node ref="U209" pin="16" pinfunction="1Y2_16" pintype="tri_state+no_connect"/>
     </net>
-    <net code="144" name="/SNES cartridge interface/cart_reset_pull_n" class="Default">
+    <net code="145" name="/SNES cartridge interface/cart_reset_pull_n" class="Default">
       <node ref="R210" pin="1" pintype="passive"/>
       <node ref="U214" pin="2" pintype="input"/>
     </net>
-    <net code="145" name="/SNES cartridge interface/cart_romsel_n" class="Default">
+    <net code="146" name="/SNES cartridge interface/cart_romsel_n" class="Default">
       <node ref="U205" pin="17" pinfunction="B5_17" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="146" name="/SNES cartridge interface/cart_sysclk" class="Default">
+    <net code="147" name="/SNES cartridge interface/cart_sysclk" class="Default">
       <node ref="U206" pin="21" pinfunction="B1_21" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="147" name="/SNES cartridge interface/cart_wr_n" class="Default">
+    <net code="148" name="/SNES cartridge interface/cart_wr_n" class="Default">
       <node ref="U205" pin="20" pinfunction="B2_20" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="148" name="/SNES cartridge interface/cart_wramsel_n" class="Default">
+    <net code="149" name="/SNES cartridge interface/cart_wramsel_n" class="Default">
       <node ref="U205" pin="16" pinfunction="B6_16" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="149" name="/SNES cartridge interface/cic_clk" class="Default">
+    <net code="150" name="/SNES cartridge interface/cic_clk" class="Default">
       <node ref="U206" pin="20" pinfunction="B2_20" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="150" name="/SNES cartridge interface/cic_data0_out" class="Default">
-      <node ref="U206" pin="18" pinfunction="B4_18" pintype="bidirectional+no_connect"/>
+    <net code="151" name="/SNES cartridge interface/cic_data0" class="Default">
+      <node ref="R218" pin="1" pintype="passive"/>
+      <node ref="U215" pin="3" pinfunction="A_3" pintype="bidirectional"/>
     </net>
-    <net code="151" name="/SNES cartridge interface/cic_data0_sense" class="Default">
-      <node ref="U209" pin="9" pinfunction="2Y1_9" pintype="tri_state+no_connect"/>
+    <net code="152" name="/SNES cartridge interface/cic_data0_dir" class="Default">
+      <node ref="R220" pin="1" pintype="passive"/>
+      <node ref="U215" pin="5" pinfunction="DIR_5" pintype="input"/>
     </net>
-    <net code="152" name="/SNES cartridge interface/cic_data1_in" class="Default">
-      <node ref="U209" pin="12" pinfunction="1Y4_12" pintype="tri_state+no_connect"/>
+    <net code="153" name="/SNES cartridge interface/cic_data1" class="Default">
+      <node ref="R219" pin="1" pintype="passive"/>
+      <node ref="U216" pin="3" pinfunction="A_3" pintype="bidirectional"/>
     </net>
-    <net code="153" name="/SNES cartridge interface/cic_oe_n" class="Default">
+    <net code="154" name="/SNES cartridge interface/cic_data1_dir" class="Default">
+      <node ref="R221" pin="1" pintype="passive"/>
+      <node ref="U216" pin="5" pinfunction="DIR_5" pintype="input"/>
+    </net>
+    <net code="155" name="/SNES cartridge interface/cic_oe_n" class="Default">
       <node ref="R207" pin="2" pintype="passive"/>
       <node ref="U211" pin="2" pintype="input"/>
     </net>
-    <net code="154" name="/SNES cartridge interface/cic_slave_reset" class="Default">
+    <net code="156" name="/SNES cartridge interface/cic_slave_reset" class="Default">
       <node ref="U206" pin="19" pinfunction="B3_19" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="155" name="/SNES cartridge interface/ctl_oe_n" class="Default">
+    <net code="157" name="/SNES cartridge interface/ctl_oe_n" class="Default">
       <node ref="R206" pin="2" pintype="passive"/>
       <node ref="U210" pin="2" pintype="input"/>
     </net>
-    <net code="156" name="/SNES cartridge interface/data_dir" class="Default">
+    <net code="158" name="/SNES cartridge interface/data_dir" class="Default">
       <node ref="R209" pin="1" pintype="passive"/>
       <node ref="U213" pin="2" pintype="input"/>
     </net>
-    <net code="157" name="/SNES cartridge interface/data_oe_n" class="Default">
+    <net code="159" name="/SNES cartridge interface/data_oe_n" class="Default">
       <node ref="R208" pin="2" pintype="passive"/>
       <node ref="U212" pin="2" pintype="input"/>
     </net>
-    <net code="158" name="/SNES cartridge interface/expand_sense" class="Default">
+    <net code="160" name="/SNES cartridge interface/expand_sense" class="Default">
       <node ref="U209" pin="14" pinfunction="1Y3_14" pintype="tri_state+no_connect"/>
     </net>
-    <net code="159" name="/SNES_5V_CART" class="Default">
+    <net code="161" name="/SNES_5V_CART" class="Default">
       <node ref="C201" pin="1" pintype="passive"/>
       <node ref="C204" pin="1" pintype="passive"/>
       <node ref="C207" pin="1" pintype="passive"/>
@@ -4670,7 +5050,9 @@
       <node ref="C213" pin="1" pintype="passive"/>
       <node ref="C216" pin="1" pintype="passive"/>
       <node ref="C219" pin="1" pintype="passive"/>
-      <node ref="C228" pin="1" pintype="passive"/>
+      <node ref="C229" pin="1" pintype="passive"/>
+      <node ref="C231" pin="1" pintype="passive"/>
+      <node ref="C232" pin="1" pintype="passive"/>
       <node ref="J2" pin="27" pinfunction="+5V_CART_27" pintype="passive"/>
       <node ref="J2" pin="58" pinfunction="+5V_CART_58" pintype="passive"/>
       <node ref="R201" pin="1" pintype="passive"/>
@@ -4688,353 +5070,355 @@
       <node ref="U205" pin="1" pinfunction="VCCA_1" pintype="power_in"/>
       <node ref="U206" pin="1" pinfunction="VCCA_1" pintype="power_in"/>
       <node ref="U207" pin="1" pinfunction="VCCA_1" pintype="power_in"/>
+      <node ref="U215" pin="6" pinfunction="VCCB_6" pintype="power_in"/>
+      <node ref="U216" pin="6" pinfunction="VCCB_6" pintype="power_in"/>
     </net>
-    <net code="160" name="/SNES_A0" class="Default">
+    <net code="162" name="/SNES_A0" class="Default">
       <node ref="J2" pin="17" pinfunction="A0_17" pintype="passive"/>
       <node ref="RN201" pin="8" pinfunction="R1.2_8" pintype="passive"/>
     </net>
-    <net code="161" name="/SNES_A1" class="Default">
+    <net code="163" name="/SNES_A1" class="Default">
       <node ref="J2" pin="16" pinfunction="A1_16" pintype="passive"/>
       <node ref="RN201" pin="7" pinfunction="R2.2_7" pintype="passive"/>
     </net>
-    <net code="162" name="/SNES_A2" class="Default">
+    <net code="164" name="/SNES_A2" class="Default">
       <node ref="J2" pin="15" pinfunction="A2_15" pintype="passive"/>
       <node ref="RN201" pin="6" pinfunction="R3.2_6" pintype="passive"/>
     </net>
-    <net code="163" name="/SNES_A3" class="Default">
+    <net code="165" name="/SNES_A3" class="Default">
       <node ref="J2" pin="14" pinfunction="A3_14" pintype="passive"/>
       <node ref="RN201" pin="5" pinfunction="R4.2_5" pintype="passive"/>
     </net>
-    <net code="164" name="/SNES_A4" class="Default">
+    <net code="166" name="/SNES_A4" class="Default">
       <node ref="J2" pin="13" pinfunction="A4_13" pintype="passive"/>
       <node ref="RN202" pin="8" pinfunction="R1.2_8" pintype="passive"/>
     </net>
-    <net code="165" name="/SNES_A5" class="Default">
+    <net code="167" name="/SNES_A5" class="Default">
       <node ref="J2" pin="12" pinfunction="A5_12" pintype="passive"/>
       <node ref="RN202" pin="7" pinfunction="R2.2_7" pintype="passive"/>
     </net>
-    <net code="166" name="/SNES_A6" class="Default">
+    <net code="168" name="/SNES_A6" class="Default">
       <node ref="J2" pin="11" pinfunction="A6_11" pintype="passive"/>
       <node ref="RN202" pin="6" pinfunction="R3.2_6" pintype="passive"/>
     </net>
-    <net code="167" name="/SNES_A7" class="Default">
+    <net code="169" name="/SNES_A7" class="Default">
       <node ref="J2" pin="10" pinfunction="A7_10" pintype="passive"/>
       <node ref="RN202" pin="5" pinfunction="R4.2_5" pintype="passive"/>
     </net>
-    <net code="168" name="/SNES_A8" class="Default">
+    <net code="170" name="/SNES_A8" class="Default">
       <node ref="J2" pin="9" pinfunction="A8_9" pintype="passive"/>
       <node ref="RN203" pin="8" pinfunction="R1.2_8" pintype="passive"/>
     </net>
-    <net code="169" name="/SNES_A9" class="Default">
+    <net code="171" name="/SNES_A9" class="Default">
       <node ref="J2" pin="8" pinfunction="A9_8" pintype="passive"/>
       <node ref="RN203" pin="7" pinfunction="R2.2_7" pintype="passive"/>
     </net>
-    <net code="170" name="/SNES_A10" class="Default">
+    <net code="172" name="/SNES_A10" class="Default">
       <node ref="J2" pin="7" pinfunction="A10_7" pintype="passive"/>
       <node ref="RN203" pin="6" pinfunction="R3.2_6" pintype="passive"/>
     </net>
-    <net code="171" name="/SNES_A11" class="Default">
+    <net code="173" name="/SNES_A11" class="Default">
       <node ref="J2" pin="6" pinfunction="A11_6" pintype="passive"/>
       <node ref="RN203" pin="5" pinfunction="R4.2_5" pintype="passive"/>
     </net>
-    <net code="172" name="/SNES_A12" class="Default">
+    <net code="174" name="/SNES_A12" class="Default">
       <node ref="J2" pin="37" pinfunction="A12_37" pintype="passive"/>
       <node ref="RN204" pin="8" pinfunction="R1.2_8" pintype="passive"/>
     </net>
-    <net code="173" name="/SNES_A13" class="Default">
+    <net code="175" name="/SNES_A13" class="Default">
       <node ref="J2" pin="38" pinfunction="A13_38" pintype="passive"/>
       <node ref="RN204" pin="7" pinfunction="R2.2_7" pintype="passive"/>
     </net>
-    <net code="174" name="/SNES_A14" class="Default">
+    <net code="176" name="/SNES_A14" class="Default">
       <node ref="J2" pin="39" pinfunction="A14_39" pintype="passive"/>
       <node ref="RN204" pin="6" pinfunction="R3.2_6" pintype="passive"/>
     </net>
-    <net code="175" name="/SNES_A15" class="Default">
+    <net code="177" name="/SNES_A15" class="Default">
       <node ref="J2" pin="40" pinfunction="A15_40" pintype="passive"/>
       <node ref="RN204" pin="5" pinfunction="R4.2_5" pintype="passive"/>
     </net>
-    <net code="176" name="/SNES_A16" class="Default">
+    <net code="178" name="/SNES_A16" class="Default">
       <node ref="J2" pin="41" pinfunction="A16_41" pintype="passive"/>
       <node ref="RN205" pin="8" pinfunction="R1.2_8" pintype="passive"/>
     </net>
-    <net code="177" name="/SNES_A17" class="Default">
+    <net code="179" name="/SNES_A17" class="Default">
       <node ref="J2" pin="42" pinfunction="A17_42" pintype="passive"/>
       <node ref="RN205" pin="7" pinfunction="R2.2_7" pintype="passive"/>
     </net>
-    <net code="178" name="/SNES_A18" class="Default">
+    <net code="180" name="/SNES_A18" class="Default">
       <node ref="J2" pin="43" pinfunction="A18_43" pintype="passive"/>
       <node ref="RN205" pin="6" pinfunction="R3.2_6" pintype="passive"/>
     </net>
-    <net code="179" name="/SNES_A19" class="Default">
+    <net code="181" name="/SNES_A19" class="Default">
       <node ref="J2" pin="44" pinfunction="A19_44" pintype="passive"/>
       <node ref="RN205" pin="5" pinfunction="R4.2_5" pintype="passive"/>
     </net>
-    <net code="180" name="/SNES_A20" class="Default">
+    <net code="182" name="/SNES_A20" class="Default">
       <node ref="J2" pin="45" pinfunction="A20_45" pintype="passive"/>
       <node ref="RN206" pin="8" pinfunction="R1.2_8" pintype="passive"/>
     </net>
-    <net code="181" name="/SNES_A21" class="Default">
+    <net code="183" name="/SNES_A21" class="Default">
       <node ref="J2" pin="46" pinfunction="A21_46" pintype="passive"/>
       <node ref="RN206" pin="7" pinfunction="R2.2_7" pintype="passive"/>
     </net>
-    <net code="182" name="/SNES_A22" class="Default">
+    <net code="184" name="/SNES_A22" class="Default">
       <node ref="J2" pin="47" pinfunction="A22_47" pintype="passive"/>
       <node ref="RN206" pin="6" pinfunction="R3.2_6" pintype="passive"/>
     </net>
-    <net code="183" name="/SNES_A23" class="Default">
+    <net code="185" name="/SNES_A23" class="Default">
       <node ref="J2" pin="48" pinfunction="A23_48" pintype="passive"/>
       <node ref="RN206" pin="5" pinfunction="R4.2_5" pintype="passive"/>
     </net>
-    <net code="184" name="/SNES_AUDIO_L_IN" class="Default">
+    <net code="186" name="/SNES_AUDIO_L_IN" class="Default">
       <node ref="J2" pin="31" pinfunction="AUDIO_L_IN_31" pintype="passive"/>
       <node ref="TP201" pin="1" pinfunction="1_1" pintype="passive"/>
     </net>
-    <net code="185" name="/SNES_AUDIO_R_IN" class="Default">
+    <net code="187" name="/SNES_AUDIO_R_IN" class="Default">
       <node ref="J2" pin="62" pinfunction="AUDIO_R_IN_62" pintype="passive"/>
       <node ref="TP202" pin="1" pinfunction="1_1" pintype="passive"/>
     </net>
-    <net code="187" name="/SNES_CIC_CLK" class="Default">
+    <net code="189" name="/SNES_CIC_CLK" class="Default">
       <node ref="J2" pin="56" pinfunction="CIC_CLK_56" pintype="passive"/>
       <node ref="RN211" pin="7" pinfunction="R2.2_7" pintype="passive"/>
     </net>
-    <net code="188" name="/SNES_CIC_DATA0" class="Default">
+    <net code="190" name="/SNES_CIC_DATA0" class="Default">
       <node ref="J2" pin="55" pinfunction="CIC_DATA0_55" pintype="passive"/>
-      <node ref="RN211" pin="5" pinfunction="R4.2_5" pintype="passive"/>
-      <node ref="U209" pin="11" pinfunction="2A1_11" pintype="input"/>
+      <node ref="R214" pin="2" pintype="passive"/>
+      <node ref="R216" pin="1" pintype="passive"/>
     </net>
-    <net code="189" name="/SNES_CIC_DATA1" class="Default">
+    <net code="191" name="/SNES_CIC_DATA1" class="Default">
       <node ref="J2" pin="24" pinfunction="CIC_DATA1_24" pintype="passive"/>
-      <node ref="R214" pin="1" pintype="passive"/>
-      <node ref="U209" pin="8" pinfunction="1A4_8" pintype="input"/>
+      <node ref="R215" pin="2" pintype="passive"/>
+      <node ref="R217" pin="1" pintype="passive"/>
     </net>
-    <net code="190" name="/SNES_CIC_SLAVE_RESET" class="Default">
+    <net code="192" name="/SNES_CIC_SLAVE_RESET" class="Default">
       <node ref="J2" pin="25" pinfunction="CIC_SLAVE_RESET_25" pintype="passive"/>
       <node ref="RN211" pin="6" pinfunction="R3.2_6" pintype="passive"/>
     </net>
-    <net code="191" name="/SNES_D0" class="Default">
+    <net code="193" name="/SNES_D0" class="Default">
       <node ref="J2" pin="19" pinfunction="D0_19" pintype="passive"/>
       <node ref="RN212" pin="8" pinfunction="R1.2_8" pintype="passive"/>
     </net>
-    <net code="192" name="/SNES_D1" class="Default">
+    <net code="194" name="/SNES_D1" class="Default">
       <node ref="J2" pin="20" pinfunction="D1_20" pintype="passive"/>
       <node ref="RN212" pin="7" pinfunction="R2.2_7" pintype="passive"/>
     </net>
-    <net code="193" name="/SNES_D2" class="Default">
+    <net code="195" name="/SNES_D2" class="Default">
       <node ref="J2" pin="21" pinfunction="D2_21" pintype="passive"/>
       <node ref="RN212" pin="6" pinfunction="R3.2_6" pintype="passive"/>
     </net>
-    <net code="194" name="/SNES_D3" class="Default">
+    <net code="196" name="/SNES_D3" class="Default">
       <node ref="J2" pin="22" pinfunction="D3_22" pintype="passive"/>
       <node ref="RN212" pin="5" pinfunction="R4.2_5" pintype="passive"/>
     </net>
-    <net code="195" name="/SNES_D4" class="Default">
+    <net code="197" name="/SNES_D4" class="Default">
       <node ref="J2" pin="50" pinfunction="D4_50" pintype="passive"/>
       <node ref="RN213" pin="8" pinfunction="R1.2_8" pintype="passive"/>
     </net>
-    <net code="196" name="/SNES_D5" class="Default">
+    <net code="198" name="/SNES_D5" class="Default">
       <node ref="J2" pin="51" pinfunction="D5_51" pintype="passive"/>
       <node ref="RN213" pin="7" pinfunction="R2.2_7" pintype="passive"/>
     </net>
-    <net code="197" name="/SNES_D6" class="Default">
+    <net code="199" name="/SNES_D6" class="Default">
       <node ref="J2" pin="52" pinfunction="D6_52" pintype="passive"/>
       <node ref="RN213" pin="6" pinfunction="R3.2_6" pintype="passive"/>
     </net>
-    <net code="198" name="/SNES_D7" class="Default">
+    <net code="200" name="/SNES_D7" class="Default">
       <node ref="J2" pin="53" pinfunction="D7_53" pintype="passive"/>
       <node ref="RN213" pin="5" pinfunction="R4.2_5" pintype="passive"/>
     </net>
-    <net code="200" name="/SNES_EXPAND" class="Default">
+    <net code="202" name="/SNES_EXPAND" class="Default">
       <node ref="J2" pin="2" pinfunction="EXPAND_2" pintype="passive"/>
       <node ref="R213" pin="2" pintype="passive"/>
       <node ref="U209" pin="6" pinfunction="1A3_6" pintype="input"/>
     </net>
-    <net code="201" name="/SNES_IRQ_N" class="Default">
+    <net code="203" name="/SNES_IRQ_N" class="Default">
       <node ref="J2" pin="18" pinfunction="/IRQ_18" pintype="passive"/>
       <node ref="R211" pin="2" pintype="passive"/>
       <node ref="U209" pin="2" pinfunction="1A1_2" pintype="input"/>
     </net>
-    <net code="202" name="/SNES_PA0" class="Default">
+    <net code="204" name="/SNES_PA0" class="Default">
       <node ref="J2" pin="28" pinfunction="PA0_28" pintype="passive"/>
       <node ref="RN207" pin="8" pinfunction="R1.2_8" pintype="passive"/>
     </net>
-    <net code="203" name="/SNES_PA1" class="Default">
+    <net code="205" name="/SNES_PA1" class="Default">
       <node ref="J2" pin="59" pinfunction="PA1_59" pintype="passive"/>
       <node ref="RN207" pin="7" pinfunction="R2.2_7" pintype="passive"/>
     </net>
-    <net code="204" name="/SNES_PA2" class="Default">
+    <net code="206" name="/SNES_PA2" class="Default">
       <node ref="J2" pin="29" pinfunction="PA2_29" pintype="passive"/>
       <node ref="RN207" pin="6" pinfunction="R3.2_6" pintype="passive"/>
     </net>
-    <net code="205" name="/SNES_PA3" class="Default">
+    <net code="207" name="/SNES_PA3" class="Default">
       <node ref="J2" pin="60" pinfunction="PA3_60" pintype="passive"/>
       <node ref="RN207" pin="5" pinfunction="R4.2_5" pintype="passive"/>
     </net>
-    <net code="206" name="/SNES_PA4" class="Default">
+    <net code="208" name="/SNES_PA4" class="Default">
       <node ref="J2" pin="30" pinfunction="PA4_30" pintype="passive"/>
       <node ref="RN208" pin="8" pinfunction="R1.2_8" pintype="passive"/>
     </net>
-    <net code="207" name="/SNES_PA5" class="Default">
+    <net code="209" name="/SNES_PA5" class="Default">
       <node ref="J2" pin="61" pinfunction="PA5_61" pintype="passive"/>
       <node ref="RN208" pin="7" pinfunction="R2.2_7" pintype="passive"/>
     </net>
-    <net code="208" name="/SNES_PA6" class="Default">
+    <net code="210" name="/SNES_PA6" class="Default">
       <node ref="J2" pin="3" pinfunction="PA6_3" pintype="passive"/>
       <node ref="RN208" pin="6" pinfunction="R3.2_6" pintype="passive"/>
     </net>
-    <net code="209" name="/SNES_PA7" class="Default">
+    <net code="211" name="/SNES_PA7" class="Default">
       <node ref="J2" pin="34" pinfunction="PA7_34" pintype="passive"/>
       <node ref="RN208" pin="5" pinfunction="R4.2_5" pintype="passive"/>
     </net>
-    <net code="211" name="/SNES_PHI2" class="Default">
+    <net code="213" name="/SNES_PHI2" class="Default">
       <node ref="J2" pin="57" pinfunction="PHI2_57" pintype="passive"/>
       <node ref="RN210" pin="5" pinfunction="R4.2_5" pintype="passive"/>
     </net>
-    <net code="212" name="/SNES_PRD_N" class="Default">
+    <net code="214" name="/SNES_PRD_N" class="Default">
       <node ref="J2" pin="4" pinfunction="/PRD_4" pintype="passive"/>
       <node ref="RN209" pin="6" pinfunction="R3.2_6" pintype="passive"/>
     </net>
-    <net code="213" name="/SNES_PWR_N" class="Default">
+    <net code="215" name="/SNES_PWR_N" class="Default">
       <node ref="J2" pin="35" pinfunction="/PWR_35" pintype="passive"/>
       <node ref="RN209" pin="5" pinfunction="R4.2_5" pintype="passive"/>
     </net>
-    <net code="214" name="/SNES_RD_N" class="Default">
+    <net code="216" name="/SNES_RD_N" class="Default">
       <node ref="J2" pin="23" pinfunction="/RD_23" pintype="passive"/>
       <node ref="RN209" pin="8" pinfunction="R1.2_8" pintype="passive"/>
     </net>
-    <net code="215" name="/SNES_REFRESH" class="Default">
+    <net code="217" name="/SNES_REFRESH" class="Default">
       <node ref="J2" pin="33" pinfunction="REFRESH_33" pintype="passive"/>
       <node ref="RN210" pin="6" pinfunction="R3.2_6" pintype="passive"/>
     </net>
-    <net code="216" name="/SNES_RESET_N" class="Default">
+    <net code="218" name="/SNES_RESET_N" class="Default">
       <node ref="J2" pin="26" pinfunction="/RESET_26" pintype="passive"/>
       <node ref="Q201" pin="3" pinfunction="D_3" pintype="passive"/>
       <node ref="R212" pin="2" pintype="passive"/>
       <node ref="U209" pin="4" pinfunction="1A2_4" pintype="input"/>
     </net>
-    <net code="217" name="/SNES_ROMSEL_N" class="Default">
+    <net code="219" name="/SNES_ROMSEL_N" class="Default">
       <node ref="J2" pin="49" pinfunction="/ROMSEL_49" pintype="passive"/>
       <node ref="RN210" pin="8" pinfunction="R1.2_8" pintype="passive"/>
     </net>
-    <net code="218" name="/SNES_SYSTEM_CLK" class="Default">
+    <net code="220" name="/SNES_SYSTEM_CLK" class="Default">
       <node ref="J2" pin="1" pinfunction="SYSTEM_CLK_1" pintype="passive"/>
       <node ref="RN211" pin="8" pinfunction="R1.2_8" pintype="passive"/>
     </net>
-    <net code="219" name="/SNES_WRAMSEL_N" class="Default">
+    <net code="221" name="/SNES_WRAMSEL_N" class="Default">
       <node ref="J2" pin="32" pinfunction="/WRAMSEL_32" pintype="passive"/>
       <node ref="RN210" pin="7" pinfunction="R2.2_7" pintype="passive"/>
     </net>
-    <net code="220" name="/SNES_WR_N" class="Default">
+    <net code="222" name="/SNES_WR_N" class="Default">
       <node ref="J2" pin="54" pinfunction="/WR_54" pintype="passive"/>
       <node ref="RN209" pin="7" pinfunction="R2.2_7" pintype="passive"/>
     </net>
-    <net code="221" name="/USB-C programmer/EE_CLK" class="Default">
+    <net code="223" name="/USB-C programmer/EE_CLK" class="Default">
       <node ref="U104" pin="44" pinfunction="EECLK_44" pintype="output"/>
       <node ref="U106" pin="4" pinfunction="CLK_4" pintype="input"/>
     </net>
-    <net code="222" name="/USB-C programmer/EE_CS" class="Default">
+    <net code="224" name="/USB-C programmer/EE_CS" class="Default">
       <node ref="U104" pin="45" pinfunction="EECS_45" pintype="output"/>
       <node ref="U106" pin="5" pinfunction="CS_5" pintype="input"/>
     </net>
-    <net code="223" name="/USB-C programmer/EE_DATA" class="Default">
+    <net code="225" name="/USB-C programmer/EE_DATA" class="Default">
       <node ref="R106" pin="2" pintype="passive"/>
       <node ref="U104" pin="43" pinfunction="EEDATA_43" pintype="bidirectional"/>
       <node ref="U106" pin="3" pinfunction="DI_3" pintype="input"/>
     </net>
-    <net code="224" name="/USB-C programmer/EE_DO" class="Default">
+    <net code="226" name="/USB-C programmer/EE_DO" class="Default">
       <node ref="R106" pin="1" pintype="passive"/>
       <node ref="R107" pin="2" pintype="passive"/>
       <node ref="U106" pin="1" pinfunction="DO_1" pintype="tri_state"/>
     </net>
-    <net code="225" name="/USB-C programmer/FT_1V8A" class="Default">
+    <net code="227" name="/USB-C programmer/FT_1V8A" class="Default">
       <node ref="C110" pin="1" pintype="passive"/>
       <node ref="U104" pin="37" pinfunction="VCCA_37" pintype="power_out"/>
     </net>
-    <net code="226" name="/USB-C programmer/FT_1V8CORE" class="Default">
+    <net code="228" name="/USB-C programmer/FT_1V8CORE" class="Default">
       <node ref="C111" pin="1" pintype="passive"/>
       <node ref="U104" pin="38" pinfunction="VCCCORE_38" pintype="power_out"/>
     </net>
-    <net code="227" name="/USB-C programmer/FT_REF" class="Default">
+    <net code="229" name="/USB-C programmer/FT_REF" class="Default">
       <node ref="R103" pin="1" pintype="passive"/>
       <node ref="U104" pin="5" pinfunction="REF_5" pintype="input"/>
     </net>
-    <net code="228" name="/USB-C programmer/FT_RESET_N" class="Default">
+    <net code="230" name="/USB-C programmer/FT_RESET_N" class="Default">
       <node ref="R104" pin="2" pintype="passive"/>
       <node ref="U104" pin="34" pinfunction="~{RESET}_34" pintype="input"/>
     </net>
-    <net code="229" name="/USB-C programmer/FT_TCK" class="Default">
+    <net code="231" name="/USB-C programmer/FT_TCK" class="Default">
       <node ref="U104" pin="13" pinfunction="ADBUS0_13" pintype="bidirectional"/>
       <node ref="U105" pin="3" pinfunction="A1_3" pintype="bidirectional"/>
     </net>
-    <net code="230" name="/USB-C programmer/FT_TDI" class="Default">
+    <net code="232" name="/USB-C programmer/FT_TDI" class="Default">
       <node ref="U104" pin="14" pinfunction="ADBUS1_14" pintype="bidirectional"/>
       <node ref="U105" pin="4" pinfunction="A2_4" pintype="bidirectional"/>
     </net>
-    <net code="231" name="/USB-C programmer/FT_TDO" class="Default">
+    <net code="233" name="/USB-C programmer/FT_TDO" class="Default">
       <node ref="U104" pin="15" pinfunction="ADBUS2_15" pintype="bidirectional"/>
       <node ref="U105" pin="5" pinfunction="A3_5" pintype="bidirectional"/>
     </net>
-    <net code="232" name="/USB-C programmer/FT_TMS" class="Default">
+    <net code="234" name="/USB-C programmer/FT_TMS" class="Default">
       <node ref="U104" pin="16" pinfunction="ADBUS3_16" pintype="bidirectional"/>
       <node ref="U105" pin="6" pinfunction="A4_6" pintype="bidirectional"/>
     </net>
-    <net code="233" name="/USB-C programmer/FT_VPHY" class="Default">
+    <net code="235" name="/USB-C programmer/FT_VPHY" class="Default">
       <node ref="C104" pin="1" pintype="passive"/>
       <node ref="L101" pin="2" pinfunction="2_2" pintype="passive"/>
       <node ref="U104" pin="3" pinfunction="VPHY_3" pintype="power_in"/>
     </net>
-    <net code="234" name="/USB-C programmer/FT_VPLL" class="Default">
+    <net code="236" name="/USB-C programmer/FT_VPLL" class="Default">
       <node ref="C105" pin="1" pintype="passive"/>
       <node ref="L102" pin="2" pinfunction="2_2" pintype="passive"/>
       <node ref="U104" pin="8" pinfunction="VPLL_8" pintype="power_in"/>
     </net>
-    <net code="235" name="/USB-C programmer/JTAG_OE_N" class="Default">
+    <net code="237" name="/USB-C programmer/JTAG_OE_N" class="Default">
       <node ref="R105" pin="2" pintype="passive"/>
       <node ref="U104" pin="30" pinfunction="ACBUS6_30" pintype="bidirectional"/>
       <node ref="U105" pin="9" pinfunction="~{OE}_9" pintype="input"/>
     </net>
-    <net code="236" name="/USB-C programmer/JTAG_TCK" class="Default">
+    <net code="238" name="/USB-C programmer/JTAG_TCK" class="Default">
       <node ref="J102" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
       <node ref="R108" pin="2" pintype="passive"/>
       <node ref="R112" pin="1" pintype="passive"/>
     </net>
-    <net code="237" name="/USB-C programmer/JTAG_TDI" class="Default">
+    <net code="239" name="/USB-C programmer/JTAG_TDI" class="Default">
       <node ref="J102" pin="4" pinfunction="Pin_4_4" pintype="passive"/>
       <node ref="R109" pin="2" pintype="passive"/>
       <node ref="R113" pin="2" pintype="passive"/>
     </net>
-    <net code="238" name="/USB-C programmer/JTAG_TDO" class="Default">
+    <net code="240" name="/USB-C programmer/JTAG_TDO" class="Default">
       <node ref="J102" pin="5" pinfunction="Pin_5_5" pintype="passive"/>
       <node ref="R110" pin="2" pintype="passive"/>
     </net>
-    <net code="239" name="/USB-C programmer/JTAG_TMS" class="Default">
+    <net code="241" name="/USB-C programmer/JTAG_TMS" class="Default">
       <node ref="J102" pin="6" pinfunction="Pin_6_6" pintype="passive"/>
       <node ref="R111" pin="2" pintype="passive"/>
       <node ref="R114" pin="2" pintype="passive"/>
     </net>
-    <net code="240" name="/USB-C programmer/TARGET_VREF" class="Default">
+    <net code="242" name="/USB-C programmer/TARGET_VREF" class="Default">
       <node ref="C113" pin="1" pintype="passive"/>
       <node ref="J102" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
       <node ref="R113" pin="1" pintype="passive"/>
       <node ref="R114" pin="1" pintype="passive"/>
       <node ref="U105" pin="15" pinfunction="VCCB_15" pintype="power_in"/>
     </net>
-    <net code="241" name="/USB-C programmer/TCK_DRV" class="Default">
+    <net code="243" name="/USB-C programmer/TCK_DRV" class="Default">
       <node ref="R108" pin="1" pintype="passive"/>
       <node ref="U105" pin="14" pinfunction="B1_14" pintype="bidirectional"/>
     </net>
-    <net code="242" name="/USB-C programmer/TDI_DRV" class="Default">
+    <net code="244" name="/USB-C programmer/TDI_DRV" class="Default">
       <node ref="R109" pin="1" pintype="passive"/>
       <node ref="U105" pin="13" pinfunction="B2_13" pintype="bidirectional"/>
     </net>
-    <net code="243" name="/USB-C programmer/TDO_RCV" class="Default">
+    <net code="245" name="/USB-C programmer/TDO_RCV" class="Default">
       <node ref="R110" pin="1" pintype="passive"/>
       <node ref="U105" pin="12" pinfunction="B3_12" pintype="bidirectional"/>
     </net>
-    <net code="244" name="/USB-C programmer/TMS_DRV" class="Default">
+    <net code="246" name="/USB-C programmer/TMS_DRV" class="Default">
       <node ref="R111" pin="1" pintype="passive"/>
       <node ref="U105" pin="11" pinfunction="B4_11" pintype="bidirectional"/>
     </net>
-    <net code="245" name="/USB-C programmer/USB_3V3" class="Default">
+    <net code="247" name="/USB-C programmer/USB_3V3" class="Default">
       <node ref="C103" pin="1" pintype="passive"/>
       <node ref="C106" pin="1" pintype="passive"/>
       <node ref="C107" pin="1" pintype="passive"/>
@@ -5059,33 +5443,33 @@
       <node ref="U105" pin="8" pinfunction="DIR4_8" pintype="input"/>
       <node ref="U106" pin="6" pinfunction="Vсс_6" pintype="power_in"/>
     </net>
-    <net code="246" name="/USB-C programmer/USB_CC1" class="Default">
+    <net code="248" name="/USB-C programmer/USB_CC1" class="Default">
       <node ref="J101" pin="A5" pinfunction="CC1_A5" pintype="bidirectional"/>
       <node ref="R101" pin="1" pintype="passive"/>
       <node ref="U102" pin="1" pinfunction="I/O1_1" pintype="passive"/>
       <node ref="U102" pin="6" pinfunction="I/O1_6" pintype="passive"/>
     </net>
-    <net code="247" name="/USB-C programmer/USB_CC2" class="Default">
+    <net code="249" name="/USB-C programmer/USB_CC2" class="Default">
       <node ref="J101" pin="B5" pinfunction="CC2_B5" pintype="bidirectional"/>
       <node ref="R102" pin="1" pintype="passive"/>
       <node ref="U102" pin="3" pinfunction="I/O2_3" pintype="passive"/>
       <node ref="U102" pin="4" pinfunction="I/O2_4" pintype="passive"/>
     </net>
-    <net code="248" name="/USB-C programmer/USB_DM" class="Default">
+    <net code="250" name="/USB-C programmer/USB_DM" class="Default">
       <node ref="J101" pin="A7" pinfunction="D-_A7" pintype="bidirectional"/>
       <node ref="J101" pin="B7" pinfunction="D-_B7" pintype="bidirectional"/>
       <node ref="U101" pin="1" pinfunction="I/O1_1" pintype="passive"/>
       <node ref="U101" pin="6" pinfunction="I/O1_6" pintype="passive"/>
       <node ref="U104" pin="6" pinfunction="DM_6" pintype="bidirectional"/>
     </net>
-    <net code="249" name="/USB-C programmer/USB_DP" class="Default">
+    <net code="251" name="/USB-C programmer/USB_DP" class="Default">
       <node ref="J101" pin="A6" pinfunction="D+_A6" pintype="bidirectional"/>
       <node ref="J101" pin="B6" pinfunction="D+_B6" pintype="bidirectional"/>
       <node ref="U101" pin="3" pinfunction="I/O2_3" pintype="passive"/>
       <node ref="U101" pin="4" pinfunction="I/O2_4" pintype="passive"/>
       <node ref="U104" pin="7" pinfunction="DP_7" pintype="bidirectional"/>
     </net>
-    <net code="250" name="/USB-C programmer/USB_VBUS" class="Default">
+    <net code="252" name="/USB-C programmer/USB_VBUS" class="Default">
       <node ref="C101" pin="1" pintype="passive"/>
       <node ref="C102" pin="1" pintype="passive"/>
       <node ref="J101" pin="A4" pinfunction="VBUS_A4" pintype="passive"/>
@@ -5097,92 +5481,107 @@
       <node ref="U103" pin="1" pinfunction="VIN_1" pintype="power_in"/>
       <node ref="U103" pin="3" pinfunction="EN_3" pintype="input"/>
     </net>
-    <net code="251" name="/USB-C programmer/XTAL_IN" class="Default">
+    <net code="253" name="/USB-C programmer/XTAL_IN" class="Default">
       <node ref="C115" pin="1" pintype="passive"/>
       <node ref="U104" pin="1" pinfunction="XCSI_1" pintype="input"/>
       <node ref="Y101" pin="1" pinfunction="1_1" pintype="passive"/>
     </net>
-    <net code="252" name="/USB-C programmer/XTAL_OUT" class="Default">
+    <net code="254" name="/USB-C programmer/XTAL_OUT" class="Default">
       <node ref="C116" pin="1" pintype="passive"/>
       <node ref="U104" pin="2" pinfunction="XCSO_2" pintype="output"/>
       <node ref="Y101" pin="3" pinfunction="3_3" pintype="passive"/>
     </net>
-    <net code="253" name="unconnected-(J101-SBU1-PadA8)" class="Default">
+    <net code="255" name="unconnected-(J101-SBU1-PadA8)" class="Default">
       <node ref="J101" pin="A8" pinfunction="SBU1_A8" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="254" name="unconnected-(J101-SBU2-PadB8)" class="Default">
+    <net code="256" name="unconnected-(J101-SBU2-PadB8)" class="Default">
       <node ref="J101" pin="B8" pinfunction="SBU2_B8" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="255" name="unconnected-(U103-NC-Pad4)" class="Default">
+    <net code="257" name="unconnected-(RN211-R4.1-Pad4)" class="Default">
+      <node ref="RN211" pin="4" pinfunction="R4.1_4" pintype="passive+no_connect"/>
+    </net>
+    <net code="258" name="unconnected-(RN211-R4.2-Pad5)" class="Default">
+      <node ref="RN211" pin="5" pinfunction="R4.2_5" pintype="passive+no_connect"/>
+    </net>
+    <net code="259" name="unconnected-(U103-NC-Pad4)" class="Default">
       <node ref="U103" pin="4" pinfunction="NC_4" pintype="no_connect"/>
     </net>
-    <net code="256" name="unconnected-(U104-ACBUS0-Pad21)" class="Default">
+    <net code="260" name="unconnected-(U104-ACBUS0-Pad21)" class="Default">
       <node ref="U104" pin="21" pinfunction="ACBUS0_21" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="257" name="unconnected-(U104-ACBUS1-Pad25)" class="Default">
+    <net code="261" name="unconnected-(U104-ACBUS1-Pad25)" class="Default">
       <node ref="U104" pin="25" pinfunction="ACBUS1_25" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="258" name="unconnected-(U104-ACBUS2-Pad26)" class="Default">
+    <net code="262" name="unconnected-(U104-ACBUS2-Pad26)" class="Default">
       <node ref="U104" pin="26" pinfunction="ACBUS2_26" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="259" name="unconnected-(U104-ACBUS3-Pad27)" class="Default">
+    <net code="263" name="unconnected-(U104-ACBUS3-Pad27)" class="Default">
       <node ref="U104" pin="27" pinfunction="ACBUS3_27" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="260" name="unconnected-(U104-ACBUS4-Pad28)" class="Default">
+    <net code="264" name="unconnected-(U104-ACBUS4-Pad28)" class="Default">
       <node ref="U104" pin="28" pinfunction="ACBUS4_28" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="261" name="unconnected-(U104-ACBUS5-Pad29)" class="Default">
+    <net code="265" name="unconnected-(U104-ACBUS5-Pad29)" class="Default">
       <node ref="U104" pin="29" pinfunction="ACBUS5_29" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="262" name="unconnected-(U104-ACBUS7-Pad31)" class="Default">
+    <net code="266" name="unconnected-(U104-ACBUS7-Pad31)" class="Default">
       <node ref="U104" pin="31" pinfunction="ACBUS7_31" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="263" name="unconnected-(U104-ACBUS8-Pad32)" class="Default">
+    <net code="267" name="unconnected-(U104-ACBUS8-Pad32)" class="Default">
       <node ref="U104" pin="32" pinfunction="ACBUS8_32" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="264" name="unconnected-(U104-ACBUS9-Pad33)" class="Default">
+    <net code="268" name="unconnected-(U104-ACBUS9-Pad33)" class="Default">
       <node ref="U104" pin="33" pinfunction="ACBUS9_33" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="265" name="unconnected-(U104-ADBUS4-Pad17)" class="Default">
+    <net code="269" name="unconnected-(U104-ADBUS4-Pad17)" class="Default">
       <node ref="U104" pin="17" pinfunction="ADBUS4_17" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="266" name="unconnected-(U104-ADBUS5-Pad18)" class="Default">
+    <net code="270" name="unconnected-(U104-ADBUS5-Pad18)" class="Default">
       <node ref="U104" pin="18" pinfunction="ADBUS5_18" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="267" name="unconnected-(U104-ADBUS6-Pad19)" class="Default">
+    <net code="271" name="unconnected-(U104-ADBUS6-Pad19)" class="Default">
       <node ref="U104" pin="19" pinfunction="ADBUS6_19" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="268" name="unconnected-(U104-ADBUS7-Pad20)" class="Default">
+    <net code="272" name="unconnected-(U104-ADBUS7-Pad20)" class="Default">
       <node ref="U104" pin="20" pinfunction="ADBUS7_20" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="269" name="unconnected-(U206-A5-Pad7)" class="Default">
+    <net code="273" name="unconnected-(U206-A4-Pad6)" class="Default">
+      <node ref="U206" pin="6" pinfunction="A4_6" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="274" name="unconnected-(U206-A5-Pad7)" class="Default">
       <node ref="U206" pin="7" pinfunction="A5_7" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="270" name="unconnected-(U206-A6-Pad8)" class="Default">
+    <net code="275" name="unconnected-(U206-A6-Pad8)" class="Default">
       <node ref="U206" pin="8" pinfunction="A6_8" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="271" name="unconnected-(U206-A7-Pad9)" class="Default">
+    <net code="276" name="unconnected-(U206-A7-Pad9)" class="Default">
       <node ref="U206" pin="9" pinfunction="A7_9" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="272" name="unconnected-(U206-A8-Pad10)" class="Default">
+    <net code="277" name="unconnected-(U206-A8-Pad10)" class="Default">
       <node ref="U206" pin="10" pinfunction="A8_10" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="273" name="unconnected-(U209-2Y2-Pad7)" class="Default">
+    <net code="278" name="unconnected-(U209-1Y4-Pad12)" class="Default">
+      <node ref="U209" pin="12" pinfunction="1Y4_12" pintype="tri_state+no_connect"/>
+    </net>
+    <net code="279" name="unconnected-(U209-2Y1-Pad9)" class="Default">
+      <node ref="U209" pin="9" pinfunction="2Y1_9" pintype="tri_state+no_connect"/>
+    </net>
+    <net code="280" name="unconnected-(U209-2Y2-Pad7)" class="Default">
       <node ref="U209" pin="7" pinfunction="2Y2_7" pintype="tri_state+no_connect"/>
     </net>
-    <net code="274" name="unconnected-(U209-2Y3-Pad5)" class="Default">
+    <net code="281" name="unconnected-(U209-2Y3-Pad5)" class="Default">
       <node ref="U209" pin="5" pinfunction="2Y3_5" pintype="tri_state+no_connect"/>
     </net>
-    <net code="275" name="unconnected-(U209-2Y4-Pad3)" class="Default">
+    <net code="282" name="unconnected-(U209-2Y4-Pad3)" class="Default">
       <node ref="U209" pin="3" pinfunction="2Y4_3" pintype="tri_state+no_connect"/>
     </net>
-    <net code="276" name="unconnected-(U210-NC-Pad1)" class="Default">
+    <net code="283" name="unconnected-(U210-NC-Pad1)" class="Default">
       <node ref="U210" pin="1" pinfunction="NC_1" pintype="free+no_connect"/>
     </net>
-    <net code="277" name="unconnected-(U211-NC-Pad1)" class="Default">
+    <net code="284" name="unconnected-(U211-NC-Pad1)" class="Default">
       <node ref="U211" pin="1" pinfunction="NC_1" pintype="free+no_connect"/>
     </net>
-    <net code="278" name="unconnected-(U212-NC-Pad1)" class="Default">
+    <net code="285" name="unconnected-(U212-NC-Pad1)" class="Default">
       <node ref="U212" pin="1" pinfunction="NC_1" pintype="free+no_connect"/>
     </net>
   </nets>

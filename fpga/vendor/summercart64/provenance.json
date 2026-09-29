@@ -2,12 +2,17 @@
   "upstream": "https://github.com/Polprzewodnikowy/SummerCart64",
   "upstream_commit": "a1e7996d2cbece686820a5c785029c68514f17b0",
   "license": "GPL-3.0 (repository LICENSE, software); hardware files use CERN-OHL-S-2.0 separately",
-  "note": "Unmodified copies of the N64 PI endpoint and its bus interfaces. SN64 uses them through a wrapper (fpga/rtl/sn64_n64_endpoint.sv); no vendored file is edited.",
+  "note": "Unmodified copies of the N64 PI endpoint and its bus interfaces. SN64 uses them through a wrapper (fpga/rtl/sn64_n64_endpoint.sv); no vendored file is edited. fw/rtl/memory/memory_flash.sv (flash_scb, flash_qspi, memory_flash: Quad I/O Fast Read EBh controller) was added 2026-09-29 for the bootstrap ROM window served from the configuration flash; it is used read-only through fpga/rtl/sn64_bootrom_flash.sv.",
   "files": [
     {
       "path": "fw/rtl/memory/mem_bus.sv",
       "sha256": "e510ccaf5b1ec7faca7e1913c959eb38d3d782f974c3f49a964acca7517c11d2",
       "bytes": 581
+    },
+    {
+      "path": "fw/rtl/memory/memory_flash.sv",
+      "sha256": "ad8238fc58cf037fe43a9d2a020a91079bab0e7b78d5774255f0ab4fd273dfff",
+      "bytes": 16764
     },
     {
       "path": "fw/rtl/n64/n64_cic.sv",

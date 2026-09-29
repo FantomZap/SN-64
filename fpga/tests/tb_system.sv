@@ -69,12 +69,16 @@ module tb_system;
     wire ctl_oe_n, data_oe_n, data_dir, cart_reset_pull;
     wire cart_reset_n = !cart_reset_pull;           // open-drain /RESET with pull-up, no cartridge pull
     byte rom[0:511]; byte sram[0:255];
-    wire cart_sel = (a>=24'h008000 && a<24'h008200) || a==24'h00fffc || a==24'h00fffd || a[23:8]==16'h7000;
+    // Optional ROM header at $00:FFC0-$00:FFDF (+pal_header: EU PAL header, valid checksum pair).
+    reg  pal_header = 0; byte hdr[0:31];
+    wire hdr_sel  = pal_header && a >= 24'h00ffc0 && a <= 24'h00ffdf;
+    wire cart_sel = (a>=24'h008000 && a<24'h008200) || a==24'h00fffc || a==24'h00fffd || a[23:8]==16'h7000 || hdr_sel;
     wire cart_drive = !rd_c && cart_sel && !ctl_oe_n && cart_5v_ok;
     reg [7:0] cart_byte;
     always @* begin
         cart_byte = 8'hxx;
-        if (a>=24'h008000 && a<24'h008200) cart_byte = rom[a[8:0]];
+        if (hdr_sel) cart_byte = hdr[a[4:0]];
+        else if (a>=24'h008000 && a<24'h008200) cart_byte = rom[a[8:0]];
         else if (a==24'h00fffc) cart_byte = 8'h00;
         else if (a==24'h00fffd) cart_byte = 8'h80;
         else if (a[23:8]==16'h7000) cart_byte = sram[a[7:0]];
@@ -91,7 +95,7 @@ module tb_system;
     wire region_pal;
     sn64_top #(.BUILD_ID(16'h5A01), .ROM_ADDR_BITS(4), .REGION_TIMEOUT_MS(1), .SEQ_RESET_HOLD_MS(1),
                .SEQ_RAIL_TIMEOUT_MS(2), .CIC_LOCK_T_PWRUP(200)) dut (
-        .clk_25(clk_25), .clk_host(clk_host), .clk_snes(clk_snes), .clk_pixel(clk_pixel), .clk_pixel_x5(clk_pixel_x5), .por_n(por_n),
+        .clk_25(clk_25), .clk_host(clk_host), .clk_snes(clk_snes), .clk_pixel(clk_pixel), .clk_pixel_x5(clk_pixel_x5), .hdmi_clock_ok(1'b1), .por_n(por_n),
         .n64_reset_n(n64_reset_n), .n64_nmi_n(1'b1), .n64_alel(alel), .n64_aleh(aleh), .n64_read_n(rd_n), .n64_write_n(wr_n),
         .n64_ad(ad), .n64_cic_clk(1'b1), .n64_si_clk(1'b0), .n64_cic_dq(n64_cic_dq),
         .rom_we(1'b0), .rom_waddr(4'd0), .rom_wdata(16'd0),
@@ -111,7 +115,9 @@ module tb_system;
     // ---------------- Invariants ----------------
     reg run_seen=0, pal_at_start=0;
     always @(posedge clk_25) begin
-        if (!ctl_oe_n && !dut.bus_permit) $fatal(1,"socket outputs enabled without permission");
+        if (!ctl_oe_n && !dut.bus_permit && !dut.hdr_owns) $fatal(1,"socket outputs enabled without permission");
+        if (dut.hdr_owns && (!wr_c || !pwr_c || !data_oe_n && data_dir || snes_clk_run || !cart_reset_pull))
+            $fatal(1,"header probe: write strobe, D-bus drive, running clock or released /RESET");
         if (snes_clk_run && !(cart_5v_ok && iface_rail_ok)) $fatal(1,"SNES clock running without cartridge power");
         if (snes_clk_run && !run_seen) begin run_seen=1; pal_at_start=region_pal; end
         if (snes_clk_run && region_pal !== pal_at_start) $fatal(1,"region changed while the SNES clock runs");
@@ -143,6 +149,10 @@ module tb_system;
     integer t_start;
     initial begin
         for (integer i=0;i<512;i++) rom[i]='hea;
+        pal_header = $test$plusargs("pal_header");
+        for (integer i=0;i<32;i++) hdr[i]=8'h20;
+        hdr[5'h15]=8'h31; hdr[5'h19]=8'h02;                            // HiROM fast, Europe (PAL)
+        hdr[5'h1C]=8'hA5; hdr[5'h1D]=8'h5A; hdr[5'h1E]=8'h5A; hdr[5'h1F]=8'hA5;  // complement $5AA5, checksum $A55A
         for (integer i=0;i<256;i++) sram[i]='h00;
         emit('h78); emit('h18); emit('hfb); emit('he2); emit('h30);   // SEI CLC XCE SEP #$30
         lda8('ha5); stal(24'h700000);                                  // proof of life
@@ -168,6 +178,9 @@ module tb_system;
         pi_addr(32'h1FFF_0016); pi_write(16'h0001); pi_end;            // CONTROL: run_request (region auto)
         wait(snes_clk_run); t_start=$time;
         $display("%0t ns: SNES clock started (region %s, status %h)", $time, region_pal ? "PAL" : "NTSC", status_word);
+        $display("header probe: done=%0d valid=%0d pal=%0d country=%h reject=%b", dut.hdr_done, dut.hdr_valid, dut.hdr_pal, dut.hdr_country, dut.hdr_reject);
+        if (!dut.hdr_done) $fatal(1,"region decided before the header probe finished");
+        if (region_pal !== pal_header) $fatal(1,"region %0d, expected %0d from the ROM header / NTSC default", region_pal, pal_header);
         wait(!cart_reset_pull);
         $display("%0t ns: cartridge /RESET released", $time);
         fork

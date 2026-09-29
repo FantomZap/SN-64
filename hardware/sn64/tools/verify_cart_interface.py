@@ -14,6 +14,11 @@ signal/bridge-port map), not against the authoring script:
     reachable from those through a resistor) reaches an FPGA-side label;
   * translator /OE defaults to released (disabled) with the interface rail off
     or the FPGA unconfigured, and /RESET defaults to asserted;
+  * CIC_DATA0 (J2.55) and CIC_DATA1 (J2.24) each pass through their OWN
+    SN74LVC1T45 (A = INTERFACE_3V3/FPGA, B = cartridge 5 V) with a series
+    resistor, whose DIR comes from a dedicated FPGA label shared with nothing
+    else and pulled down (default listen); each has a cartridge-side pull-down
+    and an A-side pull-down, and neither touches U206/U209 or any other part;
   * component pin identities match fixed datasheet tables; decoupling count;
   * KiCad ERC reports zero errors.
 
@@ -54,6 +59,8 @@ LVC244A = {'1': '1OE', '2': '1A1', '3': '2Y4', '4': '1A2', '5': '2Y3', '6': '1A3
 # TI SCES296AG / SCES295AB DBV: 1 NC, 2 A (input), 3 GND, 4 Y (open drain), 5 VCC
 LVC1G_TYPES = {'2': 'input', '3': 'power_in', '4': 'open_collector', '5': 'power_in'}
 NMOS_SOT23 = {'1': 'G', '2': 'S', '3': 'D'}
+# TI SCES515N (June 2024) Table 4-1, DBV: DIR is referenced to VCCA; H = A->B, L = B->A.
+LVC1T45 = {'1': 'VCCA', '2': 'GND', '3': 'A', '4': 'B', '5': 'DIR', '6': 'VCCB'}
 RPACK = [('1', '8'), ('2', '7'), ('3', '6'), ('4', '5')]
 
 # SN64 bridge-port names for the FPGA side (fpga/rtl/sn64_cart_bridge.sv plus
@@ -61,13 +68,23 @@ RPACK = [('1', '8'), ('2', '7'), ('3', '6'), ('4', '5')]
 DRIVEN = {**{f'A{i}': f'cart_address{i}' for i in range(24)}, **{f'PA{i}': f'cart_pa{i}' for i in range(8)},
           '/RD': 'cart_rd_n', '/WR': 'cart_wr_n', '/PRD': 'cart_prd_n', '/PWR': 'cart_pwr_n',
           '/ROMSEL': 'cart_romsel_n', '/WRAMSEL': 'cart_wramsel_n', 'REFRESH': 'cart_refresh', 'PHI2': 'cart_phi2',
-          'SYSTEM_CLK': 'cart_sysclk', 'CIC_CLK': 'cic_clk', 'CIC_SLAVE_RESET': 'cic_slave_reset',
-          'CIC_DATA0': 'cic_data0_out'}
+          'SYSTEM_CLK': 'cart_sysclk', 'CIC_CLK': 'cic_clk', 'CIC_SLAVE_RESET': 'cic_slave_reset'}
 DATA = {f'D{i}': f'cart_data{i}' for i in range(8)}
-SENSED = {'/IRQ': 'cart_irq_n', '/RESET': 'cart_reset_n_sense', 'EXPAND': 'expand_sense',
-          'CIC_DATA1': 'cic_data1_in', 'CIC_DATA0': 'cic_data0_sense'}
+SENSED = {'/IRQ': 'cart_irq_n', '/RESET': 'cart_reset_n_sense', 'EXPAND': 'expand_sense'}
+# CIC data pins: per-pin bidirectional path (fpga/rtl/sn64_snes_cic_lock.sv swaps
+# the driving side between rounds). signal -> (A-side FPGA label, DIR FPGA label)
+CIC_BIDIR = {'CIC_DATA0': ('cic_data0', 'cic_data0_dir'), 'CIC_DATA1': ('cic_data1', 'cic_data1_dir')}
+CIC_PULLDOWN_OHMS = (1e3, 100e3)     # accepted cartridge-side pull-down range (value provisional)
 CONTROL = ['ctl_oe_n', 'cic_oe_n', 'data_oe_n', 'data_dir', 'cart_reset_pull_n']
-FPGA_LABELS = set(DRIVEN.values()) | set(DATA.values()) | set(SENSED.values()) | set(CONTROL)
+FPGA_LABELS = (set(DRIVEN.values()) | set(DATA.values()) | set(SENSED.values()) | set(CONTROL)
+               | {v for pair in CIC_BIDIR.values() for v in pair})
+
+
+def ohms(value):
+    m = re.match(r'([\d.]+)\s*([kKM]?)', value or '')
+    if not m:
+        return None
+    return float(m.group(1)) * {'': 1, 'k': 1e3, 'K': 1e3, 'M': 1e6}[m.group(2)]
 RAIL5, RAIL3, GND = '/SNES_5V_CART', 'INTERFACE_3V3', '/GND'
 
 
@@ -145,8 +162,10 @@ def run_checks(project: Path, cli: Path):
     by_part = lambda part: sorted(r for r in child if comps[r]['part'] == part)
     octets, receivers = by_part('SN74LVC4245APW'), by_part('SN74LVC244APW')
     od_buf, od_inv, nmos = by_part('74LVC1G07'), by_part('74LVC1G06'), by_part('2N7002')
-    check('expected_part_counts', len(octets) == 7 and len(receivers) == 1 and len(od_buf) == 3 and len(od_inv) == 2 and len(nmos) == 1,
-          {'SN74LVC4245A': octets, 'SN74LVC244A': receivers, '1G07': od_buf, '1G06': od_inv, 'NMOS': nmos})
+    xl = by_part('SN74LVC1T45DBV')
+    check('expected_part_counts', len(octets) == 7 and len(receivers) == 1 and len(od_buf) == 3 and len(od_inv) == 2
+          and len(nmos) == 1 and len(xl) == 2,
+          {'SN74LVC4245A': octets, 'SN74LVC244A': receivers, '1G07': od_buf, '1G06': od_inv, 'NMOS': nmos, 'SN74LVC1T45': xl})
 
     # Pin identities against the datasheet tables.
     bad = []
@@ -167,6 +186,11 @@ def run_checks(project: Path, cli: Path):
                 bad.append((ref, pin, typ, actual))
     for ref in nmos:
         for pin, name in NMOS_SOT23.items():
+            actual = next((n['name'] for n in nodes.get(net_of.get((ref, pin)), []) if n['ref'] == ref and n['pin'] == pin), None)
+            if actual != name:
+                bad.append((ref, pin, name, actual))
+    for ref in xl:
+        for pin, name in LVC1T45.items():
             actual = next((n['name'] for n in nodes.get(net_of.get((ref, pin)), []) if n['ref'] == ref and n['pin'] == pin), None)
             if actual != name:
                 bad.append((ref, pin, name, actual))
@@ -242,6 +266,68 @@ def run_checks(project: Path, cli: Path):
             return None
         return {'series': rref, 'value': value, 'octet': a_pins[0]['ref'], 'channel': int(a_pins[0]['name'][1:])}
 
+    def pulls_to(net, target):
+        return [(r, v) for o, r, v in resistor_links(net) if o == target and o is not None]
+
+    cic_results = {}
+
+    def cic_path(sig, sock):
+        """Per-pin CIC data path. Problems are tagged path:/supply:/dir:/pull:."""
+        a_label, dir_label = CIC_BIDIR[sig]
+        probs, out = [], {}
+        foreign = [(m['ref'], m['pin']) for m in members(sock)
+                   if m['ref'] != 'J2' and comps.get(m['ref'], {}).get('part') != 'R']
+        if foreign:
+            probs.append(f'path: socket net carries non-resistor parts {foreign} (shared translator/receiver/driver)')
+        series = [(o, r, v) for o, r, v in resistor_links(sock) if o not in (GND, RAIL5, rail3, None)]
+        ref = None
+        if len(series) != 1:
+            probs.append(f'path: expected exactly one series resistor from the socket net, found {series}')
+        else:
+            xb, rser, vser = series[0]
+            bpins = [m for m in members(xb) if m['ref'] in xl and m['name'] == 'B']
+            extra = [(m['ref'], m['pin']) for m in members(xb) if m['ref'] != rser and m not in bpins]
+            out.update(series=rser, series_value=vser, b_net=xb)
+            if len(bpins) != 1 or extra:
+                probs.append(f'path: series resistor must reach exactly one SN74LVC1T45 B pin and nothing else ({extra})')
+            else:
+                ref = bpins[0]['ref']
+            if not (22 <= (ohms(vser) or 0) <= 100):
+                probs.append('path: series value outside 22-100 ohm')
+        if ref:
+            out['translator'] = ref
+            if not (pin_net(ref, 1) == rail3 and pin_net(ref, 6) == RAIL5 and pin_net(ref, 2) == GND):
+                probs.append(f'supply: {ref} must have VCCA=INTERFACE_3V3 (FPGA/DIR side), VCCB=SNES_5V_CART, GND')
+            a_net, d_net = pin_net(ref, 3), pin_net(ref, 5)
+            out.update(fpga_net=a_net, dir_net=d_net)
+            if base(a_net) != a_label or not (a_net or '').startswith(FPGA_PREFIX):
+                probs.append(f'path: A side {a_net} is not the FPGA label {a_label}')
+            a_ics = [(m['ref'], m['pin']) for m in members(a_net) if comps.get(m['ref'], {}).get('part') != 'R']
+            if a_ics != [(ref, '3')]:
+                probs.append(f'path: A-side net shared with other pins {a_ics}')
+            if base(d_net) != dir_label or not (d_net or '').startswith(FPGA_PREFIX):
+                probs.append(f'dir: DIR on {d_net}, not its own FPGA label {dir_label}')
+            d_ics = [(m['ref'], m['pin']) for m in members(d_net) if comps.get(m['ref'], {}).get('part') != 'R']
+            if d_ics != [(ref, '5')]:
+                probs.append(f'dir: DIR net shared with other pins/enables {d_ics}')
+            if not pulls_to(d_net, GND):
+                probs.append('dir: DIR has no pull-down (must default to L = B->A = listen)')
+            if d_net in (RAIL5, rail3, GND) or has_pull(d_net, RAIL5):
+                probs.append('dir: DIR tied or pulled to a supply')
+            ap = pulls_to(a_net, GND)
+            out['a_side_pulldown'] = ap
+            if not ap:
+                probs.append('pull: A-side pull-down missing (SCES515N Table 8-2: same idle condition on both sides)')
+        pd = pulls_to(sock, GND)
+        out['cart_pulldown'] = pd
+        lo, hi = CIC_PULLDOWN_OHMS
+        if len(pd) != 1 or not (lo <= (ohms(pd[0][1]) or 0) <= hi):
+            probs.append(f'pull: need exactly one {lo:g}-{hi:g} ohm cartridge-side pull-down to GND, found {pd}')
+        if has_pull(sock, RAIL5) or has_pull(sock, rail3):
+            probs.append('pull: pull-up on a CIC data pin (lock expects released = low)')
+        cic_results[sig] = {**out, 'problems': probs}
+        return cic_results[sig]
+
     for row in rows:
         pin, sig, direction = row['pin'], row['signal'], row['direction']
         net = net_of.get(('J2', pin))
@@ -250,7 +336,15 @@ def run_checks(project: Path, cli: Path):
         ok = net == expected
         why = [] if ok else [f'net {net} != {expected}']
         push_pull = [n for n in members(net) if n['type'] in ('output', 'tri_state', 'power_out')] if net else []
-        if direction == 'out' or direction == 'bidirectional' or sig == 'CIC_DATA0':
+        if sig in CIC_BIDIR:
+            res = cic_path(sig, net) if net else {'problems': ['socket net missing']}
+            rec.update({k: v for k, v in res.items() if k != 'problems'})
+            if res['problems']:
+                ok = False
+                why.extend(res['problems'])
+            rec['handling'] = ('per-pin SN74LVC1T45: own FPGA DIR (H = drive cartridge, default L = listen), '
+                               'series R, cartridge-side and A-side pull-downs')
+        elif direction == 'out' or direction == 'bidirectional':
             path = through_series(net) if net else None
             if not path:
                 ok = False
@@ -275,12 +369,7 @@ def run_checks(project: Path, cli: Path):
                     if dnet != GND:
                         ok = False
                         why.append(f'fixed output octet {path["octet"]} DIR strapped to {dnet}, not GND (B->A)')
-            if sig == 'CIC_DATA0':
-                sensed = [n for n in members(net) if n['ref'] in receivers and re.fullmatch(r'[12]A[1-4]', n['name'])]
-                if len(sensed) != 1 or base(pin_net(sensed[0]['ref'], {v: k for k, v in LVC244A.items()}[sensed[0]['name'].replace('A', 'Y')])) != SENSED[sig]:
-                    ok = False
-                    why.append('CIC_DATA0 release sense path missing')
-            rec['handling'] = {'out': 'driven: fixed-direction translator', 'bidirectional': 'data octet: variable DIR + gated OE'}.get(direction, 'driven + sensed (release-capable group OE)')
+            rec['handling'] = {'out': 'driven: fixed-direction translator', 'bidirectional': 'data octet: variable DIR + gated OE'}[direction]
         elif sig in SENSED:
             sensed = [n for n in members(net) if n['ref'] in receivers and re.fullmatch(r'[12]A[1-4]', n['name'])]
             y_net = None
@@ -312,7 +401,7 @@ def run_checks(project: Path, cli: Path):
                     ok = False
                     why.append('reset open-drain sink / default-assert chain incomplete')
             rec['handling'] = {'/IRQ': 'sensed, 5 V pull-up, never driven', '/RESET': 'open-drain NMOS sink + sense, 5 V pull-up',
-                               'EXPAND': 'bias (5 V pull-up) + sense', 'CIC_DATA1': 'sensed only (default high-Z)'}[sig]
+                               'EXPAND': 'bias (5 V pull-up) + sense'}[sig]
         elif direction == 'analog_in':
             active = [n for n in members(net) if n['ref'] != 'J2' and comps.get(n['ref'], {}).get('part') != 'TestPoint']
             if active:
@@ -338,6 +427,28 @@ def run_checks(project: Path, cli: Path):
     check('fixed_output_octets_DIR_strapped_B_to_A', fixed_dirs and all(v == GND for v in fixed_dirs.values())
           and not (set(fixed_dirs) & data_octets), fixed_dirs)
 
+    # ---- CIC data pins: individual direction control, pulls, no shared enable ----
+    def tagged(tag):
+        return {s: [p for p in r['problems'] if p.startswith(tag)] for s, r in cic_results.items()}
+    both = set(cic_results) == set(CIC_BIDIR)
+    refs = [r.get('translator') for r in cic_results.values()]
+    dirs = [r.get('dir_net') for r in cic_results.values()]
+    check('cic_data_pins_individually_direction_controlled',
+          both and all(refs) and len(set(refs)) == 2 and all(dirs) and len(set(dirs)) == 2
+          and not any(tagged('dir:').values()) and not any(tagged('path:').values()) and not any(tagged('supply:').values()),
+          {s: {k: r.get(k) for k in ('translator', 'dir_net', 'fpga_net', 'b_net', 'series')} | {'problems': r['problems']}
+           for s, r in cic_results.items()})
+    check('cic_data_pins_pulled_down_both_sides', both and not any(tagged('pull:').values()) and not any(tagged('dir:').values()),
+          {s: {'cart_pulldown': r.get('cart_pulldown'), 'a_side_pulldown': r.get('a_side_pulldown'),
+               'problems': [p for p in r['problems'] if p.startswith(('pull:', 'dir:'))]} for s, r in cic_results.items()})
+    shared = {ref: sorted(base(pin_net(ref, 22 - ch)) for ch in range(1, 9)
+                          if base(pin_net(ref, 22 - ch)) in {v for pair in CIC_BIDIR.values() for v in pair})
+              for ref in octets}
+    rx_cic = [(r, n['name']) for sig in CIC_BIDIR for r in receivers
+              for n in members(root_net(sig)) if n['ref'] == r]
+    check('cic_data_pins_not_on_shared_octet_enable_or_receiver', not any(shared.values()) and not rx_cic,
+          {'octet_B_pins_on_cic_labels': shared, 'receiver_inputs_on_cic_pins': rx_cic})
+
     d_ok, d_detail = len(data_octets) == 1, {'data_octets': sorted(data_octets)}
     if d_ok:
         ref = next(iter(data_octets))
@@ -354,13 +465,19 @@ def run_checks(project: Path, cli: Path):
     check('all_FPGA_side_labels_present', {base(n) for n in fpga_nets} == FPGA_LABELS,
           sorted(FPGA_LABELS - {base(n) for n in fpga_nets}))
     five_v = {RAIL5} | {n for n in nodes if any(m['ref'] == 'J2' for m in members(n))} | \
-             {pin_net(r, p) for r in octets for p in list(range(3, 11)) + [1, 2, 22]}
+             {pin_net(r, p) for r in octets for p in list(range(3, 11)) + [1, 2, 22]} | \
+             {pin_net(r, p) for r in xl for p in (4, 6)}
     five_v.discard(GND)   # fixed DIR straps sit on GND; ground is common, not a 5 V net
+    five_v.discard(None)
     leaks, seen, frontier = [], set(fpga_nets), list(fpga_nets)
     while frontier:
         net = frontier.pop()
+        if net in five_v:
+            leaks.append((net, 'is a 5 V net'))
         for m in members(net):
             if m['ref'] == 'J2' or (m['ref'] in octets and m['name'] in ('DIR', 'OE', 'VCCA') or (m['ref'] in octets and m['name'].startswith('A'))):
+                leaks.append((net, m['ref'], m['pin']))
+            if m['ref'] in xl and m['name'] in ('B', 'VCCB'):
                 leaks.append((net, m['ref'], m['pin']))
         for other, rref, _ in resistor_links(net):
             if other in (rail3, GND) or other is None:
@@ -376,7 +493,8 @@ def run_checks(project: Path, cli: Path):
             part = comps.get(m['ref'], {}).get('part')
             fine = ((m['ref'] in octets and re.fullmatch(r'B[1-8]', m['name'])) or
                     (m['ref'] in receivers and re.fullmatch(r'[12]Y[1-4]', m['name'])) or
-                    (m['ref'] in od_buf + od_inv and m['pin'] == '2') or part == 'R')
+                    (m['ref'] in od_buf + od_inv and m['pin'] == '2') or
+                    (m['ref'] in xl and m['name'] in ('A', 'DIR')) or part == 'R')
             if not fine:
                 allowed.append((net, m['ref'], m['pin'], m['name']))
     check('no_5V_net_reaches_FPGA_label', not leaks and not allowed and seen == fpga_nets and rail3 not in five_v,
@@ -386,8 +504,9 @@ def run_checks(project: Path, cli: Path):
 
     # ---- decoupling, footprints, sheet wiring --------------------------------------
     supply = {}
-    for ref in octets + receivers + od_buf + od_inv:
-        for n in [m for net in nodes for m in members(net) if m['ref'] == ref and m['type'] == 'power_in' and m['name'] != 'GND' and m['pin'] != '3']:
+    for ref in octets + receivers + od_buf + od_inv + xl:
+        for n in [m for net in nodes for m in members(net) if m['ref'] == ref and m['type'] == 'power_in' and m['name'] != 'GND'
+                  and not (ref in od_buf + od_inv and m['pin'] == '3')]:
             supply[pin_net(ref, n['pin'])] = supply.get(pin_net(ref, n['pin']), 0) + 1
     caps = {}
     for ref in child:
@@ -421,13 +540,28 @@ def main():
     if a.negative_test:
         # Each mutation edits one label in a temp copy of the project.
         mutations = [
+        # (title, old text, new text, checks that MUST be among the failures)
             ('U201 DIR strapped to cartridge 5 V (A->B) instead of GND',
-             '(label "GND" (at 38.1 116.84 180)', '(label "SNES_5V_CART" (at 38.1 116.84 180)'),
+             '(label "GND" (at 38.1 116.84 180)', '(label "SNES_5V_CART" (at 38.1 116.84 180)',
+             ['fixed_output_octets_DIR_strapped_B_to_A']),
             ('R206 FPGA-side pull-up moved to cartridge 5 V (5 V reaches ctl_oe_n)',
-             '(label "INTERFACE_3V3" (at 165.1 346.71 90)', '(label "SNES_5V_CART" (at 165.1 346.71 90)'),
+             '(label "INTERFACE_3V3" (at 165.1 346.71 90)', '(label "SNES_5V_CART" (at 165.1 346.71 90)',
+             ['no_5V_net_reaches_FPGA_label']),
+            ('U215 (CIC_DATA0) DIR tied to cartridge 5 V instead of its FPGA pin cic_data0_dir',
+             '(label "cic_data0_dir" (at 624.84 261.62 180)', '(label "SNES_5V_CART" (at 624.84 261.62 180)',
+             ['cic_data_pins_individually_direction_controlled']),
+            ('R217 CIC_DATA1 cartridge-side pull-down disconnected (missing pull-down)',
+             '(label "SNES_CIC_DATA1" (at 777.24 247.65 90)', '(label "R217_OPEN" (at 777.24 247.65 90)',
+             ['cic_data_pins_pulled_down_both_sides']),
+            ('U216 (CIC_DATA1) DIR shares U215 cic_data0_dir (shared direction enable)',
+             '(label "cic_data1_dir" (at 721.36 261.62 180)', '(label "cic_data0_dir" (at 721.36 261.62 180)',
+             ['cic_data_pins_individually_direction_controlled']),
+            ('U215 B (cartridge 5 V side) wired to the FPGA label cic_data0 (5 V on an FPGA label)',
+             '(label "XB_CIC_DATA0" (at 655.32 256.54 0)', '(label "cic_data0" (at 655.32 256.54 0)',
+             ['no_5V_net_reaches_FPGA_label', 'cic_data_pins_individually_direction_controlled']),
         ]
         results = []
-        for title, old, new in mutations:
+        for title, old, new, must_fail in mutations:
             with tempfile.TemporaryDirectory(prefix='sn64-cart-neg-') as temp:
                 copy = Path(temp) / 'sn64'
                 shutil.copytree(project, copy, ignore=shutil.ignore_patterns('exports', 'validation'))
@@ -437,8 +571,10 @@ def main():
                 (copy / SHEET).write_text(text.replace(old, new), encoding='utf-8', newline='\n')
                 checks, _, _ = run_checks(copy, cli)
             failed = [c['check'] for c in checks if not c['passed']]
-            results.append({'mutation': title, 'applied': applied, 'detected': bool(failed) and applied, 'failed_checks': failed})
-            print(('FAIL (as required): ' if failed else 'NOT DETECTED: ') + title + ' -> ' + ', '.join(failed))
+            detected = applied and set(must_fail) <= set(failed)
+            results.append({'mutation': title, 'applied': applied, 'detected': detected, 'required_failures': must_fail,
+                            'failed_checks': failed})
+            print(('FAIL (as required): ' if detected else 'NOT DETECTED: ') + title + ' -> ' + ', '.join(failed))
         ok = all(r['detected'] for r in results)
         print(json.dumps({'negative_test': 'pass' if ok else 'fail', 'results': results}, indent=2))
         return 0 if ok else 1
@@ -458,7 +594,8 @@ def main():
             'Static connectivity only: no timing, signal-integrity, ESD, power-sequencing or cartridge test was performed.',
             'Component values (33 R damping, 1k/2.2k/10k/100k pulls) are provisional engineering choices, not measured.',
             'FPGA-side pins end at no-connect markers in the root until the FPGA sheet exists; INTERFACE_3V3 has no source yet.',
-            'CIC_DATA0 shares its enable with SYSTEM_CLK/CIC_CLK/CIC_SLAVE_RESET; SuperCIC pair-mode drive on CIC_DATA1 is not provided.',
+            'CIC_DATA0/1 direction sequencing (DIR high before the FPGA drives A; FPGA releases A before DIR low) is an FPGA/board-wrapper '
+            'obligation that a netlist check cannot see; the CIC pull-down value is provisional until checked against a real key CIC.',
             'Socket-side ESD protection is not yet selected.',
         ]}
     out = a.output or project / 'validation' / 'cart-interface-check.json'

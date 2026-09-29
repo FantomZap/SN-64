@@ -1,18 +1,18 @@
 {
   "status": "pass",
   "scope": "static schematic/netlist check of the SNES cartridge-side translation sheet only",
-  "generated_at_utc": "2026-09-29T21:58:26.874154+00:00",
-  "checks_passed": 17,
+  "generated_at_utc": "2026-09-29T22:14:51.514092+00:00",
+  "checks_passed": 20,
   "checks_failed": 0,
   "inputs": {
-    "sn64.kicad_sch": "23fd9d23b681ae03c7f5c6b89370c9579089100e961ec24f3bd82825cb1b72d2",
-    "cart-interface.kicad_sch": "8a7bcce3c3f37ed82bdddd2f215fb63732daeeda1fefdf91b4179a9acbe75e54",
+    "sn64.kicad_sch": "7e7c31aa2f6f8a496f9e544541f85b013ff636c4fa4920a66c76662725faf8db",
+    "cart-interface.kicad_sch": "d36100f7a024c560e34dff2041f68d98f3db25c198a857e95e5628a64f353079",
     "interfaces/snes-pin-map.csv": "911a289bfb073aab8048daff42256eae65a527c8a0efd852bca0f37b1fdf7adc",
     "libraries/SN64_CART.kicad_sym": "c9398658a1ded7297d70e912f3a58fedbd5742abe486d00a21b5adf22ffdb092"
   },
   "erc_violations_by_type": {
     "warning:isolated_pin_label": 32,
-    "warning:pin_to_pin": 4
+    "warning:pin_to_pin": 5
   },
   "checks": [
     {
@@ -27,7 +27,7 @@
         "report_written": true,
         "violations_by_type": {
           "warning:isolated_pin_label": 32,
-          "warning:pin_to_pin": 4
+          "warning:pin_to_pin": 5
         }
       }
     },
@@ -58,6 +58,10 @@
         ],
         "NMOS": [
           "Q201"
+        ],
+        "SN74LVC1T45": [
+          "U215",
+          "U216"
         ]
       }
     },
@@ -224,6 +228,80 @@
       }
     },
     {
+      "check": "cic_data_pins_individually_direction_controlled",
+      "passed": true,
+      "detail": {
+        "CIC_DATA1": {
+          "translator": "U216",
+          "dir_net": "/SNES cartridge interface/cic_data1_dir",
+          "fpga_net": "/SNES cartridge interface/cic_data1",
+          "b_net": "/SNES cartridge interface/XB_CIC_DATA1",
+          "series": "R215",
+          "problems": []
+        },
+        "CIC_DATA0": {
+          "translator": "U215",
+          "dir_net": "/SNES cartridge interface/cic_data0_dir",
+          "fpga_net": "/SNES cartridge interface/cic_data0",
+          "b_net": "/SNES cartridge interface/XB_CIC_DATA0",
+          "series": "R214",
+          "problems": []
+        }
+      }
+    },
+    {
+      "check": "cic_data_pins_pulled_down_both_sides",
+      "passed": true,
+      "detail": {
+        "CIC_DATA1": {
+          "cart_pulldown": [
+            [
+              "R217",
+              "10k"
+            ]
+          ],
+          "a_side_pulldown": [
+            [
+              "R219",
+              "100k"
+            ]
+          ],
+          "problems": []
+        },
+        "CIC_DATA0": {
+          "cart_pulldown": [
+            [
+              "R216",
+              "10k"
+            ]
+          ],
+          "a_side_pulldown": [
+            [
+              "R218",
+              "100k"
+            ]
+          ],
+          "problems": []
+        }
+      }
+    },
+    {
+      "check": "cic_data_pins_not_on_shared_octet_enable_or_receiver",
+      "passed": true,
+      "detail": {
+        "octet_B_pins_on_cic_labels": {
+          "U201": [],
+          "U202": [],
+          "U203": [],
+          "U204": [],
+          "U205": [],
+          "U206": [],
+          "U207": []
+        },
+        "receiver_inputs_on_cic_pins": []
+      }
+    },
+    {
       "check": "data_octet_DIR_level_safe_inverting_open_drain",
       "passed": true,
       "detail": {
@@ -245,7 +323,7 @@
       "check": "no_5V_net_reaches_FPGA_label",
       "passed": true,
       "detail": {
-        "fpga_nets_checked": 62,
+        "fpga_nets_checked": 63,
         "leaks": [],
         "unexpected_members": []
       }
@@ -269,12 +347,12 @@
       "passed": true,
       "detail": {
         "supply_pins": {
-          "/SNES cartridge interface/INTERFACE_3V3": 20,
-          "/SNES_5V_CART": 7
+          "/SNES cartridge interface/INTERFACE_3V3": 22,
+          "/SNES_5V_CART": 9
         },
         "100nF_caps": {
-          "/SNES_5V_CART": 7,
-          "/SNES cartridge interface/INTERFACE_3V3": 20
+          "/SNES cartridge interface/INTERFACE_3V3": 22,
+          "/SNES_5V_CART": 9
         }
       }
     },
@@ -604,8 +682,25 @@
       "signal": "CIC_DATA1",
       "csv_direction": "bidirectional_protocol",
       "socket_net": "/SNES_CIC_DATA1",
-      "fpga_net": "/SNES cartridge interface/cic_data1_in",
-      "handling": "sensed only (default high-Z)",
+      "series": "R215",
+      "series_value": "33",
+      "b_net": "/SNES cartridge interface/XB_CIC_DATA1",
+      "translator": "U216",
+      "fpga_net": "/SNES cartridge interface/cic_data1",
+      "dir_net": "/SNES cartridge interface/cic_data1_dir",
+      "a_side_pulldown": [
+        [
+          "R219",
+          "100k"
+        ]
+      ],
+      "cart_pulldown": [
+        [
+          "R217",
+          "10k"
+        ]
+      ],
+      "handling": "per-pin SN74LVC1T45: own FPGA DIR (H = drive cartridge, default L = listen), series R, cartridge-side and A-side pull-downs",
       "passed": true
     },
     {
@@ -1025,13 +1120,25 @@
       "signal": "CIC_DATA0",
       "csv_direction": "bidirectional_protocol",
       "socket_net": "/SNES_CIC_DATA0",
-      "series": "RN211.4-5",
-      "value": "33 (4x0603, tune)",
-      "octet": "U206",
-      "channel": 4,
-      "fpga_net": "/SNES cartridge interface/cic_data0_out",
-      "direction_control": "fixed B->A",
-      "handling": "driven + sensed (release-capable group OE)",
+      "series": "R214",
+      "series_value": "33",
+      "b_net": "/SNES cartridge interface/XB_CIC_DATA0",
+      "translator": "U215",
+      "fpga_net": "/SNES cartridge interface/cic_data0",
+      "dir_net": "/SNES cartridge interface/cic_data0_dir",
+      "a_side_pulldown": [
+        [
+          "R218",
+          "100k"
+        ]
+      ],
+      "cart_pulldown": [
+        [
+          "R216",
+          "10k"
+        ]
+      ],
+      "handling": "per-pin SN74LVC1T45: own FPGA DIR (H = drive cartridge, default L = listen), series R, cartridge-side and A-side pull-downs",
       "passed": true
     },
     {
@@ -1134,7 +1241,7 @@
     "Static connectivity only: no timing, signal-integrity, ESD, power-sequencing or cartridge test was performed.",
     "Component values (33 R damping, 1k/2.2k/10k/100k pulls) are provisional engineering choices, not measured.",
     "FPGA-side pins end at no-connect markers in the root until the FPGA sheet exists; INTERFACE_3V3 has no source yet.",
-    "CIC_DATA0 shares its enable with SYSTEM_CLK/CIC_CLK/CIC_SLAVE_RESET; SuperCIC pair-mode drive on CIC_DATA1 is not provided.",
+    "CIC_DATA0/1 direction sequencing (DIR high before the FPGA drives A; FPGA releases A before DIR low) is an FPGA/board-wrapper obligation that a netlist check cannot see; the CIC pull-down value is provisional until checked against a real key CIC.",
     "Socket-side ESD protection is not yet selected."
   ]
 }

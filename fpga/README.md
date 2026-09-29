@@ -10,6 +10,10 @@ This directory contains a reproducible **console-only engineering candidate** bu
 - [N64/M64 endpoint](rtl/sn64_n64_endpoint.sv): vendored [SummerCart64 PI controller](vendor/summercart64/provenance.json) (GPL-3.0, unmodified) with an SN64 bootstrap ROM window and mailbox; [host-model diagnostic](tests/tb_n64_endpoint.sv). See [endpoint notes](../docs/design/n64-endpoint-implementation.md).
 - [N64 CIC lockout](../docs/design/n64-cic-implementation.md): vendored SummerCart64 CIC (SERV soft core, ISC) running the vendored UltraCIC_C firmware (MIT); build the image with `fpga/tools/build_cic.py` (xPack riscv-none-elf-gcc), then [tb_n64_cic.sv](tests/tb_n64_cic.sv) checks the ID, seed and checksum streams against an independent reference.
 - [Recorded evaluation](reports/evaluation.md) and [machine-readable evidence](reports/evaluation.json).
+- [Board top level](rtl/sn64_board_top.sv): ECP5 PLLs (25 -> 62.5 MHz, pixel x5), one DCSC that selects the NTSC/PAL SNES master and starts/stops it glitchlessly, bootstrap ROM from the configuration flash, CIC pads. Route it with `python tools/route_top.py` (see [integration notes](../docs/design/system-integration.md)).
+- [Bootstrap ROM from flash](rtl/sn64_bootrom_flash.sv): vendored SummerCart64 `memory_flash` (QSPI EBh, unmodified) behind the endpoint's ROM window, `ROM_FROM_FLASH=1`; [bench](tests/tb_bootrom_flash.sv) with a QSPI flash model. See [notes](../docs/design/bootrom-flash.md).
+- [ROM-header region probe](rtl/sn64_header_probe.sv): reads the SNES header with the cartridge held in reset to pick NTSC/PAL when there is no key CIC; [bench](tests/tb_header_probe.sv). See [notes](../docs/design/header-region-probe.md).
+- [CIC pad sequencing](rtl/sn64_cic_pad.sv): SN74LVC1T45 DIR against pad drive; [bench](tests/tb_cic_pad.sv).
 - [Physical-cartridge bridge work](../docs/design/physical-cartridge-bridge.md) and [FPGA selection](../docs/design/fpga-board-selection.md).
 
 ## What is reused and changed

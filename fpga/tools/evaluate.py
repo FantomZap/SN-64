@@ -135,6 +135,23 @@ def main():
         if n64_pass is None:
             raise RuntimeError('N64 endpoint test exited without its acceptance marker')
         report['simulation']['n64_endpoint'] = n64_pass
+        # Bootstrap ROM window from the configuration flash: SummerCart64 memory_flash (unmodified) + QSPI flash model.
+        flash_sources = n64_common + ['fpga/vendor/summercart64/fw/rtl/memory/memory_flash.sv',
+                                      'fpga/rtl/sn64_bootrom_flash.sv', 'fpga/tests/tb_bootrom_flash.sv']
+        flash_obj = obj / 'bootrom-flash'
+        run('bootrom-flash-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+            '--top-module', 'tb_bootrom_flash', '--Mdir', str(flash_obj).replace('\\', '/')] + flash_sources)
+        flash_exe = flash_obj / ('Vtb_bootrom_flash.exe' if os.name == 'nt' else 'Vtb_bootrom_flash')
+        flash_body = run('bootrom-flash', [str(flash_exe)])
+        flash_pass = next((line for line in flash_body.splitlines() if line.startswith('PASS:')), None)
+        if flash_pass is None:
+            raise RuntimeError('Bootrom flash test exited without its acceptance marker')
+        report['simulation']['bootrom_flash'] = flash_pass
+        run('bootrom-flash-corrupt-byte', [str(flash_exe), '+fault=1'], 'got 08a3 expected 085c')
+        run('bootrom-flash-wrong-offset', [str(flash_exe), '+fault=2'], 'got ffff expected 6047')
+        run('bootrom-flash-late-data', [str(flash_exe), '+fault=3'], 'got 9047 expected 6047')
+        report['simulation']['injected_bootrom_flash_faults'] = ('Rejected: a corrupted flash byte, the image 2 bytes off '
+                                                                 'FLASH_OFFSET and flash data 40 ns late are all detected')
         # CIC lockout handshake against a console-side model; needs the built firmware image.
         if (ROOT / 'build/cic/cic-build.json').exists():
             cic_obj = obj / 'n64-cic'
@@ -216,7 +233,7 @@ def main():
                            'fpga/rtl/sn64_snes_cic_lock.sv', 'fpga/vendor/snestang-controller/src/controller_adapter.sv',
                            'fpga/rtl/sn64_snes_joypad.sv'] + hdmi_vendor + [
                            'fpga/rtl/sn64_av_hdmi_tx.sv', 'fpga/rtl/sn64_av_serializer.sv', 'fpga/rtl/sn64_av_out.sv',
-                           'fpga/rtl/sn64_top.sv', 'fpga/tests/tb_system.sv']
+                           'fpga/rtl/sn64_header_probe.sv', 'fpga/rtl/sn64_top.sv', 'fpga/tests/tb_system.sv']
             sys_obj = obj / 'system'
             run('system-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
                 '-Wno-lint', '-Wno-style', '-Wno-TIMESCALEMOD',
@@ -226,6 +243,12 @@ def main():
             if sys_pass is None:
                 raise RuntimeError('System test exited without its acceptance marker')
             report['simulation']['system'] = sys_pass
+            # Same system with a PAL (Europe) ROM header and no key CIC: region must come up PAL.
+            sys_pal_body = run('system-pal-header', [str(sys_obj / ('Vtb_system.exe' if os.name == 'nt' else 'Vtb_system')), '+pal_header'])
+            sys_pal_pass = next((line for line in sys_pal_body.splitlines() if line.startswith('PASS:')), None)
+            if sys_pal_pass is None or 'STATUS=54df' not in sys_pal_pass:   # STATUS bit 7 = region PAL
+                raise RuntimeError('System PAL-header test did not start in PAL')
+            report['simulation']['system_pal_header'] = sys_pal_pass
         # Controller path: mailbox button images -> emulated standard SNES pads, alone and on the core.
         pad_sources = ['fpga/vendor/snestang-controller/src/controller_adapter.sv',
                        'fpga/rtl/sn64_snes_joypad.sv', 'fpga/tests/tb_snes_joypad.sv']
@@ -273,6 +296,37 @@ def main():
             run('snes-cic-' + tag, [str(f_obj / ('Vtb_snes_cic_lock.exe' if os.name == 'nt' else 'Vtb_snes_cic_lock'))],
                 'FAIL: SNES CIC lock')
         report['simulation']['injected_snes_cic_fault'] = 'Rejected: disabled compare and altered table update are both detected'
+        # ROM-header region probe, plus two fault builds that must fail
+        hdr_src = ['fpga/rtl/sn64_header_probe.sv', 'fpga/tests/tb_header_probe.sv']
+        hdr_obj = obj / 'header-probe'
+        run('header-probe-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+            '--top-module', 'tb_header_probe', '--Mdir', str(hdr_obj).replace('\\', '/')] + hdr_src)
+        hdr_body = run('header-probe', [str(hdr_obj / ('Vtb_header_probe.exe' if os.name == 'nt' else 'Vtb_header_probe'))])
+        hdr_pass = next((line for line in hdr_body.splitlines() if line.startswith('PASS:')), None)
+        if hdr_pass is None:
+            raise RuntimeError('Header probe test exited without its acceptance marker')
+        report['simulation']['header_probe'] = hdr_pass
+        for tag, define in (('skip-checksum', 'SN64_FAULT_SKIP_CHECKSUM'), ('short-access', 'TB_SHORT_ACCESS')):
+            f_obj = obj / ('header-probe-' + tag)
+            run('header-probe-' + tag + '-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+                '+define+' + define, '--top-module', 'tb_header_probe', '--Mdir', str(f_obj).replace('\\', '/')] + hdr_src)
+            run('header-probe-' + tag, [str(f_obj / ('Vtb_header_probe.exe' if os.name == 'nt' else 'Vtb_header_probe'))],
+                'FAIL: tb_header_probe')
+        report['simulation']['injected_header_fault'] = ('Rejected: skipped checksum validation and a too-short read strobe '
+                                                         'are both detected')
+        # SNES CIC pad direction sequencing (SN74LVC1T45 per pin), plus a fault build that must fail
+        cpad_src = ['fpga/rtl/sn64_cic_pad.sv', 'fpga/tests/tb_cic_pad.sv']
+        for tag, defines, expect in (('', [], None), ('-order', ['+define+SN64_FAULT_CIC_PAD_ORDER'], 'FAIL: tb_cic_pad')):
+            c_obj = obj / ('cic-pad' + tag)
+            run('cic-pad' + tag + '-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal'] + defines +
+                ['--top-module', 'tb_cic_pad', '--Mdir', str(c_obj).replace('\\', '/')] + cpad_src)
+            c_body = run('cic-pad' + tag, [str(c_obj / ('Vtb_cic_pad.exe' if os.name == 'nt' else 'Vtb_cic_pad'))], expect)
+            if not tag:
+                c_pass = next((line for line in c_body.splitlines() if line.startswith('PASS:')), None)
+                if c_pass is None:
+                    raise RuntimeError('CIC pad test exited without its acceptance marker')
+                report['simulation']['cic_pad'] = c_pass
+        report['simulation']['injected_cic_pad_fault'] = 'Rejected: pad drive and DIR switching together is detected as contention'
         report['simulation']['limit'] = ('Same master clock in all runs; PAL clocks/video and PPU/APU not qualified; '
                                          'bridge bus model is behavioural (no analog levels or translator delays)')
 

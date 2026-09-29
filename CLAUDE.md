@@ -68,7 +68,7 @@ KiCad static checks. These **rewrite tracked** `hardware/sn64/validation/*` repo
 & 'C:\Program Files\KiCad\10.0\bin\python.exe' hardware/sn64/tools/verify_usb_programmer.py --kicad-cli 'C:\Program Files\KiCad\10.0\bin\kicad-cli.exe'
 ```
 
-Baselines: 30/30 interface checks, 64/64 USB checks, ERC 0 errors plus 90 expected `isolated_pin_label` warnings. Mechanical scripts take `--source-root .` now that `references/downloads/` is local (see `mechanical/README.md`).
+Baselines (2026-09-29, cart sheet rev 0.3.1): 30/30 interface checks, 64/64 USB checks, 20/20 cartridge-interface checks (`verify_cart_interface.py`, plus `--negative-test`), ERC 0 errors with 32 `isolated_pin_label` and 5 `pin_to_pin` warnings. Mechanical scripts take `--source-root .` now that `references/downloads/` is local (see `mechanical/README.md`).
 
 ## Next engineering work (from the plan's "Next" section)
 

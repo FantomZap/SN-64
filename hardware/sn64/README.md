@@ -1,6 +1,6 @@
 # SN 64 KiCad schematic draft
 
-Open **[sn64.kicad_pro](sn64.kicad_pro)** in KiCad 10, then open the schematic. The [PDF](exports/sn64-interface-draft.pdf) is a review export of the root cartridge sheet and [USB programmer child sheet](usb-programmer.kicad_sch). Revision `0.2-usb` contains two cartridge connectors and a USB-C programming circuit with project-local libraries. It is not a complete electrical design or a manufacturing package.
+Open **[sn64.kicad_pro](sn64.kicad_pro)** in KiCad 10, then open the schematic. The [PDF](exports/sn64-interface-draft.pdf) is a review export of the root cartridge sheet, the [USB programmer child sheet](usb-programmer.kicad_sch) and the [SNES cartridge interface child sheet](cart-interface.kicad_sch) (rev 0.3.1-cart: 5 V/3.3 V translators, reset/IRQ/CIC paths, per-pin CIC data translators; see [notes](../../docs/design/cart-interface-schematic.md)). The project contains two cartridge connectors, a USB-C programming circuit and the cartridge interface, with project-local libraries. It is not a complete electrical design or a manufacturing package.
 
 ## What is present
 
@@ -30,7 +30,7 @@ See [THIRD_PARTY.md](THIRD_PARTY.md), [cartridge provenance](libraries/provenanc
 
 ## Validation and reproducibility
 
-KiCad 10.0.6 exports the two-sheet schematic to XML and PDF. Both PDF sheets were rendered and visually inspected. The saved ERC report contains **90 warnings**, all `isolated_pin_label`, at the pending cartridge interfaces, and **zero errors**. The USB sheet has no ERC violations. These warnings remain visible; the schematic is incomplete and is not an ERC-clean release. Rerun checks as actual circuitry is added.
+KiCad 10.0.6 exports the two-sheet schematic to XML and PDF. Both PDF sheets were rendered and visually inspected. The saved ERC report contains **zero errors** and 37 warnings (32 `isolated_pin_label` at interfaces still waiting for the FPGA sheet, 5 `pin_to_pin`); `verify_cart_interface.py` passes 20/20 checks plus its negative test. The USB sheet has no ERC violations. These warnings remain visible; the schematic is incomplete and is not an ERC-clean release. Rerun checks as actual circuitry is added.
 
 The [independent validation script](tools/verify_interfaces.py) checks the exported connector pin/net assignments against the separately researched maps, rejects accidental cross-domain connections, and compares both footprints against the original downloaded sources. The corresponding [result](validation/interface-check.json) and [review](validation/interface-review.md) record the result and remaining limitations.
 

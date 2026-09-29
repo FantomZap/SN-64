@@ -1,14 +1,14 @@
 {
   "status": "pass",
   "scope": "connector reference consistency only",
-  "generated_at_utc": "2026-09-29T21:58:24.667970+00:00",
+  "generated_at_utc": "2026-09-29T22:15:07.719227+00:00",
   "kicad_python_version": "10.0.6",
   "checks_passed": 30,
   "checks_failed": 0,
   "inputs": {
     "schematic": {
       "path": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\hardware\\sn64\\sn64.kicad_sch",
-      "sha256": "23fd9d23b681ae03c7f5c6b89370c9579089100e961ec24f3bd82825cb1b72d2"
+      "sha256": "7e7c31aa2f6f8a496f9e544541f85b013ff636c4fa4920a66c76662725faf8db"
     },
     "symbol_library": {
       "path": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\hardware\\sn64\\libraries\\SN64.kicad_sym",

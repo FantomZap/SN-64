@@ -4,16 +4,22 @@
 // Reuses SummerCart64's proven PI-bus controller (fpga/vendor/summercart64,
 // GPL-3.0, unmodified) and gives it two SN64-specific back ends:
 //   * a bootstrap ROM window at N64 address 0x1000_0000 (the ordinary
-//     cartridge-ROM range the console boots from), served from block RAM;
+//     cartridge-ROM range the console boots from), served from block RAM
+//     (ROM_FROM_FLASH = 0) or from the FPGA configuration flash through
+//     SummerCart64's flash controller (ROM_FROM_FLASH = 1, sn64_bootrom_flash.sv,
+//     docs/design/bootrom-flash.md);
 //   * a mailbox register block at 0x1FFF_0000 (SummerCart64's register range,
 //     so its unlocked-register convention carries over): controller state
 //     from the N64 bootstrap program to the SNES core, and status/control.
 // CIC (lockout), SI/joybus and /INT are NOT implemented here; see
 // docs/design/n64-endpoint-implementation.md.
 module sn64_n64_endpoint #(
-    parameter ROM_ADDR_BITS = 12          // bootstrap ROM size = 2^ROM_ADDR_BITS 16-bit words
+    parameter ROM_ADDR_BITS = 12,         // bootstrap ROM window = 2^ROM_ADDR_BITS 16-bit words (mirrored above)
+    parameter ROM_FROM_FLASH = 0,         // 0: block RAM loaded through rom_we; 1: SPI configuration flash
+    parameter [23:0] FLASH_OFFSET = 24'h40_0000, // flash byte address of ROM word 0 (ROM_FROM_FLASH = 1)
+    parameter FLASH_USE_USRMCLK = 1       // 1: ECP5 USRMCLK drives MCLK; 0: SCK on flash_sck (simulation)
 ) (
-    input  wire        clk,               // 21.477 MHz master clock (PI logic is synchronous to it)
+    input  wire        clk,               // host clock: clk_host 62.5 MHz in sn64_top (PI logic is synchronous to it)
     input  wire        reset,             // active-high local reset
     input  wire        cic_cpu_clk,       // CIC soft-CPU clock (62.5 MHz from the PLL, as in SummerCart64)
 
@@ -23,10 +29,16 @@ module sn64_n64_endpoint #(
     input  wire        n64_pi_alel, n64_pi_aleh, n64_pi_read, n64_pi_write,
     inout  wire [15:0] n64_pi_ad,
 
-    // Bootstrap ROM load port (from the programmer/USB path at build time or run time)
+    // Bootstrap ROM load port (from the programmer/USB path at build time or run time).
+    // Unused when ROM_FROM_FLASH = 1 (the image is programmed into the flash).
     input  wire        rom_we,
     input  wire [ROM_ADDR_BITS-1:0] rom_waddr,
     input  wire [15:0] rom_wdata,
+
+    // Configuration flash (ROM_FROM_FLASH = 1). BRAM build: CS high, SCK low, DQ released.
+    output wire        flash_sck,         // only with FLASH_USE_USRMCLK = 0; else MCLK comes from USRMCLK
+    output wire        flash_cs_n,
+    inout  wire [3:0]  flash_dq,
 
     // Mailbox: N64 -> SNES side
     output reg  [15:0] joy1_buttons, joy2_buttons,   // SNES button image (active-high bits)
@@ -108,20 +120,30 @@ module sn64_n64_endpoint #(
     // outside the ROM return the word address mirrored into the ROM (small
     // ROM mirrored across the window); writes are ignored (rom_write_enabled=0).
     // ---------------------------------------------------------------------
-    reg [15:0] rom [0:(1<<ROM_ADDR_BITS)-1];
-    always @(posedge clk) if (rom_we) rom[rom_waddr] <= rom_wdata;
+    if (ROM_FROM_FLASH) begin : g_rom_flash
+        sn64_bootrom_flash #(.FLASH_OFFSET(FLASH_OFFSET), .WINDOW_BITS(ROM_ADDR_BITS + 1),
+                             .USE_USRMCLK(FLASH_USE_USRMCLK)) u_flash (
+            .clk(clk), .reset(reset), .mem_bus(mem_bus),
+            .flash_sck_pin(flash_sck), .flash_cs_n(flash_cs_n), .flash_dq(flash_dq));
+    end else begin : g_rom_bram
+        reg [15:0] rom [0:(1<<ROM_ADDR_BITS)-1];
+        always @(posedge clk) if (rom_we) rom[rom_waddr] <= rom_wdata;
 
-    reg mem_ack;
-    reg [15:0] mem_rdata;
-    always @(posedge clk) begin
-        mem_ack <= 1'b0;
-        if (mem_bus.request && !mem_ack) begin
-            mem_rdata <= rom[mem_bus.address[ROM_ADDR_BITS:1]];
-            mem_ack   <= 1'b1;
+        reg mem_ack;
+        reg [15:0] mem_rdata;
+        always @(posedge clk) begin
+            mem_ack <= 1'b0;
+            if (mem_bus.request && !mem_ack) begin
+                mem_rdata <= rom[mem_bus.address[ROM_ADDR_BITS:1]];
+                mem_ack   <= 1'b1;
+            end
         end
+        assign mem_bus.ack   = mem_ack;
+        assign mem_bus.rdata = mem_rdata;
+        assign flash_sck     = 1'b0;
+        assign flash_cs_n    = 1'b1;
+        // flash_dq is left undriven (released) in the block-RAM build.
     end
-    assign mem_bus.ack   = mem_ack;
-    assign mem_bus.rdata = mem_rdata;
 
     // ---------------------------------------------------------------------
     // Mailbox registers (16-bit words at 0x1FFF_0000 + offset)

@@ -136,8 +136,10 @@ module sn64_cart_bridge (
     end
 `endif
 
-    assign data_dir  = drive_q;
-    assign data_oe_n = !(drive_q || listen_q);
+    // Also gated by permit combinationally: once permission drops the SNES
+    // clock may stop, and the registered state would then never clear.
+    assign data_dir  = drive_q && permit;
+    assign data_oe_n = !(permit && (drive_q || listen_q));
     assign contention_guard = data_oe_n;
 
     // What the core sees: the cartridge byte while listening; its own byte

@@ -1,6 +1,6 @@
 # Integrated top level and system simulation
 
-Snapshot 2026-09-29. [fpga/rtl/sn64_top.sv](../../fpga/rtl/sn64_top.sv) connects every FPGA block that exists so far. [fpga/tests/tb_system.sv](../../fpga/tests/tb_system.sv) runs the whole power-on story in simulation. **Nothing here has run on hardware**, and the board wrapper (PLLs, the SNES clock select/gate primitive, pad constraints) is not written yet.
+Snapshot 2026-09-29. [fpga/rtl/sn64_top.sv](../../fpga/rtl/sn64_top.sv) connects every FPGA block that exists so far. [fpga/tests/tb_system.sv](../../fpga/tests/tb_system.sv) runs the whole power-on story in simulation. **Nothing here has run on hardware.** The board top level [sn64_board_top.sv](../../fpga/rtl/sn64_board_top.sv) (PLLs, the SNES clock select, flash boot ROM, CIC pads) exists; the final pinout waits for the FPGA sheet of the schematic.
 
 ## Plain-language summary
 
@@ -21,7 +21,7 @@ The N64 endpoint must run from an always-on clock: the N64 boots the menu before
 1. Board reset releases; the Si5351 is programmed and both PLLs lock (`STATUS[0]`).
 2. The N64 boots the bootstrap from the ROM window, checks MAGIC and writes CONTROL.run_request.
 3. The power sequencer holds cartridge /RESET, enables 5 V, then the interface rail.
-4. The SNES CIC lock starts on its own clock. The region is decided by the forced mode, a passing key's type, a failing/absent key (NTSC default) or a 300 ms timeout.
+4. The SNES CIC lock starts on its own clock, and the [ROM-header probe](header-region-probe.md) reads `$00:FFC0-$00:FFDF` while the cartridge is still held in /RESET. The region is decided in priority order: forced mode, a passing key's type, a valid ROM header, NTSC default (also after the 300 ms timeout).
 5. `snes_clk_run` starts the SNES master at that region's frequency. It never changes while it runs; see the [clock plan](clock-plan.md).
 6. After 1 ms of running clock the sequencer releases /RESET and grants bus permission; the core leaves reset.
 
@@ -44,13 +44,15 @@ A first full place-and-route used [sn64_pnr_wrap.sv](../../fpga/rtl/sn64_pnr_wra
 
 ## Open integration decisions
 
-1. **Bootstrap ROM storage.** The first menu ROM is 114,688 bytes and needs a 64 K-word window: 64 DP16KD blocks. Whole-design synthesis confirms 205 of 208 blocks used with it, so it must move out of block RAM. Options: serve it from the FPGA configuration flash through SummerCart64's flash path (it already serves its bootloader from flash), or from external RAM if the A/V design needs one anyway. `ROM_ADDR_BITS` stays configurable until this is decided.
-2. **Board wrapper:** ECP5 PLLs for 62.5 MHz and the HDMI clocks, a glitch-free SNES clock select/gate (DCS) driven by `snes_clk_run`/`region_pal`, I/O standards and pin constraints.
-3. **A/V output** integration once its block is merged.
-4. **ROM header region fallback** (`$00:FFD9`) needs a pre-boot bus master in front of the bridge; today an absent key means NTSC unless the menu forces PAL.
-5. Whole-design place-and-route for timing.
-6. **CIC data pin circuit** (must fix before layout): the [cartridge interface sheet](cart-interface-schematic.md) treats CIC_DATA0 as output-only and CIC_DATA1 as input-only, but the lock protocol drives each pin in some rounds and receives on it in others. Each needs its own enabled bidirectional path with a pull-down.
+Status 2026-09-29 (evening):
 
+1. **Bootstrap ROM storage: resolved.** The ROM window is served from the FPGA configuration flash ([bootrom-flash.md](bootrom-flash.md), SummerCart64 `memory_flash.sv` unmodified, `ROM_FROM_FLASH=1` in the board top). This frees 64 DP16KD. Still open: the sysCONFIG setting that frees CSSPIN/D0-D3 after configuration, flash part selection (QE bit, tCLQV), the programmer offset, and the menu rule that PI DOM1 LAT stays at the header's 0x40.
+2. **Board wrapper: written** ([sn64_board_top.sv](../../fpga/rtl/sn64_board_top.sv)). EHXPLLL 25 -> 62.5 MHz and pixel -> x5, one DCSC that both selects NTSC/PAL and starts/stops the SNES clock, flash boot ROM, CIC pads. Still open: the real pinout and I/O standards (needs the FPGA schematic sheet).
+3. **A/V output:** merged (HDMI 720x480p with 32 kHz audio). PAL raster and cartridge analog audio still open.
+4. **ROM header region fallback: implemented** ([header-region-probe.md](header-region-probe.md)), tested alone and in `tb_system` with an EU header (PAL) and without a header (NTSC).
+5. **Place-and-route:** see below; the board top is routed with real clock primitives.
+6. **CIC data pin circuit: resolved.** Schematic rev 0.3.1 gives each CIC data pin its own SN74LVC1T45 with a dedicated DIR pin and pull-downs ([cart-interface-schematic.md](cart-interface-schematic.md)). [sn64_cic_pad.sv](../../fpga/rtl/sn64_cic_pad.sv) sequences DIR against the pad drive; [tb_cic_pad.sv](../../fpga/tests/tb_cic_pad.sv) checks it against a translator model, and a fault build that switches both together is rejected.
+7. **Header telemetry:** STATUS is full; the menu cannot yet see why a region was chosen (header valid, country, reject reason). Needs a new mailbox word.
 
 ## Place-and-route with HDMI (2026-09-29)
 
@@ -65,3 +67,18 @@ Reproduce with `python fpga/tools/route_top.py` (OSS CAD Suite on PATH; writes `
 | HDMI TMDS bit clock | 135.1 MHz | 317.36 MHz |
 
 Resources: 29,224 LUT4 / 33,899 TRELLIS_COMB (40 %), 12,910 FF (15 %), 143 of 208 DP16KD, 20 MULT18X18D, 4 ODDRX1F, 122 I/O. The bootstrap ROM block RAM is not counted (its load port is tied off and it is being moved to flash). Cross-domain paths are synchronised by design and excluded; this is internal feasibility, not a board timing sign-off.
+
+## Board top place-and-route with real clock primitives (2026-09-29)
+
+Reproduce with `python fpga/tools/route_top.py` (default `--top board`; writes `build/route-board/summary.json`). This routes [sn64_board_top.sv](../../fpga/rtl/sn64_board_top.sv): the clocks now come from pins through the real ECP5 primitives (two EHXPLLL, one DCSC), the bootstrap ROM is served from the configuration flash through USRMCLK, and the CIC data pads have their DIR sequencing. Constraints: [sn64_board_trial.lpf](../../fpga/constraints/sn64_board_trial.lpf) (clock frequencies on the four clock pins; ULX3S sites for the oscillator, HDMI and flash pins; everything else placed by the tool). nextpnr-ecp5, 85F, CABGA381, speed grade 6:
+
+| Clock | Required | Achieved |
+|---|---:|---:|
+| SNES master (after the DCSC) | 21.48 MHz | 27.30 MHz |
+| Host, from PLL (N64 endpoint, CIC, flash) | 62.5 MHz | 82.90 MHz |
+| Housekeeping, 25 MHz oscillator | 25 MHz | 61.46 MHz |
+| HDMI pixel (Si5351 CLK2) | 27.02 MHz | 62.50 MHz |
+| HDMI TMDS bit clock, from PLL | 135.1 MHz | 320.20 MHz |
+
+Resources: 34,773 TRELLIS_COMB (41 %), 13,342 FF (15 %), **143 of 208 DP16KD** (the bootstrap ROM no longer uses block RAM), 20 MULT18X18D, 2 of 4 EHXPLLL, 1 of 2 DCSC, 121 I/O. nextpnr derived the SNES clock constraint through the DCSC by itself and promoted all five clocks to the global network. Cross-domain paths are synchronised by design and are not timing-checked; the SNES domain's worst reported cross-domain path is 24.5 ns. This is a feasibility result on a trial pinout: the real pin assignment, I/O standards and board timing come with the FPGA schematic sheet.
+

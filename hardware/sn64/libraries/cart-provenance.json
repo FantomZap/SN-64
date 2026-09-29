@@ -81,6 +81,7 @@
     "Device:C",
     "Device:R",
     "Device:R_Pack04",
+    "Logic_LevelTranslator:SN74LVC1T45DBV",
     "Transistor_FET:2N7002",
     "power:PWR_FLAG"
   ],
@@ -91,6 +92,7 @@
     "Package_SO:TSSOP-24_4.4x7.8mm_P0.65mm",
     "Package_TO_SOT_SMD:SOT-23",
     "Package_TO_SOT_SMD:SOT-23-5",
+    "Package_TO_SOT_SMD:SOT-23-6",
     "Resistor_SMD:R_0603_1608Metric",
     "Resistor_SMD:R_Array_Convex_4x0603",
     "TestPoint:TestPoint_Pad_D1.0mm"
@@ -105,7 +107,52 @@
       "url": "https://www.ti.com/lit/ds/symlink/sn74lvc1g06.pdf",
       "revision": "SCES295AB, revised October 2025",
       "sha256_of_downloaded_copy": "44dbca33c92d677ed71f99c2d1a2eb28f12d6fdb512e13fdf485444a3a42b4a4"
+    },
+    "sn74lvc1t45": {
+      "url": "https://www.ti.com/lit/ds/symlink/sn74lvc1t45.pdf",
+      "revision": "SCES515N, revised June 2024",
+      "sha256_of_downloaded_copy": "e6fbd8400161399554fe905326e73236e74bb3af0b546ea1942deed14310536e"
     }
+  },
+  "cic_data_translator": {
+    "part": "SN74LVC1T45DBVR (LCSC C7843), installed KiCad symbol Logic_LevelTranslator:SN74LVC1T45DBV, footprint Package_TO_SOT_SMD:SOT-23-6",
+    "source": {
+      "url": "https://www.ti.com/lit/ds/symlink/sn74lvc1t45.pdf",
+      "revision": "SCES515N, revised June 2024",
+      "sha256_of_downloaded_copy": "e6fbd8400161399554fe905326e73236e74bb3af0b546ea1942deed14310536e"
+    },
+    "pins_dbv_table_4_1": {
+      "1": "VCCA",
+      "2": "GND",
+      "3": "A",
+      "4": "B",
+      "5": "DIR",
+      "6": "VCCB"
+    },
+    "function_table_7_1": {
+      "DIR=L": "B data to A bus",
+      "DIR=H": "A data to B bus"
+    },
+    "quoted_features": [
+      "VCC isolation feature - if either VCC input is at GND, both ports are in the high-impedance state",
+      "DIR input circuit referenced to VCCA",
+      "Ioff supports partial-power-down mode operation"
+    ],
+    "quoted_7_3_3": "The inputs and outputs for this device enter a high-impedance state when the device is powered down, inhibiting current backflow into the device.",
+    "quoted_7_3_6": "The I/Os of both ports will enter a high-impedance state when either of the supplies are at GND, while the other supply is still connected to the device.",
+    "quoted_8_2_2": "Because the SN74LVC1T45 does not have an output-enable (OE) pin, the system designer should take precautions to avoid bus contention between SYSTEM-1 and SYSTEM-2 when changing directions.",
+    "ioff_limit_5_5": "A port (VCCA = 0 V) and B port (VCCB = 0 V), VI or VO = 0 to 5.5 V: +/-1 uA at 25 C, +/-2 uA at -40 to 85 C",
+    "dir_timing_5_8_vcca_3v3_vccb_5v_max_ns": {
+      "tPHZ DIR->A": 7.3,
+      "tPLZ DIR->A": 5.7,
+      "tPHZ DIR->B": 6.8,
+      "tPLZ DIR->B": 4.9,
+      "tPZH DIR->A": 10.3,
+      "tPZL DIR->A": 11.3,
+      "tPZH DIR->B": 10.1,
+      "tPZL DIR->B": 11.3
+    },
+    "text_extraction": "pdftotext (poppler, w64 Git) of the downloaded copy; table cells re-read in -raw mode."
   },
   "licenses": "KiCad library content: CC-BY-SA-4.0 with the KiCad library exception (see KiCad library LICENSE). Drawn symbols: SN64 project content; pin data are facts from the cited TI datasheets."
 }

@@ -1,12 +1,12 @@
 {
   "status": "pass",
-  "generated_at_utc": "2026-09-29T21:58:25.314943+00:00",
+  "generated_at_utc": "2026-09-29T22:15:08.369016+00:00",
   "scope": "independent USB programmer static connectivity review",
   "kicad": "10.0.6",
   "checks_passed": 64,
   "checks_failed": 0,
   "inputs": {
-    "sn64.kicad_sch": "23fd9d23b681ae03c7f5c6b89370c9579089100e961ec24f3bd82825cb1b72d2",
+    "sn64.kicad_sch": "7e7c31aa2f6f8a496f9e544541f85b013ff636c4fa4920a66c76662725faf8db",
     "usb-programmer.kicad_sch": "de8b536223ca8ce2d8d8059e9678f495efc755403f25b18025af4e47beaa6481",
     "libraries/SN64_USB.kicad_sym": "f26ef1391fa4cfc9e1da1ab88492ed9628f75d8df63a385852dbe0ca17650fc1"
   },

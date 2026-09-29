@@ -37,7 +37,7 @@ module sn64_pnr_wrap (
 );
     wire [15:0] st;
     sn64_top #(.ROM_ADDR_BITS(16)) top (
-        .clk_25(clk_25), .clk_host(clk_host), .clk_snes(clk_snes), .clk_pixel(clk_pixel), .clk_pixel_x5(clk_pixel_x5), .por_n(por_n),
+        .clk_25(clk_25), .clk_host(clk_host), .clk_snes(clk_snes), .clk_pixel(clk_pixel), .clk_pixel_x5(clk_pixel_x5), .hdmi_clock_ok(1'b1), .por_n(por_n),
         .n64_reset_n(n64_reset_n), .n64_nmi_n(n64_nmi_n), .n64_alel(n64_alel), .n64_aleh(n64_aleh),
         .n64_read_n(n64_read_n), .n64_write_n(n64_write_n), .n64_ad(n64_ad),
         .n64_cic_clk(n64_cic_clk), .n64_si_clk(n64_si_clk), .n64_cic_dq(n64_cic_dq),
