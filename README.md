@@ -6,7 +6,7 @@ The FPGA will recreate the SNES motherboard environment and provide a protected,
 
 ## Current status
 
-**Reference collection and adaptation planning. No completed or tested SN 64 hardware exists yet.** Existing SNES FPGA sources, SNES and N64 schematics/PCBs, connector footprints, and cartridge CAD have been downloaded locally. Connector and mounting dimensions have been extracted from native CAD. It does not yet contain a validated SN 64 schematic, PCB, FPGA implementation, or printable enclosure.
+**Research and the first KiCad interface draft. No completed or tested SN 64 hardware exists yet.** Existing SNES FPGA sources, SNES and N64 schematics/PCBs, connector footprints, and cartridge CAD have been downloaded locally. Connector and mounting dimensions have been extracted from native CAD. The [editable interface draft](hardware/sn64/README.md) contains both checked cartridge connectors and reused footprints. It does not yet contain the power/FPGA circuitry, a complete PCB, an FPGA implementation, or a printable enclosure.
 
 Every target in the original specification remains in scope, including PAL, protection, save integrity, telemetry, independent recovery, factory testing, and the additional requirements. Independent digital A/V is an initial validation path. M64 single-HDMI operation remains a required target with an unresolved dependency on a supported M64 integration mechanism; reserving resources does not establish compatibility.
 
@@ -19,6 +19,10 @@ Every target in the original specification remains in scope, including PAL, prot
 - [Connector, cartridge and mounting dimensions](docs/dimensions.md)
 - [Official M64 schematics and mechanical references](docs/research/m64-reference-files.md)
 - [Local reference collection and source manifests](references/README.md)
+- [KiCad cartridge-interface draft and verification](hardware/sn64/README.md)
+- [SNES signal directions and electrical notes](docs/design/snes-interface-notes.md)
+- [N64/M64 signal directions and power references](docs/design/n64-interface-notes.md)
+- [sd2snes level-shifter reuse review](docs/design/translation-reuse-review.md)
 
 Current input decisions are standard, configurable N64-to-SNES controller mapping; no multitap; and undecided Super Scope/Justifier support. Virtual SNES mouse control using an N64 controller is deferred to a later FPGA/firmware update. The initial design must preserve the necessary input data, update path, and justified resource margins. Other researched accessories are candidates, not selected features.
 
@@ -33,7 +37,7 @@ Start by adapting working upstream designs: reuse their HDL, circuits, layouts, 
 
 ## Planned outputs
 
-These directories describe future work; they are not claims that implementations already exist.
+These directories describe the intended outputs. The interface draft and reference collection exist; the remaining implementations are future work.
 
 | Planned directory | Contents |
 |---|---|

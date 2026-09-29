@@ -1,6 +1,6 @@
 # SN 64 Engineering Implementation Plan
 
-**Status:** Preliminary engineering plan for review. This document defines the work and its evidence requirements; it does not certify a completed electrical or mechanical design.
+**Status:** Research and interface drafting underway. This document defines the full work and its evidence requirements; it does not certify a completed electrical or mechanical design.
 
 **Goal:** Build one SN 64 adapter that satisfies every target in the supplied specification and works on both an original Nintendo 64 and ModRetro M64 without internal console modifications, with PCB and enclosure manufacturing through PCBWay.
 
@@ -183,4 +183,8 @@ The inspected M64 downloads include individual Parasolid mechanical parts, not a
 
 ## Immediate next work
 
-Continue stage 1 with the installed tools: produce the requirement register, extract the connector geometry from native reference files, and verify CAD imports and exports. Then use those results to develop and review the architecture before selecting final components and starting the PCB.
+The reference collection now includes source SNES FPGA implementations, OpenSFC and sd2snes electrical designs, Sanni connector CAD, SummerCart64 host-side PCB/shell files, and official M64 reference files. Native KiCad/STEP imports and exports have been exercised; connector/pad/hole dimensions are recorded in [the dimension register](../../dimensions.md). M64 Parasolid conversion and complete host/socket envelope verification remain unresolved.
+
+The [first editable KiCad interface draft](../../../hardware/sn64/README.md) implements the checked 50-contact N64/M64 edge and 62-contact SNES socket with reused footprints. The [SNES pin notes](../../design/snes-interface-notes.md), [N64 pin notes](../../design/n64-interface-notes.md), and [translator reuse review](../../design/translation-reuse-review.md) establish pin identities, domain boundaries and concrete upstream circuits to adapt. This is early interface work, not completion of stage 3 or permission to skip architecture evidence.
+
+Next: finish the traceable requirements register, select and dimension the actual SNES socket, establish the combined power budget and power paths on both hosts, and adapt the existing translator circuitry with verified power-off behavior. Compare/synthesize reusable SNES core and bridge/host logic before fixing the FPGA package and memory. Use those results to complete the protected circuit schematic, then PCB placement and the FreeCAD assembly/enclosure.
