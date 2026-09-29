@@ -1,0 +1,41 @@
+{
+  "source_commit": "e54ac7577a127f62072267e417652432529e9fe1",
+  "repository": "https://github.com/michael-hirschmugl/SNESDRONE-Cartridge-Shell",
+  "license_notice": "No repository-wide license at pinned commit. SnesDrone-specific top/bottom STLs remain ignored local references. The archived New Super Famicom Cartridge contains an explicit CC-BY-3.0 notice by usagi_; do not extend that license to other files.",
+  "files": [
+    {
+      "path": "downloads/SNESDRONE-e54ac7577a127f62072267e417652432529e9fe1/README.md",
+      "url": "https://raw.githubusercontent.com/michael-hirschmugl/SNESDRONE-Cartridge-Shell/e54ac7577a127f62072267e417652432529e9fe1/README.md",
+      "bytes": 471,
+      "sha256": "1ea9b487843777d35e710d2f287b532d2def22e53a8a2224fa13f409a6d9b1f6"
+    },
+    {
+      "path": "downloads/SNESDRONE-e54ac7577a127f62072267e417652432529e9fe1/New_Super_Famicom_Cartridge.zip",
+      "url": "https://raw.githubusercontent.com/michael-hirschmugl/SNESDRONE-Cartridge-Shell/e54ac7577a127f62072267e417652432529e9fe1/New_Super_Famicom_Cartridge.zip",
+      "bytes": 1042940,
+      "sha256": "c3fb844795d34af4d527018d0341fb9d9733e07ee73e06820fb809cb776d4221"
+    },
+    {
+      "path": "downloads/SNESDRONE-e54ac7577a127f62072267e417652432529e9fe1/SnesDrone_Shell_Bottom_V0.1.1.stl",
+      "url": "https://raw.githubusercontent.com/michael-hirschmugl/SNESDRONE-Cartridge-Shell/e54ac7577a127f62072267e417652432529e9fe1/SnesDrone_Shell_Bottom_V0.1.1.stl",
+      "bytes": 1570384,
+      "sha256": "624669975c53994c086d581a6eb675f9a2426e9fa4d0c2eb49281831cbcd2f41"
+    },
+    {
+      "path": "downloads/SNESDRONE-e54ac7577a127f62072267e417652432529e9fe1/SnesDrone_Shell_Top_V0.1.1.stl",
+      "url": "https://raw.githubusercontent.com/michael-hirschmugl/SNESDRONE-Cartridge-Shell/e54ac7577a127f62072267e417652432529e9fe1/SnesDrone_Shell_Top_V0.1.1.stl",
+      "bytes": 762984,
+      "sha256": "cde7f463d126c3c822c1e00ee82531a01673c3a7e7fac4c6699198522b07541f"
+    }
+  ],
+  "archived_original": {
+    "author": "usagi_",
+    "original_url": "https://www.thingiverse.com/thing:1396153",
+    "published": "2016-03-06",
+    "license": "CC-BY-3.0",
+    "archive_member": "files/sfc_cart.stl",
+    "local_path": "downloads/SNESDRONE-e54ac7577a127f62072267e417652432529e9fe1/sfc_cart.stl",
+    "sha256": "94613e68ed244d4abb16ccb863066fc95d09367d8a8a2f4ae9904ac3ac60f677",
+    "author_limit": "Author asks others to test printing; created to accommodate an msata-to-pcie card. Not an OEM measurement or guaranteed cartridge fit."
+  }
+}

@@ -1,6 +1,6 @@
 # SN 64 Engineering Implementation Plan
 
-**Status:** Research, cartridge interfaces and the USB programming circuit are drafted. This document defines the full work and its evidence requirements; it does not certify a completed electrical or mechanical design.
+**Status:** The full requirements register, cartridge/USB circuit draft, console-core evaluation and editable mechanical references exist. Power, socket and FPGA supply studies identify remaining integration decisions. This document defines the full work and its evidence requirements; it does not certify a completed electrical or mechanical design. See the [work log](../../project-work-log.md) and [current architecture](../../architecture.md).
 
 **Goal:** Build one SN 64 adapter that satisfies every target in the supplied specification and works on both an original Nintendo 64 and ModRetro M64 without internal console modifications, with PCB and enclosure manufacturing through PCBWay.
 
@@ -56,7 +56,7 @@ These are planned outputs, not files claimed to exist already.
 
 ### 1. Establish requirements and dimensional evidence
 
-- [ ] Expand every source requirement into a traceable entry with a checkable acceptance method. Treat future and additional items as required targets.
+- [x] Expand every source requirement into a traceable entry with a checkable acceptance method. The [136-entry register](../../requirements.md) retains all 110 source items plus compatibility refinements and user clarifications; future and additional items remain targets.
 - [x] Confirm KiCad and FreeCAD installations, record versions, and verify their command-line executables respond.
 - [ ] Verify native file opening, checking, and exports. Establish a supported conversion route for any reference CAD format the installed tools cannot read directly.
 - [ ] Obtain and inspect the reference N64 edge geometry, SNES socket footprint, cartridge shells, and published M64 mechanical files listed below.

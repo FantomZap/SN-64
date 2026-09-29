@@ -1,0 +1,397 @@
+{
+  "generated_utc": "2026-09-29T04:27:50.453559+00:00",
+  "scope": "Console candidate only; no board pin/timing qualification or hardware proof",
+  "mode": "all",
+  "commands": [
+    {
+      "label": "verilator-version",
+      "argv": [
+        "C:\\Users\\RyanB\\.codex\\tools\\oss-cad-suite-20260928\\oss-cad-suite\\bin\\verilator_bin.EXE",
+        "--version"
+      ],
+      "exit_code": 0,
+      "log_sha256": "77c88dfe83159e6ba25f771f57f1aaf1ec3340a5a36e2bb357ece4aac6b2485c"
+    },
+    {
+      "label": "simulation-build",
+      "argv": [
+        "C:\\Users\\RyanB\\.codex\\tools\\oss-cad-suite-20260928\\oss-cad-suite\\bin\\verilator_bin.EXE",
+        "--binary",
+        "--timing",
+        "--build-jobs",
+        "4",
+        "-Wno-fatal",
+        "--top-module",
+        "tb_console_boot",
+        "--Mdir",
+        "C:/Users/RyanB/.codex/tools/sn64-build/sim-console",
+        "-Ibuild/generated/snestang/src",
+        "-Ibuild/generated/snestang/src/spc700",
+        "-Ibuild/generated/snestang/src/65C816",
+        "-f",
+        "build/core-sources.f",
+        "fpga/rtl/sn64_console_candidate.sv",
+        "fpga/tests/tb_console_boot.sv"
+      ],
+      "exit_code": 0,
+      "log_sha256": "398b5d35be884485ad1edb54ef4c36a007d0d4a5e3daf101d12682515b0018a1"
+    },
+    {
+      "label": "ntsc-mode",
+      "argv": [
+        "C:\\Users\\RyanB\\.codex\\tools\\sn64-build\\sim-console\\Vtb_console_boot.exe"
+      ],
+      "exit_code": 0,
+      "log_sha256": "84556dd0501d8e7c12154be115246394236f95a205e4c3400468a09175d61102"
+    },
+    {
+      "label": "pal-mode-bit",
+      "argv": [
+        "C:\\Users\\RyanB\\.codex\\tools\\sn64-build\\sim-console\\Vtb_console_boot.exe",
+        "+pal"
+      ],
+      "exit_code": 0,
+      "log_sha256": "73d25b35ef24d9a35d717c548f2b75cad6aa9a74296c4f26ef499bb80474f51f"
+    },
+    {
+      "label": "corrupt-cartridge-read",
+      "argv": [
+        "C:\\Users\\RyanB\\.codex\\tools\\sn64-build\\sim-console\\Vtb_console_boot.exe",
+        "+corrupt_read"
+      ],
+      "exit_code": 1,
+      "log_sha256": "c7d16a9d3bfef1877e244b1aa77d47f3b56e0384d6f0a14c63185c5af08fe048"
+    },
+    {
+      "label": "yosys-version",
+      "argv": [
+        "C:\\Users\\RyanB\\.codex\\tools\\oss-cad-suite-20260928\\oss-cad-suite\\bin\\yosys.EXE",
+        "-V"
+      ],
+      "exit_code": 0,
+      "log_sha256": "00345a7d25ee7bc45328f8eb6a3d3e523e6f244f36a9df7485f8e6029e605aa2"
+    },
+    {
+      "label": "synthesis",
+      "argv": [
+        "C:\\Users\\RyanB\\.codex\\tools\\oss-cad-suite-20260928\\oss-cad-suite\\bin\\yosys.EXE",
+        "-Q",
+        "-T",
+        "-p",
+        "plugin -i slang; scratchpad -set abc9.xaiger 1; read_slang --top sn64_console_candidate -DVERILATOR -Ibuild/generated/snestang/src -Ibuild/generated/snestang/src/spc700 -f build/core-sources.f fpga/rtl/sn64_console_candidate.sv; synth_ecp5 -top sn64_console_candidate -json build/console-ecp5.json; stat"
+      ],
+      "exit_code": 0,
+      "log_sha256": "f3406b09ad9ce08f96d8db2c6a2590e0f78c4e81e310bcf7de19857312ba35a3"
+    },
+    {
+      "label": "nextpnr-version",
+      "argv": [
+        "C:\\Users\\RyanB\\.codex\\tools\\oss-cad-suite-20260928\\oss-cad-suite\\bin\\nextpnr-ecp5.EXE",
+        "--version"
+      ],
+      "exit_code": 0,
+      "log_sha256": "fa732311fe34fd743d2fbe41414b89fcb5c1311db4f42302cc8707d0c1fb017e"
+    },
+    {
+      "label": "placement-route",
+      "argv": [
+        "C:\\Users\\RyanB\\.codex\\tools\\oss-cad-suite-20260928\\oss-cad-suite\\bin\\nextpnr-ecp5.EXE",
+        "--85k",
+        "--package",
+        "CABGA381",
+        "--speed",
+        "6",
+        "--json",
+        "build/console-ecp5.json",
+        "--freq",
+        "21.477273",
+        "--lpf-allow-unconstrained",
+        "--report",
+        "build/console-ecp5-pnr.json"
+      ],
+      "exit_code": 0,
+      "log_sha256": "558fe648233330a0d2a7c8b3e72fc84fcf4fc7527e63db006cbf65b3c0380c05"
+    }
+  ],
+  "inputs": {
+    "fpga/core-sources.f": "450d7a281fe2fc876a3f397e560a49cec6aa274ecc624afd9a579663bc577c49",
+    "fpga/rtl/sn64_console_candidate.sv": "ab06de50a2455319f9d53e8cda226ded2551bdf301220f36e134d6b4daae9afe",
+    "fpga/tests/tb_console_boot.sv": "1e3658a003d4cb491c24a3f4fe8a546a466791b2ff82215feea98ea80cb51f6d",
+    "fpga/tools/evaluate.py": "a9fd0d2512bd5a09728f82c61ddf0034c062a4ae9718ad8e6cfdfdcf7696f618",
+    "fpga/tools/prepare_core.py": "e6ef68569a3acb25215e1091c21f89782dcf927e1b947610e21a82fa121a1bfb",
+    "fpga/vendor/snestang/src/65C816/adder4.v": "2e5355a23ef7fcb0c8b655e13e30142b83e6d264b9317bfa7e909f47d7d909e4",
+    "fpga/vendor/snestang/src/65C816/AddrGen.v": "74f0338b4182f0502ea61b3a37bb93bb8ed56842f96dfede5681e0304ea35d71",
+    "fpga/vendor/snestang/src/65C816/AddSubBCD.v": "18bab63b0558de279d6741ffccb23659563903ee5a8cf6407e65ff9ed30dd508",
+    "fpga/vendor/snestang/src/65C816/ALU.v": "8d356c91325b13ab9360493148f36a3d8b63a60b8bbc160aa472a98878a0d5b7",
+    "fpga/vendor/snestang/src/65C816/BCDAdder.v": "c599eb38da3affae8d8e91839d4815947f3b31d2dae327e9809dc9d3592c6636",
+    "fpga/vendor/snestang/src/65C816/bit_adder.v": "bec4d59495a51419d1b62a4c05edff45c2035494fe99e5d56d432b7d1760f686",
+    "fpga/vendor/snestang/src/65C816/common.sv": "e57c81dddab15de2ec212fe880273f8265446d53fc15094de623631dfd1cb3ff",
+    "fpga/vendor/snestang/src/65C816/mcode.py": "79e88870080438173dafa0a5bcea8bcb921364a6c7624a27ce0b0dcb89c9f0bf",
+    "fpga/vendor/snestang/src/65C816/mcode.sv": "fcd8e1ccd043525642b076a887d29c147e12d7af79d6a72fd107dd34d749ac14",
+    "fpga/vendor/snestang/src/65C816/P65C816.v": "e42fe6536478499032ae73e7389bf09d75d71e1103b26a09d095a0cfcbd0d1d7",
+    "fpga/vendor/snestang/src/CEGen.v": "5a4b2d3904022c072b93d824c08b9e62b49498f8a9b9cd1740a54c5cf2febd98",
+    "fpga/vendor/snestang/src/cpu.v": "d1d9503c7d28634532f81587e44c989fb6e37ed964815164ba2563d1f8cc94c4",
+    "fpga/vendor/snestang/src/dsp.v": "68406b5090b7913e7ed3b40d69ba8acbce97f3a5240b257d411050caf45a1451",
+    "fpga/vendor/snestang/src/dsp.vh": "d26180fcb3e3906151f958f5b38aab436207c984cde8a0fbf7ef60b731e59a7a",
+    "fpga/vendor/snestang/src/ppu.v": "ec61575314f8b5086477b63e845253bfe37580d26345bacc30f6150abf1e1cc3",
+    "fpga/vendor/snestang/src/ppu_defines.vh": "438a155a7f72ba64c9204fd137cdc073521701af08ab4ecd3f94816984fcc711",
+    "fpga/vendor/snestang/src/ppucgram.v": "c560151fb40582e67dc9fc5d00544c9818e751bdc528949da65987495d43a8dd",
+    "fpga/vendor/snestang/src/ppuhoam.v": "45396969ba61eb9828d3e830f47d032cd30535491ae0331cb8570da7dfda78c4",
+    "fpga/vendor/snestang/src/ppuoam.v": "6b4f3f6b52af0ee2c62771cbcfbd3d252720dde8295c0fedf6d8bcebed1c7db3",
+    "fpga/vendor/snestang/src/smp.v": "7f146ae1041cbfeb8dbce64673a2277be55cc9ebde0287e8b9bc3cf8e79cf33b",
+    "fpga/vendor/snestang/src/SNES.v": "bb9583989099b294e47b7e8070f440e149263c73b4117008536cedddd4d2a3b5",
+    "fpga/vendor/snestang/src/spc700/_spc700_package.v": "9432d71dfaa694d04a1649d9c8d73be64bfa1c95a09e13a16cc136a1b4379e77",
+    "fpga/vendor/snestang/src/spc700/addrgen.v": "153bebcb2f21c5ae51aa5f0ecfcbeebb19009e237cab05356f5effe032cce71a",
+    "fpga/vendor/snestang/src/spc700/addsub.v": "9b59a7446529279d9607e3a056fbda3965f6e2ee900711b24c724fe9914fce43",
+    "fpga/vendor/snestang/src/spc700/alu.v": "1dd52726a3de21d1945d7fd8c66da64db9a928bcc4644740a6febc45dcf23d99",
+    "fpga/vendor/snestang/src/spc700/bcdadj.v": "a837325825b04ef051c88c4ea9153c94c90dde027b03c2d4e179b19a3361467d",
+    "fpga/vendor/snestang/src/spc700/mcode.py": "5cf6db76728bda4cce339a6921bd952f30ef19f87573b03a2d1e271e4c0b23e5",
+    "fpga/vendor/snestang/src/spc700/mcode.v": "9d6b5689ddd437ea6550d23141a89354df496134273a20a2727090b1bdab14c3",
+    "fpga/vendor/snestang/src/spc700/mcode.vh": "acee5ff98197dc378229e2a35039ec858da2a0f806c1ac6e34be06332a62de1d",
+    "fpga/vendor/snestang/src/spc700/muldiv.v": "29c3775160921cfd756b769a500d2700527cc63bf7ed4e64bbce33417ca40141",
+    "fpga/vendor/snestang/src/spc700/spc700.v": "4634321a1a410033268418966905e87108dadb7ef44b9863b7a63e1d1d111a16",
+    "fpga/vendor/snestang/src/swram.v": "9ec3693b5de2447c9fb33362ef051bbc9be1336477bf1eca73543cfa2025337a"
+  },
+  "preparation_sha256": "1279e2cc6fbf808bd28ddfc35f4796bce6aa5bcfbb39a96a338639aeb3b369eb",
+  "simulation": {
+    "ntsc-mode": "PASS: reset/native CPU, cartridge R/W, WRAM, B-bus, DMA, PHI2; PAL flag=0; 1336 clocks",
+    "pal-mode-bit": "PASS: reset/native CPU, cartridge R/W, WRAM, B-bus, DMA, PHI2; PAL flag=1; 1336 clocks",
+    "injected_bad_read": "Rejected with expected cartridge low readback assertion",
+    "limit": "Same master clock in both runs; PAL clocks/video and PPU/APU not qualified"
+  },
+  "synthesis": {
+    "cells": {
+      "CCU2C": 1036,
+      "DP16KD": 139,
+      "L6MUX21": 1675,
+      "LUT4": 27817,
+      "MULT18X18D": 19,
+      "PFUMX": 5227,
+      "TRELLIS_DPR16X4": 34,
+      "TRELLIS_FF": 10775
+    },
+    "normal_cpu_speed_control": [
+      "0"
+    ],
+    "netlist_sha256": "ae8b081e30f267b52466124da6f9314e8fc325c9a4bced20df6973bf38c18c55",
+    "warnings": [
+      "build\\generated\\snestang\\src\\65C816\\mcode.sv:2363:13: warning: asynchronous load value missing for variable '\\console.CPU.P65C816.MCode.$15.STATE2'",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.PPU.FlipPlane.bp [7]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.PPU.FlipPlane.bp [6]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.PPU.FlipPlane.bp [5]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.PPU.FlipPlane.bp [4]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.PPU.FlipPlane.bp [3]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.PPU.FlipPlane.bp [2]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.PPU.FlipPlane.bp [1]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.PPU.FlipPlane.bp [0]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.PPU.FlipPlane.flip:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [16]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [15]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [14]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [13]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [12]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [11]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [10]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [9]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [8]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [7]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [6]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [5]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [4]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [3]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [2]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [1]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [0]:",
+      "Warning: Wire sn64_console_candidate.\\console.CPU.DBG_CPU_BRK is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_PPU_DAT [7] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_PPU_DAT [6] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_PPU_DAT [5] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_PPU_DAT [4] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_PPU_DAT [3] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_PPU_DAT [2] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_PPU_DAT [1] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_PPU_DAT [0] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_WRAM_DAT [7] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_WRAM_DAT [6] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_WRAM_DAT [5] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_WRAM_DAT [4] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_WRAM_DAT [3] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_WRAM_DAT [2] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_WRAM_DAT [1] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_WRAM_DAT [0] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.PPU_DBG_BRK is used but has no driver.",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.PPU.FlipPlane.bp [7]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.PPU.FlipPlane.bp [6]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.PPU.FlipPlane.bp [5]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.PPU.FlipPlane.bp [4]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.PPU.FlipPlane.bp [3]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.PPU.FlipPlane.bp [2]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.PPU.FlipPlane.bp [1]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.PPU.FlipPlane.bp [0]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.PPU.FlipPlane.flip:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [16]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [15]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [14]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [13]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [12]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [11]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [10]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [9]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [8]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [7]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [6]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [5]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [4]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [3]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [2]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [1]:",
+      "Warning: multiple conflicting drivers for sn64_console_candidate.\\console.dsp.CLAMP16.a [0]:",
+      "Warning: Wire sn64_console_candidate.\\console.CPU.DBG_CPU_BRK is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_PPU_DAT [7] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_PPU_DAT [6] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_PPU_DAT [5] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_PPU_DAT [4] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_PPU_DAT [3] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_PPU_DAT [2] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_PPU_DAT [1] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_PPU_DAT [0] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_WRAM_DAT [7] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_WRAM_DAT [6] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_WRAM_DAT [5] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_WRAM_DAT [4] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_WRAM_DAT [3] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_WRAM_DAT [2] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_WRAM_DAT [1] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.DBG_WRAM_DAT [0] is used but has no driver.",
+      "Warning: Wire sn64_console_candidate.\\console.PPU_DBG_BRK is used but has no driver.",
+      "ABC: Warning: AIG with boxes has internal fanout in 0 complex flops and 1 carries.",
+      "ABC: Warning: The network is combinational.",
+      "ABC: Warning: AIG with boxes has internal fanout in 0 complex flops and 1 carries.",
+      "ABC: Warning: AIG with boxes has internal fanout in 0 complex flops and 1 carries."
+    ]
+  },
+  "placement_route": {
+    "fmax": {
+      "$glbnet$clk$TRELLIS_IO_IN": {
+        "achieved": 27.99160385131836,
+        "constraint": 21.477272033691406
+      }
+    },
+    "utilization": {
+      "ALU54B": {
+        "available": 78,
+        "used": 0
+      },
+      "CLKDIVF": {
+        "available": 4,
+        "used": 0
+      },
+      "DCCA": {
+        "available": 56,
+        "used": 1
+      },
+      "DCSC": {
+        "available": 2,
+        "used": 0
+      },
+      "DCUA": {
+        "available": 2,
+        "used": 0
+      },
+      "DDRDLL": {
+        "available": 4,
+        "used": 0
+      },
+      "DLLDELD": {
+        "available": 8,
+        "used": 0
+      },
+      "DP16KD": {
+        "available": 208,
+        "used": 139
+      },
+      "DQSBUFM": {
+        "available": 14,
+        "used": 0
+      },
+      "DTR": {
+        "available": 1,
+        "used": 0
+      },
+      "ECLKBRIDGECS": {
+        "available": 2,
+        "used": 0
+      },
+      "ECLKSYNCB": {
+        "available": 10,
+        "used": 0
+      },
+      "EHXPLLL": {
+        "available": 4,
+        "used": 0
+      },
+      "EXTREFB": {
+        "available": 2,
+        "used": 0
+      },
+      "GSR": {
+        "available": 1,
+        "used": 0
+      },
+      "IOLOGIC": {
+        "available": 224,
+        "used": 0
+      },
+      "JTAGG": {
+        "available": 1,
+        "used": 0
+      },
+      "MULT18X18D": {
+        "available": 156,
+        "used": 19
+      },
+      "OSCG": {
+        "available": 1,
+        "used": 0
+      },
+      "PCSCLKDIV": {
+        "available": 2,
+        "used": 0
+      },
+      "SEDGA": {
+        "available": 1,
+        "used": 0
+      },
+      "SIOLOGIC": {
+        "available": 141,
+        "used": 0
+      },
+      "TRELLIS_COMB": {
+        "available": 83640,
+        "used": 30821
+      },
+      "TRELLIS_ECLKBUF": {
+        "available": 8,
+        "used": 0
+      },
+      "TRELLIS_FF": {
+        "available": 83640,
+        "used": 10775
+      },
+      "TRELLIS_IO": {
+        "available": 365,
+        "used": 142
+      },
+      "TRELLIS_RAMW": {
+        "available": 10455,
+        "used": 34
+      },
+      "USRMCLK": {
+        "available": 1,
+        "used": 0
+      }
+    },
+    "constraint_limit": "Unconstrained trial I/O; internal fit experiment only",
+    "netlist_sha256": "ae8b081e30f267b52466124da6f9314e8fc325c9a4bced20df6973bf38c18c55"
+  }
+}

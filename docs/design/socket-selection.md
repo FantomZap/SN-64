@@ -1,0 +1,35 @@
+# SNES socket sourcing and mechanical evidence
+
+Checked 2026-09-29. **Use the full 62-contact SNES/SFC pattern. A production socket is not yet qualified.** The online search found orderable replacement sockets, but no inspected supplier provided both an exact manufacturer part number and a matching mechanical drawing. This is a specific gap in body/terminal/mating evidence, not a lack of connector CAD: the existing Sanni footprint and the new [FreeCAD references](../../mechanical/README.md) already provide useful geometry.
+
+## Obtainable candidates
+
+| Source / identifier | Vendor evidence at inspection | Decision |
+|---|---|---|
+| [NES Repair Shop `snspt043`](https://www.nesrepairsshop.com/Catalog/index.php?main_page=product_info&products_id=2262) | US seller; add-to-cart listing at $9.99; new 62-contact soldered replacement with legs/ears, advertised for SNES and SFC. No numeric stock count, pitch or drawing. `snspt043` is the retailer's part number. | Preferred **sample-evaluation candidate**, not an approved BOM MPN. Confirm availability before any later purchase. |
+| [RetroReiZ `SNESSLOT`](https://retroreiz.de/shop/werkstatt/ersatzteile-fuer-super-nintendo/snes-62pin-cartridge-slot-connector-modul-sockel-port-fuer-super-nintendo/) | 62-contact replacement; page reports seven in stock at EUR 6.95. Vendor explicitly warns that it differs from the original, may need pin/body adjustments and is incompatible with the original removable metal slot. No pitch or drawing. | Alternate sample candidate. Do not transfer original body dimensions to it. |
+| [Hexir `HXR-19-18637`](https://www.hexir.com/snes-62-pin-with-ear-cartridge-slot-connector-replacement-bulk-hexir/) | Identified branded part, 62 contacts and ears; preorder/on-order listing. Published spacing is **2.54 mm**. | Reject as a drop-in match to the verified 2.5 mm footprint unless corrected by actual dimensional evidence. |
+| [Shenzhen ZTLEKE seller storefront](https://ztleke.en.alibaba.com/) | An indexed listing advertises 2.5 mm and 62 contacts. No verified exact socket identifier, drawing or stock quantity was obtained. | Sourcing lead only; insufficient for selection or ordering. |
+
+No orders or supplier contacts were made. An available retailer SKU can identify a sample, but it does not establish manufacturing consistency, contact plating, rated insertion life or an electrical current rating.
+
+## Geometry already established
+
+The [pinned Sanni footprint](https://github.com/sanni/cartreader/blob/060d8ae0bf4be40bfc6a368bf6fbf7b594b3884d/hardware/footprints/%21OSCR.pretty/SNES%20Slot.kicad_mod) has 62 holes: two rows of 31, 2.5 mm ordinary pitch, 7.5 mm section gaps between 4–5 and 27–28 on each row, 5 mm row separation, 85 mm first-to-last span and nominal 0.762 mm holes. These are PCB footprint values, not measured limits of any candidate socket. The [extracted datums](../../mechanical/source-datums.json) retain every pin number and source hash.
+
+The [SummerCart64 board](https://github.com/Polprzewodnikowy/SummerCart64/blob/a1e7996d2cbece686820a5c785029c68514f17b0/hw/pcb/sc64v2.kicad_pcb) provides the lower N64 connector outline, 1.2 mm board setting and two mounting holes. The generated board reference preserves all 35 outline segments, including the six in the edge footprint. It is a reusable lower-interface reference for both host targets; its full board shape is not the selected SN64 board layout.
+
+## Shell CAD found and inspected
+
+- **N64 lower shell:** [SummerCart64 STEP assembly and STL halves](https://github.com/Polprzewodnikowy/SummerCart64/tree/a1e7996d2cbece686820a5c785029c68514f17b0/hw/shell) are already downloaded. The combined STEP opens as two valid solids, with an approximately 116.116 × 89.371 × 18.056 mm envelope. Keep its assembly transform; separate halves use different origins. It does not include the SNES upper support or prove M64 clearance.
+- **SFC cartridge precedent:** [SNESDRONE shell repository](https://github.com/michael-hirschmugl/SNESDRONE-Cartridge-Shell/tree/e54ac7577a127f62072267e417652432529e9fe1) supplies top/bottom STLs and an archived original [usagi_ SFC model](https://www.thingiverse.com/thing:1396153). Four repository files were downloaded with [hashes and provenance](../../mechanical/shell-source-manifest.json). The archive contains a CC-BY-3.0 notice for usagi_'s model; no repository-wide license was found for the later SnesDrone parts. The original author described a modified model for an mSATA-to-PCIe project and requested print testing. These are references, not OEM dimensional authority. All three inspected STLs fail FreeCAD's closed-mesh test; do not use them directly as print-ready or guaranteed cartridge envelopes.
+- **M64:** ModRetro's [official files](https://support.modretro.com/en_us/articles/m64-open-source-files-ByrpukdUGg) include cartridge front/back, front/back doors and eject-button Parasolid solids. The existing [collection record](../research/m64-reference-files.md) identifies exact downloads. Their installed assembly positions and motion are not provided by the inspected set. A validated Parasolid-to-STEP conversion and bay assembly alignment remain outstanding; dimensions must not be inferred from screenshots.
+
+## Evidence needed to finish the socket and shell
+
+1. Obtain a manufacturer drawing or measure the chosen socket sample: all terminal centres, tail cross-section and length, section gaps, body envelope, mounting ears/holes, PCB seating height, cartridge slot centreline, supported mating thickness, contact wipe and full insertion depth. Match the numbered terminals to the project's electrical map. Qualify these before committing the footprint or solder-hole tolerance.
+2. Check cartridge-to-socket seating and case clearance with North American SNES, PAL/SFC, enhancement-chip cartridges, Super EverDrive X5/X6 and FXPAK Pro shells. Preserve all outer contacts and cartridge audio. Record heights, protrusions, mass/support loads and access to relevant card slots/buttons; an SFC reproduction model alone does not cover this set.
+3. Establish lower-shell/PCB datum alignment and actual original-N64 and M64 bay clearance, including M64 door/eject travel. The taller upper assembly needs a load path and controlled insertion/extraction forces; source N64 shell geometry alone does not establish them.
+4. Place the actual SN64 board/components before fixing standoffs, wall thickness, thermal openings or connector apertures. Retain the mandatory externally accessible **side USB-C data port for initial loading, updates and recovery without host boot**. Use the [JAE connector notes](usb-connector-mechanics.md); receptacle dimensions do not supply the cable overmold envelope or final panel setback.
+
+The current CAD enables a hole-pattern sample check and review of the known lower interface. A complete, printable SN64 enclosure remains dependent on qualified socket dimensions, the actual board assembly and both-host fit evidence. All full-spec targets remain in scope; these references do not reduce compatibility requirements or establish working hardware.
