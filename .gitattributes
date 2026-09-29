@@ -15,10 +15,14 @@ sym-lib-table text eol=lf
 *.xml text eol=lf
 *.v text eol=lf
 *.sv text eol=lf
+*.vh text eol=lf
+*.f text eol=lf
 *.vhd text eol=lf
 *.docx binary
 *.pdf binary
 *.FCStd binary
+*.step -text whitespace=-blank-at-eol
+*.stl binary
 *.blend binary
 *.png binary
 *.jpg binary
@@ -26,3 +30,7 @@ sym-lib-table text eol=lf
 
 # Retain exact upstream license text, including its final blank line.
 hardware/sn64/licenses/*.txt -text whitespace=-blank-at-eof
+mechanical/licenses/*.txt -text whitespace=-blank-at-eof
+fpga/vendor/snestang/LICENSE -text whitespace=-blank-at-eof
+# Preserve pinned third-party HDL verbatim; do not "fix" its whitespace.
+fpga/vendor/snestang/** text eol=lf whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab

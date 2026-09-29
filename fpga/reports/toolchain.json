@@ -1,0 +1,30 @@
+{
+  "date": "2026-09-29",
+  "host": "Windows x64",
+  "tools": {
+    "yosys": "0.69+154, 30d62572e-dirty",
+    "verilator": "5.053 devel, v5.052-119-g014c9820d (mod)",
+    "nextpnr-ecp5": "0.11.1-34-gc4fbb55a",
+    "w64devkit": "2.10.0"
+  },
+  "archives": [
+    {
+      "name": "oss-cad-suite-windows-x64-20260928.tgz",
+      "url": "https://github.com/YosysHQ/oss-cad-suite-build/releases/download/2026-09-28/oss-cad-suite-windows-x64-20260928.tgz",
+      "bytes": 599996455,
+      "sha256": "71a0a16592db2070e6abf18f76463dcc6bc0c7d6c772f29a7fd925197a29e184",
+      "verification": "Downloaded bytes matched the official GitHub release asset digest before extraction."
+    },
+    {
+      "name": "w64devkit-x64-2.10.0.7z.exe",
+      "url": "https://github.com/skeeto/w64devkit/releases/download/v2.10.0/w64devkit-x64-2.10.0.7z.exe",
+      "bytes": 67127496,
+      "sha256": "18d0a4c71a166f8401ab6305781bec5882b40b5e06ba9807c61cb5f3b3c6325e",
+      "verification": "Downloaded bytes matched the official GitHub release asset digest before extraction."
+    }
+  ],
+  "limits": [
+    "Official portable release artifacts; tool development versions are pinned, not claimed stable releases.",
+    "GHDL is not included in the Windows OSS CAD Suite; mixed-VHDL fork evaluation is separate."
+  ]
+}

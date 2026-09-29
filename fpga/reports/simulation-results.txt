@@ -1,0 +1,18 @@
+ntsc-mode
+PASS: reset/native CPU, cartridge R/W, WRAM, B-bus, DMA, PHI2; PAL flag=0; 1336 clocks
+- fpga/tests\tb_console_boot.sv:101: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.053 devel
+- Verilator: $finish at 62us; walltime 0.002 s; speed 39.388 ms/s
+- Verilator: cpu 0.000 s on 1 threads; allocated 5 MB
+
+pal-mode-bit
+PASS: reset/native CPU, cartridge R/W, WRAM, B-bus, DMA, PHI2; PAL flag=1; 1336 clocks
+- fpga/tests\tb_console_boot.sv:101: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.053 devel
+- Verilator: $finish at 62us; walltime 0.001 s; speed 62.238 ms/s
+- Verilator: cpu 0.000 s on 1 threads; allocated 5 MB
+
+corrupt-cartridge-read
+[27750000] %Fatal: tb_console_boot.sv:91: Assertion failed in tb_console_boot: cartridge low readback
+%Error: fpga/tests\tb_console_boot.sv:91: Verilog $stop
+Aborting...

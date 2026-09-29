@@ -1,0 +1,219 @@
+{
+  "upstream": "https://github.com/nand2mario/snestang",
+  "commit": "5f0ef193145f67bded7f73f2c477ac8da4d85f7e",
+  "archive_sha256": "09adb16244d16fa7210ec3aafa32f15550ada98f65531c9579a7f1d6f9120d13",
+  "license": "GPL-3.0; retained LICENSE and file notices",
+  "selection": "SNES console and processor sources only; no game ROMs, cartridge-emulation wrapper, soft MCU, loader or board-specific clock/pin files",
+  "files": [
+    {
+      "path": "LICENSE",
+      "upstream_sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "local_sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "changes": "none"
+    },
+    {
+      "path": "src/65C816/ALU.v",
+      "upstream_sha256": "8d356c91325b13ab9360493148f36a3d8b63a60b8bbc160aa472a98878a0d5b7",
+      "local_sha256": "8d356c91325b13ab9360493148f36a3d8b63a60b8bbc160aa472a98878a0d5b7",
+      "changes": "none"
+    },
+    {
+      "path": "src/65C816/AddSubBCD.v",
+      "upstream_sha256": "18bab63b0558de279d6741ffccb23659563903ee5a8cf6407e65ff9ed30dd508",
+      "local_sha256": "18bab63b0558de279d6741ffccb23659563903ee5a8cf6407e65ff9ed30dd508",
+      "changes": "none"
+    },
+    {
+      "path": "src/65C816/AddrGen.v",
+      "upstream_sha256": "74f0338b4182f0502ea61b3a37bb93bb8ed56842f96dfede5681e0304ea35d71",
+      "local_sha256": "74f0338b4182f0502ea61b3a37bb93bb8ed56842f96dfede5681e0304ea35d71",
+      "changes": "none"
+    },
+    {
+      "path": "src/65C816/BCDAdder.v",
+      "upstream_sha256": "c599eb38da3affae8d8e91839d4815947f3b31d2dae327e9809dc9d3592c6636",
+      "local_sha256": "c599eb38da3affae8d8e91839d4815947f3b31d2dae327e9809dc9d3592c6636",
+      "changes": "none"
+    },
+    {
+      "path": "src/65C816/P65C816.v",
+      "upstream_sha256": "e42fe6536478499032ae73e7389bf09d75d71e1103b26a09d095a0cfcbd0d1d7",
+      "local_sha256": "e42fe6536478499032ae73e7389bf09d75d71e1103b26a09d095a0cfcbd0d1d7",
+      "changes": "none"
+    },
+    {
+      "path": "src/65C816/adder4.v",
+      "upstream_sha256": "2e5355a23ef7fcb0c8b655e13e30142b83e6d264b9317bfa7e909f47d7d909e4",
+      "local_sha256": "2e5355a23ef7fcb0c8b655e13e30142b83e6d264b9317bfa7e909f47d7d909e4",
+      "changes": "none"
+    },
+    {
+      "path": "src/65C816/bit_adder.v",
+      "upstream_sha256": "bec4d59495a51419d1b62a4c05edff45c2035494fe99e5d56d432b7d1760f686",
+      "local_sha256": "bec4d59495a51419d1b62a4c05edff45c2035494fe99e5d56d432b7d1760f686",
+      "changes": "none"
+    },
+    {
+      "path": "src/65C816/common.sv",
+      "upstream_sha256": "e57c81dddab15de2ec212fe880273f8265446d53fc15094de623631dfd1cb3ff",
+      "local_sha256": "e57c81dddab15de2ec212fe880273f8265446d53fc15094de623631dfd1cb3ff",
+      "changes": "none"
+    },
+    {
+      "path": "src/65C816/mcode.py",
+      "upstream_sha256": "79e88870080438173dafa0a5bcea8bcb921364a6c7624a27ce0b0dcb89c9f0bf",
+      "local_sha256": "79e88870080438173dafa0a5bcea8bcb921364a6c7624a27ce0b0dcb89c9f0bf",
+      "changes": "none"
+    },
+    {
+      "path": "src/65C816/mcode.sv",
+      "upstream_sha256": "fcd8e1ccd043525642b076a887d29c147e12d7af79d6a72fd107dd34d749ac14",
+      "local_sha256": "fcd8e1ccd043525642b076a887d29c147e12d7af79d6a72fd107dd34d749ac14",
+      "changes": "none"
+    },
+    {
+      "path": "src/65C816/mcode.txt",
+      "upstream_sha256": "69fa95063e9c5d545f9f8429dfa793e267d104854dae01c5cd5e6e19be174af3",
+      "local_sha256": "69fa95063e9c5d545f9f8429dfa793e267d104854dae01c5cd5e6e19be174af3",
+      "changes": "none"
+    },
+    {
+      "path": "src/CEGen.v",
+      "upstream_sha256": "5a4b2d3904022c072b93d824c08b9e62b49498f8a9b9cd1740a54c5cf2febd98",
+      "local_sha256": "5a4b2d3904022c072b93d824c08b9e62b49498f8a9b9cd1740a54c5cf2febd98",
+      "changes": "none"
+    },
+    {
+      "path": "src/SNES.v",
+      "upstream_sha256": "bb9583989099b294e47b7e8070f440e149263c73b4117008536cedddd4d2a3b5",
+      "local_sha256": "bb9583989099b294e47b7e8070f440e149263c73b4117008536cedddd4d2a3b5",
+      "changes": "none"
+    },
+    {
+      "path": "src/cpu.v",
+      "upstream_sha256": "d1d9503c7d28634532f81587e44c989fb6e37ed964815164ba2563d1f8cc94c4",
+      "local_sha256": "d1d9503c7d28634532f81587e44c989fb6e37ed964815164ba2563d1f8cc94c4",
+      "changes": "none"
+    },
+    {
+      "path": "src/dsp.v",
+      "upstream_sha256": "68406b5090b7913e7ed3b40d69ba8acbce97f3a5240b257d411050caf45a1451",
+      "local_sha256": "68406b5090b7913e7ed3b40d69ba8acbce97f3a5240b257d411050caf45a1451",
+      "changes": "none"
+    },
+    {
+      "path": "src/dsp.vh",
+      "upstream_sha256": "d26180fcb3e3906151f958f5b38aab436207c984cde8a0fbf7ef60b731e59a7a",
+      "local_sha256": "d26180fcb3e3906151f958f5b38aab436207c984cde8a0fbf7ef60b731e59a7a",
+      "changes": "none"
+    },
+    {
+      "path": "src/ppu.v",
+      "upstream_sha256": "ec61575314f8b5086477b63e845253bfe37580d26345bacc30f6150abf1e1cc3",
+      "local_sha256": "ec61575314f8b5086477b63e845253bfe37580d26345bacc30f6150abf1e1cc3",
+      "changes": "none"
+    },
+    {
+      "path": "src/ppu_defines.vh",
+      "upstream_sha256": "438a155a7f72ba64c9204fd137cdc073521701af08ab4ecd3f94816984fcc711",
+      "local_sha256": "438a155a7f72ba64c9204fd137cdc073521701af08ab4ecd3f94816984fcc711",
+      "changes": "none"
+    },
+    {
+      "path": "src/ppucgram.v",
+      "upstream_sha256": "c560151fb40582e67dc9fc5d00544c9818e751bdc528949da65987495d43a8dd",
+      "local_sha256": "c560151fb40582e67dc9fc5d00544c9818e751bdc528949da65987495d43a8dd",
+      "changes": "none"
+    },
+    {
+      "path": "src/ppuhoam.v",
+      "upstream_sha256": "45396969ba61eb9828d3e830f47d032cd30535491ae0331cb8570da7dfda78c4",
+      "local_sha256": "45396969ba61eb9828d3e830f47d032cd30535491ae0331cb8570da7dfda78c4",
+      "changes": "none"
+    },
+    {
+      "path": "src/ppuoam.v",
+      "upstream_sha256": "6b4f3f6b52af0ee2c62771cbcfbd3d252720dde8295c0fedf6d8bcebed1c7db3",
+      "local_sha256": "6b4f3f6b52af0ee2c62771cbcfbd3d252720dde8295c0fedf6d8bcebed1c7db3",
+      "changes": "none"
+    },
+    {
+      "path": "src/smp.v",
+      "upstream_sha256": "7f146ae1041cbfeb8dbce64673a2277be55cc9ebde0287e8b9bc3cf8e79cf33b",
+      "local_sha256": "7f146ae1041cbfeb8dbce64673a2277be55cc9ebde0287e8b9bc3cf8e79cf33b",
+      "changes": "none"
+    },
+    {
+      "path": "src/spc700/_spc700_package.v",
+      "upstream_sha256": "9432d71dfaa694d04a1649d9c8d73be64bfa1c95a09e13a16cc136a1b4379e77",
+      "local_sha256": "9432d71dfaa694d04a1649d9c8d73be64bfa1c95a09e13a16cc136a1b4379e77",
+      "changes": "none"
+    },
+    {
+      "path": "src/spc700/addrgen.v",
+      "upstream_sha256": "153bebcb2f21c5ae51aa5f0ecfcbeebb19009e237cab05356f5effe032cce71a",
+      "local_sha256": "153bebcb2f21c5ae51aa5f0ecfcbeebb19009e237cab05356f5effe032cce71a",
+      "changes": "none"
+    },
+    {
+      "path": "src/spc700/addsub.v",
+      "upstream_sha256": "9b59a7446529279d9607e3a056fbda3965f6e2ee900711b24c724fe9914fce43",
+      "local_sha256": "9b59a7446529279d9607e3a056fbda3965f6e2ee900711b24c724fe9914fce43",
+      "changes": "none"
+    },
+    {
+      "path": "src/spc700/alu.v",
+      "upstream_sha256": "1dd52726a3de21d1945d7fd8c66da64db9a928bcc4644740a6febc45dcf23d99",
+      "local_sha256": "1dd52726a3de21d1945d7fd8c66da64db9a928bcc4644740a6febc45dcf23d99",
+      "changes": "none"
+    },
+    {
+      "path": "src/spc700/bcdadj.v",
+      "upstream_sha256": "a837325825b04ef051c88c4ea9153c94c90dde027b03c2d4e179b19a3361467d",
+      "local_sha256": "a837325825b04ef051c88c4ea9153c94c90dde027b03c2d4e179b19a3361467d",
+      "changes": "none"
+    },
+    {
+      "path": "src/spc700/mcode.py",
+      "upstream_sha256": "5cf6db76728bda4cce339a6921bd952f30ef19f87573b03a2d1e271e4c0b23e5",
+      "local_sha256": "5cf6db76728bda4cce339a6921bd952f30ef19f87573b03a2d1e271e4c0b23e5",
+      "changes": "none"
+    },
+    {
+      "path": "src/spc700/mcode.txt",
+      "upstream_sha256": "470ae82ea43843681064930e1705f2463149aeca715dab1eb9655cf318b68250",
+      "local_sha256": "470ae82ea43843681064930e1705f2463149aeca715dab1eb9655cf318b68250",
+      "changes": "none"
+    },
+    {
+      "path": "src/spc700/mcode.v",
+      "upstream_sha256": "9d6b5689ddd437ea6550d23141a89354df496134273a20a2727090b1bdab14c3",
+      "local_sha256": "9d6b5689ddd437ea6550d23141a89354df496134273a20a2727090b1bdab14c3",
+      "changes": "none"
+    },
+    {
+      "path": "src/spc700/mcode.vh",
+      "upstream_sha256": "acee5ff98197dc378229e2a35039ec858da2a0f806c1ac6e34be06332a62de1d",
+      "local_sha256": "acee5ff98197dc378229e2a35039ec858da2a0f806c1ac6e34be06332a62de1d",
+      "changes": "none"
+    },
+    {
+      "path": "src/spc700/muldiv.v",
+      "upstream_sha256": "29c3775160921cfd756b769a500d2700527cc63bf7ed4e64bbce33417ca40141",
+      "local_sha256": "29c3775160921cfd756b769a500d2700527cc63bf7ed4e64bbce33417ca40141",
+      "changes": "none"
+    },
+    {
+      "path": "src/spc700/spc700.v",
+      "upstream_sha256": "4634321a1a410033268418966905e87108dadb7ef44b9863b7a63e1d1d111a16",
+      "local_sha256": "4634321a1a410033268418966905e87108dadb7ef44b9863b7a63e1d1d111a16",
+      "changes": "none"
+    },
+    {
+      "path": "src/swram.v",
+      "upstream_sha256": "9ec3693b5de2447c9fb33362ef051bbc9be1336477bf1eca73543cfa2025337a",
+      "local_sha256": "9ec3693b5de2447c9fb33362ef051bbc9be1336477bf1eca73543cfa2025337a",
+      "changes": "none"
+    }
+  ]
+}

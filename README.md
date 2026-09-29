@@ -6,9 +6,9 @@ The FPGA will recreate the SNES motherboard environment and provide a protected,
 
 ## Current status
 
-**Cartridge interfaces and a USB programming circuit are drafted in KiCad. No completed or tested SN 64 hardware exists yet.** Existing SNES FPGA sources, schematics/PCBs, connector footprints, and cartridge CAD have been downloaded locally. Connector and mounting dimensions have been extracted from native CAD. The [editable schematic](hardware/sn64/README.md), revision `0.2-usb`, contains both cartridge connectors and a real [USB programmer child sheet](hardware/sn64/usb-programmer.kicad_sch): USB-C, protection, bridge power, FT232HL, crystal, optional EEPROM, isolated JTAG and service access.
+**The project now includes a simulated SNES console candidate, editable mechanical reference parts, and the KiCad cartridge/USB circuit draft. No completed or tested SN 64 hardware exists yet.** The [core evaluation](fpga/README.md) reuses pinned SNESTang sources and includes original diagnostics, synthesis and internal FPGA fit experiments. The [mechanical package](mechanical/README.md) contains FreeCAD, STEP and STL files for a socket hole-pattern coupon and source N64 board reference; these are not a final enclosure. The [editable schematic](hardware/sn64/README.md), revision `0.2-usb`, contains both cartridge connectors and a real [USB programmer child sheet](hardware/sn64/usb-programmer.kicad_sch): USB-C, protection, bridge power, FT232HL, crystal, optional EEPROM, isolated JTAG and service access.
 
-Independent static checks passed **30 cartridge-interface checks and 64 USB checks**. These verify source agreement and schematic connectivity, not working hardware or USB compliance. FPGA selection, configuration storage and its programming hookup, system/cartridge power, the remaining interfaces and firmware, PCB layout, enclosure and hardware tests remain pending. **This is not fabrication ready.**
+Independent static checks passed **30 cartridge-interface checks and 64 USB checks**. These verify source agreement and schematic connectivity, not working hardware or USB compliance. The [136-entry requirements register](docs/requirements.md) preserves every specification target and records partial evidence separately from acceptance. Final FPGA/BOM selection, configuration storage and its programming hookup, system/cartridge power circuitry, the physical bus bridge, host and A/V integration, PCB layout, enclosure and hardware tests remain pending. **This is not fabrication ready.**
 
 Every target in the original specification remains in scope, including PAL, protection, save integrity, telemetry, independent recovery, factory testing, and the additional requirements. Independent digital A/V is an initial validation path. M64 single-HDMI operation remains a required target with an unresolved dependency on a supported M64 integration mechanism; reserving resources does not establish compatibility.
 
@@ -16,6 +16,14 @@ Every target in the original specification remains in scope, including PAL, prot
 
 - [Engineering specification, Rev A](SN_64_Engineering_Specification_Rev_A.docx)
 - [Engineering implementation plan](docs/superpowers/plans/2026-09-28-sn64-engineering-plan.md)
+- [Full requirements and acceptance register](docs/requirements.md)
+- [System architecture and integration status](docs/architecture.md)
+- [Console-core evaluation and reproducible builds](fpga/README.md)
+- [Physical cartridge bridge design and open tests](docs/design/physical-cartridge-bridge.md)
+- [FPGA/package, supply and board reuse review](docs/design/fpga-board-selection.md)
+- [Power architecture, including M64 USB power](docs/design/power-architecture.md)
+- [Socket selection and missing manufacturer dimensions](docs/design/socket-selection.md)
+- [Editable mechanical references and fit coupon](mechanical/README.md)
 - [Peripheral research and current decisions](docs/research/snes-peripherals.md)
 - [Reusable SNES circuits, layouts and FPGA source](docs/research/reusable-designs.md)
 - [Connector, cartridge and mounting dimensions](docs/dimensions.md)
@@ -38,13 +46,13 @@ Current input decisions are standard, configurable N64-to-SNES controller mappin
 - **KiCad 10.0.6:** schematics, PCB layout, checks, and manufacturing exports.
 - **FreeCAD 1.1.4:** dimensioned enclosure and mechanical assembly models.
 - **Blender:** available for visualization and mesh work.
-- FPGA synthesis, simulation, and programming tools will be selected with the FPGA.
+- **OSS CAD Suite 2026-09-28:** Yosys/Slang, Verilator, nextpnr-ecp5 and programming utilities; [pinned toolchain](fpga/reports/toolchain.json). Initial loading of actual SN64 hardware is still untested.
 
 Start by adapting working upstream designs: reuse their HDL, circuits, layouts, footprints and mechanical CAD where they fit. The main custom work is integrating the physical SNES cartridge bridge with the SNES core, protected power, the N64 host endpoint, A/V and enclosure. Dimensions and interface assumptions retain their provenance and are cross-checked. Physical fit and functional tests follow adaptation.
 
 ## Planned outputs
 
-These directories describe the intended outputs. The cartridge/USB schematic draft and reference collection exist; the remaining implementations are future work.
+These directories describe the intended outputs. Cartridge/USB schematics, the core candidate/tests, mechanical reference models and the acceptance register exist; the complete product implementations remain in progress.
 
 | Planned directory | Contents |
 |---|---|
