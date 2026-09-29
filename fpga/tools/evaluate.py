@@ -162,6 +162,19 @@ def main():
         if pwr_pass is None:
             raise RuntimeError('Power sequencer test exited without its acceptance marker')
         report['simulation']['power_sequencer'] = pwr_pass
+        # Si5351 start-up and region latch
+        clk_obj = obj / 'clock-init'
+        run('clock-init-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+            '--top-module', 'tb_clock_init', '--Mdir', str(clk_obj).replace('\\', '/'),
+            'fpga/rtl/sn64_clock_init.sv', 'fpga/tests/tb_clock_init.sv'])
+        clk_exe = clk_obj / ('Vtb_clock_init.exe' if os.name == 'nt' else 'Vtb_clock_init')
+        clk_body = run('clock-init', [str(clk_exe)])
+        clk_pass = next((line for line in clk_body.splitlines() if line.startswith('PASS:')), None)
+        if clk_pass is None:
+            raise RuntimeError('Clock init test exited without its acceptance marker')
+        report['simulation']['clock_init'] = clk_pass
+        run('clock-init-no-ack', [str(clk_exe), '+wrong_addr'], 'master reported i2c_error on NACK')
+        report['simulation']['injected_clock_fault'] = 'Rejected: a non-responding Si5351 is reported as i2c_error'
         report['simulation']['limit'] = ('Same master clock in all runs; PAL clocks/video and PPU/APU not qualified; '
                                          'bridge bus model is behavioural (no analog levels or translator delays)')
 

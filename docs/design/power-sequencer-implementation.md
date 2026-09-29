@@ -20,14 +20,16 @@ This block decides when the SNES cartridge gets power and when the FPGA may driv
 | RESET (1) | 5 V enabled (eFuse slew), reset pulled | 5 V window valid; timeout → FAULT code `0x08` |
 | RAMP5 (2) | interface rail enabled | rail valid; timeout → FAULT code `0x10` |
 | IFACE (3) | reset still pulled for `RESET_HOLD_MS` | hold time elapsed → reset released |
-| RUN (4) | everything on, `bus_permit` may be high | request dropped or host reset → SHUTDOWN |
+| RUN (4) | everything on, `bus_permit` may be high; `hold_reset` pulls cartridge /RESET only | request dropped or host reset → SHUTDOWN |
 | SHUTDOWN (5) | reset pulled, rails off | next clock → OFF |
 | FAULT (6) | everything off, reset pulled, fault latched | `fault_clear` while `run_request` is low → OFF |
 
 The interface rail is never enabled without cartridge 5 V (translator A side must be powered first; see the power-architecture translator section). `fault_code` records the trip cause: bit 1 configuration loss, 2 host/USB rail, 3 FPGA rails… as coded in the module; bit 3 5 V window, bit 4 interface rail, bit 6 eFuse, bit 7 over-temperature. It is intended for the telemetry registers.
 
+**Soft reset never power-cycles the cartridge.** `hold_reset` (the N64 menu's "reset SNES" action) behaves like the console's reset button: /RESET is held while cartridge 5 V and the interface rail stay on and the machine stays in RUN. A flashcart such as a Super EverDrive or FXPAK Pro therefore keeps the game it has loaded; removing power would send it back to its menu. Cartridge power is removed only by SHUTDOWN (request dropped, host reset) or FAULT. The SNES master clock is never changed while running; the region is fixed at power-on (see the [clock plan](clock-plan.md)).
+
 ## Verification
 
-The bench uses shortened hold/timeout parameters and rail models that become valid a few clocks after their enable. Every clock it asserts that `bus_permit` is never high with any condition false, never high outside RUN, and that the interface rail is never on without 5 V. Sequence checks: normal bring-up and request drop; host reset during RUN removes permission on the next clock and shuts down; eFuse fault, over-temperature, configuration loss and 5 V loss each remove permission within one clock, latch with the right code, keep outputs off, refuse `fault_clear` while the run request is still high, and clear properly afterwards; a 5 V rail that never comes up times out with code `0x08`. Result: **PASS**.
+The bench uses shortened hold/timeout parameters and rail models that become valid a few clocks after their enable. Every clock it asserts that `bus_permit` is never high with any condition false, never high outside RUN, and that the interface rail is never on without 5 V. Sequence checks: normal bring-up and request drop; a 50-clock soft reset in RUN keeps both rails enabled and the state in RUN while /RESET is held, then releases cleanly; host reset during RUN removes permission on the next clock and shuts down; eFuse fault, over-temperature, configuration loss and 5 V loss each remove permission within one clock, latch with the right code, keep outputs off, refuse `fault_clear` while the run request is still high, and clear properly afterwards; a 5 V rail that never comes up times out with code `0x08`. Result: **PASS**.
 
 Limits: digital behaviour only. The analog veto, eFuse current limit and slew, monitor thresholds and all real timings (reset hold, rail timeouts) must be set from the selected parts and measured on hardware. Hardware inputs are assumed already synchronised; board integration must add synchronisers for asynchronous monitor outputs.

@@ -24,6 +24,7 @@ Every target in the original specification remains in scope, including PAL, prot
 - [N64/M64 endpoint implementation and mailbox map](docs/design/n64-endpoint-implementation.md)
 - [N64 CIC lockout implementation](docs/design/n64-cic-implementation.md)
 - [Power-control state machine](docs/design/power-sequencer-implementation.md)
+- [Clock plan and region selection](docs/design/clock-plan.md)
 - [Cartridge data-bus source evidence and unresolved behavior](docs/design/bus-electrical-evidence.md)
 - [FPGA/package, supply and board reuse review](docs/design/fpga-board-selection.md)
 - [Power architecture, including M64 USB power](docs/design/power-architecture.md)

@@ -10,7 +10,7 @@ module tb_power_sequencer;
     reg configured=1, host_3v3_ok=1, fpga_rails_ok=1, efuse_fault_n=1, overtemp=0, host_reset_n=1;
     reg rail_5v_dead=0;                     // model a 5 V rail that never comes up
     reg cart_5v_ok=0, iface_rail_ok=0;
-    reg run_request=0, fault_clear=0;
+    reg run_request=0, fault_clear=0, hold_reset=0;
     wire cart_5v_enable, iface_rail_enable, cart_reset_pull, bus_permit, fault_latched;
     wire [3:0] state; wire [7:0] fault_code;
 
@@ -19,7 +19,7 @@ module tb_power_sequencer;
         .configured(configured), .host_3v3_ok(host_3v3_ok), .fpga_rails_ok(fpga_rails_ok),
         .cart_5v_ok(cart_5v_ok), .iface_rail_ok(iface_rail_ok), .efuse_fault_n(efuse_fault_n),
         .overtemp(overtemp), .host_reset_n(host_reset_n),
-        .run_request(run_request), .fault_clear(fault_clear),
+        .run_request(run_request), .fault_clear(fault_clear), .hold_reset(hold_reset),
         .cart_5v_enable(cart_5v_enable), .iface_rail_enable(iface_rail_enable), .cart_reset_pull(cart_reset_pull),
         .bus_permit(bus_permit), .fault_latched(fault_latched), .state(state), .fault_code(fault_code));
 
@@ -71,6 +71,18 @@ module tb_power_sequencer;
         expect_safe;
         // 1) Normal bring-up and request drop
         bring_up; run_request=0; wait(state==S_OFF); expect_safe;
+        // 1b) Soft reset while running (region clock switch): /RESET held,
+        //     cartridge power and interface rail must stay on throughout, and
+        //     the machine stays in RUN (a flashcart keeps its loaded game).
+        bring_up; hold_reset=1;
+        repeat(50) begin @(negedge clk);
+            if (!cart_5v_enable || !iface_rail_enable) $fatal(1,"soft reset removed cartridge power");
+            if (state!=S_RUN) $fatal(1,"soft reset left RUN (state %0d)",state);
+        end
+        if (!cart_reset_pull) $fatal(1,"soft reset did not hold cartridge /RESET");
+        hold_reset=0; repeat(3) @(negedge clk);
+        if (cart_reset_pull || !cart_5v_enable) $fatal(1,"soft reset did not release cleanly");
+        run_request=0; wait(state==S_OFF); expect_safe;
         // 2) Host reset during RUN -> immediate permit loss and shutdown
         bring_up; host_reset_n=0; @(negedge clk); if (bus_permit) $fatal(1,"permit survived host reset");
         wait(state==S_OFF); run_request=0; expect_safe; host_reset_n=1;
@@ -87,7 +99,7 @@ module tb_power_sequencer;
         rail_5v_dead=1; run_request=1; wait(state==S_FAULT); @(negedge clk);
         if (fault_code!==8'h08) $fatal(1,"rail timeout code wrong: %h",fault_code);
         rail_5v_dead=0; clear_fault(8'h08, "rail timeout");
-        $display("PASS: power sequencer bring-up order, request/host-reset shutdown, 4 fault classes trip and latch, clear refused while requested, rail timeout (%0d clocks)", cycles);
+        $display("PASS: power sequencer bring-up order, soft reset keeps cartridge power, request/host-reset shutdown, 4 fault classes trip and latch, clear refused while requested, rail timeout (%0d clocks)", cycles);
         $finish;
     end
 endmodule

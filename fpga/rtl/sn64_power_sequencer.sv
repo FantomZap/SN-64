@@ -35,6 +35,8 @@ module sn64_power_sequencer #(
     // Requests
     input  wire run_request,          // from the N64 mailbox
     input  wire fault_clear,          // explicit acknowledge
+    input  wire hold_reset,           // soft reset while running (N64-menu "reset SNES", like the
+                                      // console reset button): pulls /RESET, NEVER removes cartridge power
 
     // Outputs
     output reg  cart_5v_enable,       // eFuse EN (default off)
@@ -94,6 +96,12 @@ module sn64_power_sequencer #(
                     if (timer >= RESET_TICKS) begin cart_reset_pull <= 1'b0; state <= S_RUN; end
                 end
                 S_RUN: begin
+                    // A soft reset behaves like the console reset button: /RESET
+                    // is held, cartridge 5 V and the interface rail stay on, so a
+                    // flashcart keeps its loaded game. Power is only removed by
+                    // SHUTDOWN or FAULT. The SNES master clock is never changed
+                    // here (region is fixed at power-on; see sn64_clock_init).
+                    cart_reset_pull <= hold_reset;
                     if (!run_request || !host_reset_n) state <= S_SHUTDOWN;
                 end
                 S_SHUTDOWN: begin                   // outputs off (bus_permit already 0), then rails
