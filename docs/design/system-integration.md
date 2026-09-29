@@ -50,3 +50,18 @@ A first full place-and-route used [sn64_pnr_wrap.sv](../../fpga/rtl/sn64_pnr_wra
 4. **ROM header region fallback** (`$00:FFD9`) needs a pre-boot bus master in front of the bridge; today an absent key means NTSC unless the menu forces PAL.
 5. Whole-design place-and-route for timing.
 6. **CIC data pin circuit** (must fix before layout): the [cartridge interface sheet](cart-interface-schematic.md) treats CIC_DATA0 as output-only and CIC_DATA1 as input-only, but the lock protocol drives each pin in some rounds and receives on it in others. Each needs its own enabled bidirectional path with a pull-down.
+
+
+## Place-and-route with HDMI (2026-09-29)
+
+Reproduce with `python fpga/tools/route_top.py` (OSS CAD Suite on PATH; writes `build/route-top/summary.json`). Synthesis loads the ECP5 cell library and defines `VERILATOR` (core memory branch) and `SN64_SYNTH` (real ODDRX1F in the HDMI serializer). The trial constraints [fpga/constraints/sn64_trial.lpf](../../fpga/constraints/sn64_trial.lpf) set all five clock frequencies and borrow the ULX3S HDMI pins (same 85F CABGA381 package) because DDR outputs need fixed PIOs; every other pin is placer-chosen.
+
+| Clock | Required | Achieved (grade 6) |
+|---|---:|---:|
+| SNES master | 21.48 MHz | 28.54 MHz |
+| Host (N64 endpoint, CIC) | 62.5 MHz | 84.25 MHz |
+| Housekeeping | 25 MHz | 61.40 MHz |
+| HDMI pixel | 27.02 MHz | 56.60 MHz |
+| HDMI TMDS bit clock | 135.1 MHz | 317.36 MHz |
+
+Resources: 29,224 LUT4 / 33,899 TRELLIS_COMB (40 %), 12,910 FF (15 %), 143 of 208 DP16KD, 20 MULT18X18D, 4 ODDRX1F, 122 I/O. The bootstrap ROM block RAM is not counted (its load port is tied off and it is being moved to flash). Cross-domain paths are synchronised by design and excluded; this is internal feasibility, not a board timing sign-off.

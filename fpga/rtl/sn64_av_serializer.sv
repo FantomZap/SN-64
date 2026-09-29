@@ -59,12 +59,14 @@ module sn64_av_serializer (
     assign tmds_clock = q[3];
 endmodule
 
-// One DDR output bit. ECP5 primitive in synthesis, behavioural model in Verilator.
+// One DDR output bit. ECP5 primitive when synthesised with SN64_SYNTH defined,
+// behavioural model otherwise. (Not keyed on VERILATOR: whole-design synthesis
+// must define VERILATOR to select the SNES core's inferred-memory branch.)
 module sn64_av_oddr (
     input  wire sclk, d0, d1,
     output wire q
 );
-`ifdef VERILATOR
+`ifndef SN64_SYNTH
     reg r0 = 1'b0, r1 = 1'b0, r1n = 1'b0;
     always @(posedge sclk) begin
         r0 <= d0;

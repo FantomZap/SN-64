@@ -1,0 +1,14 @@
+FREQUENCY PORT "clk_25" 25 MHZ;
+FREQUENCY PORT "clk_host" 62.5 MHZ;
+FREQUENCY PORT "clk_snes" 21.477272 MHZ;
+FREQUENCY PORT "clk_pixel" 27.0198 MHZ;
+FREQUENCY PORT "clk_pixel_x5" 135.099 MHZ;
+# Trial HDMI pins borrowed from the ULX3S GPDI connector (same LFE5U-85F CABGA381 package); not the SN64 pinout.
+LOCATE COMP "hdmi_tmds[0]" SITE "A16";
+LOCATE COMP "hdmi_tmds[1]" SITE "A14";
+LOCATE COMP "hdmi_tmds[2]" SITE "A12";
+LOCATE COMP "hdmi_tmds_clock" SITE "A17";
+IOBUF PORT "hdmi_tmds[0]" IO_TYPE=LVCMOS33D DRIVE=4;
+IOBUF PORT "hdmi_tmds[1]" IO_TYPE=LVCMOS33D DRIVE=4;
+IOBUF PORT "hdmi_tmds[2]" IO_TYPE=LVCMOS33D DRIVE=4;
+IOBUF PORT "hdmi_tmds_clock" IO_TYPE=LVCMOS33D DRIVE=4;
