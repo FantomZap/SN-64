@@ -95,7 +95,31 @@ def main():
         if wram_pass is None:
             raise RuntimeError('WRAM bus test exited without its acceptance marker')
         report['simulation']['wram_bus'] = wram_pass
-        report['simulation']['limit'] = 'Same master clock in both runs; PAL clocks/video and PPU/APU not qualified'
+        bridge_sources = ['fpga/rtl/sn64_console_candidate.sv', 'fpga/rtl/sn64_cart_bridge.sv',
+                          'fpga/rtl/sn64_console_with_bridge.sv', 'fpga/tests/tb_cart_bridge.sv']
+        bridge_obj = obj / 'cart-bridge'
+        run('bridge-build', [verilator, '--binary', '--timing', '--build-jobs', '4',
+            '-Wno-fatal', '--top-module', 'tb_cart_bridge', '--Mdir', str(bridge_obj).replace('\\', '/'),
+            '-Ibuild/generated/snestang/src', '-Ibuild/generated/snestang/src/spc700',
+            '-Ibuild/generated/snestang/src/65C816', '-f', 'build/core-sources.f'] + bridge_sources)
+        bridge_exe = bridge_obj / ('Vtb_cart_bridge.exe' if os.name == 'nt' else 'Vtb_cart_bridge')
+        bridge_body = run('cart-bridge', [str(bridge_exe)])
+        bridge_pass = next((line for line in bridge_body.splitlines() if line.startswith('PASS:')), None)
+        if bridge_pass is None:
+            raise RuntimeError('Cartridge bridge test exited without its acceptance marker')
+        report['simulation']['cart_bridge'] = bridge_pass
+        # Fault injection: a bridge without the turnaround clock must be caught as contention.
+        fault_obj = obj / 'cart-bridge-fault'
+        run('bridge-fault-build', [verilator, '--binary', '--timing', '--build-jobs', '4',
+            '-Wno-fatal', '+define+SN64_FAULT_NO_GUARD', '--top-module', 'tb_cart_bridge',
+            '--Mdir', str(fault_obj).replace('\\', '/'),
+            '-Ibuild/generated/snestang/src', '-Ibuild/generated/snestang/src/spc700',
+            '-Ibuild/generated/snestang/src/65C816', '-f', 'build/core-sources.f'] + bridge_sources)
+        fault_exe = fault_obj / ('Vtb_cart_bridge.exe' if os.name == 'nt' else 'Vtb_cart_bridge')
+        run('cart-bridge-no-guard', [str(fault_exe)], 'without release clock')
+        report['simulation']['injected_bridge_fault'] = 'Rejected: owner change without a released clock is detected'
+        report['simulation']['limit'] = ('Same master clock in all runs; PAL clocks/video and PPU/APU not qualified; '
+                                         'bridge bus model is behavioural (no analog levels or translator delays)')
 
     if args.mode in ('synth', 'all'):
         run('yosys-version', [shutil.which('yosys'), '-V'])

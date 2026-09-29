@@ -6,6 +6,7 @@ This directory contains a reproducible **console-only engineering candidate** bu
 - [Candidate wrapper](rtl/sn64_console_candidate.sv): CPU/PPU/APU plus 128 KiB WRAM, 64 KiB VRAM and 64 KiB ARAM in synchronous inferred RAM.
 - [Diagnostic](tests/tb_console_boot.sv): original instruction program; no commercial game image.
 - [WRAM bus diagnostic](tests/tb_wram_bus.sv): active-cycle RAM data, direct/mirrored addresses, RAM port and B-to-A DMA.
+- [Cartridge bridge](rtl/sn64_cart_bridge.sv) and [socket-facing top](rtl/sn64_console_with_bridge.sv): data-bus ownership with one released clock at every turnaround; [physical-bus diagnostic](tests/tb_cart_bridge.sv) with contention monitor and a fault-injected run. See [implementation notes](../docs/design/cartridge-bridge-implementation.md).
 - [Recorded evaluation](reports/evaluation.md) and [machine-readable evidence](reports/evaluation.json).
 - [Physical-cartridge bridge work](../docs/design/physical-cartridge-bridge.md) and [FPGA selection](../docs/design/fpga-board-selection.md).
 
@@ -33,7 +34,7 @@ $env:PATH = 'C:/path/to/w64devkit/bin;' + $env:PATH
 
 The Verilator object directory must contain no spaces, even if the repository does. On Windows the runner invokes `verilator_bin.exe` and sets its installed `VERILATOR_ROOT`; the extensionless Perl wrapper is not relied upon. Normal Python 3 works too; KiCad's bundled Python was convenient here. No network download is needed to prepare or evaluate the vendored core once tools are installed.
 
-`--mode sim` runs diagnostics; `--mode synth` maps the core; `--mode pnr` uses the **existing** `build/console-ecp5.json` and does not independently establish that it matches current sources. Use `--mode all` for a current complete experiment. Logs and the fresh report are written to `build/evaluation/`; reviewed snapshots are copied into `fpga/reports/` deliberately.
+`--mode sim` runs all diagnostics, including the bridge bench and its fault-injected build (which must fail); `--mode synth` maps the core; `--mode pnr` uses the **existing** `build/console-ecp5.json` and does not independently establish that it matches current sources. Use `--mode all` for a current complete experiment. Logs and the fresh report are written to `build/evaluation/`; reviewed snapshots are copied into `fpga/reports/` deliberately.
 
 Yosys uses `scratchpad -set abc9.xaiger 1`: the pinned Windows build's experimental XAIGER2 backend asserted during export. This selects its existing older XAIGER path; it does not skip logic mapping. The synthesis report explicitly checks that the mapped TURBO control is constant zero. Earlier static-function alias and unused-debug warnings are preserved, not represented as a warning-free build.
 

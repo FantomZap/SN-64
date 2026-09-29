@@ -59,6 +59,13 @@ The current [evaluation report](../fpga/reports/evaluation.md) and [JSON snapsho
 - Current tool assessment: keep KiCad, because PCBWay accepts it directly and every reused upstream board is KiCad. Keep the OSS CAD Suite ECP5 flow. New enclosure geometry may move to code-first build123d with STEP/STL exports, keeping the FreeCAD references. No tool change has been made yet.
 - Recorded a quick [risk assessment](risk-assessment.md). Top risks are power, the video path, real-cartridge timing and BGA board layout. It recommends proving the cartridge path on development hardware before the custom board.
 
+## 2026-09-29 — Physical cartridge bridge implemented in simulation
+
+- Cross-referenced the pinned core's cartridge bus (`cpu.v` strobe generation and cycle counters, `SNES.v` data muxing, `P65C816.v` read-data latch point) with console-side hardware behaviour and wrote [sn64_cart_bridge.sv](../fpga/rtl/sn64_cart_bridge.sv): registered socket outputs gated by a hardware permission, a data-bus ownership state machine with a released clock at every owner change, look-ahead so turnarounds finish before the strobe edge reaches the cartridge, and one clock of write-data hold. Internal CPU-register reads are not exported, per the evidence audit. [Implementation notes](design/cartridge-bridge-implementation.md).
+- Added a physical-bus testbench with a cartridge model that drives only when selected and a monitor that fails on contention, unpermitted output, missing write data or a missing turnaround. Passes in 1,411 clocks with 56 ownership changes and zero contention. A fault-injected build (turnaround removed) is rejected as required.
+- Two bugs found and fixed during development: (1) deciding ownership from the delayed socket strobes shortened the effective write pulse; (2) the bench's SRAM model latched after the address had advanced. Both are recorded in the implementation note.
+- `evaluate.py --mode sim` now runs seven checks. CIC, EXPAND, analog audio, HDMA/PPU/APU responder cases, fault-input wiring and hardware timing remain open.
+
 ## Remaining work
 
 Select and validate the FPGA/storage and physical-cartridge bridge, complete system/cartridge power and protection, N64 endpoint, controller/firmware functions, clocks, A/V and diagnostics. Retain PAL and the required M64 single-HDMI target; its supported integration mechanism remains unresolved. Complete PCB placement/routing and the FreeCAD enclosure, then perform electrical, programming, compatibility and fit tests on prototypes before producing a PCBWay release. No working SN 64 hardware or fabrication-ready package exists yet.
