@@ -1,0 +1,812 @@
+{
+  "status": "pass",
+  "generated_at_utc": "2026-09-29T04:00:06.298944+00:00",
+  "scope": "independent USB programmer static connectivity review",
+  "kicad": "10.0.6",
+  "checks_passed": 64,
+  "checks_failed": 0,
+  "inputs": {
+    "sn64.kicad_sch": "8e4b1478d341b6cac2e893a4be78ed555079c30cac6b4ab5112d08309e73a298",
+    "usb-programmer.kicad_sch": "de8b536223ca8ce2d8d8059e9678f495efc755403f25b18025af4e47beaa6481",
+    "libraries/SN64_USB.kicad_sym": "f26ef1391fa4cfc9e1da1ab88492ed9628f75d8df63a385852dbe0ca17650fc1"
+  },
+  "sources": {
+    "FT232H_v2_2": "https://www.ftdichip.cn/Support/Documents/DataSheets/ICs/DS_FT232H.pdf",
+    "SN74AXC4T774_revC": "https://www.ti.com/lit/ds/symlink/sn74axc4t774.pdf",
+    "AP2112": "https://www.diodes.com/datasheet/download/AP2112.pdf",
+    "USBLC6_2_rev7": "https://www.st.com/resource/en/datasheet/usblc6-2.pdf",
+    "ABM3B": "https://abracon.com/Resonators/abm3b.pdf",
+    "source_USB_connector_EEPROM": "https://github.com/Polprzewodnikowy/SummerCart64/blob/a1e7996d2cbece686820a5c785029c68514f17b0/hw/pcb/sc64v2.kicad_sch",
+    "programmer_GPIO_contract": "https://github.com/trabucayre/openFPGALoader/blob/676e53ec73d2261c974d610b7cf0693117c8d2ef/src/ftdipp_mpsse.cpp"
+  },
+  "checks": [
+    {
+      "check": "fresh_netlist_export",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "stored_netlist_current",
+      "passed": true,
+      "detail": "Electrical connectivity and pin types compared with a fresh temporary export."
+    },
+    {
+      "check": "all_expected_USB_parts_present",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "check": "no_unreviewed_USB_sheet_parts",
+      "passed": true,
+      "detail": {
+        "extra": [],
+        "missing": []
+      }
+    },
+    {
+      "check": "each_pin_in_one_net",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "check": "topology_USB_VBUS",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/USB_VBUS"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 10
+      }
+    },
+    {
+      "check": "topology_USB_DP",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/USB_DP"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 5
+      }
+    },
+    {
+      "check": "topology_USB_DM",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/USB_DM"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 5
+      }
+    },
+    {
+      "check": "topology_CC1",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/USB_CC1"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 4
+      }
+    },
+    {
+      "check": "topology_CC2",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/USB_CC2"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 4
+      }
+    },
+    {
+      "check": "topology_USB_3V3",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/USB_3V3"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 23
+      }
+    },
+    {
+      "check": "topology_FT_VPHY",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/FT_VPHY"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 3
+      }
+    },
+    {
+      "check": "topology_FT_VPLL",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/FT_VPLL"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 3
+      }
+    },
+    {
+      "check": "topology_FT_VCCA_1V8",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/FT_1V8A"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 2
+      }
+    },
+    {
+      "check": "topology_FT_VCORE_1V8",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/FT_1V8CORE"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 2
+      }
+    },
+    {
+      "check": "topology_FT_REF",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/FT_REF"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 2
+      }
+    },
+    {
+      "check": "topology_FT_RESET",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/FT_RESET_N"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 2
+      }
+    },
+    {
+      "check": "topology_XTAL_IN",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/XTAL_IN"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 3
+      }
+    },
+    {
+      "check": "topology_XTAL_OUT",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/XTAL_OUT"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 3
+      }
+    },
+    {
+      "check": "topology_FT_TCK_to_A1",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/FT_TCK"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 2
+      }
+    },
+    {
+      "check": "topology_FT_TDI_to_A2",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/FT_TDI"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 2
+      }
+    },
+    {
+      "check": "topology_FT_TDO_from_A3",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/FT_TDO"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 2
+      }
+    },
+    {
+      "check": "topology_FT_TMS_to_A4",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/FT_TMS"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 2
+      }
+    },
+    {
+      "check": "topology_ACBUS6_OE_N",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/JTAG_OE_N"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 3
+      }
+    },
+    {
+      "check": "topology_B1_TCK_series",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/TCK_DRV"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 2
+      }
+    },
+    {
+      "check": "topology_B2_TDI_series",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/TDI_DRV"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 2
+      }
+    },
+    {
+      "check": "topology_B3_TDO_series",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/TDO_RCV"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 2
+      }
+    },
+    {
+      "check": "topology_B4_TMS_series",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/TMS_DRV"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 2
+      }
+    },
+    {
+      "check": "topology_TARGET_TCK",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/JTAG_TCK"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 3
+      }
+    },
+    {
+      "check": "topology_TARGET_TDI",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/JTAG_TDI"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 3
+      }
+    },
+    {
+      "check": "topology_TARGET_TDO",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/JTAG_TDO"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 2
+      }
+    },
+    {
+      "check": "topology_TARGET_TMS",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/JTAG_TMS"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 3
+      }
+    },
+    {
+      "check": "topology_TARGET_VREF",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/TARGET_VREF"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 5
+      }
+    },
+    {
+      "check": "topology_EE_CLK",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/EE_CLK"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 2
+      }
+    },
+    {
+      "check": "topology_EE_CS",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/EE_CS"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 2
+      }
+    },
+    {
+      "check": "topology_EE_DATA",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/EE_DATA"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 3
+      }
+    },
+    {
+      "check": "topology_EE_DO",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/USB-C programmer/EE_DO"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 3
+      }
+    },
+    {
+      "check": "topology_GROUND",
+      "passed": true,
+      "detail": {
+        "actual_nets": [
+          "/GND"
+        ],
+        "missing_pins": [],
+        "unexpected_USB_pins": [],
+        "expected_pin_count": 46
+      }
+    },
+    {
+      "check": "intended_groups_remain_distinct",
+      "passed": true,
+      "detail": {
+        "groups": 33,
+        "distinct_nets": 33
+      }
+    },
+    {
+      "check": "deliberate_NC_contacts",
+      "passed": true,
+      "detail": [
+        [
+          "J101",
+          "A8"
+        ],
+        [
+          "J101",
+          "B8"
+        ],
+        [
+          "U103",
+          "4"
+        ],
+        [
+          "U104",
+          "17"
+        ],
+        [
+          "U104",
+          "18"
+        ],
+        [
+          "U104",
+          "19"
+        ],
+        [
+          "U104",
+          "20"
+        ],
+        [
+          "U104",
+          "21"
+        ],
+        [
+          "U104",
+          "25"
+        ],
+        [
+          "U104",
+          "26"
+        ],
+        [
+          "U104",
+          "27"
+        ],
+        [
+          "U104",
+          "28"
+        ],
+        [
+          "U104",
+          "29"
+        ],
+        [
+          "U104",
+          "31"
+        ],
+        [
+          "U104",
+          "32"
+        ],
+        [
+          "U104",
+          "33"
+        ]
+      ]
+    },
+    {
+      "check": "all_USB_component_pins_accounted_for",
+      "passed": true,
+      "detail": {
+        "mapped": 178,
+        "actual": 178,
+        "extra": [],
+        "missing": []
+      }
+    },
+    {
+      "check": "USB_ground_joins_both_cartridge_interfaces",
+      "passed": true,
+      "detail": {
+        "USB": "/GND",
+        "N64": "/GND",
+        "SNES": "/GND"
+      }
+    },
+    {
+      "check": "only_ground_directly_crosses_USB_host_boundary",
+      "passed": true,
+      "detail": [
+        "/GND"
+      ]
+    },
+    {
+      "check": "six_power_domains_distinct",
+      "passed": true,
+      "detail": {
+        "USB_VBUS": "/USB-C programmer/USB_VBUS",
+        "USB_3V3": "/USB-C programmer/USB_3V3",
+        "TARGET_VREF": "/USB-C programmer/TARGET_VREF",
+        "HOST_3V3": "/HOST_3V3",
+        "HOST_12V": "/HOST_12V",
+        "SNES_5V": "/SNES_5V_CART"
+      }
+    },
+    {
+      "check": "independent_CC_5k1_resistors",
+      "passed": true,
+      "detail": {
+        "R101": "5.1k 1%",
+        "R102": "5.1k 1%"
+      }
+    },
+    {
+      "check": "OE_has_10k_pullup_to_USB_3V3",
+      "passed": true,
+      "detail": "10k"
+    },
+    {
+      "check": "REF_and_reset_resistors",
+      "passed": true,
+      "detail": {
+        "REF": "12k 1%",
+        "RESET": "12k"
+      }
+    },
+    {
+      "check": "JTAG_series_and_target_bias_values",
+      "passed": true,
+      "detail": {
+        "R108": "33",
+        "R109": "33",
+        "R110": "33",
+        "R111": "33",
+        "R112": "10k",
+        "R113": "10k",
+        "R114": "10k"
+      }
+    },
+    {
+      "check": "FTDI_and_translator_bypassing",
+      "passed": true,
+      "detail": "100 nF capacitors on filtered PHY/PLL, USB3V3, separate FTDI1V8 outputs, and translator supplies; physical placement untested."
+    },
+    {
+      "check": "crystal_and_load_cap_candidate",
+      "passed": true,
+      "detail": "12 MHz crystal; both signal electrodes and grounded package pads verified. 11 pF loads require parasitic/startup measurement."
+    },
+    {
+      "check": "regulator_fixed_3V3_variant",
+      "passed": true,
+      "detail": "AP2112K-3.3TRG1"
+    },
+    {
+      "check": "FT232H_revision_C_qualified",
+      "passed": true,
+      "detail": "FT232HL (rev C)"
+    },
+    {
+      "check": "EEPROM_really_DNP",
+      "passed": true,
+      "detail": "KiCad DNP property required in addition to the value text."
+    },
+    {
+      "check": "EEPROM_clock_select_are_FTDI_outputs",
+      "passed": true,
+      "detail": {
+        "44": "output",
+        "45": "output"
+      }
+    },
+    {
+      "check": "U104_physical_pad_set",
+      "passed": true,
+      "detail": [
+        "1",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "2",
+        "20",
+        "21",
+        "22",
+        "23",
+        "24",
+        "25",
+        "26",
+        "27",
+        "28",
+        "29",
+        "3",
+        "30",
+        "31",
+        "32",
+        "33",
+        "34",
+        "35",
+        "36",
+        "37",
+        "38",
+        "39",
+        "4",
+        "40",
+        "41",
+        "42",
+        "43",
+        "44",
+        "45",
+        "46",
+        "47",
+        "48",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ]
+    },
+    {
+      "check": "U105_physical_pad_set",
+      "passed": true,
+      "detail": [
+        "1",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+      ]
+    },
+    {
+      "check": "U103_physical_pad_set",
+      "passed": true,
+      "detail": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ]
+    },
+    {
+      "check": "U101_physical_pad_set",
+      "passed": true,
+      "detail": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ]
+    },
+    {
+      "check": "U102_physical_pad_set",
+      "passed": true,
+      "detail": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ]
+    },
+    {
+      "check": "U106_physical_pad_set",
+      "passed": true,
+      "detail": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ]
+    },
+    {
+      "check": "Y101_physical_pad_set",
+      "passed": true,
+      "detail": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ]
+    },
+    {
+      "check": "J102_physical_pad_set",
+      "passed": true,
+      "detail": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ]
+    },
+    {
+      "check": "J101_physical_pad_set",
+      "passed": true,
+      "detail": [
+        "A1",
+        "A12",
+        "A4",
+        "A5",
+        "A6",
+        "A7",
+        "A8",
+        "A9",
+        "B1",
+        "B12",
+        "B4",
+        "B5",
+        "B6",
+        "B7",
+        "B8",
+        "B9",
+        "S1"
+      ]
+    },
+    {
+      "check": "service_header_target_side_only",
+      "passed": true,
+      "detail": "J102 is VTREF,GND,TCK,TDI,TDO,TMS on the target side; it does not expose USB3V3 as target power."
+    }
+  ],
+  "limitations": [
+    "This checks schematic connectivity against fixed pin tables; it does not prove physical routing, signal integrity, protection performance or USB compliance.",
+    "Crystal startup, effective load capacitance and frequency accuracy require layout and prototype measurements. The 11 pF values are explicitly provisional.",
+    "The USB supply powers the bridge only. The actual FPGA/flash power, pin allocation and persistent-loading algorithm remain unimplemented.",
+    "A fitted EEPROM must preserve the safe ACBUS6 startup contract. Host loading must use the documented --status-pin 14 option.",
+    "Target-off leakage, USB/target power sequencing, abnormal process termination/reset, inrush, thermal margin, suspend current and cold-boot persistence require bench tests.",
+    "ESD array pin connectivity is checked; this is not a short-to-VBUS/USB-PD protection claim. USB and target supplies have no direct schematic connection to host power."
+  ]
+}

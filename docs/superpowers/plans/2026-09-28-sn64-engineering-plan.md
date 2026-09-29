@@ -1,6 +1,6 @@
 # SN 64 Engineering Implementation Plan
 
-**Status:** Research and interface drafting underway. This document defines the full work and its evidence requirements; it does not certify a completed electrical or mechanical design.
+**Status:** Research, cartridge interfaces and the USB programming circuit are drafted. This document defines the full work and its evidence requirements; it does not certify a completed electrical or mechanical design.
 
 **Goal:** Build one SN 64 adapter that satisfies every target in the supplied specification and works on both an original Nintendo 64 and ModRetro M64 without internal console modifications, with PCB and enclosure manufacturing through PCBWay.
 
@@ -190,5 +190,7 @@ The inspected M64 downloads include individual Parasolid mechanical parts, not a
 The reference collection now includes source SNES FPGA implementations, OpenSFC and sd2snes electrical designs, Sanni connector CAD, SummerCart64 host-side PCB/shell files, and official M64 reference files. Native KiCad/STEP imports and exports have been exercised; connector/pad/hole dimensions are recorded in [the dimension register](../../dimensions.md). M64 Parasolid conversion and complete host/socket envelope verification remain unresolved.
 
 The [first editable KiCad interface draft](../../../hardware/sn64/README.md) implements the checked 50-contact N64/M64 edge and 62-contact SNES socket with reused footprints. The [SNES pin notes](../../design/snes-interface-notes.md), [N64 pin notes](../../design/n64-interface-notes.md), and [translator reuse review](../../design/translation-reuse-review.md) establish pin identities, domain boundaries and concrete upstream circuits to adapt. This is early interface work, not completion of stage 3 or permission to skip architecture evidence.
+
+Revision `0.2-usb` adds the [native USB programmer sheet](../../../hardware/sn64/usb-programmer.kicad_sch): the side USB-C receptacle, separate CC resistors, ESD protection, USB-only regulator, FT232HL support circuit, default-disabled JTAG translator and service header. The [programming contract](../../design/usb-programming-architecture.md), [connector/crystal dimensions](../../design/usb-connector-mechanics.md), and [independent circuit review](../../../hardware/sn64/validation/usb-review.md) record the evidence and limitations. USB enumeration is designed to work from a blank board; target power, final FPGA/flash hookup, persistent images and hardware validation are still required. The stage 3 USB task remains open until that complete path is demonstrated.
 
 Next: finish the traceable requirements register, select and dimension the actual SNES socket, establish the combined power budget and power paths on both hosts, and adapt the existing translator circuitry with verified power-off behavior. Compare/synthesize reusable SNES core and bridge/host logic before fixing the FPGA package and memory. Use those results to complete the protected circuit schematic, then PCB placement and the FreeCAD assembly/enclosure.

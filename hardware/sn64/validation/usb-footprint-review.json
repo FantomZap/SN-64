@@ -1,0 +1,780 @@
+{
+  "status": "pass",
+  "checked_at_utc": "2026-09-29T04:02:58.850955+00:00",
+  "kicad": "10.0.6",
+  "source_commit": "a1e7996d2cbece686820a5c785029c68514f17b0",
+  "source_reference": "J1",
+  "source_board_sha256": "7991e3105a4be609be6904c9c69d507e98fec3db5f51d3d91d43cc540a16295a",
+  "local_footprint_sha256": "02afa58b6d1f29925fbf75815f9c4aac88b84f3c903e01d03f58dbeff5d8ed6a",
+  "source_pad_objects": 24,
+  "local_pad_objects": 24,
+  "all_pad_geometries_match": true,
+  "local_pad_records": [
+    [
+      "",
+      {
+        "position_iu": [
+          -3000000,
+          -1950000
+        ],
+        "size_iu": [
+          600000,
+          600000
+        ],
+        "drill_iu": [
+          600000,
+          600000
+        ],
+        "layers": "*.Cu wildcard (unplated mechanical hole)",
+        "shape": 0,
+        "attribute": 3,
+        "angle_deg": 0.0,
+        "roundrect_ratio": 0.25,
+        "solder_mask_margin_iu": null
+      }
+    ],
+    [
+      "",
+      {
+        "position_iu": [
+          -1400000,
+          1150000
+        ],
+        "size_iu": [
+          1000000,
+          2000000
+        ],
+        "drill_iu": [
+          0,
+          0
+        ],
+        "layers": [
+          0,
+          1,
+          13
+        ],
+        "shape": 1,
+        "attribute": 1,
+        "angle_deg": 0.0,
+        "roundrect_ratio": 0.25,
+        "solder_mask_margin_iu": null
+      }
+    ],
+    [
+      "",
+      {
+        "position_iu": [
+          1400000,
+          1150000
+        ],
+        "size_iu": [
+          1000000,
+          2000000
+        ],
+        "drill_iu": [
+          0,
+          0
+        ],
+        "layers": [
+          0,
+          1,
+          13
+        ],
+        "shape": 1,
+        "attribute": 1,
+        "angle_deg": 0.0,
+        "roundrect_ratio": 0.25,
+        "solder_mask_margin_iu": null
+      }
+    ],
+    [
+      "",
+      {
+        "position_iu": [
+          3000000,
+          -1950000
+        ],
+        "size_iu": [
+          850000,
+          600000
+        ],
+        "drill_iu": [
+          850000,
+          600000
+        ],
+        "layers": "*.Cu wildcard (unplated mechanical hole)",
+        "shape": 2,
+        "attribute": 3,
+        "angle_deg": 0.0,
+        "roundrect_ratio": 0.25,
+        "solder_mask_margin_iu": null
+      }
+    ],
+    [
+      "A1",
+      {
+        "position_iu": [
+          -3100000,
+          -3050000
+        ],
+        "size_iu": [
+          520000,
+          1000000
+        ],
+        "drill_iu": [
+          0,
+          0
+        ],
+        "layers": [
+          0,
+          1,
+          13
+        ],
+        "shape": 1,
+        "attribute": 1,
+        "angle_deg": 0.0,
+        "roundrect_ratio": 0.25,
+        "solder_mask_margin_iu": null
+      }
+    ],
+    [
+      "A12",
+      {
+        "position_iu": [
+          3100000,
+          -3050000
+        ],
+        "size_iu": [
+          520000,
+          1000000
+        ],
+        "drill_iu": [
+          0,
+          0
+        ],
+        "layers": [
+          0,
+          1,
+          13
+        ],
+        "shape": 1,
+        "attribute": 1,
+        "angle_deg": 0.0,
+        "roundrect_ratio": 0.25,
+        "solder_mask_margin_iu": null
+      }
+    ],
+    [
+      "A4",
+      {
+        "position_iu": [
+          -2350000,
+          -3050000
+        ],
+        "size_iu": [
+          520000,
+          1000000
+        ],
+        "drill_iu": [
+          0,
+          0
+        ],
+        "layers": [
+          0,
+          1,
+          13
+        ],
+        "shape": 1,
+        "attribute": 1,
+        "angle_deg": 0.0,
+        "roundrect_ratio": 0.25,
+        "solder_mask_margin_iu": null
+      }
+    ],
+    [
+      "A5",
+      {
+        "position_iu": [
+          -1750000,
+          -3050000
+        ],
+        "size_iu": [
+          270000,
+          1000000
+        ],
+        "drill_iu": [
+          0,
+          0
+        ],
+        "layers": [
+          0,
+          1,
+          13
+        ],
+        "shape": 1,
+        "attribute": 1,
+        "angle_deg": 0.0,
+        "roundrect_ratio": 0.25,
+        "solder_mask_margin_iu": null
+      }
+    ],
+    [
+      "A6",
+      {
+        "position_iu": [
+          -250000,
+          -3050000
+        ],
+        "size_iu": [
+          270000,
+          1000000
+        ],
+        "drill_iu": [
+          0,
+          0
+        ],
+        "layers": [
+          0,
+          1,
+          13
+        ],
+        "shape": 1,
+        "attribute": 1,
+        "angle_deg": 0.0,
+        "roundrect_ratio": 0.25,
+        "solder_mask_margin_iu": null
+      }
+    ],
+    [
+      "A7",
+      {
+        "position_iu": [
+          750000,
+          -3050000
+        ],
+        "size_iu": [
+          270000,
+          1000000
+        ],
+        "drill_iu": [
+          0,
+          0
+        ],
+        "layers": [
+          0,
+          1,
+          13
+        ],
+        "shape": 1,
+        "attribute": 1,
+        "angle_deg": 0.0,
+        "roundrect_ratio": 0.25,
+        "solder_mask_margin_iu": null
+      }
+    ],
+    [
+      "A8",
+      {
+        "position_iu": [
+          1750000,
+          -3050000
+        ],
+        "size_iu": [
+          270000,
+          1000000
+        ],
+        "drill_iu": [
+          0,
+          0
+        ],
+        "layers": [
+          0,
+          1,
+          13
+        ],
+        "shape": 1,
+        "attribute": 1,
+        "angle_deg": 0.0,
+        "roundrect_ratio": 0.25,
+        "solder_mask_margin_iu": null
+      }
+    ],
+    [
+      "A9",
+      {
+        "position_iu": [
+          2350000,
+          -3050000
+        ],
+        "size_iu": [
+          520000,
+          1000000
+        ],
+        "drill_iu": [
+          0,
+          0
+        ],
+        "layers": [
+          0,
+          1,
+          13
+        ],
+        "shape": 1,
+        "attribute": 1,
+        "angle_deg": 0.0,
+        "roundrect_ratio": 0.25,
+        "solder_mask_margin_iu": null
+      }
+    ],
+    [
+      "B1",
+      {
+        "position_iu": [
+          3100000,
+          -3050000
+        ],
+        "size_iu": [
+          520000,
+          1000000
+        ],
+        "drill_iu": [
+          0,
+          0
+        ],
+        "layers": [
+          0,
+          1,
+          13
+        ],
+        "shape": 1,
+        "attribute": 1,
+        "angle_deg": 0.0,
+        "roundrect_ratio": 0.25,
+        "solder_mask_margin_iu": null
+      }
+    ],
+    [
+      "B12",
+      {
+        "position_iu": [
+          -3100000,
+          -3050000
+        ],
+        "size_iu": [
+          520000,
+          1000000
+        ],
+        "drill_iu": [
+          0,
+          0
+        ],
+        "layers": [
+          0,
+          1,
+          13
+        ],
+        "shape": 1,
+        "attribute": 1,
+        "angle_deg": 0.0,
+        "roundrect_ratio": 0.25,
+        "solder_mask_margin_iu": null
+      }
+    ],
+    [
+      "B4",
+      {
+        "position_iu": [
+          2350000,
+          -3050000
+        ],
+        "size_iu": [
+          520000,
+          1000000
+        ],
+        "drill_iu": [
+          0,
+          0
+        ],
+        "layers": [
+          0,
+          1,
+          13
+        ],
+        "shape": 1,
+        "attribute": 1,
+        "angle_deg": 0.0,
+        "roundrect_ratio": 0.25,
+        "solder_mask_margin_iu": null
+      }
+    ],
+    [
+      "B5",
+      {
+        "position_iu": [
+          1250000,
+          -3050000
+        ],
+        "size_iu": [
+          270000,
+          1000000
+        ],
+        "drill_iu": [
+          0,
+          0
+        ],
+        "layers": [
+          0,
+          1,
+          13
+        ],
+        "shape": 1,
+        "attribute": 1,
+        "angle_deg": 0.0,
+        "roundrect_ratio": 0.25,
+        "solder_mask_margin_iu": null
+      }
+    ],
+    [
+      "B6",
+      {
+        "position_iu": [
+          250000,
+          -3050000
+        ],
+        "size_iu": [
+          270000,
+          1000000
+        ],
+        "drill_iu": [
+          0,
+          0
+        ],
+        "layers": [
+          0,
+          1,
+          13
+        ],
+        "shape": 1,
+        "attribute": 1,
+        "angle_deg": 0.0,
+        "roundrect_ratio": 0.25,
+        "solder_mask_margin_iu": null
+      }
+    ],
+    [
+      "B7",
+      {
+        "position_iu": [
+          -750000,
+          -3050000
+        ],
+        "size_iu": [
+          270000,
+          1000000
+        ],
+        "drill_iu": [
+          0,
+          0
+        ],
+        "layers": [
+          0,
+          1,
+          13
+        ],
+        "shape": 1,
+        "attribute": 1,
+        "angle_deg": 0.0,
+        "roundrect_ratio": 0.25,
+        "solder_mask_margin_iu": null
+      }
+    ],
+    [
+      "B8",
+      {
+        "position_iu": [
+          -1250000,
+          -3050000
+        ],
+        "size_iu": [
+          270000,
+          1000000
+        ],
+        "drill_iu": [
+          0,
+          0
+        ],
+        "layers": [
+          0,
+          1,
+          13
+        ],
+        "shape": 1,
+        "attribute": 1,
+        "angle_deg": 0.0,
+        "roundrect_ratio": 0.25,
+        "solder_mask_margin_iu": null
+      }
+    ],
+    [
+      "B9",
+      {
+        "position_iu": [
+          -2350000,
+          -3050000
+        ],
+        "size_iu": [
+          520000,
+          1000000
+        ],
+        "drill_iu": [
+          0,
+          0
+        ],
+        "layers": [
+          0,
+          1,
+          13
+        ],
+        "shape": 1,
+        "attribute": 1,
+        "angle_deg": 0.0,
+        "roundrect_ratio": 0.25,
+        "solder_mask_margin_iu": null
+      }
+    ],
+    [
+      "S1",
+      {
+        "position_iu": [
+          -4320000,
+          -2675000
+        ],
+        "size_iu": [
+          1300000,
+          2300000
+        ],
+        "drill_iu": [
+          600000,
+          1600000
+        ],
+        "layers": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          6,
+          8,
+          10,
+          12,
+          14,
+          16,
+          18,
+          20,
+          22,
+          24,
+          26,
+          28,
+          30,
+          32,
+          34,
+          36,
+          38,
+          40,
+          42,
+          44,
+          46,
+          48,
+          50,
+          52,
+          54,
+          56,
+          58,
+          60,
+          62
+        ],
+        "shape": 2,
+        "attribute": 0,
+        "angle_deg": 0.0,
+        "roundrect_ratio": 0.25,
+        "solder_mask_margin_iu": null
+      }
+    ],
+    [
+      "S1",
+      {
+        "position_iu": [
+          -4320000,
+          1150000
+        ],
+        "size_iu": [
+          1300000,
+          2600000
+        ],
+        "drill_iu": [
+          600000,
+          1900000
+        ],
+        "layers": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          6,
+          8,
+          10,
+          12,
+          14,
+          16,
+          18,
+          20,
+          22,
+          24,
+          26,
+          28,
+          30,
+          32,
+          34,
+          36,
+          38,
+          40,
+          42,
+          44,
+          46,
+          48,
+          50,
+          52,
+          54,
+          56,
+          58,
+          60,
+          62
+        ],
+        "shape": 2,
+        "attribute": 0,
+        "angle_deg": 0.0,
+        "roundrect_ratio": 0.25,
+        "solder_mask_margin_iu": null
+      }
+    ],
+    [
+      "S1",
+      {
+        "position_iu": [
+          4320000,
+          -2675000
+        ],
+        "size_iu": [
+          1300000,
+          2300000
+        ],
+        "drill_iu": [
+          600000,
+          1600000
+        ],
+        "layers": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          6,
+          8,
+          10,
+          12,
+          14,
+          16,
+          18,
+          20,
+          22,
+          24,
+          26,
+          28,
+          30,
+          32,
+          34,
+          36,
+          38,
+          40,
+          42,
+          44,
+          46,
+          48,
+          50,
+          52,
+          54,
+          56,
+          58,
+          60,
+          62
+        ],
+        "shape": 2,
+        "attribute": 0,
+        "angle_deg": 0.0,
+        "roundrect_ratio": 0.25,
+        "solder_mask_margin_iu": null
+      }
+    ],
+    [
+      "S1",
+      {
+        "position_iu": [
+          4320000,
+          1150000
+        ],
+        "size_iu": [
+          1300000,
+          2600000
+        ],
+        "drill_iu": [
+          600000,
+          1900000
+        ],
+        "layers": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          6,
+          8,
+          10,
+          12,
+          14,
+          16,
+          18,
+          20,
+          22,
+          24,
+          26,
+          28,
+          30,
+          32,
+          34,
+          36,
+          38,
+          40,
+          42,
+          44,
+          46,
+          48,
+          50,
+          52,
+          54,
+          56,
+          58,
+          60,
+          62
+        ],
+        "shape": 2,
+        "attribute": 0,
+        "angle_deg": 0.0,
+        "roundrect_ratio": 0.25,
+        "solder_mask_margin_iu": null
+      }
+    ]
+  ],
+  "method": "KiCad pcbnew pad objects compared in footprint-local XY and orientation, including repeated/coincident and unnumbered pads. Compared size, drill, layers, shape, attribute, roundrect ratio and local mask margin. For the two NPTH holes only, normalize the *.Cu wildcard: the source board enables four copper layers whereas a standalone library exposes all32. No footprint was modified.",
+  "limits": "Static source agreement only. JA3 drawing corroboration is in docs/design/usb-connector-mechanics.md. Real socket, PCB and enclosure fit remain untested."
+}

@@ -162,6 +162,8 @@ def main():
         actual, duplicates = {}, []
         for net in nets:
             for node in net.findall('node'):
+                if node.get('ref') not in maps:
+                    continue  # USB and future sheets have their own validators.
                 key = (node.get('ref'), node.get('pin'))
                 if key in actual:
                     duplicates.append(key)
@@ -180,7 +182,8 @@ def main():
                     mismatches.append({'ref': ref, 'pin': pin, 'expected': expected, 'actual': actual.get((ref, pin))})
         check('all_112_pin_net_assignments', not mismatches, {'matched': 112 - len(mismatches), 'mismatches': mismatches})
 
-        shared = [n.get('name') for n in nets if len({p.get('ref') for p in n.findall('node')}) > 1]
+        shared = [n.get('name') for n in nets
+                  if {'J1', 'J2'} <= {p.get('ref') for p in n.findall('node')}]
         check('only_ground_crosses_host_snes_domains', shared == ['/GND'], shared)
         supplies = {n.get('name'): sorted((p.get('ref'), int(p.get('pin'))) for p in n.findall('node'))
                     for n in nets if n.get('name') in ['/HOST_3V3', '/HOST_12V', '/SNES_5V_CART']}
@@ -188,8 +191,10 @@ def main():
             '/HOST_3V3': [('J1', 9), ('J1', 17), ('J1', 34), ('J1', 42)],
             '/HOST_12V': [('J1', 13), ('J1', 38)],
             '/SNES_5V_CART': [('J2', 27), ('J2', 58)]}, supplies)
-        check('only_two_connector_components', {c.get('ref') for c in xml.findall('./components/comp')} == {'J1', 'J2'},
-              [c.get('ref') for c in xml.findall('./components/comp')])
+        root_components = [c.get('ref') for c in xml.findall('./components/comp')
+                           if c.find('sheetpath').get('names') == '/']
+        check('root_cartridge_sheet_has_two_connectors', set(root_components) == {'J1', 'J2'},
+              root_components)
         reserved = {str(p) for p in [14, 24, 39, 46, 49]}
         isolated = all(len(n.findall('node')) == 1 for n in nets
                        if any(p.get('ref') == 'J1' and p.get('pin') in reserved for p in n.findall('node')))
