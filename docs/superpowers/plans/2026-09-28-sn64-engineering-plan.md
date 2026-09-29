@@ -21,6 +21,7 @@
 - Source connector dimensions online first. Use native CAD, actual component drawings, and corroborating designs; identify gaps before requesting measurements.
 - The complete SNES interface includes expansion/enhancement contacts, relevant auxiliary signals, and cartridge audio. Verify the source signal list and physical pin mapping before assigning circuitry.
 - Protect both console and cartridge. Default cartridge power OFF and external FPGA bus outputs high impedance until configuration and health checks succeed.
+- USB-C is mandatory in the first hardware revision: a side-mounted data port for initial firmware/FPGA programming, updates and recovery from a computer, with supporting circuitry and an accessible enclosure opening. Operation must not require successful N64/M64 boot. A power-only connector or deferred hardware addition does not satisfy this requirement.
 - Cartridges are not hot-swappable. Provide a deliberate power-down workflow before cartridge changes.
 - Staged prototypes establish progress; they do not remove requirements or establish completion of the full target.
 - The source explicitly omits the legacy TriStar NES subsystem, cheat hardware, memory editor, and analog-switch topology; those exclusions remain in force.
@@ -88,6 +89,7 @@ These are planned outputs, not files claimed to exist already.
 - [ ] Expose cartridge voltage/current, FPGA rails, input voltage, temperature, configuration state, overcurrent history, and reset reason. Make bootstrap health checks refuse cartridge power on a reported fault.
 - [ ] Implement configurable controller mapping and configuration/diagnostic behavior specified by Rev A.
 - [ ] Define independent JTAG/service recovery and versioned, integrity-checked updates with a known-good recovery strategy.
+- [ ] Implement the first-revision side-mounted USB-C programming path. Define initial loading of a blank board and recovery from an invalid image, including any factory bootstrap step; retain independent factory/service access. Verify computer-based firmware/FPGA loading and persistence after power cycling before accepting the first revision.
 - [ ] Produce meaningful simulations for buses, fault transitions, and memory timing; review electrical ratings and the schematic in addition to ERC.
 
 **Exit evidence:** Reviewed schematic, interface contracts, initial builds/simulations, and a recovery procedure that does not depend on successful N64 boot.
@@ -98,6 +100,7 @@ These are planned outputs, not files claimed to exist already.
 - [ ] Place the top socket and bottom edge from the controlled dimensional model; place translators, FPGA, clocks, power, and A/V following the source architecture.
 - [ ] Route with verified return paths, termination options, test access, thermal copper, and enclosure keep-outs. Concentrate manufacturing test pads on one side where practical.
 - [ ] Export the populated board as STEP and design the FreeCAD enclosure around it, with universal cartridge opening, keyed insertion, structural support, fasteners, service access, and thermal provisions.
+- [ ] Include the mandatory side USB-C opening and verify cable/plug clearance on both hosts in the first enclosure revision.
 - [ ] Check clearances for SNES/SFC, X5/X6, and FXPAK Pro shells and their SD/cable access. Check both hosts and the M64 eject motion.
 - [ ] Print interface/fit samples and test seating and interference before releasing the full enclosure. Specify material/process-dependent tolerances and assembly clearances.
 - [ ] Run ERC/DRC, schematic/PCB parity, footprint and polarity checks, 3D interference checks, and an independent engineering review.
@@ -107,6 +110,7 @@ These are planned outputs, not files claimed to exist already.
 ### 5. Manufacture and bring up prototypes
 
 - [ ] Prepare PCBWay prototype fabrication/assembly files and separate enclosure files with consistent revision identifiers.
+- [ ] Define a factory programming package with the tested firmware and FPGA configuration images, exact target devices/storage, programmer and connection instructions, required equipment/fixture, and verification/power-cycle tests. Confirm PCBWay can perform this specific programming and test scope before ordering preprogrammed assemblies.
 - [ ] Inspect the unpowered assembly and check for shorts; use a current-limited bench supply without a console or game cartridge.
 - [ ] Validate rails and sequencing, then a minimal FPGA image with external buses high impedance.
 - [ ] Check N64 idle levels with a fixture, protected cartridge power with a dummy load, and SNES clocks/buses with measurement fixtures.

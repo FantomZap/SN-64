@@ -26,6 +26,8 @@ Every target in the original specification remains in scope, including PAL, prot
 
 Current input decisions are standard, configurable N64-to-SNES controller mapping; no multitap; and undecided Super Scope/Justifier support. Virtual SNES mouse control using an N64 controller is deferred to a later FPGA/firmware update. The initial design must preserve the necessary input data, update path, and justified resource margins. Other researched accessories are candidates, not selected features.
 
+**USB-C is mandatory in the first hardware revision.** Provide a side-mounted, externally accessible USB-C data port for initial firmware/FPGA programming, subsequent updates and recovery from a computer. It must be usable without a successful N64 or M64 boot. Include the connector, supporting programming circuitry and enclosure opening in the initial design; a power-only port or a future hardware addition does not satisfy this requirement. The current connector-only schematic does not yet implement this programming path.
+
 ## Tools and research approach
 
 - **KiCad 10.0.6:** schematics, PCB layout, checks, and manufacturing exports.

@@ -43,9 +43,11 @@ The initial authoring script, [create_interface_draft.py](tools/create_interface
 
 ## Next circuitry
 
+**Required in the first revision:** a side-mounted USB-C data/programming port, supporting circuitry and matching enclosure opening. It must support initial firmware/FPGA image loading, updates and recovery from a computer without successful host-console boot. This is a release requirement for the initial PCB and shell, not deferred functionality. The two-connector draft does not yet contain the USB-C circuit. Independent factory/service programming access remains required as well.
+
 1. Build the power budget for the FPGA, memory, digital A/V and real cartridges on both hosts. The M64 reference annotates a 500 mA cartridge limiter; that is not a guaranteed SN 64 allowance. There is no 5 V N64 edge supply. Select input power, no-backfeed paths and default-off protected cartridge power from the actual budget.
 2. Adapt the sd2snes translator circuit using the [reuse review](../../docs/design/translation-reuse-review.md). Reverse address/strobe ownership for a console endpoint; define enable, read/write turnaround and power-off behavior for the exact part. Separately implement IRQ/reset, CIC, expansion and analog audio.
-3. Integrate the reusable SNES FPGA core, physical cartridge bridge and N64 endpoint. Select FPGA/package and memory only after resource, I/O, clock and timing evidence. Add independent recovery, health monitoring and A/V, then review the complete schematic.
+3. Integrate the reusable SNES FPGA core, physical cartridge bridge and N64 endpoint. Select FPGA/package and memory only after resource, I/O, clock and timing evidence. Add the mandatory USB-C initial-programming/update/recovery path, independent factory/service access, health monitoring and A/V, then review the complete schematic.
 4. Place and route a PCB with the verified mechanical constraints; develop the FreeCAD enclosure around that assembly. Produce PCBWay files after electrical review and prototype/fit validation.
 
 These are the next stages of the full specification, not a reduced product target. No PCB, FPGA bitstream, working adapter, print-ready shell or PCBWay release is included in this interface revision.
