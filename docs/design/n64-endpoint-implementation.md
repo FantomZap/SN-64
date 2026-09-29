@@ -33,7 +33,7 @@ New SN64 logic:
 | `0x10` | JOY1_BUTTONS | r/w | SNES button image for controller 1 |
 | `0x12` | JOY2_BUTTONS | r/w | SNES button image for controller 2 |
 | `0x14` | JOY1_STICK | r/w | `{y, x}` analog stick, retained for the deferred virtual mouse |
-| `0x16` | CONTROL | r/w | bit 0 = `run_request` (bootstrap asks for cartridge power and run) |
+| `0x16` | CONTROL | r/w | bit 0 `run_request` (cartridge power and run); bit 1 soft reset ("reset SNES": holds /RESET, keeps cartridge power); bits 3:2 region mode (0 auto, 1 NTSC, 2 PAL; applied at the next cartridge power-up, never live) |
 | `0x18` | COMMIT | w | any write increments SEQ after a complete controller update |
 
 `run_request` is cleared by hardware whenever the host asserts reset: the bootstrap must re-request cartridge power after every console reset, in line with the default-off principle in the [power architecture](power-architecture.md). `run_request` is an input to the hardware permission chain, not the permission itself; the hardware veto still applies.

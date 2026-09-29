@@ -35,6 +35,7 @@ module sn64_power_sequencer #(
     // Requests
     input  wire run_request,          // from the N64 mailbox
     input  wire fault_clear,          // explicit acknowledge
+    input  wire release_ok,           // region decided and SNES master clock running (tie 1 if unused)
     input  wire hold_reset,           // soft reset while running (N64-menu "reset SNES", like the
                                       // console reset button): pulls /RESET, NEVER removes cartridge power
 
@@ -91,9 +92,9 @@ module sn64_power_sequencer #(
                     if (iface_rail_ok) begin state <= S_IFACE; timer <= 0; end
                     else if (timer > RAIL_TICKS) begin state <= S_FAULT; fault_latched <= 1'b1; fault_code <= 8'h10; cart_5v_enable <= 1'b0; iface_rail_enable <= 1'b0; end
                 end
-                S_IFACE: begin                      // hold reset for the settle time, then release
-                    timer <= timer + 1;
-                    if (timer >= RESET_TICKS) begin cart_reset_pull <= 1'b0; state <= S_RUN; end
+                S_IFACE: begin                      // hold reset for the settle time and until the
+                    timer <= timer + 1;             // region is decided and the SNES clock runs
+                    if (timer >= RESET_TICKS && release_ok) begin cart_reset_pull <= 1'b0; state <= S_RUN; end
                 end
                 S_RUN: begin
                     // A soft reset behaves like the console reset button: /RESET

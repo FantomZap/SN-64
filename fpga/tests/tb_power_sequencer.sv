@@ -19,7 +19,7 @@ module tb_power_sequencer;
         .configured(configured), .host_3v3_ok(host_3v3_ok), .fpga_rails_ok(fpga_rails_ok),
         .cart_5v_ok(cart_5v_ok), .iface_rail_ok(iface_rail_ok), .efuse_fault_n(efuse_fault_n),
         .overtemp(overtemp), .host_reset_n(host_reset_n),
-        .run_request(run_request), .fault_clear(fault_clear), .hold_reset(hold_reset),
+        .run_request(run_request), .fault_clear(fault_clear), .hold_reset(hold_reset), .release_ok(1'b1),
         .cart_5v_enable(cart_5v_enable), .iface_rail_enable(iface_rail_enable), .cart_reset_pull(cart_reset_pull),
         .bus_permit(bus_permit), .fault_latched(fault_latched), .state(state), .fault_code(fault_code));
 

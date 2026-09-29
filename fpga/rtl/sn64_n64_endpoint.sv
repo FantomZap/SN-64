@@ -32,6 +32,8 @@ module sn64_n64_endpoint #(
     output reg  [15:0] joy1_buttons, joy2_buttons,   // SNES button image (active-high bits)
     output reg  [7:0]  joy1_stick_x, joy1_stick_y,   // retained for the deferred virtual mouse
     output reg         run_request,                  // bootstrap asks for cartridge power/run
+    output reg         soft_reset,                   // "reset SNES" (holds /RESET, keeps cartridge power)
+    output reg  [1:0]  region_mode,                  // 0 auto, 1 NTSC, 2 PAL (applies at next cartridge power-up)
     output reg  [15:0] mailbox_seq,                   // increments on every controller update
 
     // Mailbox: SNES/system -> N64 side
@@ -125,7 +127,8 @@ module sn64_n64_endpoint #(
     //   0x00 SN64_MAGIC     r  0x534E ("SN")      0x02 SN64_VERSION  r  build_id
     //   0x04 STATUS         r  status_flags        0x06 SEQ           r  mailbox_seq
     //   0x10 JOY1_BUTTONS   w                      0x12 JOY2_BUTTONS  w
-    //   0x14 JOY1_STICK     w  {y,x}               0x16 CONTROL       w  bit0 = run_request
+    //   0x14 JOY1_STICK     w  {y,x}               0x16 CONTROL       w  bit0 run_request, bit1 soft reset,
+    //                                                                        bits3:2 region mode (0 auto, 1 NTSC, 2 PAL)
     //   0x18 COMMIT         w  any write increments SEQ (bootstrap writes after a full update)
     // ---------------------------------------------------------------------
     localparam [15:0] MAGIC = 16'h534E;
@@ -134,20 +137,20 @@ module sn64_n64_endpoint #(
         if (reset) begin
             joy1_buttons <= 16'h0; joy2_buttons <= 16'h0;
             joy1_stick_x <= 8'h0; joy1_stick_y <= 8'h0;
-            run_request  <= 1'b0; mailbox_seq  <= 16'h0;
+            run_request  <= 1'b0; mailbox_seq  <= 16'h0; soft_reset <= 1'b0; region_mode <= 2'd0;
         end else if (reg_bus.write && reg_bus.cfg_select) begin
             case (ra[7:0])
                 8'h10: joy1_buttons <= reg_bus.wdata;
                 8'h12: joy2_buttons <= reg_bus.wdata;
                 8'h14: {joy1_stick_y, joy1_stick_x} <= reg_bus.wdata;
-                8'h16: run_request  <= reg_bus.wdata[0];
+                8'h16: begin run_request <= reg_bus.wdata[0]; soft_reset <= reg_bus.wdata[1]; region_mode <= reg_bus.wdata[3:2]; end
                 8'h18: mailbox_seq  <= mailbox_seq + 16'd1;
                 default: ;
             endcase
         end
         // Host reset drops the run request: cartridge power must be re-requested
         // by the bootstrap after every console reset (safety principle).
-        if (!n64_reset) run_request <= 1'b0;
+        if (!n64_reset) begin run_request <= 1'b0; soft_reset <= 1'b0; end
     end
 
     reg [15:0] cfg_rdata;
@@ -160,7 +163,7 @@ module sn64_n64_endpoint #(
             8'h10: cfg_rdata = joy1_buttons;
             8'h12: cfg_rdata = joy2_buttons;
             8'h14: cfg_rdata = {joy1_stick_y, joy1_stick_x};
-            8'h16: cfg_rdata = {15'd0, run_request};
+            8'h16: cfg_rdata = {12'd0, region_mode, soft_reset, run_request};
             default: cfg_rdata = 16'h0000;
         endcase
     end
