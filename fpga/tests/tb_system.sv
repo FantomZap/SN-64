@@ -21,6 +21,9 @@ module tb_system;
     reg clk_25=0, clk_host=0, clk_snes=0;
     always #20 clk_25 = ~clk_25;                  // 25 MHz
     always #8  clk_host = ~clk_host;              // 62.5 MHz
+    reg clk_pixel=0, clk_pixel_x5=0;
+    always #18.505 clk_pixel = ~clk_pixel;        // 27.0198 MHz (Si5351 CLK2)
+    always #3.701  clk_pixel_x5 = ~clk_pixel_x5;  // 5x TMDS
     wire snes_clk_run;
     always #23.28 clk_snes = snes_clk_run ? ~clk_snes : 1'b0;   // Si5351 NTSC master, gated by the board
     reg por_n=0;
@@ -88,7 +91,7 @@ module tb_system;
     wire region_pal;
     sn64_top #(.BUILD_ID(16'h5A01), .ROM_ADDR_BITS(4), .REGION_TIMEOUT_MS(1), .SEQ_RESET_HOLD_MS(1),
                .SEQ_RAIL_TIMEOUT_MS(2), .CIC_LOCK_T_PWRUP(200)) dut (
-        .clk_25(clk_25), .clk_host(clk_host), .clk_snes(clk_snes), .por_n(por_n),
+        .clk_25(clk_25), .clk_host(clk_host), .clk_snes(clk_snes), .clk_pixel(clk_pixel), .clk_pixel_x5(clk_pixel_x5), .por_n(por_n),
         .n64_reset_n(n64_reset_n), .n64_nmi_n(1'b1), .n64_alel(alel), .n64_aleh(aleh), .n64_read_n(rd_n), .n64_write_n(wr_n),
         .n64_ad(ad), .n64_cic_clk(1'b1), .n64_si_clk(1'b0), .n64_cic_dq(n64_cic_dq),
         .rom_we(1'b0), .rom_waddr(4'd0), .rom_wdata(16'd0),
@@ -102,8 +105,7 @@ module tb_system;
         .snes_cic_oe_n(),.snes_cic_clk(cic_clk), .snes_cic_slave_reset(cic_srst),
         .snes_cic_data0_o(d0o), .snes_cic_data0_oe(d0oe), .snes_cic_data0_i(d0oe & d0o),
         .snes_cic_data1_o(d1o), .snes_cic_data1_oe(d1oe), .snes_cic_data1_i(d1oe & d1o),
-        .snes_rgb(), .snes_hsync(), .snes_vsync(), .snes_hde(), .snes_vde(), .snes_dot_clock(),
-        .snes_high_res(), .snes_field(), .snes_interlace(), .snes_audio_left(), .snes_audio_right(), .snes_audio_ready(),
+        .hdmi_tmds(), .hdmi_tmds_clock(), .av_locked(),
         .status_word(status_word));
 
     // ---------------- Invariants ----------------

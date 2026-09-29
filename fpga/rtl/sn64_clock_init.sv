@@ -2,8 +2,10 @@
 // Si5351A start-up and SNES region clock selection.
 //
 // Programs the Si5351A over I2C from the 25 MHz housekeeping clock so that
-// CLK0 = 21.4772727 MHz (NTSC SNES master) and CLK1 = 21.28137 MHz (PAL),
-// both from a 25 MHz crystal, then waits for both PLLs to report lock
+// CLK0 = 21.4772727 MHz (NTSC SNES master), CLK1 = 21.28137 MHz (PAL) and
+// CLK2 = 27.0197947 MHz (HDMI 480p pixel clock = NTSC master x 39/31, from the
+// same PLLA so the HDMI raster is frequency-locked to the SNES frame), all
+// from a 25 MHz crystal, then waits for both PLLs to report lock
 // (register 0: SYS_INIT and LOL_A/LOL_B clear) before asserting `clocks_ready`.
 // Register values are derived in docs/design/clock-plan.md (AN619 formulas).
 //
@@ -43,7 +45,7 @@ module sn64_clock_init #(
     // Register table: {register, value}. Written in order, then PLL reset,
     // then outputs enabled. Values from docs/design/clock-plan.md.
     // ------------------------------------------------------------------
-    localparam N_WRITES = 37;
+    localparam N_WRITES = 45;
     function automatic [15:0] table_entry(input [5:0] i);
         case (i)
             0:  table_entry = {8'd3,   8'hFF};  // disable all outputs while programming
@@ -71,15 +73,22 @@ module sn64_clock_init #(
             31: table_entry = {8'd52, 8'h00}; 32: table_entry = {8'd53, 8'h12};
             33: table_entry = {8'd54, 8'h00}; 34: table_entry = {8'd55, 8'h00};
             35: table_entry = {8'd56, 8'h00}; 36: table_entry = {8'd57, 8'h00};
+            // MS2: fractional 31 + 31/39 from PLLA (P1=3557 P2=29 P3=39) -> 27.0197947 MHz
+            37: table_entry = {8'd58, 8'h00}; 38: table_entry = {8'd59, 8'h27};
+            39: table_entry = {8'd60, 8'h00}; 40: table_entry = {8'd61, 8'h0D};
+            41: table_entry = {8'd62, 8'hE5}; 42: table_entry = {8'd63, 8'h00};
+            43: table_entry = {8'd64, 8'h00}; 44: table_entry = {8'd65, 8'h1D};
             default: table_entry = 16'h0000;
         endcase
     endfunction
     // After the table: reset both PLLs, power up CLK0 (MS0 integer, PLLA,
-    // multisynth source, 8 mA) and CLK1 (MS1 integer, PLLB), enable outputs 0-1.
+    // multisynth source, 8 mA), CLK1 (MS1 integer, PLLB) and CLK2 (MS2
+    // fractional, PLLA), enable outputs 0-2.
     localparam [15:0] W_PLL_RESET = {8'd177, 8'hA0};
     localparam [15:0] W_CLK0_CTRL = {8'd16,  8'h4F};
     localparam [15:0] W_CLK1_CTRL = {8'd17,  8'h6F};
-    localparam [15:0] W_OE        = {8'd3,   8'hFC};
+    localparam [15:0] W_CLK2_CTRL = {8'd18,  8'h0F};
+    localparam [15:0] W_OE        = {8'd3,   8'hF8};
 
     // ------------------------------------------------------------------
     // Minimal I2C master: byte-level write and single-register read.
@@ -162,7 +171,7 @@ module sn64_clock_init #(
     // Sequencer: table writes, PLL reset, clock enables, then poll register 0
     // until SYS_INIT (bit 7) and LOL_B/LOL_A (bits 6:5) are clear.
     // ------------------------------------------------------------------
-    localparam [3:0] Q_BOOT=0, Q_TABLE=1, Q_PLLRST=2, Q_CLK0=3, Q_CLK1=4, Q_OE=5, Q_POLL=6, Q_READY=7, Q_ERROR=8;
+    localparam [3:0] Q_BOOT=0, Q_TABLE=1, Q_PLLRST=2, Q_CLK0=3, Q_CLK1=4, Q_OE=5, Q_POLL=6, Q_READY=7, Q_ERROR=8, Q_CLK2=9;
     reg [3:0] q; reg [5:0] idx; reg waiting; reg [23:0] boot_wait; reg [15:0] polls;
     task automatic start_write(input [15:0] w);
         begin bytes[0] <= {SI5351_ADDR,1'b0}; bytes[1] <= w[15:8]; bytes[2] <= w[7:0]; nbytes <= 3; read_mode <= 1'b0; go <= 1'b1; waiting <= 1'b1; end
@@ -186,7 +195,8 @@ module sn64_clock_init #(
             Q_TABLE:  begin start_write(table_entry(idx)); if (idx == N_WRITES-1) q <= Q_PLLRST; else idx <= idx + 1; end
             Q_PLLRST: begin start_write(W_PLL_RESET); q <= Q_CLK0; end
             Q_CLK0:   begin start_write(W_CLK0_CTRL); q <= Q_CLK1; end
-            Q_CLK1:   begin start_write(W_CLK1_CTRL); q <= Q_OE; end
+            Q_CLK1:   begin start_write(W_CLK1_CTRL); q <= Q_CLK2; end
+            Q_CLK2:   begin start_write(W_CLK2_CTRL); q <= Q_OE; end
             Q_OE:     begin start_write(W_OE); q <= Q_POLL; end
             Q_POLL:   if (polls != 0 && (rdata[7:5] == 3'b000)) begin clocks_ready <= 1'b1; q <= Q_READY; end
                       else if (polls == 16'd2000) begin q <= Q_ERROR; i2c_error <= 1'b1; end

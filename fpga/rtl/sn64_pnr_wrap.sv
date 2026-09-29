@@ -3,12 +3,12 @@
 //
 // Keeps every real board interface as a pin, ties off the simulation-only
 // bootstrap load port, and XOR-reduces the SNES video/audio and status
-// outputs into three pins so synthesis cannot remove the PPU/APU logic that
-// the eventual A/V block will consume. Used only to measure resources and
+// outputs are now consumed by the integrated HDMI block; the status word is
+// XOR-reduced into one pin. Used only to measure resources and
 // internal timing before the board wrapper (PLLs, DCS, A/V, pin constraints)
 // exists; pin locations are left to the placer.
 module sn64_pnr_wrap (
-    input  wire        clk_25, clk_host, clk_snes, por_n,
+    input  wire        clk_25, clk_host, clk_snes, clk_pixel, clk_pixel_x5, por_n,
     input  wire        n64_reset_n, n64_nmi_n, n64_alel, n64_aleh, n64_read_n, n64_write_n,
     inout  wire [15:0] n64_ad,
     input  wire        n64_cic_clk, n64_si_clk,
@@ -31,11 +31,13 @@ module sn64_pnr_wrap (
     input  wire        snes_cic_data0_i,
     output wire        snes_cic_data1_o, snes_cic_data1_oe,
     input  wire        snes_cic_data1_i,
-    output reg         video_keep, audio_keep, status_keep
+    output wire [2:0]  hdmi_tmds,
+    output wire        hdmi_tmds_clock, av_locked,
+    output reg         status_keep
 );
-    wire [14:0] rgb; wire hs, vs, hde, vde, dot, hr, fld, il; wire [15:0] al, ar; wire ardy; wire [15:0] st;
+    wire [15:0] st;
     sn64_top #(.ROM_ADDR_BITS(16)) top (
-        .clk_25(clk_25), .clk_host(clk_host), .clk_snes(clk_snes), .por_n(por_n),
+        .clk_25(clk_25), .clk_host(clk_host), .clk_snes(clk_snes), .clk_pixel(clk_pixel), .clk_pixel_x5(clk_pixel_x5), .por_n(por_n),
         .n64_reset_n(n64_reset_n), .n64_nmi_n(n64_nmi_n), .n64_alel(n64_alel), .n64_aleh(n64_aleh),
         .n64_read_n(n64_read_n), .n64_write_n(n64_write_n), .n64_ad(n64_ad),
         .n64_cic_clk(n64_cic_clk), .n64_si_clk(n64_si_clk), .n64_cic_dq(n64_cic_dq),
@@ -52,12 +54,6 @@ module sn64_pnr_wrap (
         .snes_cic_oe_n(snes_cic_oe_n), .snes_cic_clk(snes_cic_clk), .snes_cic_slave_reset(snes_cic_slave_reset),
         .snes_cic_data0_o(snes_cic_data0_o), .snes_cic_data0_oe(snes_cic_data0_oe), .snes_cic_data0_i(snes_cic_data0_i),
         .snes_cic_data1_o(snes_cic_data1_o), .snes_cic_data1_oe(snes_cic_data1_oe), .snes_cic_data1_i(snes_cic_data1_i),
-        .snes_rgb(rgb), .snes_hsync(hs), .snes_vsync(vs), .snes_hde(hde), .snes_vde(vde), .snes_dot_clock(dot),
-        .snes_high_res(hr), .snes_field(fld), .snes_interlace(il),
-        .snes_audio_left(al), .snes_audio_right(ar), .snes_audio_ready(ardy), .status_word(st));
-    always @(posedge clk_snes) begin
-        video_keep <= ^{rgb, hs, vs, hde, vde, dot, hr, fld, il};
-        audio_keep <= ^{al, ar, ardy};
-    end
+        .hdmi_tmds(hdmi_tmds), .hdmi_tmds_clock(hdmi_tmds_clock), .av_locked(av_locked), .status_word(st));
     always @(posedge clk_25) status_keep <= ^st;
 endmodule

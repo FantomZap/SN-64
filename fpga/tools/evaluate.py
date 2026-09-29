@@ -184,6 +184,28 @@ def main():
         if cdc_pass is None:
             raise RuntimeError('CDC test exited without its acceptance marker')
         report['simulation']['cdc'] = cdc_pass
+        # Digital A/V output (HDMI 720x480p + 32 kHz audio); the bench decodes the serial TMDS lanes.
+        hdmi_vendor = sorted(str(p.relative_to(ROOT)).replace('\\', '/')
+                             for p in (ROOT / 'fpga/vendor/hdl-util-hdmi/src').glob('*.sv'))
+        av_sources = hdmi_vendor + ['fpga/rtl/sn64_av_hdmi_tx.sv', 'fpga/rtl/sn64_av_serializer.sv',
+                                    'fpga/rtl/sn64_av_out.sv', 'fpga/tests/tb_av_out.sv']
+        av_flags = ['--binary', '--timing', '--build-jobs', '4', '-Wno-fatal', '-Wno-lint', '-Wno-style',
+                    '-Wno-TIMESCALEMOD', '--top-module', 'tb_av_out']
+        for av_label, av_define, av_expect in (
+                ('av-out', None, None),
+                ('av-out-async', '+define+SN64_TB_ASYNC_27M', None),
+                ('av-out-pixel-fault', '+define+SN64_AV_FAULT_PIXEL', 'got 845239 expected 8c5239'),
+                ('av-out-sync-fault', '+define+SN64_AV_FAULT_SYNC', 'hsync width 61')):
+            av_obj = obj / av_label
+            run(av_label + '-build', [verilator] + av_flags + ['--Mdir', str(av_obj).replace('\\', '/')]
+                + ([av_define] if av_define else []) + av_sources)
+            av_body = run(av_label, [str(av_obj / ('Vtb_av_out.exe' if os.name == 'nt' else 'Vtb_av_out'))], av_expect)
+            if av_expect is None:
+                av_pass = next((line for line in av_body.splitlines() if line.startswith('PASS:')), None)
+                if av_pass is None:
+                    raise RuntimeError(f'{av_label} exited without its acceptance marker')
+                report['simulation'][av_label.replace('-', '_')] = av_pass
+        report['simulation']['injected_av_faults'] = 'Rejected: one flipped pixel bit and one short hsync are both detected from the decoded TMDS'
         # Whole-system power-on: N64 host, Si5351, rails, cartridge, SNES core, all blocks in sn64_top.
         if (ROOT / 'build/cic/cic-build.json').exists():
             sys_sources = ['-Ibuild/generated/snestang/src', '-Ibuild/generated/snestang/src/spc700',
@@ -192,9 +214,12 @@ def main():
                            'fpga/rtl/sn64_console_with_bridge.sv'] + n64_common + [
                            'fpga/rtl/sn64_cdc.sv', 'fpga/rtl/sn64_clock_init.sv', 'fpga/rtl/sn64_power_sequencer.sv',
                            'fpga/rtl/sn64_snes_cic_lock.sv', 'fpga/vendor/snestang-controller/src/controller_adapter.sv',
-                           'fpga/rtl/sn64_snes_joypad.sv', 'fpga/rtl/sn64_top.sv', 'fpga/tests/tb_system.sv']
+                           'fpga/rtl/sn64_snes_joypad.sv'] + hdmi_vendor + [
+                           'fpga/rtl/sn64_av_hdmi_tx.sv', 'fpga/rtl/sn64_av_serializer.sv', 'fpga/rtl/sn64_av_out.sv',
+                           'fpga/rtl/sn64_top.sv', 'fpga/tests/tb_system.sv']
             sys_obj = obj / 'system'
             run('system-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+                '-Wno-lint', '-Wno-style', '-Wno-TIMESCALEMOD',
                 '--top-module', 'tb_system', '--Mdir', str(sys_obj).replace('\\', '/')] + sys_sources)
             sys_body = run('system', [str(sys_obj / ('Vtb_system.exe' if os.name == 'nt' else 'Vtb_system'))])
             sys_pass = next((line for line in sys_body.splitlines() if line.startswith('PASS:')), None)

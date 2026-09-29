@@ -26,6 +26,7 @@ module sn64_top #(
     parameter        CIC_LOCK_T_PWRUP = 49605      // lock start-up wait (instruction cycles)
 ) (
     input  wire        clk_25, clk_host, clk_snes,
+    input  wire        clk_pixel, clk_pixel_x5,        // HDMI: Si5351 CLK2 (27.0198 MHz, locked to the NTSC master) and ECP5 PLL x5
     input  wire        por_n,                      // board power-on reset / FPGA configured
 
     // ---------------- N64 / M64 cartridge edge ----------------
@@ -68,12 +69,10 @@ module sn64_top #(
     output wire        snes_cic_data1_o, snes_cic_data1_oe,
     input  wire        snes_cic_data1_i,
 
-    // ---------------- SNES video/audio (to the A/V output block) ----------------
-    output wire [14:0] snes_rgb,
-    output wire        snes_hsync, snes_vsync, snes_hde, snes_vde, snes_dot_clock,
-    output wire        snes_high_res, snes_field, snes_interlace,
-    output wire [15:0] snes_audio_left, snes_audio_right,
-    output wire        snes_audio_ready,
+    // ---------------- HDMI output (720x480p, 32 kHz audio) ----------------
+    output wire [2:0]  hdmi_tmds,                   // serial TMDS data lanes (single-ended view; board adds differential I/O)
+    output wire        hdmi_tmds_clock,
+    output wire        av_locked,
 
     // ---------------- Diagnostics ----------------
     output wire [15:0] status_word
@@ -194,6 +193,8 @@ module sn64_top #(
     wire core_reset_n;
     sn64_sync_bit #(1'b0) s_core_rst (.clk(clk_snes), .d(cart_reset_n_sense & bus_permit), .q(core_reset_n));
 
+    wire [14:0] snes_rgb; wire snes_hde, snes_vde; wire [8:0] snes_video_x, snes_video_y;
+    wire [15:0] snes_audio_left, snes_audio_right; wire snes_audio_ready;
     wire [15:0] joy1_s, joy2_s;
     sn64_cdc_word #(.W(16)) x_joy1 (.src_clk(clk_host), .src_data(joy1_h), .dst_clk(clk_snes), .dst_data(joy1_s));
     sn64_cdc_word #(.W(16)) x_joy2 (.src_clk(clk_host), .src_data(joy2_h), .dst_clk(clk_snes), .dst_data(joy2_s));
@@ -214,9 +215,25 @@ module sn64_top #(
         .cart_reset_n_sense(cart_reset_n_sense), .cart_reset_pull_n(bridge_reset_pull_n),
         .ctl_oe_n(ctl_oe_n), .data_oe_n(data_oe_n), .data_dir(data_dir), .contention_guard(),
         .joy1_di(joy1_di), .joy2_di(joy2_di), .joy_strobe(joy_strobe), .joy1_clock(joy1_clock), .joy2_clock(joy2_clock),
-        .rgb(snes_rgb), .hsync(snes_hsync), .vsync(snes_vsync), .hde(snes_hde), .vde(snes_vde), .dot_clock(snes_dot_clock),
-        .high_res(snes_high_res), .field(snes_field), .interlace(snes_interlace), .video_x(), .video_y(),
+        .rgb(snes_rgb), .hsync(), .vsync(), .hde(snes_hde), .vde(snes_vde), .dot_clock(),
+        .high_res(), .field(), .interlace(), .video_x(snes_video_x), .video_y(snes_video_y),
         .audio_left(snes_audio_left), .audio_right(snes_audio_right), .audio_ready(snes_audio_ready));
+
+    // =====================================================================
+    // HDMI output: SNES picture line-doubled to 720x480p, audio as 32 kHz
+    // HDMI audio (docs/design/av-output-implementation.md). The pixel clock
+    // comes from the same Si5351 PLL as the NTSC master, so the raster is
+    // frequency-locked to the SNES frame.
+    // =====================================================================
+    wire rst_pixel_n;
+    sn64_sync_bit #(1'b0) s_rst_pix (.clk(clk_pixel), .d(por_n & clocks_ready), .q(rst_pixel_n));
+    sn64_av_out av (
+        .clk_snes(clk_snes), .rst_snes_n(core_reset_n),
+        .rgb(snes_rgb), .hde(snes_hde), .vde(snes_vde), .video_x(snes_video_x), .video_y(snes_video_y),
+        .audio_left(snes_audio_left), .audio_right(snes_audio_right), .audio_ready(snes_audio_ready),
+        .clk_pixel(clk_pixel), .clk_pixel_x5(clk_pixel_x5), .rst_pixel_n(rst_pixel_n),
+        .tmds(hdmi_tmds), .tmds_clock(hdmi_tmds_clock),
+        .locked(av_locked), .lock_error(), .rephase_count());
 
     // Socket /RESET: open-drain pull owned by the power sequencer (held in
     // every state except RUN, and during a soft reset) or whenever the bus is

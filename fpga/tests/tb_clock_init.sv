@@ -80,7 +80,10 @@ module tb_clock_init;
         // MS0 / MS1 divide by 40
         check_reg(45,8'h12); check_reg(43,8'h01); check_reg(53,8'h12); check_reg(51,8'h01);
         // control, PLL reset, outputs
-        check_reg(183,8'hD2); check_reg(177,8'hA0); check_reg(16,8'h4F); check_reg(17,8'h6F); check_reg(18,8'h80); check_reg(3,8'hFC);
+        // MS2 fractional 31+31/39 (HDMI pixel clock locked to the NTSC master)
+        check_reg(58,8'h00); check_reg(59,8'h27); check_reg(60,8'h00); check_reg(61,8'h0D);
+        check_reg(62,8'hE5); check_reg(63,8'h00); check_reg(64,8'h00); check_reg(65,8'h1D);
+        check_reg(183,8'hD2); check_reg(177,8'hA0); check_reg(16,8'h4F); check_reg(17,8'h6F); check_reg(18,8'h0F); check_reg(3,8'hF8);
         if (status_reads<5) $fatal(1,"did not wait for PLL lock (reads=%0d)",status_reads);
         // Region latch: follows detection only while the SNES clock is stopped.
         detected_valid=1; detected_pal=1; repeat(3) @(negedge clk);
@@ -91,7 +94,7 @@ module tb_clock_init;
         if (!pending) $fatal(1,"pending change not reported");
         snes_clock_stopped=1; repeat(3) @(negedge clk);   // next power-up window
         if (region_pal) $fatal(1,"forced NTSC not applied at next power-up");
-        $display("PASS: Si5351 image (PLLA/PLLB/MS0/MS1/control) written and verified, lock polled (%0d status reads), region latched only while SNES clock stopped (%0d writes, %0d clocks)", status_reads, writes, cycles);
+        $display("PASS: Si5351 image (PLLA/PLLB/MS0/MS1/MS2/control) written and verified, lock polled (%0d status reads), region latched only while SNES clock stopped (%0d writes, %0d clocks)", status_reads, writes, cycles);
         $finish;
     end
 endmodule

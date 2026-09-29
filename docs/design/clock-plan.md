@@ -8,8 +8,8 @@ Decision record, 2026-09-29. Selects the clock sources for the SNES master clock
 |---|---|---|
 | SNES master, NTSC | 21.4772727 MHz (6 × 3.579545) | Drives the CPU/PPU/APU timing, and reaches the cartridge on SYSTEM_CLK (pin 1). Enhancement chips such as Super FX clock from it. Real consoles use a ±50 ppm-class crystal. |
 | SNES master, PAL | 21.28137 MHz | Same, for PAL timing (spec keeps PAL in scope). |
-| CIC soft CPU | 62.5 MHz | SummerCart64's rate; the SERV core is too slow at 21.477 MHz (see [CIC notes](n64-cic-implementation.md)). |
-| HDMI 480p | 27 MHz pixel, 135 MHz TMDS (5×) | Standard 720×480p60 timing; see the A/V design note. |
+| CIC soft CPU and N64 endpoint | 62.5 MHz | SummerCart64's rate; the SERV core is too slow at 21.477 MHz (see [CIC notes](n64-cic-implementation.md)). |
+| HDMI 480p | 27.0198 MHz pixel (NTSC master × 39/31), 135.1 MHz TMDS (5×) | The [A/V block](av-output-implementation.md) line-doubles each SNES line into exactly two HDMI lines, so the raster must be frequency-locked to the SNES frame (858 × 524 at 60.0988 Hz). |
 
 ## Why the FPGA PLL alone cannot make the SNES clocks
 
@@ -18,12 +18,12 @@ ECP5 PLL dividers are limited to 1–128 with a 400–800 MHz VCO. A search over
 ## Selected architecture
 
 ```text
-25 MHz oscillator ──┬──> ECP5 PLL A ── 62.5 MHz  (CIC soft CPU)
-                    ├──> ECP5 PLL B ── 135 MHz / 27 MHz (HDMI TMDS / pixel)
-                    ├──> FPGA housekeeping (I2C master, power sequencer, USB-side logic)
-                    └──> Si5351A XTAL/CLKIN
+25 MHz oscillator ──┬──> ECP5 PLL A ── 62.5 MHz  (N64 endpoint, CIC soft CPU)
+                    └──> FPGA housekeeping (I2C master, power sequencer, SNES CIC lock)
+25 MHz crystal ────────> Si5351A
                             ├─ CLK0: 21.4772727 MHz (NTSC SNES master) ─┐
-                            └─ CLK1: 21.28137   MHz (PAL SNES master)  ─┴─> FPGA global clock input(s) → SNES core, bridge, SYSTEM_CLK
+                            ├─ CLK1: 21.28137   MHz (PAL SNES master)  ─┴─> FPGA global clock input → SNES core, bridge, SYSTEM_CLK
+                            └─ CLK2: 27.0197947 MHz (HDMI pixel = NTSC master × 39/31, same PLLA) ──> ECP5 PLL B ×5 → 135.1 MHz TMDS
 ```
 
 - The Si5351A variant has a crystal input only (XA/XB), so it gets its own 25 MHz crystal (10 pF load, register 183) rather than the FPGA's oscillator; the Si5351C would accept an external clock but is poorly stocked.
@@ -49,3 +49,9 @@ ECP5 PLL dividers are limited to 1–128 with a 400–800 MHz VCO. A search over
 [fpga/rtl/sn64_clock_init.sv](../../fpga/rtl/sn64_clock_init.sv) programs the Si5351 over I²C at 400 kHz from the 25 MHz housekeeping clock: all outputs off, the PLLA/PLLB/MS0/MS1 values above, crystal load, PLL reset, CLK0/CLK1 enabled, then it polls register 0 until SYS_INIT and both loss-of-lock bits clear before asserting `clocks_ready`. A missing ACK or a lock timeout latches `i2c_error`. The region output follows the forced mode or the detection result only while `snes_clock_stopped` is high.
 
 [fpga/tests/tb_clock_init.sv](../../fpga/tests/tb_clock_init.sv) uses a behavioural Si5351 I²C slave. It verifies every programmed register against the values in this document, that lock was polled, and that the region cannot change while the SNES clock runs but does change at the next power-up window. With `+wrong_addr` the slave never acknowledges and the run must end in `i2c_error`; both runs are in `evaluate.py --mode sim`. Real Si5351 timing, crystal start-up and output jitter remain hardware checks.
+
+## HDMI pixel clock (decision 2026-09-29)
+
+The [A/V block](av-output-implementation.md) needs its pixel clock frequency-locked to the SNES frame (each SNES line becomes exactly two HDMI lines, with a 4-line buffer instead of a frame buffer). Its author proposed two chained ECP5 PLLs from the SNES master (PFD 3.46 MHz, close to the 3.125 MHz minimum). Instead, the Si5351's otherwise unused CLK2 generates the pixel clock from the **same PLLA** as the NTSC master with a fractional output divider of 31 + 31/39: 859.0909 MHz / 31.7948718 = **27.0197947 MHz = master × 39/31 exactly**. Both outputs therefore share one oscillator and one PLL, so the raster cannot drift against the SNES frame, and the ECP5 only needs one PLL (×5, PFD 27 MHz) for the TMDS bit clock. Fractional multisynth outputs have somewhat more jitter than integer ones (Si5351A datasheet); measure the TMDS eye on the prototype. PAL HDMI (a 576p-class raster) needs its own ratio from PLLB and is not implemented. The independent-27 MHz fallback also passes the A/V bench with one re-phase per frame.
+
+`sn64_clock_init` programs MS2 (registers 58–65: P1 = 3557, P2 = 29, P3 = 39), CLK2 control 0x0F and enables outputs 0–2; its bench verifies every register.

@@ -1,0 +1,27 @@
+{
+  "upstream": "https://github.com/hdl-util/hdmi",
+  "commit": "83b1c9543a91b776671a44e68e130f81cae437b7",
+  "archive_sha256": "e7d4d79e08390f0e186f15f9af7a65f8d22d18a32d1ba065fd1c9309496214e7",
+  "archive_note": "GitHub archive zip of the commit above, fetched 2026-09-29; used for the licence texts and to diff against the SNESTang copy",
+  "via": {
+    "upstream": "https://github.com/nand2mario/snestang",
+    "commit": "5f0ef193145f67bded7f73f2c477ac8da4d85f7e",
+    "archive_sha256": "09adb16244d16fa7210ec3aafa32f15550ada98f65531c9579a7f1d6f9120d13",
+    "path": "src/hdmi2/",
+    "note": "SNESTang carries a copy of hdl-util/hdmi. Six of the eight files below are byte-identical to hdl-util/hdmi at the commit above. packet_picker.sv and audio_clock_regeneration_packet.sv carry SNESTang's change: clk_audio is sampled as a strobe in the clk_pixel domain instead of being used as a clock. SN64 takes those two files from SNESTang for that reason."
+  },
+  "license": "MIT OR Apache-2.0 (hdl-util/hdmi, Copyright (c) 2019 Sameer Puri; LICENSE-MIT and LICENSE-APACHE retained). The clk_audio change in packet_picker.sv and audio_clock_regeneration_packet.sv comes from SNESTang, whose repository licence is GPL-3.0 (see fpga/vendor/snestang/LICENSE). Both are compatible with SN64's GPL-3.0-or-later HDL.",
+  "not_taken": "hdmi.sv (raster and island scheduler) and serializer.sv (Xilinx/Intel/Gowin primitives) are not vendored. SN64 needs an externally locked raster, so fpga/rtl/sn64_av_hdmi_tx.sv reimplements the scheduler following hdmi.sv's period arithmetic, with attribution. fpga/rtl/sn64_av_serializer.sv provides the ECP5 serializer.",
+  "files": [
+    {"path": "LICENSE-MIT", "upstream_sha256": "b39d2287911147fbe58a5a288aa0f2a38b4459575e168551c2a3e3853e01536d", "local_sha256": "b39d2287911147fbe58a5a288aa0f2a38b4459575e168551c2a3e3853e01536d", "changes": "none"},
+    {"path": "LICENSE-APACHE", "upstream_sha256": "7c6c1ea9fbe1f376e2fc1ff4b0e5fe3f9896dd41f9fff101b7e69994a55f0d56", "local_sha256": "7c6c1ea9fbe1f376e2fc1ff4b0e5fe3f9896dd41f9fff101b7e69994a55f0d56", "changes": "none"},
+    {"path": "src/tmds_channel.sv", "upstream_sha256": "1e45e87703e2ab1790c13235822e8889fb016ad4c11cd9e5def0980d26a24637", "local_sha256": "1e45e87703e2ab1790c13235822e8889fb016ad4c11cd9e5def0980d26a24637", "changes": "none"},
+    {"path": "src/packet_assembler.sv", "upstream_sha256": "00d143e3b4226cb8ac7418bab35b9ea6f3a963e81fd0f2f7f3109844f4bde2c6", "local_sha256": "00d143e3b4226cb8ac7418bab35b9ea6f3a963e81fd0f2f7f3109844f4bde2c6", "changes": "none"},
+    {"path": "src/audio_sample_packet.sv", "upstream_sha256": "0e3a35ccb3e934eecfcd3916c5dac9ef269abea21472d66ebd2660a9d25e6a13", "local_sha256": "0e3a35ccb3e934eecfcd3916c5dac9ef269abea21472d66ebd2660a9d25e6a13", "changes": "none"},
+    {"path": "src/audio_info_frame.sv", "upstream_sha256": "dedd552fa988d9e2875bdadc54f3c08d5041d54637da1ff565d46078eeb2ea89", "local_sha256": "dedd552fa988d9e2875bdadc54f3c08d5041d54637da1ff565d46078eeb2ea89", "changes": "none"},
+    {"path": "src/auxiliary_video_information_info_frame.sv", "upstream_sha256": "c151e2675ad97ef36254044e42657f2d758512d305040137859f9b8806135f64", "local_sha256": "c151e2675ad97ef36254044e42657f2d758512d305040137859f9b8806135f64", "changes": "none"},
+    {"path": "src/source_product_description_info_frame.sv", "upstream_sha256": "893269fdccd2dc147e8570519f35308ac5e5460ad7f54bf673b3c31e9a8259de", "local_sha256": "893269fdccd2dc147e8570519f35308ac5e5460ad7f54bf673b3c31e9a8259de", "changes": "none"},
+    {"path": "src/packet_picker.sv", "upstream_sha256": "6c3e87c8221a5756393bdbff0c48988f03e4917e0f088b7cba5cda8d6e83f3ad", "snestang_sha256": "13fe20151abd6b33188985b116e58cf9dcd0d67b55c2412bc159e6efab0bcce1", "local_sha256": "de4a38ee0fea42e84520f9f6de1526be7a9446c85d584619d6e8bd18849ef9da", "changes": "SNESTang copy (clk_audio edge-detected in clk_pixel domain). SN64 change, marked in the file: the IEC 60958 frame_counter update uses one non-blocking assignment instead of mixed blocking/non-blocking assignments (same result), because yosys-slang rejects the mix."},
+    {"path": "src/audio_clock_regeneration_packet.sv", "upstream_sha256": "a8b7f0c592ce8c871bf31986db293799f64893b18b5a6387e262a81b7ec22954", "snestang_sha256": "729df6b9ca9d018ed0fdfae98aa2b3455131de04b7257afc97383a0036e03881", "local_sha256": "b15c7335993b71c3e3c47f1827ac220e8432e3f6321ab13d49be2f8a61ff4d86", "changes": "SNESTang copy (clk_audio edge-detected in clk_pixel domain). SN64 change, marked in the file: CYCLE_TIME_STAMP_COUNTER_IDEAL/WIDTH use $rtoi(x + 0.5)/$itor instead of int'() casts on reals (same rounding for these positive values), because Verilator 5.053 cannot constant-fold the casts. Counter width is unchanged (15 bits at 27.0198 MHz / 32 kHz)."}
+  ]
+}
