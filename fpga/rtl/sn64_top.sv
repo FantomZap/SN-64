@@ -214,8 +214,12 @@ module sn64_top #(
         .high_res(snes_high_res), .field(snes_field), .interlace(snes_interlace), .video_x(), .video_y(),
         .audio_left(snes_audio_left), .audio_right(snes_audio_right), .audio_ready(snes_audio_ready));
 
-    // Socket /RESET: open-drain pull from the sequencer or the bridge.
-    assign cart_reset_pull = seq_reset_pull | !bridge_reset_pull_n;
+    // Socket /RESET: open-drain pull owned by the power sequencer (held in
+    // every state except RUN, and during a soft reset) or whenever the bus is
+    // not permitted. The bridge's own reset request is NOT used here: it
+    // follows the core reset, which itself follows the socket /RESET level,
+    // and combining them deadlocks (found by tb_system).
+    assign cart_reset_pull = seq_reset_pull | !bus_permit;
 
     // =====================================================================
     // Status word to the N64 mailbox (clk_25 -> clk_host)

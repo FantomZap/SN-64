@@ -175,6 +175,32 @@ def main():
         report['simulation']['clock_init'] = clk_pass
         run('clock-init-no-ack', [str(clk_exe), '+wrong_addr'], 'master reported i2c_error on NACK')
         report['simulation']['injected_clock_fault'] = 'Rejected: a non-responding Si5351 is reported as i2c_error'
+        # Clock-domain crossing word transfer
+        cdc_obj = obj / 'cdc'
+        run('cdc-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+            '--top-module', 'tb_cdc', '--Mdir', str(cdc_obj).replace('\\', '/'), 'fpga/rtl/sn64_cdc.sv', 'fpga/tests/tb_cdc.sv'])
+        cdc_body = run('cdc', [str(cdc_obj / ('Vtb_cdc.exe' if os.name == 'nt' else 'Vtb_cdc'))])
+        cdc_pass = next((line for line in cdc_body.splitlines() if line.startswith('PASS:')), None)
+        if cdc_pass is None:
+            raise RuntimeError('CDC test exited without its acceptance marker')
+        report['simulation']['cdc'] = cdc_pass
+        # Whole-system power-on: N64 host, Si5351, rails, cartridge, SNES core, all blocks in sn64_top.
+        if (ROOT / 'build/cic/cic-build.json').exists():
+            sys_sources = ['-Ibuild/generated/snestang/src', '-Ibuild/generated/snestang/src/spc700',
+                           '-Ibuild/generated/snestang/src/65C816', '-f', 'build/core-sources.f',
+                           'fpga/rtl/sn64_console_candidate.sv', 'fpga/rtl/sn64_cart_bridge.sv',
+                           'fpga/rtl/sn64_console_with_bridge.sv'] + n64_common + [
+                           'fpga/rtl/sn64_cdc.sv', 'fpga/rtl/sn64_clock_init.sv', 'fpga/rtl/sn64_power_sequencer.sv',
+                           'fpga/rtl/sn64_snes_cic_lock.sv', 'fpga/vendor/snestang-controller/src/controller_adapter.sv',
+                           'fpga/rtl/sn64_snes_joypad.sv', 'fpga/rtl/sn64_top.sv', 'fpga/tests/tb_system.sv']
+            sys_obj = obj / 'system'
+            run('system-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+                '--top-module', 'tb_system', '--Mdir', str(sys_obj).replace('\\', '/')] + sys_sources)
+            sys_body = run('system', [str(sys_obj / ('Vtb_system.exe' if os.name == 'nt' else 'Vtb_system'))])
+            sys_pass = next((line for line in sys_body.splitlines() if line.startswith('PASS:')), None)
+            if sys_pass is None:
+                raise RuntimeError('System test exited without its acceptance marker')
+            report['simulation']['system'] = sys_pass
         report['simulation']['limit'] = ('Same master clock in all runs; PAL clocks/video and PPU/APU not qualified; '
                                          'bridge bus model is behavioural (no analog levels or translator delays)')
 
