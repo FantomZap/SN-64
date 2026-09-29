@@ -61,6 +61,7 @@ module sn64_top #(
     output wire        cart_reset_pull,            // 1 = open-drain pull of socket /RESET
     output wire        ctl_oe_n, data_oe_n, data_dir,
     // SNES CIC lines
+    output wire        snes_cic_oe_n,              // U206 enable: CIC_CLK, CIC_SLAVE_RESET, SYSTEM_CLK octet
     output wire        snes_cic_clk, snes_cic_slave_reset,
     output wire        snes_cic_data0_o, snes_cic_data0_oe,
     input  wire        snes_cic_data0_i,
@@ -148,6 +149,7 @@ module sn64_top #(
     // reports the key's region.
     // =====================================================================
     wire cic_enable = (seq_state >= 4'd3) && (seq_state <= 4'd4);   // IFACE or RUN
+    assign snes_cic_oe_n = !cic_enable;                              // enabled from IFACE, before the SNES clock
     reg [3:0] seed_counter = 4'd0;                                   // stream-select nibble, sampled at key reset
     always @(posedge clk_25) seed_counter <= seed_counter + 4'd1;
     sn64_snes_cic_lock #(.CLK_DIV(CIC_LOCK_CLK_DIV), .T_PWRUP(CIC_LOCK_T_PWRUP)) snes_cic (

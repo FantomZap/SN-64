@@ -1,41 +1,41 @@
 {
   "status": "pass",
   "scope": "connector reference consistency only",
-  "generated_at_utc": "2026-09-29T04:31:36.279791+00:00",
+  "generated_at_utc": "2026-09-29T21:58:24.667970+00:00",
   "kicad_python_version": "10.0.6",
   "checks_passed": 30,
   "checks_failed": 0,
   "inputs": {
     "schematic": {
-      "path": "C:\\Users\\RyanB\\.codex\\worktrees\\sn64-system-integration\\SN 64 Project\\hardware\\sn64\\sn64.kicad_sch",
-      "sha256": "8e4b1478d341b6cac2e893a4be78ed555079c30cac6b4ab5112d08309e73a298"
+      "path": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\hardware\\sn64\\sn64.kicad_sch",
+      "sha256": "23fd9d23b681ae03c7f5c6b89370c9579089100e961ec24f3bd82825cb1b72d2"
     },
     "symbol_library": {
-      "path": "C:\\Users\\RyanB\\.codex\\worktrees\\sn64-system-integration\\SN 64 Project\\hardware\\sn64\\libraries\\SN64.kicad_sym",
+      "path": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\hardware\\sn64\\libraries\\SN64.kicad_sym",
       "sha256": "abdec73b3c58d95d555d58b81e7d86d3427c93d932fb52ad89fe80ca1c71d1b0"
     },
     "n64_footprint": {
-      "path": "C:\\Users\\RyanB\\.codex\\worktrees\\sn64-system-integration\\SN 64 Project\\hardware\\sn64\\libraries\\SN64.pretty\\N64_Edge_SC64_Reference.kicad_mod",
+      "path": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\hardware\\sn64\\libraries\\SN64.pretty\\N64_Edge_SC64_Reference.kicad_mod",
       "sha256": "46855f30e7b3be78139cf742809e20d4f2476cc7ee6d9751012e22cf11c05e89"
     },
     "snes_footprint": {
-      "path": "C:\\Users\\RyanB\\.codex\\worktrees\\sn64-system-integration\\SN 64 Project\\hardware\\sn64\\libraries\\SN64.pretty\\SNES Slot.kicad_mod",
+      "path": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\hardware\\sn64\\libraries\\SN64.pretty\\SNES Slot.kicad_mod",
       "sha256": "9cd8ac2eb5323928023d6f4d098a65bf5e8cd3ab9f97d42e3b2fc1197432aac6"
     },
     "n64_source_board": {
-      "path": "C:\\Users\\RyanB\\Documents\\Codex\\SN 64 Project\\references\\downloads\\summercart64\\hw\\pcb\\sc64v2.kicad_pcb",
+      "path": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\references\\downloads\\summercart64\\hw\\pcb\\sc64v2.kicad_pcb",
       "sha256": "7991e3105a4be609be6904c9c69d507e98fec3db5f51d3d91d43cc540a16295a"
     },
     "snes_source_footprint": {
-      "path": "C:\\Users\\RyanB\\Documents\\Codex\\SN 64 Project\\references\\downloads\\sanni\\hardware\\footprints\\!OSCR.pretty\\SNES Slot.kicad_mod",
+      "path": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\references\\downloads\\sanni\\hardware\\footprints\\!OSCR.pretty\\SNES Slot.kicad_mod",
       "sha256": "9cd8ac2eb5323928023d6f4d098a65bf5e8cd3ab9f97d42e3b2fc1197432aac6"
     },
     "n64_map": {
-      "path": "C:\\Users\\RyanB\\.codex\\worktrees\\sn64-system-integration\\SN 64 Project\\hardware\\sn64\\interfaces\\n64-pin-map.csv",
+      "path": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\hardware\\sn64\\interfaces\\n64-pin-map.csv",
       "sha256": "ea5f5bac79ea969e33620144626e95c02a8db2723d378d3023d11f10c94048c4"
     },
     "snes_map": {
-      "path": "C:\\Users\\RyanB\\.codex\\worktrees\\sn64-system-integration\\SN 64 Project\\hardware\\sn64\\interfaces\\snes-pin-map.csv",
+      "path": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\hardware\\sn64\\interfaces\\snes-pin-map.csv",
       "sha256": "911a289bfb073aab8048daff42256eae65a527c8a0efd852bca0f37b1fdf7adc"
     }
   },

@@ -99,7 +99,7 @@ module tb_system;
         .cart_romsel_n(romsel), .cart_wramsel_n(wramsel), .cart_refresh(refresh), .cart_phi2(phi2), .cart_sysclk(sysclk),
         .cart_data_out(dout), .cart_data_in(bus_in), .cart_irq_n(1'b1), .cart_reset_n_sense(cart_reset_n),
         .cart_reset_pull(cart_reset_pull), .ctl_oe_n(ctl_oe_n), .data_oe_n(data_oe_n), .data_dir(data_dir),
-        .snes_cic_clk(cic_clk), .snes_cic_slave_reset(cic_srst),
+        .snes_cic_oe_n(),.snes_cic_clk(cic_clk), .snes_cic_slave_reset(cic_srst),
         .snes_cic_data0_o(d0o), .snes_cic_data0_oe(d0oe), .snes_cic_data0_i(d0oe & d0o),
         .snes_cic_data1_o(d1o), .snes_cic_data1_oe(d1oe), .snes_cic_data1_i(d1oe & d1o),
         .snes_rgb(), .snes_hsync(), .snes_vsync(), .snes_hde(), .snes_vde(), .snes_dot_clock(),

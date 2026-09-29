@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "recorded_date": "2026-09-29",
+  "scope": "SNES cartridge-interface child-sheet symbols; schematic draft only, not a manufacturing or functional-validation release.",
+  "tool_version": "KiCad 10.0.6",
+  "drawn_symbols": {
+    "SN74LVC4245APW": {
+      "library": "libraries/SN64_CART.kicad_sym",
+      "source": {
+        "url": "https://www.ti.com/lit/ds/symlink/sn74lvc4245a.pdf",
+        "revision": "SCAS375K, revised May 2026",
+        "sha256_of_downloaded_copy": "29a63cd196f43f2ba0a0f5d704a0acb70c056766bda7eca36be95e0117a5f2b0"
+      },
+      "source_section": "Figure 4-1 (DB/DW/PW top view) and Table 4-1 Pin Functions",
+      "pins": {
+        "1": "VCCA",
+        "2": "DIR",
+        "22": "~{OE}",
+        "23": "VCCB",
+        "24": "VCCB",
+        "11": "GND",
+        "12": "GND",
+        "13": "GND",
+        "3": "A1",
+        "4": "A2",
+        "5": "A3",
+        "6": "A4",
+        "7": "A5",
+        "8": "A6",
+        "9": "A7",
+        "10": "A8",
+        "21": "B1",
+        "20": "B2",
+        "19": "B3",
+        "18": "B4",
+        "17": "B5",
+        "16": "B6",
+        "15": "B7",
+        "14": "B8"
+      },
+      "note": "Pin 23 is shown as NC,VCCB in Figure 4-1 and VCCB in Table 4-1; drawn as VCCB and tied to VCCB (safe for both).",
+      "footprint": "Package_SO:TSSOP-24_4.4x7.8mm_P0.65mm (installed KiCad library)"
+    },
+    "SN74LVC244APW": {
+      "library": "libraries/SN64_CART.kicad_sym",
+      "source": {
+        "url": "https://www.ti.com/lit/ds/symlink/sn74lvc244a.pdf",
+        "revision": "SCAS414AG, revised June 2026",
+        "sha256_of_downloaded_copy": "cfc6af57afa803bda8d900f5ba71bbaded5f50be369639be2002eb2370684179"
+      },
+      "source_section": "Figure 4-2 (DB/DGV/DW/N/NS/DGS/PW packages)",
+      "pins": {
+        "20": "VCC",
+        "10": "GND",
+        "1": "~{1OE}",
+        "19": "~{2OE}",
+        "2": "1A1",
+        "18": "1Y1",
+        "4": "1A2",
+        "16": "1Y2",
+        "6": "1A3",
+        "14": "1Y3",
+        "8": "1A4",
+        "12": "1Y4",
+        "11": "2A1",
+        "9": "2Y1",
+        "13": "2A2",
+        "7": "2Y2",
+        "15": "2A3",
+        "5": "2Y3",
+        "17": "2A4",
+        "3": "2Y4"
+      },
+      "footprint": "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm (installed KiCad library)"
+    }
+  },
+  "installed_kicad_symbols_used_unmodified": [
+    "74xGxx:74LVC1G06",
+    "74xGxx:74LVC1G07",
+    "Connector:TestPoint",
+    "Device:C",
+    "Device:R",
+    "Device:R_Pack04",
+    "Transistor_FET:2N7002",
+    "power:PWR_FLAG"
+  ],
+  "installed_kicad_footprints_referenced": [
+    "Capacitor_SMD:C_0603_1608Metric",
+    "Capacitor_SMD:C_0805_2012Metric",
+    "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm",
+    "Package_SO:TSSOP-24_4.4x7.8mm_P0.65mm",
+    "Package_TO_SOT_SMD:SOT-23",
+    "Package_TO_SOT_SMD:SOT-23-5",
+    "Resistor_SMD:R_0603_1608Metric",
+    "Resistor_SMD:R_Array_Convex_4x0603",
+    "TestPoint:TestPoint_Pad_D1.0mm"
+  ],
+  "other_datasheets_checked": {
+    "sn74lvc1g07": {
+      "url": "https://www.ti.com/lit/ds/symlink/sn74lvc1g07.pdf",
+      "revision": "SCES296AG, revised October 2025",
+      "sha256_of_downloaded_copy": "5c68b82a5110b337457ca918b149432c6b9c605be7849e76116f108ddbd7abee"
+    },
+    "sn74lvc1g06": {
+      "url": "https://www.ti.com/lit/ds/symlink/sn74lvc1g06.pdf",
+      "revision": "SCES295AB, revised October 2025",
+      "sha256_of_downloaded_copy": "44dbca33c92d677ed71f99c2d1a2eb28f12d6fdb512e13fdf485444a3a42b4a4"
+    }
+  },
+  "licenses": "KiCad library content: CC-BY-SA-4.0 with the KiCad library exception (see KiCad library LICENSE). Drawn symbols: SN64 project content; pin data are facts from the cited TI datasheets."
+}

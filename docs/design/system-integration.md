@@ -47,4 +47,5 @@ Limits: no key CIC and no PAL run in this test (both are covered by the [SNES CI
 2. **Board wrapper:** ECP5 PLLs for 62.5 MHz and the HDMI clocks, a glitch-free SNES clock select/gate (DCS) driven by `snes_clk_run`/`region_pal`, I/O standards and pin constraints.
 3. **A/V output** integration once its block is merged.
 4. **ROM header region fallback** (`$00:FFD9`) needs a pre-boot bus master in front of the bridge; today an absent key means NTSC unless the menu forces PAL.
-5. Whole-design synthesis and place-and-route for resources and timing.
+5. Whole-design place-and-route for timing.
+6. **CIC data pin circuit** (must fix before layout): the [cartridge interface sheet](cart-interface-schematic.md) treats CIC_DATA0 as output-only and CIC_DATA1 as input-only, but the lock protocol drives each pin in some rounds and receives on it in others. Each needs its own enabled bidirectional path with a pull-down.

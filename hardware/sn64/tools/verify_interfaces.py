@@ -185,7 +185,11 @@ def main():
         shared = [n.get('name') for n in nets
                   if {'J1', 'J2'} <= {p.get('ref') for p in n.findall('node')}]
         check('only_ground_crosses_host_snes_domains', shared == ['/GND'], shared)
-        supplies = {n.get('name'): sorted((p.get('ref'), int(p.get('pin'))) for p in n.findall('node'))
+        # Connector pins only: translator, pull-up and decoupling nodes on the
+        # cartridge 5 V rail (cart-interface sheet) are expected and checked by
+        # verify_cart_interface.py.
+        supplies = {n.get('name'): sorted((p.get('ref'), int(p.get('pin'))) for p in n.findall('node')
+                                          if p.get('ref') in maps)
                     for n in nets if n.get('name') in ['/HOST_3V3', '/HOST_12V', '/SNES_5V_CART']}
         check('three_power_domains_separate', supplies == {
             '/HOST_3V3': [('J1', 9), ('J1', 17), ('J1', 34), ('J1', 42)],
