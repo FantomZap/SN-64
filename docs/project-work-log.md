@@ -50,6 +50,14 @@ These changes form the next engineering checkpoint for the existing draft pull r
 
 The current [evaluation report](../fpga/reports/evaluation.md) and [JSON snapshot](../fpga/reports/evaluation.json) own exact build inputs, commands, results and limitations. Historical resource/timing figures above describe their original checkpoint; use the current report for the latest candidate.
 
+## 2026-09-29 — Development moved to Claude Code; GitHub main updated
+
+- Development continues from a complete copy of the Codex project folder: Git history, ignored research downloads, build evidence and the Codex worktrees' ignored scratch files. A hash comparison confirmed every original file is present and identical; only Git fetch metadata differs. The original folder is unchanged.
+- Re-ran the existing checks from the new location. `evaluate.py --mode sim` passed both 1,336-clock boot runs (PAL flag 0 and 1). It rejected the injected corrupt read and passed the 1,089-clock WRAM regression. KiCad static checks again passed 30 interface and 64 USB checks. This repeats existing simulation/static evidence only; no hardware was tested.
+- Published the full local development history to GitHub `main` as a fast-forward. Draft PR #1 held the identical file tree under different publication commits, so it was closed as superseded instead of merged.
+- Added [CLAUDE.md](../CLAUDE.md) with working rules and check commands. The user handed project control to Claude and allowed replacing the named software where better-suited tools exist.
+- Current tool assessment: keep KiCad, because PCBWay accepts it directly and every reused upstream board is KiCad. Keep the OSS CAD Suite ECP5 flow. New enclosure geometry may move to code-first build123d with STEP/STL exports, keeping the FreeCAD references. No tool change has been made yet.
+
 ## Remaining work
 
 Select and validate the FPGA/storage and physical-cartridge bridge, complete system/cartridge power and protection, N64 endpoint, controller/firmware functions, clocks, A/V and diagnostics. Retain PAL and the required M64 single-HDMI target; its supported integration mechanism remains unresolved. Complete PCB placement/routing and the FreeCAD enclosure, then perform electrical, programming, compatibility and fit tests on prototypes before producing a PCBWay release. No working SN 64 hardware or fabrication-ready package exists yet.
