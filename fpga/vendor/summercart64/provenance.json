@@ -10,6 +10,11 @@
       "bytes": 581
     },
     {
+      "path": "fw/rtl/n64/n64_cic.sv",
+      "sha256": "4225afa255eac39155ca3d421de7b37cac1924d6f05ee283fe537644b0bd5741",
+      "bytes": 6487
+    },
+    {
       "path": "fw/rtl/n64/n64_pi.sv",
       "sha256": "2a6dc471072392c20a53fa34039cad437ba233828320c75aeb9b821a208d615a",
       "bytes": 16411
@@ -30,9 +35,109 @@
       "bytes": 6216
     },
     {
+      "path": "fw/rtl/serv/LICENSE",
+      "sha256": "d9a1bd691f04280a8369a4aa69b6be20c0e2ee6d164a17ad8a8ef49da8ea0ea9",
+      "bytes": 740
+    },
+    {
+      "path": "fw/rtl/serv/serv_alu.v",
+      "sha256": "241301e22f759d34ed1faa79f00e9134978d7cb1c590df23d61ec1aac654ca0c",
+      "bytes": 1908
+    },
+    {
+      "path": "fw/rtl/serv/serv_bufreg.v",
+      "sha256": "6eaae986300a6486ac678df0490da8c17e3392fccd7b988534c0086c8bdd7c38",
+      "bytes": 1593
+    },
+    {
+      "path": "fw/rtl/serv/serv_bufreg2.v",
+      "sha256": "8d10955563bc395e80bf54a00376697873b7265fe5949254b63f8a13537283b6",
+      "bytes": 2045
+    },
+    {
+      "path": "fw/rtl/serv/serv_ctrl.v",
+      "sha256": "c1a71573ca0108ab4e504bea9465cd922d1578c891f2964010c219ed053f5e9e",
+      "bytes": 3276
+    },
+    {
+      "path": "fw/rtl/serv/serv_decode.v",
+      "sha256": "75b23f6ff6198678fea6e8c1c9898cd0269d8145181528b77a86e9b237ea38e2",
+      "bytes": 13026
+    },
+    {
+      "path": "fw/rtl/serv/serv_immdec.v",
+      "sha256": "20408d3c6e11ebc1b9fa1092a3bc2dfe285c1e496372e1a2469d590c93ac3e78",
+      "bytes": 3033
+    },
+    {
+      "path": "fw/rtl/serv/serv_mem_if.v",
+      "sha256": "22f2fce152056469dd177f932dbcc07a64290af841dab6dd12c812c73047289d",
+      "bytes": 2034
+    },
+    {
+      "path": "fw/rtl/serv/serv_rf_if.v",
+      "sha256": "9dac084e93f3acd0bf5bfe8a1d07e6c813073bb34b0cea41d10fd9102691c7ba",
+      "bytes": 4099
+    },
+    {
+      "path": "fw/rtl/serv/serv_rf_ram.v",
+      "sha256": "e160430e997bc510ea75d2cba8f2129760a4ec42ea45aaffae189aa80de35638",
+      "bytes": 1203
+    },
+    {
+      "path": "fw/rtl/serv/serv_rf_ram_if.v",
+      "sha256": "b8844cd951d0edea080f098f02d67136ae8f46ace8964b22f8b4107a0e171bf5",
+      "bytes": 4385
+    },
+    {
+      "path": "fw/rtl/serv/serv_rf_top.v",
+      "sha256": "cc56c4512c8a23ef77be8e880a4bc4975cf97f718cf7e32f9c03d33c33bdfa2e",
+      "bytes": 6494
+    },
+    {
+      "path": "fw/rtl/serv/serv_state.v",
+      "sha256": "2848b302956fd46738e8778b590ae378e9ab235768432e21236277adf321afb5",
+      "bytes": 8294
+    },
+    {
+      "path": "fw/rtl/serv/serv_top.v",
+      "sha256": "58c60c5c9459b3a5c097d8b17b866fd97823cc03cc2f794005520efa39840b41",
+      "bytes": 17637
+    },
+    {
       "path": "LICENSE",
       "sha256": "8b1ba204bb69a0ade2bfcf65ef294a920f6bb361b317dba43c7ef29d96332b9b",
       "bytes": 35148
+    },
+    {
+      "path": "sw/cic/build.sh",
+      "sha256": "4f95930fecb471c790154c9b6689ba240d6c3e39261820cb1a1cac8c5200b920",
+      "bytes": 558
+    },
+    {
+      "path": "sw/cic/cic.c",
+      "sha256": "22eb64f6d7386764ec9ddd41b9af92de2a2152d3bc22e807f740c7fdf4cfde1d",
+      "bytes": 8497
+    },
+    {
+      "path": "sw/cic/cic.h",
+      "sha256": "69c2cd4809f6023a11484cff52c160773ffe4d8b2dceaa17f9489b174a5554e3",
+      "bytes": 2273
+    },
+    {
+      "path": "sw/cic/cic.ld",
+      "sha256": "e1adb1a4d727b533f805c25df925c15cb1bb62d5257a3e169b6ba6d0a9c03299",
+      "bytes": 904
+    },
+    {
+      "path": "sw/cic/convert.py",
+      "sha256": "5cd58dccfdd45865ace15a189c5ee76e9fc90f9f80d82e3faa632ea47f51385d",
+      "bytes": 484
+    },
+    {
+      "path": "sw/cic/startup.S",
+      "sha256": "9e53b511343ea9da31a305c241312e5f1c599eb2cb349aa337c05e082cf6e6bf",
+      "bytes": 331
     }
   ]
 }

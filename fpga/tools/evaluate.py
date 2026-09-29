@@ -119,10 +119,13 @@ def main():
         run('cart-bridge-no-guard', [str(fault_exe)], 'without release clock')
         report['simulation']['injected_bridge_fault'] = 'Rejected: owner change without a released clock is detected'
         # N64/M64 host endpoint: vendored SummerCart64 PI controller plus the SN64 ROM/mailbox wrapper.
-        n64_sources = ['fpga/vendor/summercart64/fw/rtl/memory/mem_bus.sv', 'fpga/rtl/sn64_n64_reg_bus.sv',
-                       'fpga/vendor/summercart64/fw/rtl/n64/n64_scb.sv', 'fpga/vendor/summercart64/fw/rtl/n64/n64_pi_fifo.sv',
-                       'fpga/vendor/summercart64/fw/rtl/n64/n64_pi.sv', 'fpga/rtl/sn64_n64_endpoint.sv',
-                       'fpga/tests/tb_n64_endpoint.sv']
+        serv = sorted(str(p.relative_to(ROOT)).replace('\\', '/')
+                      for p in (ROOT / 'fpga/vendor/summercart64/fw/rtl/serv').glob('*.v'))
+        n64_common = ['fpga/vendor/summercart64/fw/rtl/memory/mem_bus.sv', 'fpga/rtl/sn64_n64_reg_bus.sv',
+                      'fpga/vendor/summercart64/fw/rtl/n64/n64_scb.sv', 'fpga/vendor/summercart64/fw/rtl/n64/n64_pi_fifo.sv',
+                      'fpga/vendor/summercart64/fw/rtl/n64/n64_pi.sv', 'build/generated/summercart64/n64_cic.sv',
+                      'fpga/rtl/sn64_n64_endpoint.sv'] + serv
+        n64_sources = n64_common + ['fpga/tests/tb_n64_endpoint.sv']
         n64_obj = obj / 'n64-endpoint'
         run('n64-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
             '--top-module', 'tb_n64_endpoint', '--Mdir', str(n64_obj).replace('\\', '/')] + n64_sources)
@@ -132,6 +135,33 @@ def main():
         if n64_pass is None:
             raise RuntimeError('N64 endpoint test exited without its acceptance marker')
         report['simulation']['n64_endpoint'] = n64_pass
+        # CIC lockout handshake against a console-side model; needs the built firmware image.
+        if (ROOT / 'build/cic/cic-build.json').exists():
+            cic_obj = obj / 'n64-cic'
+            run('cic-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+                '--top-module', 'tb_n64_cic', '--Mdir', str(cic_obj).replace('\\', '/')] + n64_common + ['fpga/tests/tb_n64_cic.sv'])
+            cic_exe = cic_obj / ('Vtb_n64_cic.exe' if os.name == 'nt' else 'Vtb_n64_cic')
+            cic_body = run('n64-cic', [str(cic_exe)])
+            cic_pass = next((line for line in cic_body.splitlines() if line.startswith('PASS:')), None)
+            if cic_pass is None:
+                raise RuntimeError('CIC test exited without its acceptance marker')
+            report['simulation']['n64_cic'] = cic_pass
+            run('n64-cic-corrupt-expectation', [str(cic_exe), '+corrupt_expect'], 'FAIL checksum nibble 3')
+            report['simulation']['injected_cic_fault'] = 'Rejected: a single altered checksum nibble is detected'
+            report['cic_firmware'] = json.loads((ROOT / 'build/cic/cic-build.json').read_text())
+        else:
+            report['simulation']['n64_cic'] = 'SKIPPED: build/cic/cic-build.json missing; run fpga/tools/build_cic.py first'
+        # Power-control state machine
+        pwr_obj = obj / 'power-sequencer'
+        run('power-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+            '--top-module', 'tb_power_sequencer', '--Mdir', str(pwr_obj).replace('\\', '/'),
+            'fpga/rtl/sn64_power_sequencer.sv', 'fpga/tests/tb_power_sequencer.sv'])
+        pwr_exe = pwr_obj / ('Vtb_power_sequencer.exe' if os.name == 'nt' else 'Vtb_power_sequencer')
+        pwr_body = run('power-sequencer', [str(pwr_exe)])
+        pwr_pass = next((line for line in pwr_body.splitlines() if line.startswith('PASS:')), None)
+        if pwr_pass is None:
+            raise RuntimeError('Power sequencer test exited without its acceptance marker')
+        report['simulation']['power_sequencer'] = pwr_pass
         report['simulation']['limit'] = ('Same master clock in all runs; PAL clocks/video and PPU/APU not qualified; '
                                          'bridge bus model is behavioural (no analog levels or translator delays)')
 

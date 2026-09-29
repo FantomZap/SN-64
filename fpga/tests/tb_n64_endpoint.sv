@@ -18,12 +18,13 @@ module tb_n64_endpoint;
     reg [15:0] status=16'hA5C3;
     wire rst_ev, nmi_ev;
 
-    sn64_n64_endpoint #(.ROM_ADDR_BITS(12)) dut(.clk(clk),.reset(reset),
+    sn64_n64_endpoint #(.ROM_ADDR_BITS(12)) dut(.clk(clk),.reset(reset),.cic_cpu_clk(clk),
         .n64_reset(n64_reset),.n64_nmi(n64_nmi),.n64_pi_alel(alel),.n64_pi_aleh(aleh),
         .n64_pi_read(rd),.n64_pi_write(wr),.n64_pi_ad(ad),
         .rom_we(rom_we),.rom_waddr(rom_waddr),.rom_wdata(rom_wdata),
         .joy1_buttons(j1),.joy2_buttons(j2),.joy1_stick_x(sx),.joy1_stick_y(sy),
         .run_request(run),.mailbox_seq(seq),.status_flags(status),.build_id(16'h0102),
+        .n64_cic_clk(1'b1),.n64_cic_dq(),.n64_si_clk(1'b0),.cic_region(1'b0),.cic_invalid_region(),.cic_step(),
         .host_reset_event(rst_ev),.host_nmi_event(nmi_ev));
 
     // Bus rule: the cartridge may only drive AD while /READ is low.

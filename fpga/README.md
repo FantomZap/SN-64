@@ -8,6 +8,7 @@ This directory contains a reproducible **console-only engineering candidate** bu
 - [WRAM bus diagnostic](tests/tb_wram_bus.sv): active-cycle RAM data, direct/mirrored addresses, RAM port and B-to-A DMA.
 - [Cartridge bridge](rtl/sn64_cart_bridge.sv) and [socket-facing top](rtl/sn64_console_with_bridge.sv): data-bus ownership with one released clock at every turnaround; [physical-bus diagnostic](tests/tb_cart_bridge.sv) with contention monitor and a fault-injected run. See [implementation notes](../docs/design/cartridge-bridge-implementation.md).
 - [N64/M64 endpoint](rtl/sn64_n64_endpoint.sv): vendored [SummerCart64 PI controller](vendor/summercart64/provenance.json) (GPL-3.0, unmodified) with an SN64 bootstrap ROM window and mailbox; [host-model diagnostic](tests/tb_n64_endpoint.sv). See [endpoint notes](../docs/design/n64-endpoint-implementation.md).
+- [N64 CIC lockout](../docs/design/n64-cic-implementation.md): vendored SummerCart64 CIC (SERV soft core, ISC) running the vendored UltraCIC_C firmware (MIT); build the image with `fpga/tools/build_cic.py` (xPack riscv-none-elf-gcc), then [tb_n64_cic.sv](tests/tb_n64_cic.sv) checks the ID, seed and checksum streams against an independent reference.
 - [Recorded evaluation](reports/evaluation.md) and [machine-readable evidence](reports/evaluation.json).
 - [Physical-cartridge bridge work](../docs/design/physical-cartridge-bridge.md) and [FPGA selection](../docs/design/fpga-board-selection.md).
 
@@ -22,6 +23,12 @@ The diagnostic checks reset-vector fetch, native CPU execution, external 16-bit 
 The wrapper now selects the current WRAM byte for `cart_data_out` during an active RAM read instead of the previous MDR byte. `cart_wram_read_valid` qualifies that source with core enable/reset and RAM CE/OE. It is **not** a complete translator output enable. The separate bus diagnostic checks direct reads, both low-memory mirrors, CPU RAM-port reads, B-to-A DMA and immediate source-valid removal during pause/reset with the clock stopped. CPU-internal register reads remain distinct from electrically visible data; see [source evidence](../docs/design/bus-electrical-evidence.md).
 
 ## Reproduction
+
+CIC firmware (needed for the CIC test; otherwise that test is reported as skipped):
+
+```powershell
+python fpga/tools/build_cic.py --toolchain C:/path/to/xpack-riscv-none-elf-gcc/bin
+```
 
 Use [OSS CAD Suite](https://github.com/YosysHQ/oss-cad-suite-build/releases/tag/2026-09-28) for Yosys/Slang, Verilator and nextpnr-ecp5. Windows also needs a C++ compiler and GNU Make; the inspected [w64devkit 2.10.0](https://github.com/skeeto/w64devkit/releases/tag/v2.10.0) provides both. These portable tools were installed under the user's `.codex/tools` folder without changing system PATH. [Tool versions and archive hashes](reports/toolchain.json) identify this run.
 

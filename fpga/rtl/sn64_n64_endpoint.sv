@@ -15,6 +15,7 @@ module sn64_n64_endpoint #(
 ) (
     input  wire        clk,               // 21.477 MHz master clock (PI logic is synchronous to it)
     input  wire        reset,             // active-high local reset
+    input  wire        cic_cpu_clk,       // CIC soft-CPU clock (62.5 MHz from the PLL, as in SummerCart64)
 
     // N64 cartridge edge (through the host-side I/O)
     input  wire        n64_reset,         // host /RESET, active low (low = held in reset)
@@ -36,6 +37,14 @@ module sn64_n64_endpoint #(
     // Mailbox: SNES/system -> N64 side
     input  wire [15:0] status_flags,      // rail/fault/config bits from the power/bridge logic
     input  wire [15:0] build_id,
+
+    // CIC lockout (vendored SummerCart64 implementation on a SERV soft core)
+    input  wire        n64_cic_clk,
+    inout  wire        n64_cic_dq,
+    input  wire        n64_si_clk,        // CIC timeout timer reference (PIF clock)
+    input  wire        cic_region,        // 0 = NTSC (6102), 1 = PAL (7101)
+    output wire        cic_invalid_region,
+    output wire [3:0]  cic_step,          // CIC firmware progress, for diagnostics
 
     // Events
     output wire        host_reset_event,  // rising edge of host reset release
@@ -70,6 +79,26 @@ module sn64_n64_endpoint #(
 
     assign host_reset_event = n64_scb.n64_reset;
     assign host_nmi_event   = n64_scb.n64_nmi;
+
+    // CIC configuration: cartridge type, standard CIC-6102/7101 seed and
+    // checksum (SummerCart64 defaults: seed 0x3F, checksum 0xA536C0F1D859).
+    assign n64_scb.cic_disabled  = 1'b0;
+    assign n64_scb.cic_64dd_mode = 1'b0;
+    assign n64_scb.cic_region    = cic_region;
+    assign n64_scb.cic_seed      = 8'h3F;
+    assign n64_scb.cic_checksum  = 48'hA536C0F1D859;
+    assign cic_invalid_region    = n64_scb.cic_invalid_region;
+    assign cic_step              = n64_scb.cic_debug_step;
+
+    // The CIC soft CPU (bit-serial SERV) must answer each CIC bit within the
+    // console's bit period; at 21.477 MHz it is too slow, so it runs from its
+    // own PLL clock, as in SummerCart64 (62.5 MHz). Its inputs are already
+    // synchronised inside n64_cic; only its reset needs a synchroniser here.
+    reg [1:0] cic_reset_ff = 2'b11;
+    always @(posedge cic_cpu_clk) cic_reset_ff <= {cic_reset_ff[0], reset};
+    n64_cic cic (
+        .clk(cic_cpu_clk), .reset(cic_reset_ff[1]), .n64_scb(n64_scb),
+        .n64_reset(n64_reset), .n64_cic_clk(n64_cic_clk), .n64_cic_dq(n64_cic_dq), .n64_si_clk(n64_si_clk));
 
     // ---------------------------------------------------------------------
     // Bootstrap ROM: mem_bus memory. Word address = byte address >> 1. Reads

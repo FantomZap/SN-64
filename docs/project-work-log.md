@@ -72,6 +72,12 @@ The current [evaluation report](../fpga/reports/evaluation.md) and [JSON snapsho
 - Added a host-model testbench driving the PI protocol (ALE_H/ALE_L latch, read/write strobes) with AD-bus ownership checks. Passes ROM burst/offset reads, mailbox read/write/readback and reset behaviour in 4,595 clocks. Added to `evaluate.py --mode sim`. Two host-model mistakes (ALE hold time, ALE order) were fixed in the bench and recorded as guidance for the bootstrap.
 - CIC lockout (SummerCart64's soft-CPU implementation), /INT and the libdragon bootstrap remain open; the register map is the bootstrap's contract.
 
+## 2026-09-29 — N64 CIC lockout and power-control state machine
+
+- Vendored SummerCart64's CIC module, the SERV RISC-V core (ISC) and the UltraCIC_C-derived firmware (MIT), unmodified, and wired them into the endpoint as CIC-6102/7101 (seed `0x3F`, checksum `0xA536C0F1D859`). Installed the xPack RISC-V GCC 15.2.0-1 (checksum verified against GitHub's release digest) and added [build_cic.py](../fpga/tools/build_cic.py); the firmware uses 395 of 512 words. A console-side model now passes ID, seed and 64-bit checksum against independently computed references and enters compare mode; an altered expectation is rejected. [CIC notes](design/n64-cic-implementation.md).
+- Design finding: the bit-serial soft CPU is too slow at 21.477 MHz; the endpoint now runs it from a separate 62.5 MHz PLL clock, as SummerCart64 does. The real PIF bit rate and phase gaps remain a hardware measurement item.
+- Added [sn64_power_sequencer.sv](../fpga/rtl/sn64_power_sequencer.sv): ordered bring-up (reset held, 5 V, interface rail, reset release), combinational bus permission, shutdown on request loss or host reset, latched faults with codes and a deliberate clear. Its bench passes bring-up, shutdown, four fault classes and a rail timeout. [Notes](design/power-sequencer-implementation.md).
+
 ## Remaining work
 
 Select and validate the FPGA/storage and physical-cartridge bridge, complete system/cartridge power and protection, N64 endpoint, controller/firmware functions, clocks, A/V and diagnostics. Retain PAL and the required M64 single-HDMI target; its supported integration mechanism remains unresolved. Complete PCB placement/routing and the FreeCAD enclosure, then perform electrical, programming, compatibility and fit tests on prototypes before producing a PCBWay release. No working SN 64 hardware or fabrication-ready package exists yet.
