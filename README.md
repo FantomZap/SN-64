@@ -20,6 +20,7 @@ Every target in the original specification remains in scope, including PAL, prot
 - [System architecture and integration status](docs/architecture.md)
 - [Console-core evaluation and reproducible builds](fpga/README.md)
 - [Physical cartridge bridge design and open tests](docs/design/physical-cartridge-bridge.md)
+- [Cartridge data-bus source evidence and unresolved behavior](docs/design/bus-electrical-evidence.md)
 - [FPGA/package, supply and board reuse review](docs/design/fpga-board-selection.md)
 - [Power architecture, including M64 USB power](docs/design/power-architecture.md)
 - [Socket selection and missing manufacturer dimensions](docs/design/socket-selection.md)

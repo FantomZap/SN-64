@@ -5,6 +5,7 @@ This directory contains a reproducible **console-only engineering candidate** bu
 - [Pinned upstream selection and hashes](vendor/snestang/provenance.json), with original GPL license and file notices retained.
 - [Candidate wrapper](rtl/sn64_console_candidate.sv): CPU/PPU/APU plus 128 KiB WRAM, 64 KiB VRAM and 64 KiB ARAM in synchronous inferred RAM.
 - [Diagnostic](tests/tb_console_boot.sv): original instruction program; no commercial game image.
+- [WRAM bus diagnostic](tests/tb_wram_bus.sv): active-cycle RAM data, direct/mirrored addresses, RAM port and B-to-A DMA.
 - [Recorded evaluation](reports/evaluation.md) and [machine-readable evidence](reports/evaluation.json).
 - [Physical-cartridge bridge work](../docs/design/physical-cartridge-bridge.md) and [FPGA selection](../docs/design/fpga-board-selection.md).
 
@@ -15,6 +16,8 @@ The 35 vendored files come from SNESTang commit `5f0ef193145f67bded7f73f2c477ac8
 `tools/prepare_core.py` verifies every source hash and writes generated copies under ignored `build/`. It selects the upstream `VERILATOR` inferred-memory branch, omits ten simulation-only diagnostic statements, connects HIGH_RES, exports PHI2, ties the open TURBO input low and exports the CPU/DMA/HDMA address **before** the upstream WRAM mirror conversion. Internal RAM decoding keeps its original address path. The generated preparation manifest lists changes and hashes. No vendor file is patched in place.
 
 The diagnostic checks reset-vector fetch, native CPU execution, external 16-bit reads/writes, 16-bit WRAM readback, preservation of a low-bank mirrored address, a B-bus write, cartridge-to-WRAM DMA and PHI2 presence. A corrupted cartridge read must produce the expected failure. Both PAL mode-bit values run, but the test clock remains the same: this is **not PAL clock/video qualification**. It does not yet exercise graphics, sound, HDMA, cartridge select qualification, open bus, output-enable timing or real cartridges.
+
+The wrapper now selects the current WRAM byte for `cart_data_out` during an active RAM read instead of the previous MDR byte. `cart_wram_read_valid` qualifies that source with core enable/reset and RAM CE/OE. It is **not** a complete translator output enable. The separate bus diagnostic checks direct reads, both low-memory mirrors, CPU RAM-port reads, B-to-A DMA and immediate source-valid removal during pause/reset with the clock stopped. CPU-internal register reads remain distinct from electrically visible data; see [source evidence](../docs/design/bus-electrical-evidence.md).
 
 ## Reproduction
 

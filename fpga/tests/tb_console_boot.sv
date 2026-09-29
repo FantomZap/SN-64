@@ -25,7 +25,7 @@ module tb_console_boot;
         .cart_address(address),.cart_data_in(data_in),.cart_data_out(data_out),
         .cart_peripheral_address(peripheral_address),.cart_prd_n(prd_n),.cart_pwr_n(pwr_n),
         .cart_rd_n(rd_n),.cart_wr_n(wr_n),.cart_irq_n(1'b1),.cart_phi2(phi2),
-        .cart_romsel_n(),.cart_wramsel_n(),.cart_refresh(),
+        .cart_romsel_n(),.cart_wramsel_n(),.cart_refresh(),.cart_wram_read_valid(),
         .joy1_di(2'b11),.joy2_di(2'b11),.joy_strobe(),.joy1_clock(),.joy2_clock(),
         .rgb(),.hsync(),.vsync(),.hde(),.vde(),.dot_clock(),.high_res(),.field(),.interlace(),
         .video_x(),.video_y(),.audio_left(),.audio_right(),.audio_ready());
