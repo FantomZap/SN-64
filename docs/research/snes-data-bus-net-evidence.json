@@ -1,0 +1,371 @@
+{
+  "recorded_date": "2026-09-29",
+  "upstream_repository": "https://github.com/starlightk7/OpenSFC",
+  "upstream_commit": "6574450b1a4594b2aae436cf23869b0fb5808ce8",
+  "upstream_schematic_directory": "Motherboards/SHVC-CPU-01/Rev A",
+  "upstream_attribution": "Documented by starlightk7; schematic title block identifies CERN-OHL-S and original Nintendo design.",
+  "source_schematic_sha256": {
+    "SHVC-CPU-01-Back.kicad_sch": "643c4dfaa2ae9ee939e6941c4c672e4631ed94d89e09b7bf47b0db7b9e7bfe5f",
+    "SHVC-CPU-01-Front.kicad_sch": "886564ff130f30f57c552dd5dab874dd45bab6757afd16c9bec73b2b042f868a",
+    "SHVC-CPU-01.kicad_sch": "86d5454a862d054a62b5ab456f43ac8fcb84f6a905201ca111702e679139143d"
+  },
+  "netlist_sha256": "c292e38ca76c9c1364d8c56f3e4a9df5c51ee9e3917f5d3b74b547ab74eb0b79",
+  "netlist_export_tool": "Eeschema 10.0.6",
+  "netlist_export_date": "2026-09-28T23:21:34",
+  "scope": "Factual connectivity extract from the pinned reproduction schematic; no physical continuity, OE or waveform measurement.",
+  "component_values": {
+    "TP86": "TestPoint_Small",
+    "TP87": "TestPoint_Small",
+    "TP88": "TestPoint_Small",
+    "TP89": "TestPoint_Small",
+    "TP157": "TestPoint_Small",
+    "TP158": "TestPoint_Small",
+    "TP159": "TestPoint_Small",
+    "TP160": "TestPoint_Small",
+    "P1": "62 Pin  Slot",
+    "P5": "2x12 Connector Male",
+    "P6": "14x2 Connector Male",
+    "U1": "S-CPU",
+    "U2": "S-PPU1",
+    "U3": "S-PPU2",
+    "U6": "S-WRAM"
+  },
+  "nets": {
+    "C.D0": [
+      {
+        "ref": "P1",
+        "pin": "19",
+        "function": "CPU_D0_19"
+      },
+      {
+        "ref": "P5",
+        "pin": "7",
+        "function": "CPU_D0_7"
+      },
+      {
+        "ref": "P6",
+        "pin": "11",
+        "function": "D0_11"
+      },
+      {
+        "ref": "TP89",
+        "pin": "1",
+        "function": "1_1"
+      },
+      {
+        "ref": "U1",
+        "pin": "60",
+        "function": "CPU_D0_60"
+      },
+      {
+        "ref": "U2",
+        "pin": "21",
+        "function": "CPU_D0_21"
+      },
+      {
+        "ref": "U3",
+        "pin": "15",
+        "function": "CPU_D0_15"
+      },
+      {
+        "ref": "U6",
+        "pin": "60",
+        "function": "CPU_D0_60"
+      }
+    ],
+    "C.D1": [
+      {
+        "ref": "P1",
+        "pin": "20",
+        "function": "CPU_D1_20"
+      },
+      {
+        "ref": "P5",
+        "pin": "8",
+        "function": "CPU_D1_8"
+      },
+      {
+        "ref": "P6",
+        "pin": "12",
+        "function": "D1_12"
+      },
+      {
+        "ref": "TP160",
+        "pin": "1",
+        "function": "1_1"
+      },
+      {
+        "ref": "U1",
+        "pin": "61",
+        "function": "CPU_D1_61"
+      },
+      {
+        "ref": "U2",
+        "pin": "20",
+        "function": "CPU_D1_20"
+      },
+      {
+        "ref": "U3",
+        "pin": "14",
+        "function": "CPU_D1_14"
+      },
+      {
+        "ref": "U6",
+        "pin": "61",
+        "function": "CPU_D1_61"
+      }
+    ],
+    "C.D2": [
+      {
+        "ref": "P1",
+        "pin": "21",
+        "function": "CPU_D2_21"
+      },
+      {
+        "ref": "P5",
+        "pin": "9",
+        "function": "CPU_D2_9"
+      },
+      {
+        "ref": "P6",
+        "pin": "13",
+        "function": "D2_13"
+      },
+      {
+        "ref": "TP88",
+        "pin": "1",
+        "function": "1_1"
+      },
+      {
+        "ref": "U1",
+        "pin": "62",
+        "function": "CPU_D2_62"
+      },
+      {
+        "ref": "U2",
+        "pin": "19",
+        "function": "CPU_D2_19"
+      },
+      {
+        "ref": "U3",
+        "pin": "13",
+        "function": "CPU_D2_13"
+      },
+      {
+        "ref": "U6",
+        "pin": "62",
+        "function": "CPU_D2_62"
+      }
+    ],
+    "C.D3": [
+      {
+        "ref": "P1",
+        "pin": "22",
+        "function": "CPU_D3_22"
+      },
+      {
+        "ref": "P5",
+        "pin": "10",
+        "function": "CPU_D3_10"
+      },
+      {
+        "ref": "P6",
+        "pin": "14",
+        "function": "D3_14"
+      },
+      {
+        "ref": "TP159",
+        "pin": "1",
+        "function": "1_1"
+      },
+      {
+        "ref": "U1",
+        "pin": "63",
+        "function": "CPU_D3_63"
+      },
+      {
+        "ref": "U2",
+        "pin": "18",
+        "function": "CPU_D3_18"
+      },
+      {
+        "ref": "U3",
+        "pin": "12",
+        "function": "CPU_D3_12"
+      },
+      {
+        "ref": "U6",
+        "pin": "63",
+        "function": "CPU_D3_63"
+      }
+    ],
+    "C.D4": [
+      {
+        "ref": "P1",
+        "pin": "50",
+        "function": "CPU_D4_50"
+      },
+      {
+        "ref": "P5",
+        "pin": "11",
+        "function": "CPU_D4_11"
+      },
+      {
+        "ref": "P6",
+        "pin": "15",
+        "function": "D4_15"
+      },
+      {
+        "ref": "TP87",
+        "pin": "1",
+        "function": "1_1"
+      },
+      {
+        "ref": "U1",
+        "pin": "64",
+        "function": "CPU_D4_64"
+      },
+      {
+        "ref": "U2",
+        "pin": "17",
+        "function": "CPU_D4_17"
+      },
+      {
+        "ref": "U3",
+        "pin": "11",
+        "function": "CPU_D4_11"
+      },
+      {
+        "ref": "U6",
+        "pin": "2",
+        "function": "CPU_D4_2"
+      }
+    ],
+    "C.D5": [
+      {
+        "ref": "P1",
+        "pin": "51",
+        "function": "CPU_D5_51"
+      },
+      {
+        "ref": "P5",
+        "pin": "12",
+        "function": "CPU_D5_12"
+      },
+      {
+        "ref": "P6",
+        "pin": "16",
+        "function": "D5_16"
+      },
+      {
+        "ref": "TP158",
+        "pin": "1",
+        "function": "1_1"
+      },
+      {
+        "ref": "U1",
+        "pin": "65",
+        "function": "CPU_D5_65"
+      },
+      {
+        "ref": "U2",
+        "pin": "16",
+        "function": "CPU_D5_16"
+      },
+      {
+        "ref": "U3",
+        "pin": "10",
+        "function": "CPU_D5_10"
+      },
+      {
+        "ref": "U6",
+        "pin": "3",
+        "function": "CPU_D5_3"
+      }
+    ],
+    "C.D6": [
+      {
+        "ref": "P1",
+        "pin": "52",
+        "function": "CPU_D6_52"
+      },
+      {
+        "ref": "P5",
+        "pin": "13",
+        "function": "CPU_D6_13"
+      },
+      {
+        "ref": "P6",
+        "pin": "17",
+        "function": "D6_17"
+      },
+      {
+        "ref": "TP86",
+        "pin": "1",
+        "function": "1_1"
+      },
+      {
+        "ref": "U1",
+        "pin": "66",
+        "function": "CPU_D6_66"
+      },
+      {
+        "ref": "U2",
+        "pin": "15",
+        "function": "CPU_D6_15"
+      },
+      {
+        "ref": "U3",
+        "pin": "9",
+        "function": "CPU_D6_9"
+      },
+      {
+        "ref": "U6",
+        "pin": "4",
+        "function": "CPU_D6_4"
+      }
+    ],
+    "C.D7": [
+      {
+        "ref": "P1",
+        "pin": "53",
+        "function": "CPU_D7_53"
+      },
+      {
+        "ref": "P5",
+        "pin": "14",
+        "function": "CPU_D7_14"
+      },
+      {
+        "ref": "P6",
+        "pin": "18",
+        "function": "D7_18"
+      },
+      {
+        "ref": "TP157",
+        "pin": "1",
+        "function": "1_1"
+      },
+      {
+        "ref": "U1",
+        "pin": "67",
+        "function": "CPU_D7_67"
+      },
+      {
+        "ref": "U2",
+        "pin": "14",
+        "function": "CPU_D7_14"
+      },
+      {
+        "ref": "U3",
+        "pin": "8",
+        "function": "CPU_D7_8"
+      },
+      {
+        "ref": "U6",
+        "pin": "5",
+        "function": "CPU_D7_5"
+      }
+    ]
+  }
+}

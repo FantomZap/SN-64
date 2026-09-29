@@ -18,22 +18,26 @@ The same preparation ties SCPU `TURBO` low. Upstream left this input open althou
 | `cart_prd_n`, `cart_pwr_n` | B-bus active-low strobes. | `/PWR` means peripheral write; it is not cartridge power control. |
 | `cart_romsel_n`, `cart_wramsel_n`, `cart_refresh` | Core selects and refresh state. | Preserve physical contacts and prove their timing; `/ROMSEL` alone is not a universal external-access decoder. |
 | `cart_phi2` | Core CPU clock waveform. | Establish frequency/duty/phase and output constraints at the socket. |
-| `cart_data_in`, `cart_data_out` | Core cartridge input and upstream write/B-read data feed. | Add resolved internal-read data, ownership, driven-bit validity and turnaround policy. |
+| `cart_data_in`, `cart_data_out` | Core cartridge input; output now selects current WRAM data during a qualified RAM read, otherwise the upstream write/B-read feed. | Complete responder ownership and turnaround policy; this output is not a complete electrical bus model. |
+| `cart_wram_read_valid` | WRAM's read window, qualified by core reset and enable. Covers A-side RAM and the B-side RAM data port. | A source-valid indication only; it must not directly replace a hardware-qualified translator OE. |
 | `cart_irq_n` | Active-low CPU IRQ input. | Shared-line receiver, bias, power isolation and timing. |
 
 SYSTEM_CLK, shared system reset sensing/assertion, CIC clock/data/slave reset, EXPAND, analog audio and all power controls still need explicit implementation. SYSCLK edge-enable pulses are internal scheduling signals, not additional socket contacts.
 
 ## Shared data bus and ownership
 
-Upstream SNES assigns `DO = ~INT_PARD_N ? BUSB_DO : CPU_DO`. SCPU assigns its DO from `MDR`, which captures internal read results at the cycle's falling-edge enable. Thus `cart_data_out` does not expose the current WRAM or CPU-I/O read byte during the active read window. A translator around this signal alone would leave a physical cartridge observing stale data on those internal reads. Source evidence is the pinned [SNES bus mux](https://github.com/nand2mario/snestang/blob/5f0ef193145f67bded7f73f2c477ac8da4d85f7e/src/SNES.v) and [SCPU MDR/readback logic](https://github.com/nand2mario/snestang/blob/5f0ef193145f67bded7f73f2c477ac8da4d85f7e/src/cpu.v); exact socket behavior must also be compared with real console traces.
+Upstream SNES assigns `DO = ~INT_PARD_N ? BUSB_DO : CPU_DO`. SCPU assigns its DO from `MDR`, which captures internal read results at the cycle's falling-edge enable. The previous wrapper therefore exposed stale data during A-side WRAM reads. A new [WRAM bus diagnostic](../../fpga/tests/tb_wram_bus.sv) reproduced `$7E` instead of the expected `$A5`; the wrapper now selects current WRAM Q while CE/OE, reset and enable identify an active RAM read. Direct/mirrored reads, the RAM data port and B-to-A DMA are tested. Hardware voltage, electrical OE and timing remain unqualified.
 
-The proposed next core boundary should provide the selected internal read byte, a driven-bit mask or equivalent validity, console write data, raw A/B addresses, strobes and explicit ownership information. This is a design proposal, not implemented ports. Keep internal CPU input selection separate from the value visibly driven on socket D0-D7. Decode CPU registers, WRAM and B-bus peripherals with the same rules as their functional modules so the bridge cannot disagree about the selected responder.
+The [electrical evidence audit](bus-electrical-evidence.md) confirms that WRAM shares all eight physical cartridge data nets. It also corrects the earlier blanket proposal to export CPU-internal register reads: internal CPU read values do **not** by themselves establish an external drive requirement. Ordinary CPU-register reads and DMA from CPU registers require separate evidence. Do not copy an emulator's internal read mux directly onto cartridge pins.
+
+The proposed next core boundary should provide verified physical responder data/validity, console write data, raw A/B addresses, strobes and explicit ownership information. Only the WRAM source-valid addition is implemented. Keep internal CPU input selection separate from the value visibly driven on socket D0-D7. Register-defined bits and PPU-internal retained bits are not automatically an electrical drive mask; characterize the actual responder before assigning output enables.
 
 | Transaction class | Required model and check |
 |---|---|
 | CPU write to external cartridge | Console drives the write byte with characterized setup/hold; cartridge receives. Test high/low data transitions and consecutive writes. |
 | External cartridge read | Console releases D0-D7; cartridge response reaches core sampling within the available window. Include cartridge registers outside ordinary ROM-selected ranges. |
-| Internal WRAM/CPU-register read | Export the internal responder's current data, including partial-bit/open-bus behavior where applicable. The slot must not observe stale MDR substituted for current read data. |
+| Internal WRAM read | Current RAM data and its qualified read window are now exported; validate the eventual electrical driver and socket timing. |
+| CPU-internal register read | Keep internal CPU readback separate. Establish ordinary CPU versus DMA electrical behavior before permitting an external driver. |
 | Internal PPU/APU/WRAM B-bus read | Preserve peripheral selection/read side effects and make resolved read data available at the bridge boundary. |
 | A-to-B DMA/HDMA | Model the A-side source and B-side destination concurrently. An external A-side source may drive the shared bus while the internal B-side peripheral consumes it. Avoid a second console driver. |
 | B-to-A DMA/HDMA | Select the actual B-side source. Internal peripheral data must reach an external A-side destination; an external B-side responder must remain the physical driver when selected. |
@@ -63,7 +67,7 @@ Address/control outputs and the D-bus driver must disable on configuration loss,
 
 These are pending tests/design deliverables, not completed results. Preserve source/build identity, expected limits, waveforms and failure evidence for each.
 
-1. **Resolved read interface:** write two different WRAM bytes, read them through direct and mirrored addresses, and assert the socket model sees each current byte before the end-of-cycle sample. Intentionally substitute MDR to demonstrate failure. Add CPU I/O and PPU/APU/WRAM-port reads, including partially driven bits and side effects.
+1. **Resolved read interface:** the WRAM stale-data regression, direct/two mirror cases, WRAM-port reads, B-to-A DMA and reset/pause source validity now pass in the core-port simulation. Remaining work: select-qualified cartridge/bus-resolution model, additional boundary cases, PPU/APU responders and hardware timing. Resolve CPU-register electrical behavior separately; do not assume every internal read is externally driven.
 2. **Address/selection coverage:** check raw mirror addresses, LoROM/HiROM-style external ranges, cartridge register ranges, `/ROMSEL`, `/WRAMSEL`, refresh and all A/B strobes. Keep CPU, DMA and HDMA source selection explicit.
 3. **Peripheral DMA matrix:** test A-to-B and B-to-A with internal and external responders, increment/decrement/fixed address modes, byte counts/bank boundaries and representative HDMA reloads. Assert both destination data and source/destination bus ownership.
 4. **Turnaround model:** test read-to-write, write-to-read and back-to-back changing owners with nonzero responder/translator delays. Assert no simultaneous incompatible drive, adequate release interval, and valid data at sampling edges. Include absent cartridges/open bus rather than unconditional address-based test data.
