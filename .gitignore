@@ -1,0 +1,47 @@
+# Local credentials and task scratch files
+.env
+.env.*
+!.env.example
+.tools/
+.local/
+.cache/
+tmp/
+temp/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Office lock files
+~$*
+
+# KiCad local preferences, locks, and automatic backups
+*.kicad_prl
+*.kicad_pcb.lck
+*.kicad_sch.lck
+~*.lck
+*-backups/
+fp-info-cache
+
+# FreeCAD and Blender automatic backups
+*.FCStd[0-9]*
+*.FCBak
+*.blend[0-9]*
+
+# Local Python environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Generated build and FPGA tool working directories
+build/
+.Xil/
+db/
+incremental_db/
+output_files/
+*.runs/
+*.cache/
+
+# Manufacturing releases belong in manufacturing/ and are not globally ignored.
