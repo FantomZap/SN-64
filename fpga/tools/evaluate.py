@@ -201,6 +201,53 @@ def main():
             if sys_pass is None:
                 raise RuntimeError('System test exited without its acceptance marker')
             report['simulation']['system'] = sys_pass
+        # Controller path: mailbox button images -> emulated standard SNES pads, alone and on the core.
+        pad_sources = ['fpga/vendor/snestang-controller/src/controller_adapter.sv',
+                       'fpga/rtl/sn64_snes_joypad.sv', 'fpga/tests/tb_snes_joypad.sv']
+        pad_obj = obj / 'snes-joypad'
+        run('joypad-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+            '--top-module', 'tb_snes_joypad', '--Mdir', str(pad_obj).replace('\\', '/')] + pad_sources)
+        pad_body = run('snes-joypad', [str(pad_obj / ('Vtb_snes_joypad.exe' if os.name == 'nt' else 'Vtb_snes_joypad'))])
+        pad_pass = next((line for line in pad_body.splitlines() if line.startswith('PASS:')), None)
+        if pad_pass is None:
+            raise RuntimeError('Joypad protocol test exited without its acceptance marker')
+        report['simulation']['snes_joypad'] = pad_pass
+        pad_fault_obj = obj / 'snes-joypad-fault'
+        run('joypad-fault-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+            '+define+SN64_FAULT_SWAP_BY', '--top-module', 'tb_snes_joypad',
+            '--Mdir', str(pad_fault_obj).replace('\\', '/')] + pad_sources)
+        run('snes-joypad-swap', [str(pad_fault_obj / ('Vtb_snes_joypad.exe' if os.name == 'nt' else 'Vtb_snes_joypad'))],
+            'bit order/ID/trailing 1s')
+        report['simulation']['injected_joypad_fault'] = 'Rejected: B/Y swap detected by the serial protocol check'
+        core_pad_obj = obj / 'snes-joypad-core'
+        run('joypad-core-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+            '+define+SN64_JOYPAD_CORE_TEST', '--top-module', 'tb_snes_joypad_core',
+            '--Mdir', str(core_pad_obj).replace('\\', '/'),
+            '-Ibuild/generated/snestang/src', '-Ibuild/generated/snestang/src/spc700',
+            '-Ibuild/generated/snestang/src/65C816', '-f', 'build/core-sources.f',
+            'fpga/rtl/sn64_console_candidate.sv'] + pad_sources)
+        core_pad_body = run('snes-joypad-core', [str(core_pad_obj / ('Vtb_snes_joypad_core.exe' if os.name == 'nt' else 'Vtb_snes_joypad_core'))])
+        core_pad_pass = next((line for line in core_pad_body.splitlines() if line.startswith('PASS:')), None)
+        if core_pad_pass is None:
+            raise RuntimeError('Joypad core test exited without its acceptance marker')
+        report['simulation']['snes_joypad_core'] = core_pad_pass
+        # SNES CIC lock, plus two fault builds that must fail
+        scic_src = ['fpga/rtl/sn64_snes_cic_lock.sv', 'fpga/tests/tb_snes_cic_lock.sv']
+        scic_obj = obj / 'snes-cic'
+        run('snes-cic-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+            '--top-module', 'tb_snes_cic_lock', '--Mdir', str(scic_obj).replace('\\', '/')] + scic_src)
+        scic_body = run('snes-cic', [str(scic_obj / ('Vtb_snes_cic_lock.exe' if os.name == 'nt' else 'Vtb_snes_cic_lock'))])
+        scic_pass = next((line for line in scic_body.splitlines() if line.startswith('PASS:')), None)
+        if scic_pass is None:
+            raise RuntimeError('SNES CIC lock test exited without its acceptance marker')
+        report['simulation']['snes_cic'] = scic_pass
+        for tag, define in (('no-compare', 'SN64_FAULT_CIC_NO_COMPARE'), ('mangle', 'SN64_FAULT_CIC_MANGLE')):
+            f_obj = obj / ('snes-cic-' + tag)
+            run('snes-cic-' + tag + '-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+                '+define+' + define, '--top-module', 'tb_snes_cic_lock', '--Mdir', str(f_obj).replace('\\', '/')] + scic_src)
+            run('snes-cic-' + tag, [str(f_obj / ('Vtb_snes_cic_lock.exe' if os.name == 'nt' else 'Vtb_snes_cic_lock'))],
+                'FAIL: SNES CIC lock')
+        report['simulation']['injected_snes_cic_fault'] = 'Rejected: disabled compare and altered table update are both detected'
         report['simulation']['limit'] = ('Same master clock in all runs; PAL clocks/video and PPU/APU not qualified; '
                                          'bridge bus model is behavioural (no analog levels or translator delays)')
 

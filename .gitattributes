@@ -37,3 +37,5 @@ fpga/vendor/snestang/** text eol=lf whitespace=-blank-at-eol,-blank-at-eof,-spac
 
 # Preserve vendored SummerCart64 files byte-for-byte (provenance.json records their SHA-256).
 fpga/vendor/summercart64/** -text
+fpga/vendor/snestang-controller/** -text
+fpga/vendor/hdl-util-hdmi/** -text

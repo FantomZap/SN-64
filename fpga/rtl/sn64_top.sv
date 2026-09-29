@@ -22,7 +22,7 @@ module sn64_top #(
     parameter        REGION_TIMEOUT_MS = 300,      // give up waiting for a key CIC
     parameter        SEQ_RESET_HOLD_MS = 20,
     parameter        SEQ_RAIL_TIMEOUT_MS = 50,
-    parameter        CIC_LOCK_CLK_DIV = 7,         // 25 MHz / 7 = 3.571 MHz CIC_CLK
+    parameter        CIC_LOCK_CLK_DIV = 8,         // 25 MHz / 8 = 3.125 MHz CIC_CLK, 50 % duty (key follows the lock's clock)
     parameter        CIC_LOCK_T_PWRUP = 49605      // lock start-up wait (instruction cycles)
 ) (
     input  wire        clk_25, clk_host, clk_snes,
@@ -89,7 +89,7 @@ module sn64_top #(
     // =====================================================================
     wire [15:0] joy1_h, joy2_h, seq_h; wire [7:0] stick_x_h, stick_y_h;
     wire run_req_h, soft_reset_h; wire [1:0] region_mode_h;
-    wire [15:0] status_h;
+    wire [15:0] status_h, fault_h;
     wire n64_cic_invalid_region; wire [3:0] n64_cic_step;
     sn64_n64_endpoint #(.ROM_ADDR_BITS(ROM_ADDR_BITS)) endpoint (
         .clk(clk_host), .reset(!rsthost_n), .cic_cpu_clk(clk_host),
@@ -99,7 +99,7 @@ module sn64_top #(
         .rom_we(rom_we), .rom_waddr(rom_waddr), .rom_wdata(rom_wdata),
         .joy1_buttons(joy1_h), .joy2_buttons(joy2_h), .joy1_stick_x(stick_x_h), .joy1_stick_y(stick_y_h),
         .run_request(run_req_h), .soft_reset(soft_reset_h), .region_mode(region_mode_h), .mailbox_seq(seq_h),
-        .status_flags(status_h), .build_id(BUILD_ID),
+        .status_flags(status_h), .fault_flags(fault_h), .build_id(BUILD_ID),
         .n64_cic_clk(n64_cic_clk), .n64_cic_dq(n64_cic_dq), .n64_si_clk(n64_si_clk), .cic_region(region_pal),
         .cic_invalid_region(n64_cic_invalid_region), .cic_step(n64_cic_step),
         .host_reset_event(), .host_nmi_event());
@@ -148,9 +148,11 @@ module sn64_top #(
     // reports the key's region.
     // =====================================================================
     wire cic_enable = (seq_state >= 4'd3) && (seq_state <= 4'd4);   // IFACE or RUN
+    reg [3:0] seed_counter = 4'd0;                                   // stream-select nibble, sampled at key reset
+    always @(posedge clk_25) seed_counter <= seed_counter + 4'd1;
     sn64_snes_cic_lock #(.CLK_DIV(CIC_LOCK_CLK_DIV), .T_PWRUP(CIC_LOCK_T_PWRUP)) snes_cic (
         .clk(clk_25), .reset_n(rst25_n), .enable(cic_enable), .enforce(1'b0),
-        .default_pal(1'b0), .seed(4'h0),
+        .default_pal(1'b0), .seed(seed_counter),
         .cic_clk(snes_cic_clk), .slave_reset(snes_cic_slave_reset),
         .data0_o(snes_cic_data0_o), .data0_oe(snes_cic_data0_oe), .data0_i(snes_cic_data0_i),
         .data1_o(snes_cic_data1_o), .data1_oe(snes_cic_data1_oe), .data1_i(snes_cic_data1_i),
@@ -222,10 +224,17 @@ module sn64_top #(
     assign cart_reset_pull = seq_reset_pull | !bus_permit;
 
     // =====================================================================
-    // Status word to the N64 mailbox (clk_25 -> clk_host)
-    //   [15:8] fault code  [7:4] sequencer state  [3] PAL  [2] SNES key CIC ok
-    //   [1] Si5351 locked  [0] SNES clock running
+    // Status and fault words to the N64 mailbox (clk_25 -> clk_host).
+    // STATUS layout (shared with firmware/bootstrap/src/sn64_mailbox.h):
+    //   [0] configured (Si5351 locked)  [1] host+FPGA rails ok  [2] cart 5 V ok
+    //   [3] interface rail ok  [4] bus permit  [5] fault latched  [6] run request seen
+    //   [7] PAL  [11:8] power sequencer state  [12] SNES clock running
+    //   [13] SNES key CIC ok  [14] SNES key CIC fail  [15] Si5351 I2C error
+    // FAULT: {fault_code, 8'h00}
     // =====================================================================
-    assign status_word = {fault_code, seq_state, region_pal, cic_key_ok, clocks_ready, snes_clk_run};
+    assign status_word = {i2c_error, cic_key_fail, cic_key_ok, snes_clk_run, seq_state,
+                          region_pal, run_req_25, fault_latched, bus_permit,
+                          iface_rail_ok, cart_5v_ok, host_3v3_ok & fpga_rails_ok, clocks_ready};
     sn64_cdc_word #(.W(16)) x_status (.src_clk(clk_25), .src_data(status_word), .dst_clk(clk_host), .dst_data(status_h));
+    sn64_cdc_word #(.W(16)) x_fault (.src_clk(clk_25), .src_data({fault_code, 8'h00}), .dst_clk(clk_host), .dst_data(fault_h));
 endmodule

@@ -180,7 +180,7 @@ module tb_system;
         // N64 reads STATUS: RUN, Si5351 locked, SNES clock running.
         repeat(200) @(posedge clk_host);
         pi_addr(32'h1FFF_0004); pi_read(d0); pi_end;
-        if (d0[7:4]!==4'd4 || !d0[1] || !d0[0]) $fatal(1,"STATUS wrong: %h", d0);
+        if (d0[11:8]!==4'd4 || !d0[12] || !d0[0] || !d0[4] || !d0[6] || d0[5]) $fatal(1,"STATUS wrong: %h", d0);
         $display("PASS: system power-on: N64 mailbox, ordered cartridge power, Si5351 lock, region decided before the SNES clock, reset release, SNES program from cartridge, controller image via auto-joypad, STATUS=%h", d0);
         $finish;
     end

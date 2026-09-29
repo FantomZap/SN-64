@@ -1,0 +1,23 @@
+{
+  "upstream": "https://github.com/nand2mario/snestang",
+  "upstream_commit": "5f0ef193145f67bded7f73f2c477ac8da4d85f7e",
+  "license": "GPL-3.0 (repository LICENSE, copied unmodified; same commit and license as fpga/vendor/snestang)",
+  "fetched": "2026-09-29 from https://raw.githubusercontent.com/nand2mario/snestang/5f0ef193145f67bded7f73f2c477ac8da4d85f7e/src/controller_adapter.sv",
+  "note": "Unmodified copy of the SNESTang button-image-to-SNES-serial-pad adapter. SN64 uses it through fpga/rtl/sn64_snes_joypad.sv, which fixes the ID nibble, drives the second data line idle (no multitap) and adds an empty-port mode. No vendored file is edited. Kept separate from fpga/vendor/snestang so that directory's provenance record stays untouched.",
+  "files": [
+    {
+      "path": "src/controller_adapter.sv",
+      "upstream_path": "src/controller_adapter.sv",
+      "sha256": "104cb3e913779232640c5db3ecf40944de4af832f0f9ebc36eb91815157e1d13",
+      "bytes": 664,
+      "changes": "none"
+    },
+    {
+      "path": "LICENSE",
+      "upstream_path": "LICENSE",
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986",
+      "bytes": 35149,
+      "changes": "none"
+    }
+  ]
+}

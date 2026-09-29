@@ -39,8 +39,8 @@ module sn64_cdc_word #(parameter W = 16, parameter [W-1:0] INIT = {W{1'b0}}) (
             hold <= src_data;
             req  <= ~req;
         end
-    sn64_sync_bit req_sync (.clk(dst_clk), .d(req), .q(req_s));
     wire req_s;
+    sn64_sync_bit req_sync (.clk(dst_clk), .d(req), .q(req_s));
     // Destination side: capture on a toggle, then acknowledge.
     always @(posedge dst_clk)
         if (req_s != ack) begin

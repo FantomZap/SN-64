@@ -37,7 +37,8 @@ module sn64_n64_endpoint #(
     output reg  [15:0] mailbox_seq,                   // increments on every controller update
 
     // Mailbox: SNES/system -> N64 side
-    input  wire [15:0] status_flags,      // rail/fault/config bits from the power/bridge logic
+    input  wire [15:0] status_flags,      // STATUS layout: docs/design/n64-endpoint-implementation.md
+    input  wire [15:0] fault_flags,       // {fault_code, reserved}
     input  wire [15:0] build_id,
 
     // CIC lockout (vendored SummerCart64 implementation on a SERV soft core)
@@ -126,6 +127,7 @@ module sn64_n64_endpoint #(
     // Mailbox registers (16-bit words at 0x1FFF_0000 + offset)
     //   0x00 SN64_MAGIC     r  0x534E ("SN")      0x02 SN64_VERSION  r  build_id
     //   0x04 STATUS         r  status_flags        0x06 SEQ           r  mailbox_seq
+    //   0x08 FAULT          r  {fault_code, 8'h00} 0x0A reserved      r  0
     //   0x10 JOY1_BUTTONS   w                      0x12 JOY2_BUTTONS  w
     //   0x14 JOY1_STICK     w  {y,x}               0x16 CONTROL       w  bit0 run_request, bit1 soft reset,
     //                                                                        bits3:2 region mode (0 auto, 1 NTSC, 2 PAL)
@@ -160,6 +162,7 @@ module sn64_n64_endpoint #(
             8'h02: cfg_rdata = build_id;
             8'h04: cfg_rdata = status_flags;
             8'h06: cfg_rdata = mailbox_seq;
+            8'h08: cfg_rdata = fault_flags;
             8'h10: cfg_rdata = joy1_buttons;
             8'h12: cfg_rdata = joy2_buttons;
             8'h14: cfg_rdata = {joy1_stick_y, joy1_stick_x};

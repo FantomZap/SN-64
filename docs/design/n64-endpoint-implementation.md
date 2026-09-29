@@ -28,7 +28,8 @@ New SN64 logic:
 |---|---|---|---|
 | `0x00` | MAGIC | r | `0x534E` ("SN") |
 | `0x02` | VERSION | r | `build_id` input |
-| `0x04` | STATUS | r | `status_flags` input: rail/fault/configuration bits from the power and bridge logic |
+| `0x04` | STATUS | r | bit 0 configured (Si5351 locked), 1 host+FPGA rails, 2 cartridge 5 V, 3 interface rail, 4 bus permit, 5 fault latched, 6 run request seen, 7 PAL, 11:8 power-sequencer state, 12 SNES clock running, 13 key CIC ok, 14 key CIC fail, 15 clock-chip error (wired in `sn64_top.sv`) |
+| `0x08` | FAULT | r | `{fault_code, 8'h00}` from the power sequencer; a latched fault clears when CONTROL.run_request is dropped |
 | `0x06` | SEQ | r | increments on every COMMIT |
 | `0x10` | JOY1_BUTTONS | r/w | SNES button image for controller 1 |
 | `0x12` | JOY2_BUTTONS | r/w | SNES button image for controller 2 |
@@ -60,5 +61,5 @@ Limits: the host model's timing is representative, not measured N64 or M64 timin
 1. **CIC lockout.** SummerCart64's CIC runs on a soft RISC-V core with a firmware image; adopting it means vendoring the core (`serv`) and building the image. Without a valid CIC response an original N64 will not boot the cartridge. This is the next endpoint task.
 2. **SI/joybus.** Not needed while the bootstrap reads controllers through the console's own PIF and forwards them through the mailbox; revisit only if EEPROM emulation or direct joybus access becomes necessary.
 3. **/INT** to the host and the exact IRQ electrical mode (see the [host interface notes](n64-interface-notes.md)).
-4. **Bootstrap program** (libdragon): menu, mapping, diagnostics, and the mailbox update loop. The register map above is its contract.
+4. **Bootstrap program:** first version implemented, see [n64-bootstrap.md](n64-bootstrap.md). The N64 CPU accesses these registers only as 32-bit pairs (0x00, 0x04, 0x08, 0x10, 0x14, 0x18); a write to 0x18 also writes 0x1A, which is ignored, so SEQ increments once per COMMIT. The image needs a 64 K-word window (`ROM_ADDR_BITS = 16`); where that ROM lives (block RAM, configuration flash or external RAM) is an open decision in the [integration notes](system-integration.md).
 5. Board-level: 3.3 V I/O bank allocation, host-first/adapter-first power sequencing, and measured PI timing on both consoles.
