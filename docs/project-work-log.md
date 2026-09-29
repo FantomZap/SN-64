@@ -57,6 +57,7 @@ The current [evaluation report](../fpga/reports/evaluation.md) and [JSON snapsho
 - Published the full local development history to GitHub `main` as a fast-forward. Draft PR #1 held the identical file tree under different publication commits, so it was closed as superseded instead of merged.
 - Added [CLAUDE.md](../CLAUDE.md) with working rules and check commands. The user handed project control to Claude and allowed replacing the named software where better-suited tools exist.
 - Current tool assessment: keep KiCad, because PCBWay accepts it directly and every reused upstream board is KiCad. Keep the OSS CAD Suite ECP5 flow. New enclosure geometry may move to code-first build123d with STEP/STL exports, keeping the FreeCAD references. No tool change has been made yet.
+- Recorded a quick [risk assessment](risk-assessment.md). Top risks are power, the video path, real-cartridge timing and BGA board layout. It recommends proving the cartridge path on development hardware before the custom board.
 
 ## Remaining work
 
