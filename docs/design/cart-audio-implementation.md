@@ -103,6 +103,8 @@ The SNESTang default makes the DSP 0.56 % fast. `dsp.vh` keeps the original 4096
 - **Scope of the finding.** The mixer handles it correctly: it is tested at the SNESTang rate (`+snes_rate=32180`). It is still an audible-quality question for MSU-1 music.
 - **Not changed here.** The DSP rate is a core-configuration decision. It also affects `sn64_av_out`, whose HDMI channel status says 32 kHz. See the open items.
 
+**Resolved 2026-09-29.** `fpga/tools/prepare_core.py` now patches the generated core back to the original rate: `ACLK_FREQ = 409600` (the value SNESTang keeps commented out as "original snes frequency") and a CE divider that uses the region's own master clock (`PAL ? 2128137 : 2147727`, as MiSTer `DSP.vhd` line 238 does). The DSP then runs at 4.096 MHz / 128 = **32,000 Hz in both regions**, matching the ADC and the HDMI channel status; the only remaining slips come from crystal tolerance (tens of ppm, a slip every several seconds). The `+snes_rate=32180` bench runs are kept as a stress test of the slip path. The table above records the pinned core's behaviour before the patch. After it, `tb_system` NTSC runs show 0 slips; the PAL runs show about 8 overflow slips per run because the bench's PAL master is 21.04 MHz (chosen for an exact 432/341 pixel ratio), 1.1 % below the real 21.28137 MHz, which makes the simulated DSP 1.1 % slower than the 32 kHz ADC model. That is a bench artefact, not a design rate.
+
 ## Mix, gain and headroom
 
 `out = sat16(snes + cart_scaled)`, where `cart_scaled = (adc × CART_GAIN_Q12) >>> 20`, an arithmetic shift, i.e. floor.

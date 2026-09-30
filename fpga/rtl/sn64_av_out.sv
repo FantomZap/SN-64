@@ -26,8 +26,12 @@
 // SYNC_LINE the SNES side toggles an event; the pixel side compares its raster
 // position with the expected position and, if the error exceeds LOCK_TOL
 // pixels, re-phases the raster at a point inside horizontal active time of a
-// vertical-blanking line (never inside a data island). With the exact clock
-// ratio the error is zero in steady state, so the output is a uniform raster.
+// vertical-blanking line (never inside a data island). The pixel clock is an
+// exact ratio of the master chosen so one HDMI frame equals the mean SNES frame.
+// PAL frames are all 1364 x 312 clocks, so the error stays zero. NTSC
+// non-interlaced frames alternate 357,368 / 357,364 clocks (the V=240 short line
+// every other frame), so the error alternates by 4 x 74932/59561 = 5.03 pixels
+// around a fixed mean; LOCK_TOL = 8 absorbs it and the raster stays uniform.
 module sn64_av_out #(
     parameter int H_ACTIVE = 720,
     // NTSC (pal = 0)
@@ -47,7 +51,7 @@ module sn64_av_out #(
     parameter int PIC_X0 = 104,       // (720 - 512) / 2
     parameter int LEAD_LINES = 3,     // HDMI lines from SNES line start to its first copy
     parameter int SYNC_X = 100,       // raster column at the lock event (HDE offset + CDC)
-    parameter int LOCK_TOL = 2,       // pixels of phase error tolerated without re-phasing
+    parameter int LOCK_TOL = 8,       // pixels of phase error tolerated without re-phasing (NTSC short-line wobble is +-5.03)
     parameter int LOCK_WINDOW = 1024, // |error| at the last event below this reports locked
     parameter real VIDEO_RATE = 27.0198e6,
     parameter bit DVI_OUTPUT = 1'b0

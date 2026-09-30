@@ -12,8 +12,10 @@
 //  - per-region HDMI pixel clock: after start-up only MultiSynth 2 (58-65) and
 //    CLK2 control (18) are ever written, only while the SNES clock is stopped
 //    (no I2C START while it runs), and the resulting MS2 image, decoded with
-//    the AN619 equations, gives pixel/master = 39/31 from PLLA (NTSC) or
-//    108/85 from PLLB (PAL, 2 x 864 pixels per 1360-clock SNES line);
+//    the AN619 equations, gives pixel/master = 74932/59561 from PLLA (NTSC:
+//    one 858 x 524 frame = 357,366 master clocks, the mean of the SNES's
+//    357,368/357,364 frames) or 432/341 from PLLB (PAL, 2 x 864 pixels per
+//    1364-clock SNES line);
 //  - pixel_clock_ready is low from the moment a new region is latched until
 //    CLK2 is reprogrammed, and stays high while the SNES clock runs;
 //  - a sequence interrupted by a (misbehaving) SNES clock start stops at once
@@ -135,7 +137,7 @@ module tb_clock_init;
         fp = fpll * $itor(pd) / $itor(pn);
         $display("  %s: PLL%s %.4f MHz, master %.6f MHz, MS2 = %0d/%0d, pixel %.7f MHz (= master x %0d/%0d), %0.3f pixels per %0d-clock SNES line",
                  pal_region ? "PAL " : "NTSC", regs[18][5] ? "B" : "A", fpll / 1e6, fm / 1e6, pn, pd, fp / 1e6, rn, rd,
-                 fp / fm * (pal_region ? 1360.0 : 1364.0), pal_region ? 1360 : 1364);
+                 fp / fm * 1364.0, 1364);
     endtask
     task automatic check_post_regs(input string when);
         for (integer i = 0; i < n_post; i++)
@@ -174,13 +176,13 @@ module tb_clock_init;
         // MS0 / MS1 divide by 40
         check_reg(45,8'h12); check_reg(43,8'h01); check_reg(53,8'h12); check_reg(51,8'h01);
         // MS2 fractional 31+31/39 (HDMI pixel clock locked to the NTSC master)
-        check_reg(58,8'h00); check_reg(59,8'h27); check_reg(60,8'h00); check_reg(61,8'h0D);
-        check_reg(62,8'hE5); check_reg(63,8'h00); check_reg(64,8'h00); check_reg(65,8'h1D);
+        check_reg(58,8'h49); check_reg(59,8'h2D); check_reg(60,8'h00); check_reg(61,8'h0D);
+        check_reg(62,8'hE5); check_reg(63,8'h00); check_reg(64,8'h34); check_reg(65,8'hBF);
         check_reg(183,8'hD2); check_reg(177,8'hA0); check_reg(16,8'h4F); check_reg(17,8'h6F); check_reg(18,8'h0F); check_reg(3,8'hF8);
         if (status_reads<5) $fatal(1,"did not wait for PLL lock (reads=%0d)",status_reads);
         repeat(3) @(negedge clk);
         if (!pixel_clock_ready || pixel_region_pal) fail("NTSC pixel clock not ready after start-up");
-        check_pixel_clock(1'b0, 39, 31);
+        check_pixel_clock(1'b0, 74932, 59561);
 
         // ---- PAL detected while the SNES clock is stopped ----
         detected_valid=1; detected_pal=1; #1;
@@ -190,11 +192,11 @@ module tb_clock_init;
         if (pixel_clock_ready) fail("pixel_clock_ready high before CLK2 was reprogrammed for PAL");
         wait_ready("NTSC->PAL");
         if (!pixel_region_pal) fail("pixel_region_pal not PAL after the PAL sequence");
-        // PAL MS2 = 31 + 13/27: P1 = 3517 (0x0DBD), P2 = 17, P3 = 27; CLK2 from PLLB
-        check_reg(58,8'h00); check_reg(59,8'h1B); check_reg(60,8'h00); check_reg(61,8'h0D);
-        check_reg(62,8'hBD); check_reg(63,8'h00); check_reg(64,8'h00); check_reg(65,8'h11);
+        // PAL MS2 = 31 + 31/54: P1 = 3529 (0x0DC9), P2 = 26, P3 = 54; CLK2 from PLLB
+        check_reg(58,8'h00); check_reg(59,8'h36); check_reg(60,8'h00); check_reg(61,8'h0D);
+        check_reg(62,8'hC9); check_reg(63,8'h00); check_reg(64,8'h00); check_reg(65,8'h1A);
         check_reg(18,8'h2F);
-        check_pixel_clock(1'b1, 108, 85);
+        check_pixel_clock(1'b1, 432, 341);
         if (n_post != 9) fail($sformatf("%0d writes for the PAL pixel clock, expected 9", n_post));
         check_post_regs("NTSC->PAL");
 
@@ -211,10 +213,10 @@ module tb_clock_init;
         snes_clock_stopped=1; repeat(3) @(negedge clk);
         if (region_pal) $fatal(1,"forced NTSC not applied at next power-up");
         wait_ready("PAL->NTSC");
-        check_reg(58,8'h00); check_reg(59,8'h27); check_reg(60,8'h00); check_reg(61,8'h0D);
-        check_reg(62,8'hE5); check_reg(63,8'h00); check_reg(64,8'h00); check_reg(65,8'h1D);
+        check_reg(58,8'h49); check_reg(59,8'h2D); check_reg(60,8'h00); check_reg(61,8'h0D);
+        check_reg(62,8'hE5); check_reg(63,8'h00); check_reg(64,8'h34); check_reg(65,8'hBF);
         check_reg(18,8'h0F);
-        check_pixel_clock(1'b0, 39, 31);
+        check_pixel_clock(1'b0, 74932, 59561);
         if (n_post != 18) fail($sformatf("%0d post-start-up writes, expected 18", n_post));
 
         // ---- misbehaving top: SNES clock starts in the middle of the PAL sequence ----
@@ -226,8 +228,8 @@ module tb_clock_init;
         if (n_post != 21) fail($sformatf("sequence continued after the SNES clock started (%0d writes, expected 21)", n_post));
         snes_clock_stopped=1;                           // next stopped window: redo in full
         wait_ready("interrupted PAL sequence redone");
-        check_reg(59,8'h1B); check_reg(62,8'hBD); check_reg(65,8'h11); check_reg(18,8'h2F);
-        check_pixel_clock(1'b1, 108, 85);
+        check_reg(59,8'h36); check_reg(62,8'hC9); check_reg(65,8'h1A); check_reg(18,8'h2F);
+        check_pixel_clock(1'b1, 432, 341);
         if (n_post != 30) fail($sformatf("%0d post-start-up writes, expected 30", n_post));
         check_post_regs("final");
         if (starts_running != 0) fail($sformatf("%0d I2C transactions started while the SNES clock ran", starts_running));

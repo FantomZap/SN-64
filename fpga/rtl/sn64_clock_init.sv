@@ -3,8 +3,8 @@
 //
 // Programs the Si5351A over I2C from the 25 MHz housekeeping clock so that
 // CLK0 = 21.4772727 MHz (NTSC SNES master), CLK1 = 21.28137 MHz (PAL) and
-// CLK2 = 27.0197947 MHz (HDMI 480p pixel clock = NTSC master x 39/31, from the
-// same PLLA so the HDMI raster is frequency-locked to the SNES frame), all
+// CLK2 = 27.0199459 MHz (HDMI 480p pixel clock = NTSC master x 74932/59561, from
+// the same PLLA so the HDMI raster is frequency-locked to the SNES frame), all
 // from a 25 MHz crystal, then waits for both PLLs to report lock
 // (register 0: SYS_INIT and LOL_A/LOL_B clear) before asserting `clocks_ready`.
 // Register values are derived in docs/design/clock-plan.md (AN619 formulas).
@@ -22,11 +22,13 @@
 // start-up, whenever the latched region differs from the region CLK2 is
 // programmed for, and only while the SNES clock is stopped, MultiSynth 2
 // (registers 58-65) and CLK2 control (register 18) are rewritten:
-//   NTSC: MS2 = 31 + 31/39 from PLLA -> master x 39/31  = 27.0197947 MHz, reg 18 = 0x0F
-//   PAL:  MS2 = 31 + 13/27 from PLLB -> master x 108/85 = 27.0398584 MHz, reg 18 = 0x2F
-//         (PAL_LINE_MCLK = 1360, the measured SNESTang line; 1364 selects
-//          MS2 = 31 + 31/54 -> master x 432/341 = 26.9605626 MHz for a core
-//          with hardware-length lines)
+//   NTSC: MS2 = 31 + 14887/18733 from PLLA -> master x 74932/59561 = 27.0199459 MHz,
+//         reg 18 = 0x0F. One 858 x 524 HDMI frame = 357,366 master clocks, the
+//         average of the SNES's alternating 357,368 / 357,364 frames (1364-clock
+//         lines; the V=240 short line every other non-interlaced frame).
+//   PAL:  MS2 = 31 + 31/54 from PLLB -> master x 432/341 = 26.9605626 MHz, reg 18 = 0x2F
+//         (864 x 624 = 1364 x 312 master clocks). PAL_LINE_MCLK = 1360 keeps the
+//         old MS2 = 31 + 13/27 (x 108/85) for a core without long dots.
 // No other register is written after start-up: PLLA/PLLB (26-41), MS0/MS1,
 // CLK0/CLK1 control, output enables (3) and PLL reset (177) keep their start-up
 // values, so CLK0/CLK1 are never touched. No PLL reset is issued for an MS2
@@ -41,7 +43,7 @@ module sn64_clock_init #(
     parameter CLK_HZ = 25_000_000,
     parameter I2C_HZ = 400_000,
     parameter [6:0] SI5351_ADDR = 7'h60,
-    parameter PAL_LINE_MCLK = 1360          // SNES PAL line length in master clocks the HDMI raster locks to (1360 or 1364)
+    parameter PAL_LINE_MCLK = 1364          // SNES PAL line length in master clocks the HDMI raster locks to (1364 hardware / 1360 legacy)
 ) (
     input  wire clk,              // 25 MHz housekeeping clock
     input  wire reset_n,
@@ -98,11 +100,11 @@ module sn64_clock_init #(
             31: table_entry = {8'd52, 8'h00}; 32: table_entry = {8'd53, 8'h12};
             33: table_entry = {8'd54, 8'h00}; 34: table_entry = {8'd55, 8'h00};
             35: table_entry = {8'd56, 8'h00}; 36: table_entry = {8'd57, 8'h00};
-            // MS2: fractional 31 + 31/39 from PLLA (P1=3557 P2=29 P3=39) -> 27.0197947 MHz
-            37: table_entry = {8'd58, 8'h00}; 38: table_entry = {8'd59, 8'h27};
+            // MS2: fractional 31 + 14887/18733 from PLLA (P1=3557 P2=13503 P3=18733) -> 27.0199459 MHz
+            37: table_entry = {8'd58, 8'h49}; 38: table_entry = {8'd59, 8'h2D};
             39: table_entry = {8'd60, 8'h00}; 40: table_entry = {8'd61, 8'h0D};
             41: table_entry = {8'd62, 8'hE5}; 42: table_entry = {8'd63, 8'h00};
-            43: table_entry = {8'd64, 8'h00}; 44: table_entry = {8'd65, 8'h1D};
+            43: table_entry = {8'd64, 8'h34}; 44: table_entry = {8'd65, 8'hBF};
             default: table_entry = 16'h0000;
         endcase
     endfunction
@@ -119,9 +121,9 @@ module sn64_clock_init #(
     // MultiSynth 2 register sets (AN619 section 4.1.2: P1 = 128a + floor(128b/c) - 512,
     // P2 = 128b - c*floor(128b/c), P3 = c; registers 58-65 layout per AN619).
     // ------------------------------------------------------------------
-    localparam [17:0] NTSC_MS2_P1 = 18'd3557;   // 31 + 31/39
-    localparam [19:0] NTSC_MS2_P2 = 20'd29;
-    localparam [19:0] NTSC_MS2_P3 = 20'd39;
+    localparam [17:0] NTSC_MS2_P1 = 18'd3557;   // 31 + 14887/18733
+    localparam [19:0] NTSC_MS2_P2 = 20'd13503;
+    localparam [19:0] NTSC_MS2_P3 = 20'd18733;
     localparam [17:0] PAL_MS2_P1 = (PAL_LINE_MCLK == 1364) ? 18'd3529 : 18'd3517;  // 31 + 31/54 : 31 + 13/27
     localparam [19:0] PAL_MS2_P2 = (PAL_LINE_MCLK == 1364) ? 20'd26   : 20'd17;
     localparam [19:0] PAL_MS2_P3 = (PAL_LINE_MCLK == 1364) ? 20'd54   : 20'd27;

@@ -82,12 +82,12 @@ Other eFuse settings:
 
 ## System regulator and FPGA rails
 
-**Interpretation note for the owner.** The architecture lists a "system regulator", 5V_PRE (TPS63070 candidate) and the FPGA rails. This sheet realises the system regulator as U304 TPS63070, with SYS_VIN at 2.7–6 V and forced PWM for ±1 % FB accuracy. U304's regulated 5.00 V output **is** 5V_PRE, and 5V_PRE is also the input to the three FPGA bucks. The reasons:
+**Decision (accepted 2026-09-29).** The architecture lists a "system regulator", 5V_PRE (TPS63070 candidate) and the FPGA rails. This sheet realises the system regulator as U304 TPS63070, with SYS_VIN at 2.7–6 V and forced PWM for ±1 % FB accuracy. U304's regulated 5.00 V output **is** 5V_PRE, and 5V_PRE is also the input to the three FPGA bucks. The reasons:
 
 - The TLV62569's recommended VIN is 2.5–5.5 V, and the USB OVLO band reaches 6.0 V.
 - FPGA_3V3 cannot be regulated by a buck from a 3.0 V host input.
 
-The cost is one extra conversion stage on the FPGA power. If the owner prefers the bucks to run directly from SYS_VIN, FPGA_3V3 needs a buck-boost and the USB OVLO must be cut to ≤5.35 V. This affects only the "SYS → FPGA regulators" arrow; no recorded decision is changed.
+The cost is one extra conversion stage on the FPGA power. Running the bucks directly from SYS_VIN would need a buck-boost for FPGA_3V3 and a USB OVLO cut to ≤5.35 V, so the 5V_PRE feed is kept. This refines only the "SYS → FPGA regulators" arrow of the architecture; no recorded decision is changed.
 
 | Rail | Regulator | Feedback (R1/R2, 0.1 %) | Nominal | Worst case with VFB tolerance | ECP5 requirement (FPGA-DS-02012-3.4 Table 3.2) |
 |---|---|---|---|---|---|

@@ -30,6 +30,7 @@ Every target in the original specification remains in scope, including PAL, prot
 - [N64 bootstrap menu ROM](docs/design/n64-bootstrap.md)
 - [Integrated top level and system simulation](docs/design/system-integration.md)
 - [Bootstrap ROM window from the configuration flash](docs/design/bootrom-flash.md)
+- [Mechanical architecture: board arrangement, insertion depths, region-free opening](docs/design/mechanical-architecture.md)
 - [ROM-header region fallback](docs/design/header-region-probe.md)
 - [HDMI and audio output](docs/design/av-output-implementation.md)
 - [Cartridge analog audio into HDMI](docs/design/cart-audio-implementation.md)

@@ -176,9 +176,24 @@ This record does not change the NTSC decision. The owner has two options:
 1. Program NTSC MS2 = 40 × 340/429 = 31 + 301/429 (P1 3545, P2 347, P3 429; registers `01 AD 00 0D D9 00 01 5B`). That gives 27.0992647 MHz (+0.368 %) and locks to the current core at 60.275238 Hz.
 2. Give the core hardware-length lines (fix the long-dot condition through `prepare_core.py`, which also changes CPU/PPU timing towards real hardware). The 39/31 decision is then exact, and PAL switches to `PAL_LINE_MCLK = 1364`.
 
+### Resolution (2026-09-29): long dots restored, NTSC ratio set to the mean frame
+
+**Root cause.** The SNESTang Verilog port reads `else if (H_CNT == 323 && H_CNT == 327)` (`src/ppu.v:261`, still the same on SNESTang master). That condition can never be true, so no dot is ever 6 clocks. The MiSTer original it was ported from, `SNES_MiSTer rtl/PPU.vhd` at commit `c61bfd45171c62000417333cd4679890bcd091a6` (SHA-256 `03d0a9583fa87c35a19e10dadc0f8bf92eb3649ccdf5a605294e024455388725`, lines 323-324), reads `elsif H_CNT = 323 or H_CNT = 327 then DOT_CYCLES := "110"`. It is a translation error, not a simplification. The core therefore ran every line 4 clocks short and every frame about 0.3 % fast (60.27 Hz instead of 60.10 Hz), and scanline-timed behaviour (H-IRQ position, HDMA timing relative to the line) differed from hardware.
+
+**Fix (option 2 above).** `fpga/tools/prepare_core.py` patches the generated copy to `H_CNT == 323 || H_CNT == 327`; the vendored source is unchanged. Measured with the prepared core after the patch:
+
+- NTSC: frames alternate **357,368 / 357,364** master clocks (262 lines of 1364; the V=240 line is 1360 in every other non-interlaced frame, the hardware short line). Line min/max 1360/1364.
+- PAL: every frame **425,568** master clocks (312 × 1364).
+
+**NTSC pixel clock, refined.** 39/31 makes one HDMI frame equal the *long* NTSC frame (357,368), so with the short line the raster would still drift 2 master clocks (about 2.5 pixels) per frame and re-phase every few frames. The pixel clock is now chosen so one 858 × 524 frame equals the **mean** SNES frame, 357,366 master clocks: pixel/master = 449,592 / 357,366 = **74932/59561**, i.e. MS2 = 40 × 59561/74932 = **31 + 14887/18733** from PLLA (P1 3557, P2 13503, P3 18733; registers 58-65 `49 2D 00 0D E5 00 34 BF`), **27.0199459 MHz**, 5.6 ppm above the old 27.0197947 MHz. The lock error then alternates by 4 × 74932/59561 = 5.03 pixels around a fixed mean, so `sn64_av_out` `LOCK_TOL` is raised from 2 to 8 pixels and the raster never re-phases after start-up. The 4-line ring buffer has thousands of pixels of slack, so a 5-pixel wobble is harmless. Interlaced modes (262/263 lines alternating) still re-phase; few games use them.
+
+**PAL.** `PAL_LINE_MCLK` now defaults to 1364: MS2 = 31 + 31/54 from PLLB (registers `00 36 00 0D C9 00 00 1A`), pixel = master × 432/341 = **26.9605626 MHz**, frame 50.006979 Hz (hardware rate), no wobble.
+
+Evidence: `tb_clock_init` checks both register images and decodes the exact ratios; `tb_av_out` models the NTSC short line and the new ratio; `tb_system` runs with exact clock ratios (1 fs time precision) and now checks frame lock in NTSC as well as PAL.
+
 ### Still to check on hardware
 
 - CLK0/CLK1 continuity during an MS2 rewrite.
 - ECP5 TMDS PLL behaviour on the CLK2 frequency step (its LOCK also holds the HDMI domain in reset).
 - TMDS eye at 135.2 MHz.
-- Display and capture acceptance of 864 × 624 at 50.154 Hz.
+- Display and capture acceptance of 864 × 624 at 50.007 Hz.

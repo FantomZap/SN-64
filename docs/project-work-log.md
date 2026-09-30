@@ -118,6 +118,14 @@ Built by parallel helper agents with self-checking and fault-injection tests, th
 - **Simulation suite:** `evaluate.py --mode sim` exit 0 with 86 recorded commands; all 23 non-zero exits are the intended fault injections.
 - Open: board-level I/O timing, footprints left empty on purpose (eFuse, TPS63070, inductors, J701 -111RLF variant), PCB/SI/PDN, `sn64_pnr_wrap.sv` still lacks the ADC ports, license notes in `hardware/sn64/THIRD_PARTY.md` for the new ULX3S facts.
 
+## 2026-09-29 — Two SNES core timing bugs fixed; HDMI locks in NTSC
+
+- **Long dots (video timing).** The SNESTang Verilog port turned MiSTer's `H_CNT = 323 or H_CNT = 327` into `H_CNT == 323 && H_CNT == 327`, which is never true. Every scanline was 1360 master clocks instead of hardware's 1364, so the console ran about 0.3 % fast (60.27 Hz instead of 60.10 Hz) and scanline-timed behaviour differed from a real SNES. The bug is still on SNESTang master. `prepare_core.py` now patches the generated copy; measured afterwards: NTSC frames alternate 357,368 / 357,364 clocks (hardware short line), PAL frames are 425,568.
+- **Audio rate.** SNESTang raised the S-DSP clock-enable target by 0.5625 % (`ACLK_FREQ 411904`, the original 409600 kept commented out) and divided by the NTSC master even in PAL. The DSP ran at 32,179.96 Hz (NTSC) / 31,886.43 Hz (PAL). Patched back to MiSTer behaviour: 32,000 Hz in both regions, so pitch and tempo are right and the 32 kHz cartridge-audio ADC almost never slips.
+- **HDMI pixel clocks.** NTSC MS2 = 31 + 14887/18733 (27.0199459 MHz): one 858 x 524 frame equals the mean SNES frame, so the raster never re-phases; `LOCK_TOL` 2 -> 8 pixels absorbs the ±5-pixel short-line wobble. PAL MS2 = 31 + 31/54 (26.9605626 MHz, 50.007 Hz). `tb_system` now checks frame lock in NTSC too, with exact clock ratios.
+- **Power/schematic decisions closed.** `efuse_fault_n` pulled up to FPGA_3V3 (a 5V_PRE divider would back-drive a non-hot-socket ECP5 bank, DS-02012 section 3.6); cartridge enable pull-ups 10k -> 4.7k (ECP5 configuration-time pull-down up to 150 µA, Table 3.7); FPGA bucks fed from 5V_PRE accepted (a buck cannot make 3.3 V from the host's 3.3 V).
+- Sources: MiSTer `SNES_MiSTer` commit `c61bfd45171c62000417333cd4679890bcd091a6` (`rtl/PPU.vhd` lines 323-324, `rtl/DSP.vhd` lines 238-247).
+
 ## Remaining work
 
 Select and validate the FPGA/storage and physical-cartridge bridge, complete system/cartridge power and protection, N64 endpoint, controller/firmware functions, clocks, A/V and diagnostics. Retain PAL and the required M64 single-HDMI target; its supported integration mechanism remains unresolved. Complete PCB placement/routing and the FreeCAD enclosure, then perform electrical, programming, compatibility and fit tests on prototypes before producing a PCBWay release. No working SN 64 hardware or fabrication-ready package exists yet.

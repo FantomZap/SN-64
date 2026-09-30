@@ -15,13 +15,15 @@
 //     VIC / picture aspect / checksum, ACR N/CTS, and audio sample continuity
 //     (every SNES sample recovered, in order)
 //   - frame lock: after the start-up lock and one overscan change, every
-//     lock event is within +-2 pixels and needs no re-phase
+//     lock event is within +-LOCK_TOL (8) pixels and needs no re-phase
 //
 // Regions:
-//   default          NTSC: 1364 master clocks x 262 lines, pixel = master x 39/31,
-//                    858 x 524 raster, VIC 2 (the recorded NTSC decision)
-//   SN64_TB_PAL      PAL:  1360 master clocks x 312 lines (the SNESTang core's
-//                    measured PAL line and frame), pixel = master x 108/85,
+//   default          NTSC: 1364 master clocks x 262 lines, with the V=240 line
+//                    1360 clocks in every other frame (hardware short line), pixel =
+//                    master x 74932/59561 (one HDMI frame = the mean SNES frame),
+//                    858 x 524 raster, VIC 2
+//   SN64_TB_PAL      PAL:  1364 master clocks x 312 lines (hardware and the core
+//                    with long dots restored), pixel = master x 432/341,
 //                    864 x 624 raster, VIC 17, picture aspect 4:3
 //   SN64_TB_ASYNC_27M NTSC timing with an independent 27.000 MHz pixel clock
 //
@@ -38,15 +40,15 @@ module tb_av_out;
     localparam bit PAL = 1;
     localparam int H_TOTAL = 864, V_TOTAL = 624, V_ACTIVE = 576;
     localparam int HS_W = 64, VS_LINES = 5, V_CENTER = 288;
-    localparam int SNES_LINE = 1360, SNES_LINES = 312;
+    localparam int SNES_LINE = 1364, SNES_LINES = 312;
     localparam int EXP_VIC = 17;
     localparam [1:0] EXP_ASPECT = 2'b01;          // 4:3
-    // pixel = master x 108/85
-    localparam int MH = 108, PH = 85, XH = 17, SO = 8;
-    // CTS = pixel clocks per 32 samples = (108/85) x 32 x 21477273/32000 = 27288.99
-    localparam int CTS_LO = 27287, CTS_HI = 27291;
+    // pixel = master x 432/341
+    localparam int MH = 2160, PH = 1705, XH = 341, SO = 170;
+    // CTS = pixel clocks per 32 samples = (432/341) x 32 x 21477273/32000 = 27208.7
+    localparam int CTS_LO = 27207, CTS_HI = 27211;
     localparam bit ASYNC = 0;
-    localparam string CLOCKING = "PAL, pixel = master*108/85";
+    localparam string CLOCKING = "PAL, pixel = master*432/341";
 `else
     localparam bit PAL = 0;
     localparam int H_TOTAL = 858, V_TOTAL = 524, V_ACTIVE = 480;
@@ -63,11 +65,11 @@ module tb_av_out;
     localparam bit ASYNC = 1;
     localparam string CLOCKING = "async 27.000 MHz";
 `else
-    // Intended clocking: pixel clock = master * 39/31 from the master clock.
-    localparam int MH = 195, PH = 155, XH = 31, SO = 15;
+    // Intended clocking: pixel clock = master * 74932/59561 from the master clock.
+    localparam int MH = 374660, PH = 297805, XH = 59561, SO = 29780;
     localparam int CTS_LO = 27018, CTS_HI = 27021;
     localparam bit ASYNC = 0;
-    localparam string CLOCKING = "pixel = master*39/31";
+    localparam string CLOCKING = "pixel = master*74932/59561";
 `endif
 `endif
     reg clk_snes = 0, clk_pixel = 0, clk_x5 = 0, clk_samp = 0;
@@ -122,7 +124,8 @@ module tb_av_out;
                 samples_sent++;
             end
             h++;
-            if (h == SNES_LINE) begin
+            // NTSC hardware short line: V=240 is 1360 clocks in every other frame
+            if (h == ((!PAL && v == 240 && frame[0]) ? SNES_LINE - 4 : SNES_LINE)) begin
                 h = 0;
                 v++;
                 if (v == SNES_LINES) begin
@@ -475,7 +478,7 @@ module tb_av_out;
                 // lock_error updates on the next clock; sample it then
                 @(posedge clk_pixel);
                 steady_lock_samples++;
-                if (lock_error > 2 || lock_error < -2) steady_lock_bad++;
+                if (lock_error > 8 || lock_error < -8) steady_lock_bad++;
             end
         end
     end

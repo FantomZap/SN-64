@@ -5,6 +5,9 @@ cannot emit its debug print tasks, so generated copies replace those statements
 with null statements. Generated SNES.v also exports the CPU PHI2 and video-mode
 signals, preserves raw cartridge addresses, and ties the upstream open TURBO
 input low for normal SNES CPU timing.
+Two SNESTang deviations from the MiSTer original are corrected: the PPU long
+dots (hardware-length 1364-clock lines) and the S-DSP rate (32,000 Hz in both
+regions); see docs/design/clock-plan.md and docs/design/cart-audio-implementation.md.
 The vendored upstream source remains unchanged; every patch is recorded below.
 """
 from pathlib import Path
@@ -47,6 +50,29 @@ def prepare():
             text = text.replace('output reg [23:0] CA,', 'output [23:0] RAW_CA,\n    output reg [23:0] CA,')
             text = text.replace('assign INT_A = ', 'assign RAW_CA = INT_A;\n\nassign INT_A = ')
             patches = ['export CPU/DMA/HDMA selected address before WRAM mirror canonicalization']
+        if rel == 'src/ppu.v':
+            # Long dots: the Verilog port reads "H_CNT == 323 && H_CNT == 327", which is never
+            # true, so every line is 340 x 4 = 1360 master clocks. The MiSTer original
+            # (SNES_MiSTer rtl/PPU.vhd, commit c61bfd45, lines 323-324) has
+            # "H_CNT = 323 or H_CNT = 327" -> 6 clocks, giving hardware-length 1364-clock lines
+            # (the NTSC short line at V=240 stays 1360). See docs/design/clock-plan.md.
+            assert text.count('else if (H_CNT == 323 && H_CNT == 327)') == 1
+            text = text.replace('else if (H_CNT == 323 && H_CNT == 327)', 'else if (H_CNT == 323 || H_CNT == 327)')
+            patches = ['restore MiSTer long dots (H_CNT 323/327 = 6 clocks): 1364-clock lines']
+        if rel == 'src/dsp.vh':
+            # SNESTang raised the APU clock-enable target to 536.33 samples/frame (+0.5625 %,
+            # 32,180 Hz). Restore the original S-DSP rate it keeps commented out beside it
+            # ("409600 original snes frequency"): 4.096 MHz CE / 128 = 32,000 Hz.
+            assert text.count('parameter ACLK_FREQ = 411904;') == 1
+            text = text.replace('parameter ACLK_FREQ = 411904;', 'parameter ACLK_FREQ = 409600;')
+            patches = ['restore original S-DSP rate: ACLK_FREQ 409600 (32,000 Hz)']
+        if rel == 'src/dsp.v':
+            # The CE generator always divides by the NTSC master, so PAL audio ran 0.91 % slow
+            # relative to NTSC (31,886 Hz). MiSTer DSP.vhd line 238 selects the region's master
+            # (MCLK_PAL_FREQ / MCLK_NTSC_FREQ); SNESTang's dsp.vh keeps the same two constants.
+            assert text.count('.IN_CLK(2147730),') == 1
+            text = text.replace('.IN_CLK(2147730),', ".IN_CLK(PAL ? 32'd2128137 : 32'd2147727),")
+            patches = ['APU CE divides by the region master (MiSTer): 32,000 Hz in NTSC and PAL']
         out = target / rel
         out.parent.mkdir(parents=True, exist_ok=True)
         out.write_text(text, encoding='utf-8', newline='\n')

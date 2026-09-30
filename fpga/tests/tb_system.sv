@@ -1,4 +1,4 @@
-`timescale 1ns/1ps
+`timescale 1ns/1fs
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Whole-system power-on simulation of sn64_top.
 //
@@ -33,8 +33,8 @@
 // Clocks: the SNES master follows region_pal (CLK0 NTSC / CLK1 PAL) and the
 // HDMI pixel clock follows the CLK2 source the FPGA programmed into the
 // Si5351 model (PLLA NTSC 39/31, PLLB PAL 108/85; docs/design/clock-plan.md,
-// "PAL HDMI"). HDMI frame lock is checked for PAL and only reported for NTSC
-// (the recorded NTSC ratio assumes 1364-clock lines; the core's are 1360).
+// "PAL HDMI"). HDMI frame lock is checked in both regions: the core has
+// hardware-length lines (long dots restored in prepare_core.py).
 module tb_system;
     // ---------------- Clocks ----------------
     reg clk_25=0, clk_host=0, clk_snes=0;
@@ -44,11 +44,12 @@ module tb_system;
     // HDMI clocks follow what the FPGA programmed into the Si5351 model below:
     // CLK2 from PLLA (reg 18 = 0x0F): 27.0198 MHz; from PLLB (0x2F): PAL pixel.
     // clk_pixel is clk_pixel_x5 / 5 (the ECP5 PLL x5 is locked to CLK2).
-    // PAL half periods use one time unit u = 0.217 ns: master 108u, pixel 85u,
-    // x5 17u, so pixel/master = 108/85 exactly (21.335 / 27.107 MHz in simulation).
+    // Exact ratios (fs precision): NTSC master 374660u, x5 59561u (pixel 297805u),
+    // u = 62 fs, so pixel/master = 74932/59561; PAL master 2160v, x5 341v, v = 11 ps,
+    // so pixel/master = 432/341 (21.52 / 27.08 MHz and 21.04 / 26.66 MHz in simulation).
     wire si_clk2_pal;
     // verilator lint_off ZERODLY
-    always #(si_clk2_pal ? 3.689 : 3.701) clk_pixel_x5 = ~clk_pixel_x5;  // 5x TMDS
+    always #(si_clk2_pal ? 3.751 : 3.692782) clk_pixel_x5 = ~clk_pixel_x5;  // 5x TMDS
     // verilator lint_on ZERODLY
     integer x5_edges = 0;
     always @(posedge clk_pixel_x5 or negedge clk_pixel_x5) begin
@@ -57,7 +58,7 @@ module tb_system;
     end
     wire snes_clk_run;
     // verilator lint_off ZERODLY
-    always #(dut.region_pal ? 23.436 : 23.28) clk_snes = snes_clk_run ? ~clk_snes : 1'b0;   // Si5351 CLK1 (PAL) / CLK0 (NTSC) master, gated by the board
+    always #(dut.region_pal ? 23.76 : 23.22892) clk_snes = snes_clk_run ? ~clk_snes : 1'b0;   // Si5351 CLK1 (PAL) / CLK0 (NTSC) master, gated by the board
     // verilator lint_on ZERODLY
     reg por_n=0;
 
@@ -342,8 +343,9 @@ module tb_system;
             // control for the region (clock-plan.md, PAL HDMI), CLK2 on the master's PLL.
             if (!dut.pixel_clock_ready || dut.pixel_region_pal !== region_pal)
                 $fatal(1,"SNES clock started before the pixel clock was programmed for the region");
-            if (region_pal ? (si_regs[18] !== 8'h2F || si_regs[59] !== 8'h1B || si_regs[62] !== 8'hBD || si_regs[65] !== 8'h11)
-                           : (si_regs[18] !== 8'h0F || si_regs[59] !== 8'h27 || si_regs[62] !== 8'hE5 || si_regs[65] !== 8'h1D))
+            // PAL MS2 = 31 + 31/54 (59 = 36, 62 = C9, 65 = 1A); NTSC MS2 = 31 + 14887/18733 (58 = 49, 59 = 2D, 64 = 34, 65 = BF)
+            if (region_pal ? (si_regs[18] !== 8'h2F || si_regs[59] !== 8'h36 || si_regs[62] !== 8'hC9 || si_regs[65] !== 8'h1A)
+                           : (si_regs[18] !== 8'h0F || si_regs[58] !== 8'h49 || si_regs[59] !== 8'h2D || si_regs[64] !== 8'h34 || si_regs[65] !== 8'hBF))
                 $fatal(1,"Si5351 CLK2/MS2 not programmed for %s at SNES clock start (reg18=%h)", region_pal ? "PAL" : "NTSC", si_regs[18]);
         end
         if (snes_clk_run && region_pal !== pal_at_start) $fatal(1,"region changed while the SNES clock runs");
@@ -359,7 +361,7 @@ module tb_system;
         if (av_events < 16) av_err[av_events] = dut.av.lock_error;
         av_events = av_events + 1;
     end
-    function automatic bit av_small(input integer e); return e <= 2 && e >= -2; endfunction
+    function automatic bit av_small(input integer e); return e <= 8 && e >= -8; endfunction   // sn64_av_out LOCK_TOL
 
     // ---------------- N64 PI tasks ----------------
     task pi_addr(input [31:0] x); begin
@@ -469,19 +471,14 @@ module tb_system;
         disable fork;
         if (dut.av.mode_pal !== region_pal) $fatal(1,"HDMI raster mode %0d does not match the region", dut.av.mode_pal);
         if (av_events < 4) $fatal(1,"HDMI: only %0d lock events", av_events);
-        // PAL: pixel = master x 108/85 must frame-lock the 864x624 raster to the core's 1360 x 312 frame
-        // (one start-up re-phase, then every event within +-2 px). NTSC is reported, not checked here:
-        // the recorded 39/31 ratio assumes 1364-clock lines and the core's lines are 1360 clocks
-        // (docs/design/clock-plan.md, "PAL HDMI"), so the NTSC raster re-phases every frame.
-        if (region_pal && (!dut.av_locked || dut.av.rephase_count != 1 || !av_small(av_err[1]) || !av_small(av_err[2]) || !av_small(av_err[3])))
-            $fatal(1,"HDMI PAL raster not frame-locked to the SNES frame (lock errors %0d %0d %0d, %0d re-phases)",
-                   av_err[1], av_err[2], av_err[3], dut.av.rephase_count);
-        if (region_pal)
-            $display("HDMI: raster 864x624 VIC 17 frame-locked, %0d lock events, lock errors %0d %0d %0d %0d px, %0d re-phases, locked %0d, Si5351 writes %0d",
-                     av_events, av_err[0], av_err[1], av_err[2], av_err[3], dut.av.rephase_count, dut.av_locked, si_writes);
-        else
-            $display("HDMI: raster 858x524 VIC 2, %0d lock events, lock errors %0d %0d %0d %0d px, %0d re-phases, locked %0d, Si5351 writes %0d (NTSC lock not checked, see clock-plan.md PAL HDMI)",
-                     av_events, av_err[0], av_err[1], av_err[2], av_err[3], dut.av.rephase_count, dut.av_locked, si_writes);
+        // Both regions: the raster must frame-lock to the SNES frame (one start-up
+        // re-phase, then every event within LOCK_TOL). NTSC events alternate by ~5 px
+        // (the V=240 short line every other frame) around a fixed mean.
+        if (!dut.av_locked || dut.av.rephase_count != 1 || !av_small(av_err[1]) || !av_small(av_err[2]) || !av_small(av_err[3]))
+            $fatal(1,"HDMI %s raster not frame-locked to the SNES frame (lock errors %0d %0d %0d, %0d re-phases)",
+                   region_pal ? "PAL" : "NTSC", av_err[1], av_err[2], av_err[3], dut.av.rephase_count);
+        $display("HDMI: raster %s frame-locked, %0d lock events, lock errors %0d %0d %0d %0d px, %0d re-phases, locked %0d, Si5351 writes %0d",
+                 region_pal ? "864x624 VIC 17" : "858x524 VIC 2", av_events, av_err[0], av_err[1], av_err[2], av_err[3], dut.av.rephase_count, dut.av_locked, si_writes);
         $display("PASS: system power-on: N64 mailbox, ordered cartridge power, Si5351 lock, region decided before the SNES clock (%s via %s), reset release, SNES program from cartridge, controller image via auto-joypad, cartridge audio mixed (%0d samples), STATUS=%h REGION_INFO=%h REGION_SOURCE=%h",
                  exp_region_s, exp_src_s, audio_mixed, d0, d1, d2);
         $finish;
