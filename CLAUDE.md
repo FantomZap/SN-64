@@ -16,7 +16,7 @@ Original carts, Super EverDrive X5/X6 and FXPAK Pro are first-class targets. Man
 | Area | What exists | Where |
 |---|---|---|
 | FPGA | Whole design (SNES core, cartridge bridge, N64 endpoint + CIC, SNES CIC lock, ROM-header region probe, power sequencer, Si5351 start-up, console video path (frame/audio window), cartridge audio, flash boot ROM) in `sn64_board_top`; full simulation suite passes; routed on the 85F with the real pinout, all clocks pass | `fpga/` |
-| KiCad | Complete schematic draft: N64 edge J1, SNES socket J2, USB-C programmer, cartridge interface (rev 0.3.1), FPGA with real pinout, power, clock/audio sheets (HDMI output removed 2026-09-29); all static checks pass. **PCB: placed draft from the netlist, nothing routed.** | `hardware/sn64/` |
+| KiCad | Complete schematic draft: N64 edge J1, SNES socket J2, USB-C programmer, cartridge interface (rev 0.3.1), FPGA with real pinout, power, clock/audio sheets (HDMI output removed 2026-09-29); all static checks pass. **PCB: first autorouted draft (2026-09-30): fan-out, planes, ~80 % of signals; 75 nets and 219 plane pads still open, no DRC shorts; see `docs/design/pcb-routing.md`. `build_main_pcb.py --force` discards the routing.** | `hardware/sn64/` |
 | Mechanical | FreeCAD fit references: SNES hole-pattern coupon, SummerCart64 N64 board reference. No enclosure. | `mechanical/` |
 
 ## Decisions the user has made (keep them)
@@ -85,5 +85,6 @@ Baselines (2026-09-29, after the HDMI removal; all five child sheets attached): 
    - (`docs/design/power-architecture.md`)
 4. Add bridge and host logic to the synthesis/route evaluation, then fix the FPGA package, pins and memory.
 5. Complete the protected schematic, then PCB layout (six layers preferred to evaluate), then the FreeCAD enclosure with the side USB-C opening, then the PCBWay prototype package.
+6. **PCB routing, next steps:** loosen the translator row (the congested area), finish the 75 open nets and 219 plane pads by hand in KiCad or with KiCadRoutingTools (`C:\Users\RyanB\Tools\KiCadRoutingTools`, venv `C:\Users\RyanB\Tools\krt-venv`; pin it with `hardware/sn64/tools/fab-pcbway.txt`), settle PCBWay annular ring (6 mil) and spacing (5 mil) against the board's 0.125 / 0.1 mm rules with the quote. Freerouting is the fallback, not the default.
 
 Key docs: `README.md` (index), `docs/architecture.md`, `docs/superpowers/plans/2026-09-28-sn64-engineering-plan.md`, `docs/project-work-log.md`, `fpga/README.md`, `hardware/sn64/README.md`, `mechanical/README.md`.

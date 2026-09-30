@@ -66,10 +66,12 @@ def main():
     idx = Index()
     same_net_vias = defaultdict(list)
     # Obstacles in mm: ('pad', x0, y0, x1, y1, net), ('via', x, y, net, dia), ('trk', ax, ay, bx, by, net, w)
+    ALL = None   # layer tag meaning "every copper layer" (through vias, THT pads)
     for fp in board.GetFootprints():
         for p in fp.Pads():
             bb = p.GetBoundingBox()
-            it = ('pad', bb.GetLeft() / 1e6, bb.GetTop() / 1e6, bb.GetRight() / 1e6, bb.GetBottom() / 1e6, p.GetNetCode())
+            lay = ALL if p.GetAttribute() == pcbnew.PAD_ATTRIB_PTH else (pcbnew.F_Cu if p.IsOnLayer(pcbnew.F_Cu) else pcbnew.B_Cu)
+            it = ('pad', bb.GetLeft() / 1e6, bb.GetTop() / 1e6, bb.GetRight() / 1e6, bb.GetBottom() / 1e6, p.GetNetCode(), lay)
             idx.add(it[1], it[2], it[3], it[4], it)
     for t in board.GetTracks():
         if t.GetClass() == 'PCB_VIA':
@@ -79,7 +81,7 @@ def main():
             same_net_vias[t.GetNetCode()].append((x, y))
         else:
             ax, ay, bx, by = t.GetStart().x / 1e6, t.GetStart().y / 1e6, t.GetEnd().x / 1e6, t.GetEnd().y / 1e6
-            it = ('trk', ax, ay, bx, by, t.GetNetCode(), t.GetWidth() / 1e6)
+            it = ('trk', ax, ay, bx, by, t.GetNetCode(), t.GetWidth() / 1e6, t.GetLayer())
             idx.add(min(ax, bx) - 0.3, min(ay, by) - 0.3, max(ax, bx) + 0.3, max(ay, by) + 0.3, it)
 
     r_cu, r_hole = VIA_D / 2, VIA_DRILL / 2
@@ -92,7 +94,8 @@ def main():
     edge_segs = [ch.CSegment(k) for ch in edge_chains for k in range(ch.SegmentCount())]
     EDGE_KEEP = mm(0.55)   # via copper radius 0.225 + 0.3 copper-to-edge
 
-    def free(x, y, net):
+    def free(x, y, net, layer=ALL):
+        """layer=ALL: a via spot (copper on every layer matters); layer=F_Cu/B_Cu: a stub point on that layer."""
         pt = V(mm(x), mm(y))
         if not outline.Contains(pt):
             return False
@@ -104,16 +107,24 @@ def main():
                 return False
         for it in idx.near(x, y):
             if it[0] == 'pad':
-                _, x0, y0, x1, y1, n = it
+                _, x0, y0, x1, y1, n, lay = it
+                if layer is not ALL and lay is not ALL and lay != layer:
+                    continue
                 d = math.hypot(max(x0 - x, 0, x - x1), max(y0 - y, 0, y - y1))
-                if (n != net and d < need_other) or (n == net and d < 0.05):
+                if n == net:
+                    if layer is ALL and d < 0.05:     # a via must not sit on a same-net pad; a stub may cross its own pad
+                        return False
+                    continue
+                if d < need_other:
                     return False
             elif it[0] == 'via':
                 _, vx, vy, n, w = it
                 if math.hypot(vx - x, vy - y) < r_cu + w / 2 + (CLEAR if n == net else HOLE_CLEAR) + 0.05:
                     return False
             else:
-                _, ax, ay, bx, by, n, w = it
+                _, ax, ay, bx, by, n, w, lay = it
+                if layer is not ALL and lay != layer:
+                    continue
                 d = seg_dist(x, y, ax, ay, bx, by) - w / 2
                 if (n != net and d < need_other) or (n == net and d < r_cu):
                     return False
@@ -133,13 +144,19 @@ def main():
             hw, hh = bb.GetWidth() / 2e6, bb.GetHeight() / 2e6
             placed = False
             # The N64 edge fingers (J1) sit inside the finger keep-out: their vias go further up the board.
-            dists = (0.7, 0.85, 1.0, 1.2) if fp.GetReference() != 'J1' else (1.5, 2.0, 2.5, 3.0, 3.5)
+            # Nearest spots first; on a routed board the stub may have to reach a few mm (a longer
+            # decoupling stub is a compromise to fix by hand later, an open pad is not usable at all).
+            dists = (0.7, 0.85, 1.0, 1.2, 1.6, 2.0, 2.5, 3.0) if fp.GetReference() != 'J1' else (1.5, 2.0, 2.5, 3.0, 3.5)
             for dist in dists:
                 for ang in (0, 180, 90, 270, 45, 135, 225, 315):
                     r = math.radians(ang)
                     x = px + math.cos(r) * (dist + hw * abs(math.cos(r)))
                     y = py + math.sin(r) * (dist + hh * abs(math.sin(r)))
-                    if not free(x, y, codes[net]) or not free((px + x) / 2, (py + y) / 2, codes[net]):
+                    if not free(x, y, codes[net]):
+                        continue
+                    n_pts = max(3, int(math.hypot(x - px, y - py) / 0.15))     # sample the stub every 0.15 mm
+                    if any(not free(px + (x - px) * f, py + (y - py) * f, codes[net], layer)
+                           for f in (k / n_pts for k in range(1, n_pts))):
                         continue
                     via = pcbnew.PCB_VIA(board)
                     via.SetViaType(pcbnew.VIATYPE_THROUGH)
@@ -153,7 +170,7 @@ def main():
                     board.Add(t)
                     it = ('via', x, y, codes[net], VIA_D)
                     idx.add(x - 0.3, y - 0.3, x + 0.3, y + 0.3, it)
-                    it2 = ('trk', px, py, x, y, codes[net], STUB_W)
+                    it2 = ('trk', px, py, x, y, codes[net], STUB_W, layer)
                     idx.add(min(px, x) - 0.3, min(py, y) - 0.3, max(px, x) + 0.3, max(py, y) + 0.3, it2)
                     same_net_vias[codes[net]].append((x, y))
                     added += 1
