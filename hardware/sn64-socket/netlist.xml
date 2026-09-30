@@ -1,0 +1,721 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<export version="E">
+  <design>
+    <source>C:\Users\RyanB\.claude\projects\SN64\hardware\sn64-socket\sn64-socket.kicad_sch</source>
+    <date>2026-09-29T20:50:33</date>
+    <tool>Eeschema 10.0.6</tool>
+    <sheet number="1" name="/" tstamps="/">
+      <title_block>
+        <title>SN 64 socket board</title>
+        <company/>
+        <rev>0.1-socket</rev>
+        <date/>
+        <source>sn64-socket.kicad_sch</source>
+        <comment number="1" value="SNES/SFC socket on its own horizontal board; joined to the main board by a 2x40 2.00 mm header (J2 on both boards). Net names match the main root sheet."/>
+        <comment number="2" value="Socket footprint: console-replacement family, OpenSFC geometry (7.0 mm rows, ears 95 mm). Unverified on a sample; see docs/dimensions.md."/>
+        <comment number="3" value=""/>
+        <comment number="4" value=""/>
+        <comment number="5" value=""/>
+        <comment number="6" value=""/>
+        <comment number="7" value=""/>
+        <comment number="8" value=""/>
+        <comment number="9" value=""/>
+      </title_block>
+    </sheet>
+  </design>
+  <components>
+    <comp ref="C1">
+      <value>100nF 16V X7R</value>
+      <footprint>Capacitor_SMD:C_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">Capacitor_SMD:C_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="sn64-socket"/>
+      <property name="Sheetfile" value="sn64-socket.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>45fe47fd-d7a8-5334-aed9-465284cabbb5</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="C2">
+      <value>100nF 16V X7R</value>
+      <footprint>Capacitor_SMD:C_0603_1608Metric</footprint>
+      <fields>
+        <field name="Footprint">Capacitor_SMD:C_0603_1608Metric</field>
+        <field name="Datasheet"/>
+        <field name="Description"/>
+      </fields>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value="sn64-socket"/>
+      <property name="Sheetfile" value="sn64-socket.kicad_sch"/>
+      <property name="ki_keywords" value="cap capacitor"/>
+      <property name="ki_fp_filters" value="C_*"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>e64d5715-a07c-5c78-a1f9-42ba822e7f11</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J1">
+      <value>SNES socket (console-replacement, 7.0 mm rows)</value>
+      <footprint>SN64:SNES_Slot_Console_7mm</footprint>
+      <description>The physical SNES/SFC cartridge socket. Contacts 1-62 per the interface CSV; footprint geometry from OpenSFC.</description>
+      <fields>
+        <field name="Footprint">SN64:SNES_Slot_Console_7mm</field>
+        <field name="Datasheet"/>
+        <field name="Description">The physical SNES/SFC cartridge socket. Contacts 1-62 per the interface CSV; footprint geometry from OpenSFC.</field>
+      </fields>
+      <libsource lib="SN64" part="SNES_Female_Slot_62" description="Reference-verified connector; passive pin types. See interface CSV for endpoint directions."/>
+      <property name="Sheetname" value="sn64-socket"/>
+      <property name="Sheetfile" value="sn64-socket.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>e275e3e0-43a7-5a59-b091-e7f1e6d6efd2</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+            <pin num="5"/>
+            <pin num="6"/>
+            <pin num="7"/>
+            <pin num="8"/>
+            <pin num="9"/>
+            <pin num="10"/>
+            <pin num="11"/>
+            <pin num="12"/>
+            <pin num="13"/>
+            <pin num="14"/>
+            <pin num="15"/>
+            <pin num="16"/>
+            <pin num="17"/>
+            <pin num="18"/>
+            <pin num="19"/>
+            <pin num="20"/>
+            <pin num="21"/>
+            <pin num="22"/>
+            <pin num="23"/>
+            <pin num="24"/>
+            <pin num="25"/>
+            <pin num="26"/>
+            <pin num="27"/>
+            <pin num="28"/>
+            <pin num="29"/>
+            <pin num="30"/>
+            <pin num="31"/>
+            <pin num="32"/>
+            <pin num="33"/>
+            <pin num="34"/>
+            <pin num="35"/>
+            <pin num="36"/>
+            <pin num="37"/>
+            <pin num="38"/>
+            <pin num="39"/>
+            <pin num="40"/>
+            <pin num="41"/>
+            <pin num="42"/>
+            <pin num="43"/>
+            <pin num="44"/>
+            <pin num="45"/>
+            <pin num="46"/>
+            <pin num="47"/>
+            <pin num="48"/>
+            <pin num="49"/>
+            <pin num="50"/>
+            <pin num="51"/>
+            <pin num="52"/>
+            <pin num="53"/>
+            <pin num="54"/>
+            <pin num="55"/>
+            <pin num="56"/>
+            <pin num="57"/>
+            <pin num="58"/>
+            <pin num="59"/>
+            <pin num="60"/>
+            <pin num="61"/>
+            <pin num="62"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+    <comp ref="J2">
+      <value>SN64_Socket_Joint_2x40</value>
+      <footprint>Connector_PinSocket_2.00mm:PinSocket_2x40_P2.00mm_Vertical</footprint>
+      <description>Joint to the main board: 2x40 2.00 mm vertical socket mating the main board J2 header. Pins 1-62 = socket contacts, 63-66 cartridge 5 V, 67-80 GND.</description>
+      <fields>
+        <field name="Footprint">Connector_PinSocket_2.00mm:PinSocket_2x40_P2.00mm_Vertical</field>
+        <field name="Datasheet"/>
+        <field name="Description">Joint to the main board: 2x40 2.00 mm vertical socket mating the main board J2 header. Pins 1-62 = socket contacts, 63-66 cartridge 5 V, 67-80 GND.</field>
+      </fields>
+      <libsource lib="SN64" part="SN64_Socket_Joint_2x40" description="Socket-board joint: 2x40 2.00 mm header. Pins 1-62 = SNES socket contacts 1-62 (same names), 63-66 cartridge 5 V, 67-80 GND. The socket itself is J1 on hardware/sn64-socket."/>
+      <property name="Sheetname" value="sn64-socket"/>
+      <property name="Sheetfile" value="sn64-socket.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>d849ac48-2a6d-5aeb-901b-08d1c02c2804</tstamps>
+      <units>
+        <unit name="A">
+          <pins>
+            <pin num="1"/>
+            <pin num="2"/>
+            <pin num="3"/>
+            <pin num="4"/>
+            <pin num="5"/>
+            <pin num="6"/>
+            <pin num="7"/>
+            <pin num="8"/>
+            <pin num="9"/>
+            <pin num="10"/>
+            <pin num="11"/>
+            <pin num="12"/>
+            <pin num="13"/>
+            <pin num="14"/>
+            <pin num="15"/>
+            <pin num="16"/>
+            <pin num="17"/>
+            <pin num="18"/>
+            <pin num="19"/>
+            <pin num="20"/>
+            <pin num="21"/>
+            <pin num="22"/>
+            <pin num="23"/>
+            <pin num="24"/>
+            <pin num="25"/>
+            <pin num="26"/>
+            <pin num="27"/>
+            <pin num="28"/>
+            <pin num="29"/>
+            <pin num="30"/>
+            <pin num="31"/>
+            <pin num="63"/>
+            <pin num="64"/>
+            <pin num="65"/>
+            <pin num="66"/>
+            <pin num="67"/>
+            <pin num="68"/>
+            <pin num="69"/>
+            <pin num="70"/>
+            <pin num="71"/>
+            <pin num="72"/>
+            <pin num="73"/>
+            <pin num="74"/>
+            <pin num="75"/>
+            <pin num="76"/>
+            <pin num="77"/>
+            <pin num="78"/>
+            <pin num="79"/>
+            <pin num="80"/>
+            <pin num="32"/>
+            <pin num="33"/>
+            <pin num="34"/>
+            <pin num="35"/>
+            <pin num="36"/>
+            <pin num="37"/>
+            <pin num="38"/>
+            <pin num="39"/>
+            <pin num="40"/>
+            <pin num="41"/>
+            <pin num="42"/>
+            <pin num="43"/>
+            <pin num="44"/>
+            <pin num="45"/>
+            <pin num="46"/>
+            <pin num="47"/>
+            <pin num="48"/>
+            <pin num="49"/>
+            <pin num="50"/>
+            <pin num="51"/>
+            <pin num="52"/>
+            <pin num="53"/>
+            <pin num="54"/>
+            <pin num="55"/>
+            <pin num="56"/>
+            <pin num="57"/>
+            <pin num="58"/>
+            <pin num="59"/>
+            <pin num="60"/>
+            <pin num="61"/>
+            <pin num="62"/>
+          </pins>
+        </unit>
+      </units>
+    </comp>
+  </components>
+  <libparts>
+    <libpart lib="Device" part="C">
+      <description>Unpolarized capacitor</description>
+      <footprints>
+        <fp>C_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">C</field>
+        <field name="Footprint"/>
+        <field name="Datasheet"/>
+        <field name="Description">Unpolarized capacitor</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SN64" part="SN64_Socket_Joint_2x40">
+      <description>Socket-board joint: 2x40 2.00 mm header. Pins 1-62 = SNES socket contacts 1-62 (same names), 63-66 cartridge 5 V, 67-80 GND. The socket itself is J1 on hardware/sn64-socket.</description>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">SN64_Socket_Joint_2x40</field>
+        <field name="Footprint">Connector_PinHeader_2.00mm:PinHeader_2x40_P2.00mm_Horizontal</field>
+        <field name="Datasheet"/>
+        <field name="Description">Socket-board joint: 2x40 2.00 mm header. Pins 1-62 = SNES socket contacts 1-62 (same names), 63-66 cartridge 5 V, 67-80 GND. The socket itself is J1 on hardware/sn64-socket.</field>
+      </fields>
+      <pins>
+        <pin num="1" name="SYSTEM_CLK" type="passive"/>
+        <pin num="2" name="EXPAND" type="passive"/>
+        <pin num="3" name="PA6" type="passive"/>
+        <pin num="4" name="/PRD" type="passive"/>
+        <pin num="5" name="GND" type="passive"/>
+        <pin num="6" name="A11" type="passive"/>
+        <pin num="7" name="A10" type="passive"/>
+        <pin num="8" name="A9" type="passive"/>
+        <pin num="9" name="A8" type="passive"/>
+        <pin num="10" name="A7" type="passive"/>
+        <pin num="11" name="A6" type="passive"/>
+        <pin num="12" name="A5" type="passive"/>
+        <pin num="13" name="A4" type="passive"/>
+        <pin num="14" name="A3" type="passive"/>
+        <pin num="15" name="A2" type="passive"/>
+        <pin num="16" name="A1" type="passive"/>
+        <pin num="17" name="A0" type="passive"/>
+        <pin num="18" name="/IRQ" type="passive"/>
+        <pin num="19" name="D0" type="passive"/>
+        <pin num="20" name="D1" type="passive"/>
+        <pin num="21" name="D2" type="passive"/>
+        <pin num="22" name="D3" type="passive"/>
+        <pin num="23" name="/RD" type="passive"/>
+        <pin num="24" name="CIC_DATA1" type="passive"/>
+        <pin num="25" name="CIC_SLAVE_RESET" type="passive"/>
+        <pin num="26" name="/RESET" type="passive"/>
+        <pin num="27" name="+5V_CART" type="passive"/>
+        <pin num="28" name="PA0" type="passive"/>
+        <pin num="29" name="PA2" type="passive"/>
+        <pin num="30" name="PA4" type="passive"/>
+        <pin num="31" name="AUDIO_L_IN" type="passive"/>
+        <pin num="32" name="/WRAMSEL" type="passive"/>
+        <pin num="33" name="REFRESH" type="passive"/>
+        <pin num="34" name="PA7" type="passive"/>
+        <pin num="35" name="/PWR" type="passive"/>
+        <pin num="36" name="GND" type="passive"/>
+        <pin num="37" name="A12" type="passive"/>
+        <pin num="38" name="A13" type="passive"/>
+        <pin num="39" name="A14" type="passive"/>
+        <pin num="40" name="A15" type="passive"/>
+        <pin num="41" name="A16" type="passive"/>
+        <pin num="42" name="A17" type="passive"/>
+        <pin num="43" name="A18" type="passive"/>
+        <pin num="44" name="A19" type="passive"/>
+        <pin num="45" name="A20" type="passive"/>
+        <pin num="46" name="A21" type="passive"/>
+        <pin num="47" name="A22" type="passive"/>
+        <pin num="48" name="A23" type="passive"/>
+        <pin num="49" name="/ROMSEL" type="passive"/>
+        <pin num="50" name="D4" type="passive"/>
+        <pin num="51" name="D5" type="passive"/>
+        <pin num="52" name="D6" type="passive"/>
+        <pin num="53" name="D7" type="passive"/>
+        <pin num="54" name="/WR" type="passive"/>
+        <pin num="55" name="CIC_DATA0" type="passive"/>
+        <pin num="56" name="CIC_CLK" type="passive"/>
+        <pin num="57" name="PHI2" type="passive"/>
+        <pin num="58" name="+5V_CART" type="passive"/>
+        <pin num="59" name="PA1" type="passive"/>
+        <pin num="60" name="PA3" type="passive"/>
+        <pin num="61" name="PA5" type="passive"/>
+        <pin num="62" name="AUDIO_R_IN" type="passive"/>
+        <pin num="63" name="SNES_5V_CART" type="passive"/>
+        <pin num="64" name="SNES_5V_CART" type="passive"/>
+        <pin num="65" name="SNES_5V_CART" type="passive"/>
+        <pin num="66" name="SNES_5V_CART" type="passive"/>
+        <pin num="67" name="GND" type="passive"/>
+        <pin num="68" name="GND" type="passive"/>
+        <pin num="69" name="GND" type="passive"/>
+        <pin num="70" name="GND" type="passive"/>
+        <pin num="71" name="GND" type="passive"/>
+        <pin num="72" name="GND" type="passive"/>
+        <pin num="73" name="GND" type="passive"/>
+        <pin num="74" name="GND" type="passive"/>
+        <pin num="75" name="GND" type="passive"/>
+        <pin num="76" name="GND" type="passive"/>
+        <pin num="77" name="GND" type="passive"/>
+        <pin num="78" name="GND" type="passive"/>
+        <pin num="79" name="GND" type="passive"/>
+        <pin num="80" name="GND" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="SN64" part="SNES_Female_Slot_62">
+      <description>Reference-verified connector; passive pin types. See interface CSV for endpoint directions.</description>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">SNES_Female_Slot_62</field>
+        <field name="Footprint">SN64:SNES Slot</field>
+        <field name="Datasheet"/>
+        <field name="Description">Reference-verified connector; passive pin types. See interface CSV for endpoint directions.</field>
+      </fields>
+      <pins>
+        <pin num="1" name="SYSTEM_CLK" type="passive"/>
+        <pin num="2" name="EXPAND" type="passive"/>
+        <pin num="3" name="PA6" type="passive"/>
+        <pin num="4" name="/PRD" type="passive"/>
+        <pin num="5" name="GND" type="passive"/>
+        <pin num="6" name="A11" type="passive"/>
+        <pin num="7" name="A10" type="passive"/>
+        <pin num="8" name="A9" type="passive"/>
+        <pin num="9" name="A8" type="passive"/>
+        <pin num="10" name="A7" type="passive"/>
+        <pin num="11" name="A6" type="passive"/>
+        <pin num="12" name="A5" type="passive"/>
+        <pin num="13" name="A4" type="passive"/>
+        <pin num="14" name="A3" type="passive"/>
+        <pin num="15" name="A2" type="passive"/>
+        <pin num="16" name="A1" type="passive"/>
+        <pin num="17" name="A0" type="passive"/>
+        <pin num="18" name="/IRQ" type="passive"/>
+        <pin num="19" name="D0" type="passive"/>
+        <pin num="20" name="D1" type="passive"/>
+        <pin num="21" name="D2" type="passive"/>
+        <pin num="22" name="D3" type="passive"/>
+        <pin num="23" name="/RD" type="passive"/>
+        <pin num="24" name="CIC_DATA1" type="passive"/>
+        <pin num="25" name="CIC_SLAVE_RESET" type="passive"/>
+        <pin num="26" name="/RESET" type="passive"/>
+        <pin num="27" name="+5V_CART" type="passive"/>
+        <pin num="28" name="PA0" type="passive"/>
+        <pin num="29" name="PA2" type="passive"/>
+        <pin num="30" name="PA4" type="passive"/>
+        <pin num="31" name="AUDIO_L_IN" type="passive"/>
+        <pin num="32" name="/WRAMSEL" type="passive"/>
+        <pin num="33" name="REFRESH" type="passive"/>
+        <pin num="34" name="PA7" type="passive"/>
+        <pin num="35" name="/PWR" type="passive"/>
+        <pin num="36" name="GND" type="passive"/>
+        <pin num="37" name="A12" type="passive"/>
+        <pin num="38" name="A13" type="passive"/>
+        <pin num="39" name="A14" type="passive"/>
+        <pin num="40" name="A15" type="passive"/>
+        <pin num="41" name="A16" type="passive"/>
+        <pin num="42" name="A17" type="passive"/>
+        <pin num="43" name="A18" type="passive"/>
+        <pin num="44" name="A19" type="passive"/>
+        <pin num="45" name="A20" type="passive"/>
+        <pin num="46" name="A21" type="passive"/>
+        <pin num="47" name="A22" type="passive"/>
+        <pin num="48" name="A23" type="passive"/>
+        <pin num="49" name="/ROMSEL" type="passive"/>
+        <pin num="50" name="D4" type="passive"/>
+        <pin num="51" name="D5" type="passive"/>
+        <pin num="52" name="D6" type="passive"/>
+        <pin num="53" name="D7" type="passive"/>
+        <pin num="54" name="/WR" type="passive"/>
+        <pin num="55" name="CIC_DATA0" type="passive"/>
+        <pin num="56" name="CIC_CLK" type="passive"/>
+        <pin num="57" name="PHI2" type="passive"/>
+        <pin num="58" name="+5V_CART" type="passive"/>
+        <pin num="59" name="PA1" type="passive"/>
+        <pin num="60" name="PA3" type="passive"/>
+        <pin num="61" name="PA5" type="passive"/>
+        <pin num="62" name="AUDIO_R_IN" type="passive"/>
+      </pins>
+    </libpart>
+  </libparts>
+  <libraries>
+    <library logical="Device">
+      <uri>${KICAD10_SYMBOL_DIR}/Device.kicad_sym</uri>
+    </library>
+    <library logical="SN64">
+      <uri>${KIPRJMOD}/../sn64/libraries/SN64.kicad_sym</uri>
+    </library>
+  </libraries>
+  <nets>
+    <net code="1" name="/GND" class="Default">
+      <node ref="C1" pin="2" pintype="passive"/>
+      <node ref="C2" pin="2" pintype="passive"/>
+      <node ref="J1" pin="36" pinfunction="GND_36" pintype="passive"/>
+      <node ref="J1" pin="5" pinfunction="GND_5" pintype="passive"/>
+      <node ref="J2" pin="36" pinfunction="GND_36" pintype="passive"/>
+      <node ref="J2" pin="5" pinfunction="GND_5" pintype="passive"/>
+      <node ref="J2" pin="67" pinfunction="GND_67" pintype="passive"/>
+      <node ref="J2" pin="68" pinfunction="GND_68" pintype="passive"/>
+      <node ref="J2" pin="69" pinfunction="GND_69" pintype="passive"/>
+      <node ref="J2" pin="70" pinfunction="GND_70" pintype="passive"/>
+      <node ref="J2" pin="71" pinfunction="GND_71" pintype="passive"/>
+      <node ref="J2" pin="72" pinfunction="GND_72" pintype="passive"/>
+      <node ref="J2" pin="73" pinfunction="GND_73" pintype="passive"/>
+      <node ref="J2" pin="74" pinfunction="GND_74" pintype="passive"/>
+      <node ref="J2" pin="75" pinfunction="GND_75" pintype="passive"/>
+      <node ref="J2" pin="76" pinfunction="GND_76" pintype="passive"/>
+      <node ref="J2" pin="77" pinfunction="GND_77" pintype="passive"/>
+      <node ref="J2" pin="78" pinfunction="GND_78" pintype="passive"/>
+      <node ref="J2" pin="79" pinfunction="GND_79" pintype="passive"/>
+      <node ref="J2" pin="80" pinfunction="GND_80" pintype="passive"/>
+    </net>
+    <net code="2" name="/SNES_5V_CART" class="Default">
+      <node ref="C1" pin="1" pintype="passive"/>
+      <node ref="C2" pin="1" pintype="passive"/>
+      <node ref="J1" pin="27" pinfunction="+5V_CART_27" pintype="passive"/>
+      <node ref="J1" pin="58" pinfunction="+5V_CART_58" pintype="passive"/>
+      <node ref="J2" pin="27" pinfunction="+5V_CART_27" pintype="passive"/>
+      <node ref="J2" pin="58" pinfunction="+5V_CART_58" pintype="passive"/>
+      <node ref="J2" pin="63" pinfunction="SNES_5V_CART_63" pintype="passive"/>
+      <node ref="J2" pin="64" pinfunction="SNES_5V_CART_64" pintype="passive"/>
+      <node ref="J2" pin="65" pinfunction="SNES_5V_CART_65" pintype="passive"/>
+      <node ref="J2" pin="66" pinfunction="SNES_5V_CART_66" pintype="passive"/>
+    </net>
+    <net code="3" name="/SNES_A0" class="Default">
+      <node ref="J1" pin="17" pinfunction="A0_17" pintype="passive"/>
+      <node ref="J2" pin="17" pinfunction="A0_17" pintype="passive"/>
+    </net>
+    <net code="4" name="/SNES_A1" class="Default">
+      <node ref="J1" pin="16" pinfunction="A1_16" pintype="passive"/>
+      <node ref="J2" pin="16" pinfunction="A1_16" pintype="passive"/>
+    </net>
+    <net code="5" name="/SNES_A2" class="Default">
+      <node ref="J1" pin="15" pinfunction="A2_15" pintype="passive"/>
+      <node ref="J2" pin="15" pinfunction="A2_15" pintype="passive"/>
+    </net>
+    <net code="6" name="/SNES_A3" class="Default">
+      <node ref="J1" pin="14" pinfunction="A3_14" pintype="passive"/>
+      <node ref="J2" pin="14" pinfunction="A3_14" pintype="passive"/>
+    </net>
+    <net code="7" name="/SNES_A4" class="Default">
+      <node ref="J1" pin="13" pinfunction="A4_13" pintype="passive"/>
+      <node ref="J2" pin="13" pinfunction="A4_13" pintype="passive"/>
+    </net>
+    <net code="8" name="/SNES_A5" class="Default">
+      <node ref="J1" pin="12" pinfunction="A5_12" pintype="passive"/>
+      <node ref="J2" pin="12" pinfunction="A5_12" pintype="passive"/>
+    </net>
+    <net code="9" name="/SNES_A6" class="Default">
+      <node ref="J1" pin="11" pinfunction="A6_11" pintype="passive"/>
+      <node ref="J2" pin="11" pinfunction="A6_11" pintype="passive"/>
+    </net>
+    <net code="10" name="/SNES_A7" class="Default">
+      <node ref="J1" pin="10" pinfunction="A7_10" pintype="passive"/>
+      <node ref="J2" pin="10" pinfunction="A7_10" pintype="passive"/>
+    </net>
+    <net code="11" name="/SNES_A8" class="Default">
+      <node ref="J1" pin="9" pinfunction="A8_9" pintype="passive"/>
+      <node ref="J2" pin="9" pinfunction="A8_9" pintype="passive"/>
+    </net>
+    <net code="12" name="/SNES_A9" class="Default">
+      <node ref="J1" pin="8" pinfunction="A9_8" pintype="passive"/>
+      <node ref="J2" pin="8" pinfunction="A9_8" pintype="passive"/>
+    </net>
+    <net code="13" name="/SNES_A10" class="Default">
+      <node ref="J1" pin="7" pinfunction="A10_7" pintype="passive"/>
+      <node ref="J2" pin="7" pinfunction="A10_7" pintype="passive"/>
+    </net>
+    <net code="14" name="/SNES_A11" class="Default">
+      <node ref="J1" pin="6" pinfunction="A11_6" pintype="passive"/>
+      <node ref="J2" pin="6" pinfunction="A11_6" pintype="passive"/>
+    </net>
+    <net code="15" name="/SNES_A12" class="Default">
+      <node ref="J1" pin="37" pinfunction="A12_37" pintype="passive"/>
+      <node ref="J2" pin="37" pinfunction="A12_37" pintype="passive"/>
+    </net>
+    <net code="16" name="/SNES_A13" class="Default">
+      <node ref="J1" pin="38" pinfunction="A13_38" pintype="passive"/>
+      <node ref="J2" pin="38" pinfunction="A13_38" pintype="passive"/>
+    </net>
+    <net code="17" name="/SNES_A14" class="Default">
+      <node ref="J1" pin="39" pinfunction="A14_39" pintype="passive"/>
+      <node ref="J2" pin="39" pinfunction="A14_39" pintype="passive"/>
+    </net>
+    <net code="18" name="/SNES_A15" class="Default">
+      <node ref="J1" pin="40" pinfunction="A15_40" pintype="passive"/>
+      <node ref="J2" pin="40" pinfunction="A15_40" pintype="passive"/>
+    </net>
+    <net code="19" name="/SNES_A16" class="Default">
+      <node ref="J1" pin="41" pinfunction="A16_41" pintype="passive"/>
+      <node ref="J2" pin="41" pinfunction="A16_41" pintype="passive"/>
+    </net>
+    <net code="20" name="/SNES_A17" class="Default">
+      <node ref="J1" pin="42" pinfunction="A17_42" pintype="passive"/>
+      <node ref="J2" pin="42" pinfunction="A17_42" pintype="passive"/>
+    </net>
+    <net code="21" name="/SNES_A18" class="Default">
+      <node ref="J1" pin="43" pinfunction="A18_43" pintype="passive"/>
+      <node ref="J2" pin="43" pinfunction="A18_43" pintype="passive"/>
+    </net>
+    <net code="22" name="/SNES_A19" class="Default">
+      <node ref="J1" pin="44" pinfunction="A19_44" pintype="passive"/>
+      <node ref="J2" pin="44" pinfunction="A19_44" pintype="passive"/>
+    </net>
+    <net code="23" name="/SNES_A20" class="Default">
+      <node ref="J1" pin="45" pinfunction="A20_45" pintype="passive"/>
+      <node ref="J2" pin="45" pinfunction="A20_45" pintype="passive"/>
+    </net>
+    <net code="24" name="/SNES_A21" class="Default">
+      <node ref="J1" pin="46" pinfunction="A21_46" pintype="passive"/>
+      <node ref="J2" pin="46" pinfunction="A21_46" pintype="passive"/>
+    </net>
+    <net code="25" name="/SNES_A22" class="Default">
+      <node ref="J1" pin="47" pinfunction="A22_47" pintype="passive"/>
+      <node ref="J2" pin="47" pinfunction="A22_47" pintype="passive"/>
+    </net>
+    <net code="26" name="/SNES_A23" class="Default">
+      <node ref="J1" pin="48" pinfunction="A23_48" pintype="passive"/>
+      <node ref="J2" pin="48" pinfunction="A23_48" pintype="passive"/>
+    </net>
+    <net code="27" name="/SNES_AUDIO_L_IN" class="Default">
+      <node ref="J1" pin="31" pinfunction="AUDIO_L_IN_31" pintype="passive"/>
+      <node ref="J2" pin="31" pinfunction="AUDIO_L_IN_31" pintype="passive"/>
+    </net>
+    <net code="28" name="/SNES_AUDIO_R_IN" class="Default">
+      <node ref="J1" pin="62" pinfunction="AUDIO_R_IN_62" pintype="passive"/>
+      <node ref="J2" pin="62" pinfunction="AUDIO_R_IN_62" pintype="passive"/>
+    </net>
+    <net code="29" name="/SNES_CIC_CLK" class="Default">
+      <node ref="J1" pin="56" pinfunction="CIC_CLK_56" pintype="passive"/>
+      <node ref="J2" pin="56" pinfunction="CIC_CLK_56" pintype="passive"/>
+    </net>
+    <net code="30" name="/SNES_CIC_DATA0" class="Default">
+      <node ref="J1" pin="55" pinfunction="CIC_DATA0_55" pintype="passive"/>
+      <node ref="J2" pin="55" pinfunction="CIC_DATA0_55" pintype="passive"/>
+    </net>
+    <net code="31" name="/SNES_CIC_DATA1" class="Default">
+      <node ref="J1" pin="24" pinfunction="CIC_DATA1_24" pintype="passive"/>
+      <node ref="J2" pin="24" pinfunction="CIC_DATA1_24" pintype="passive"/>
+    </net>
+    <net code="32" name="/SNES_CIC_SLAVE_RESET" class="Default">
+      <node ref="J1" pin="25" pinfunction="CIC_SLAVE_RESET_25" pintype="passive"/>
+      <node ref="J2" pin="25" pinfunction="CIC_SLAVE_RESET_25" pintype="passive"/>
+    </net>
+    <net code="33" name="/SNES_D0" class="Default">
+      <node ref="J1" pin="19" pinfunction="D0_19" pintype="passive"/>
+      <node ref="J2" pin="19" pinfunction="D0_19" pintype="passive"/>
+    </net>
+    <net code="34" name="/SNES_D1" class="Default">
+      <node ref="J1" pin="20" pinfunction="D1_20" pintype="passive"/>
+      <node ref="J2" pin="20" pinfunction="D1_20" pintype="passive"/>
+    </net>
+    <net code="35" name="/SNES_D2" class="Default">
+      <node ref="J1" pin="21" pinfunction="D2_21" pintype="passive"/>
+      <node ref="J2" pin="21" pinfunction="D2_21" pintype="passive"/>
+    </net>
+    <net code="36" name="/SNES_D3" class="Default">
+      <node ref="J1" pin="22" pinfunction="D3_22" pintype="passive"/>
+      <node ref="J2" pin="22" pinfunction="D3_22" pintype="passive"/>
+    </net>
+    <net code="37" name="/SNES_D4" class="Default">
+      <node ref="J1" pin="50" pinfunction="D4_50" pintype="passive"/>
+      <node ref="J2" pin="50" pinfunction="D4_50" pintype="passive"/>
+    </net>
+    <net code="38" name="/SNES_D5" class="Default">
+      <node ref="J1" pin="51" pinfunction="D5_51" pintype="passive"/>
+      <node ref="J2" pin="51" pinfunction="D5_51" pintype="passive"/>
+    </net>
+    <net code="39" name="/SNES_D6" class="Default">
+      <node ref="J1" pin="52" pinfunction="D6_52" pintype="passive"/>
+      <node ref="J2" pin="52" pinfunction="D6_52" pintype="passive"/>
+    </net>
+    <net code="40" name="/SNES_D7" class="Default">
+      <node ref="J1" pin="53" pinfunction="D7_53" pintype="passive"/>
+      <node ref="J2" pin="53" pinfunction="D7_53" pintype="passive"/>
+    </net>
+    <net code="41" name="/SNES_EXPAND" class="Default">
+      <node ref="J1" pin="2" pinfunction="EXPAND_2" pintype="passive"/>
+      <node ref="J2" pin="2" pinfunction="EXPAND_2" pintype="passive"/>
+    </net>
+    <net code="42" name="/SNES_IRQ_N" class="Default">
+      <node ref="J1" pin="18" pinfunction="/IRQ_18" pintype="passive"/>
+      <node ref="J2" pin="18" pinfunction="/IRQ_18" pintype="passive"/>
+    </net>
+    <net code="43" name="/SNES_PA0" class="Default">
+      <node ref="J1" pin="28" pinfunction="PA0_28" pintype="passive"/>
+      <node ref="J2" pin="28" pinfunction="PA0_28" pintype="passive"/>
+    </net>
+    <net code="44" name="/SNES_PA1" class="Default">
+      <node ref="J1" pin="59" pinfunction="PA1_59" pintype="passive"/>
+      <node ref="J2" pin="59" pinfunction="PA1_59" pintype="passive"/>
+    </net>
+    <net code="45" name="/SNES_PA2" class="Default">
+      <node ref="J1" pin="29" pinfunction="PA2_29" pintype="passive"/>
+      <node ref="J2" pin="29" pinfunction="PA2_29" pintype="passive"/>
+    </net>
+    <net code="46" name="/SNES_PA3" class="Default">
+      <node ref="J1" pin="60" pinfunction="PA3_60" pintype="passive"/>
+      <node ref="J2" pin="60" pinfunction="PA3_60" pintype="passive"/>
+    </net>
+    <net code="47" name="/SNES_PA4" class="Default">
+      <node ref="J1" pin="30" pinfunction="PA4_30" pintype="passive"/>
+      <node ref="J2" pin="30" pinfunction="PA4_30" pintype="passive"/>
+    </net>
+    <net code="48" name="/SNES_PA5" class="Default">
+      <node ref="J1" pin="61" pinfunction="PA5_61" pintype="passive"/>
+      <node ref="J2" pin="61" pinfunction="PA5_61" pintype="passive"/>
+    </net>
+    <net code="49" name="/SNES_PA6" class="Default">
+      <node ref="J1" pin="3" pinfunction="PA6_3" pintype="passive"/>
+      <node ref="J2" pin="3" pinfunction="PA6_3" pintype="passive"/>
+    </net>
+    <net code="50" name="/SNES_PA7" class="Default">
+      <node ref="J1" pin="34" pinfunction="PA7_34" pintype="passive"/>
+      <node ref="J2" pin="34" pinfunction="PA7_34" pintype="passive"/>
+    </net>
+    <net code="51" name="/SNES_PHI2" class="Default">
+      <node ref="J1" pin="57" pinfunction="PHI2_57" pintype="passive"/>
+      <node ref="J2" pin="57" pinfunction="PHI2_57" pintype="passive"/>
+    </net>
+    <net code="52" name="/SNES_PRD_N" class="Default">
+      <node ref="J1" pin="4" pinfunction="/PRD_4" pintype="passive"/>
+      <node ref="J2" pin="4" pinfunction="/PRD_4" pintype="passive"/>
+    </net>
+    <net code="53" name="/SNES_PWR_N" class="Default">
+      <node ref="J1" pin="35" pinfunction="/PWR_35" pintype="passive"/>
+      <node ref="J2" pin="35" pinfunction="/PWR_35" pintype="passive"/>
+    </net>
+    <net code="54" name="/SNES_RD_N" class="Default">
+      <node ref="J1" pin="23" pinfunction="/RD_23" pintype="passive"/>
+      <node ref="J2" pin="23" pinfunction="/RD_23" pintype="passive"/>
+    </net>
+    <net code="55" name="/SNES_REFRESH" class="Default">
+      <node ref="J1" pin="33" pinfunction="REFRESH_33" pintype="passive"/>
+      <node ref="J2" pin="33" pinfunction="REFRESH_33" pintype="passive"/>
+    </net>
+    <net code="56" name="/SNES_RESET_N" class="Default">
+      <node ref="J1" pin="26" pinfunction="/RESET_26" pintype="passive"/>
+      <node ref="J2" pin="26" pinfunction="/RESET_26" pintype="passive"/>
+    </net>
+    <net code="57" name="/SNES_ROMSEL_N" class="Default">
+      <node ref="J1" pin="49" pinfunction="/ROMSEL_49" pintype="passive"/>
+      <node ref="J2" pin="49" pinfunction="/ROMSEL_49" pintype="passive"/>
+    </net>
+    <net code="58" name="/SNES_SYSTEM_CLK" class="Default">
+      <node ref="J1" pin="1" pinfunction="SYSTEM_CLK_1" pintype="passive"/>
+      <node ref="J2" pin="1" pinfunction="SYSTEM_CLK_1" pintype="passive"/>
+    </net>
+    <net code="59" name="/SNES_WRAMSEL_N" class="Default">
+      <node ref="J1" pin="32" pinfunction="/WRAMSEL_32" pintype="passive"/>
+      <node ref="J2" pin="32" pinfunction="/WRAMSEL_32" pintype="passive"/>
+    </net>
+    <net code="60" name="/SNES_WR_N" class="Default">
+      <node ref="J1" pin="54" pinfunction="/WR_54" pintype="passive"/>
+      <node ref="J2" pin="54" pinfunction="/WR_54" pintype="passive"/>
+    </net>
+  </nets>
+</export>

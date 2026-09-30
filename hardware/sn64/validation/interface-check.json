@@ -1,18 +1,18 @@
 {
   "status": "pass",
   "scope": "connector reference consistency only",
-  "generated_at_utc": "2026-09-29T23:58:27.952054+00:00",
+  "generated_at_utc": "2026-09-30T00:52:14.216465+00:00",
   "kicad_python_version": "10.0.6",
-  "checks_passed": 30,
+  "checks_passed": 31,
   "checks_failed": 0,
   "inputs": {
     "schematic": {
       "path": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\hardware\\sn64\\sn64.kicad_sch",
-      "sha256": "4fbc588ad545ea6d34c095103af83c9238bc3e5f922bc91e2abdb4711719b5b0"
+      "sha256": "e6b8db9ae8891be85ceba04973537c6430c2831e07c6bc8b80b56fd22d0e800a"
     },
     "symbol_library": {
       "path": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\hardware\\sn64\\libraries\\SN64.kicad_sym",
-      "sha256": "abdec73b3c58d95d555d58b81e7d86d3427c93d932fb52ad89fe80ca1c71d1b0"
+      "sha256": "0fdf7f9bc64eb500275b5c1639407be3afeee753f4d0e2e90163fbdf646e9a45"
     },
     "n64_footprint": {
       "path": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\hardware\\sn64\\libraries\\SN64.pretty\\N64_Edge_SC64_Reference.kicad_mod",
@@ -62,6 +62,11 @@
         "missing": [],
         "extra": []
       }
+    },
+    {
+      "check": "J2_joint_pins_63_66_5V_67_80_GND",
+      "passed": true,
+      "detail": "all 18 joint pins as expected"
     },
     {
       "check": "J1_complete_map",
@@ -128,6 +133,22 @@
           [
             "J2",
             58
+          ],
+          [
+            "J2",
+            63
+          ],
+          [
+            "J2",
+            64
+          ],
+          [
+            "J2",
+            65
+          ],
+          [
+            "J2",
+            66
           ]
         ]
       }
@@ -150,6 +171,7 @@
       "passed": true,
       "detail": [
         "N64_Cartridge_Edge_50",
+        "SN64_Socket_Joint_2x40",
         "SNES_Female_Slot_62"
       ]
     },
@@ -176,12 +198,12 @@
     {
       "check": "J2_library_pin_names_numbers_types",
       "passed": true,
-      "detail": 62
+      "detail": 80
     },
     {
       "check": "J2_footprint_binding",
       "passed": true,
-      "detail": "SN64:SNES Slot"
+      "detail": "Connector_PinHeader_2.00mm:PinHeader_2x40_P2.00mm_Horizontal"
     },
     {
       "check": "sym-lib-table_J2",

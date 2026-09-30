@@ -169,9 +169,16 @@ def main():
                     duplicates.append(key)
                 actual[key] = (net.get('name'), node.get('pinfunction'), node.get('pintype'))
         expected_keys = {(ref, pin) for ref, rows in maps.items() for pin in rows}
-        check('all_112_contacts_once', len(actual) == 112 and set(actual) == expected_keys and not duplicates,
-              {'exported_contacts': len(actual), 'duplicates': duplicates,
-               'missing': sorted(expected_keys - set(actual)), 'extra': sorted(set(actual) - expected_keys)})
+        # Two-board split (tools/split_socket_board.py): J2 on this board is the socket-board joint.
+        # Its pins 1-62 are the socket contacts; 63-66 carry the cartridge 5 V and 67-80 GND.
+        joint_extra = {('J2', str(n)): ('/SNES_5V_CART' if n <= 66 else '/GND') for n in range(63, 81)}
+        joint_actual = {k: v[0] for k, v in actual.items() if k in joint_extra}
+        contacts = {k: v for k, v in actual.items() if k not in joint_extra}
+        check('all_112_contacts_once', len(contacts) == 112 and set(contacts) == expected_keys and not duplicates,
+              {'exported_contacts': len(contacts), 'duplicates': duplicates,
+               'missing': sorted(expected_keys - set(contacts)), 'extra': sorted(set(contacts) - expected_keys)})
+        check('J2_joint_pins_63_66_5V_67_80_GND', joint_actual == joint_extra,
+              {k: v for k, v in joint_actual.items() if joint_extra.get(k) != v} or 'all 18 joint pins as expected')
         mismatches = []
         for ref, rows in maps.items():
             count = 50 if ref == 'J1' else 62
@@ -194,7 +201,7 @@ def main():
         check('three_power_domains_separate', supplies == {
             '/HOST_3V3': [('J1', 9), ('J1', 17), ('J1', 34), ('J1', 42)],
             '/HOST_12V': [('J1', 13), ('J1', 38)],
-            '/SNES_5V_CART': [('J2', 27), ('J2', 58)]}, supplies)
+            '/SNES_5V_CART': [('J2', 27), ('J2', 58), ('J2', 63), ('J2', 64), ('J2', 65), ('J2', 66)]}, supplies)
         root_components = [c.get('ref') for c in xml.findall('./components/comp')
                            if c.find('sheetpath').get('names') == '/']
         check('root_cartridge_sheet_has_two_connectors', set(root_components) == {'J1', 'J2'},
@@ -211,16 +218,19 @@ def main():
         embedded = {s[1].split(':', 1)[-1]: ['symbol', s[1].split(':', 1)[-1], *s[2:]]
                     for s in children(child(schematic, 'lib_symbols'), 'symbol')}
         check('embedded_symbols_match_reusable_library', embedded == symbols, sorted(symbols))
-        assignments = {'J1': ('N64_Cartridge_Edge_50', 'N64_Edge_SC64_Reference'),
-                       'J2': ('SNES_Female_Slot_62', 'SNES Slot')}
+        # J2 on the main board is the joint symbol: the socket's 62 pins plus 18 joint pins.
+        assignments = {'J1': ('N64_Cartridge_Edge_50', 'SN64:N64_Edge_SC64_Reference'),
+                       'J2': ('SN64_Socket_Joint_2x40', 'Connector_PinHeader_2.00mm:PinHeader_2x40_P2.00mm_Horizontal')}
         for ref, (symbol_name, footprint_name) in assignments.items():
             symbol = symbols[symbol_name]
             pins = [p for unit in children(symbol, 'symbol') for p in children(unit, 'pin')]
             values = [(child(p, 'number')[1], child(p, 'name')[1], p[1]) for p in pins]
             expected = [(pin, row['signal'], 'passive') for pin, row in maps[ref].items()]
+            if ref == 'J2':
+                expected += [(str(n), 'SNES_5V_CART' if n <= 66 else 'GND', 'passive') for n in range(63, 81)]
             check(ref + '_library_pin_names_numbers_types', sorted(values) == sorted(expected), len(values))
             component = next(c for c in xml.findall('./components/comp') if c.get('ref') == ref)
-            check(ref + '_footprint_binding', component.findtext('footprint') == 'SN64:' + footprint_name,
+            check(ref + '_footprint_binding', component.findtext('footprint') == footprint_name,
                   component.findtext('footprint'))
             for table_name, expected_uri in [('sym-lib-table', '${KIPRJMOD}/libraries/SN64.kicad_sym'),
                                              ('fp-lib-table', '${KIPRJMOD}/libraries/SN64.pretty')]:

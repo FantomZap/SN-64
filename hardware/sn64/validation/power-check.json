@@ -1,16 +1,16 @@
 {
   "status": "pass",
-  "generated_at_utc": "2026-09-29T23:57:56.687894+00:00",
+  "generated_at_utc": "2026-09-30T00:51:32.574074+00:00",
   "scope": "independent power-sheet static connectivity and divider arithmetic review",
   "project_checked": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\hardware\\sn64",
   "checks_passed": 23,
   "checks_failed": 0,
   "inputs_sha256": {
-    "sn64.kicad_sch": "4fbc588ad545ea6d34c095103af83c9238bc3e5f922bc91e2abdb4711719b5b0",
+    "sn64.kicad_sch": "e6b8db9ae8891be85ceba04973537c6430c2831e07c6bc8b80b56fd22d0e800a",
     "power.kicad_sch": "14d5328907a943e9cbbbecc31dc1b685f4714dc595a91a176ed44d8a1d50d2c1",
     "libraries/SN64_POWER.kicad_sym": "828065e92ca1941d4ea8da258a00ebc7d5570a401bc9cec2ed6d0d1417847ef5",
     "usb-programmer.kicad_sch": "b8cfd904b2ea9a024f47461d22f97630a7414379b5f59f308514e877f118861d",
-    "cart-interface.kicad_sch": "466af5c6f78a321be77d3a1cfa262c58f0f7734d184cdfc74ff529f6120fd3b3"
+    "cart-interface.kicad_sch": "71f79297ebf20618138eb1d05044cdcc1c3e719a6b62d1dfb639b74a56693e1c"
   },
   "checks": [
     {
@@ -356,112 +356,6 @@
     "Footprints for RPW/RNM packages and the inductors are pending; no PCB exists."
   ],
   "negative_test_previous_run": {
-    "status": "pass",
-    "mutations": 11,
-    "detected": 11,
-    "results": [
-      {
-        "mutation": "host_shorted_to_SYS_VIN",
-        "expected_failing_check": "no_source_directly_paralleled",
-        "failed_checks": [
-          "ic_and_fet_pin_maps",
-          "rails_are_distinct_nets",
-          "no_source_directly_paralleled",
-          "regulator_enable_chain",
-          "divider_values_reproduce_documented_thresholds"
-        ],
-        "detected": true
-      },
-      {
-        "mutation": "usb_shorted_to_SYS_VIN",
-        "expected_failing_check": "no_source_directly_paralleled",
-        "failed_checks": [
-          "ic_and_fet_pin_maps",
-          "rails_are_distinct_nets",
-          "no_source_directly_paralleled",
-          "regulator_enable_chain",
-          "divider_values_reproduce_documented_thresholds"
-        ],
-        "detected": true
-      },
-      {
-        "mutation": "cart_enable_pulled_up",
-        "expected_failing_check": "cart_efuse_enable_default_low",
-        "failed_checks": [
-          "cart_efuse_enable_default_low"
-        ],
-        "detected": true
-      },
-      {
-        "mutation": "cart_monitor_on_supply_side",
-        "expected_failing_check": "monitors_on_socket_side",
-        "failed_checks": [
-          "monitors_on_socket_side",
-          "divider_values_reproduce_documented_thresholds"
-        ],
-        "detected": true
-      },
-      {
-        "mutation": "iface_enable_pulled_up",
-        "expected_failing_check": "iface_switch_default_off",
-        "failed_checks": [
-          "iface_switch_default_off"
-        ],
-        "detected": true
-      },
-      {
-        "mutation": "cart_window_resistor_changed",
-        "expected_failing_check": "divider_values_reproduce_documented_thresholds",
-        "failed_checks": [
-          "divider_values_reproduce_documented_thresholds"
-        ],
-        "detected": true
-      },
-      {
-        "mutation": "usb_ovlo_resistor_changed",
-        "expected_failing_check": "divider_values_reproduce_documented_thresholds",
-        "failed_checks": [
-          "divider_values_reproduce_documented_thresholds"
-        ],
-        "detected": true
-      },
-      {
-        "mutation": "contract_signal_renamed",
-        "expected_failing_check": "contract_signals_present_with_direction",
-        "failed_checks": [
-          "contract_signals_present_with_direction"
-        ],
-        "detected": true
-      },
-      {
-        "mutation": "monitor_pullup_to_5V",
-        "expected_failing_check": "monitor_outputs_pulled_to_FPGA_3V3",
-        "failed_checks": [
-          "monitor_outputs_pulled_to_FPGA_3V3"
-        ],
-        "detected": true
-      },
-      {
-        "mutation": "usb_permission_bypassed",
-        "expected_failing_check": "usb_input_default_off_permission",
-        "failed_checks": [
-          "ic_and_fet_pin_maps",
-          "usb_input_default_off_permission"
-        ],
-        "detected": true
-      },
-      {
-        "mutation": "cart_pulldown_too_weak",
-        "expected_failing_check": "cart_efuse_enable_default_low",
-        "failed_checks": [
-          "cart_efuse_enable_default_low"
-        ],
-        "detected": true
-      }
-    ],
-    "generated_at_utc": "2026-09-29T23:40:28.094862+00:00"
-  },
-  "negative_test": {
     "status": "pass",
     "mutations": 12,
     "detected": 12,

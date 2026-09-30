@@ -1,12 +1,12 @@
 {
   "status": "pass",
-  "generated_at_utc": "2026-09-30T00:00:56.377636+00:00",
+  "generated_at_utc": "2026-09-30T00:51:35.828905+00:00",
   "scope": "root hierarchy connectivity: hierarchical labels, sheet pins, root labels and the shared net-name contract",
   "tool": "hardware/sn64/tools/verify_root_connectivity.py",
   "checks_passed": 4,
   "checks_failed": 0,
   "inputs": {
-    "sn64.kicad_sch": "4fbc588ad545ea6d34c095103af83c9238bc3e5f922bc91e2abdb4711719b5b0",
+    "sn64.kicad_sch": "e6b8db9ae8891be85ceba04973537c6430c2831e07c6bc8b80b56fd22d0e800a",
     "usb-programmer.kicad_sch": "b8cfd904b2ea9a024f47461d22f97630a7414379b5f59f308514e877f118861d",
     "cart-interface.kicad_sch": "71f79297ebf20618138eb1d05044cdcc1c3e719a6b62d1dfb639b74a56693e1c",
     "fpga.kicad_sch": "0a2c5c6b651acf6349636239c4eb994d2c3bba8bcb526bd7f8e938f781867e75",

@@ -1,0 +1,77 @@
+{
+  "status": "pass",
+  "checks": [
+    {
+      "name": "joint_has_80_pins_on_both_boards",
+      "ok": true,
+      "detail": {
+        "main": 80,
+        "socket": 80
+      }
+    },
+    {
+      "name": "joint_pins_carry_same_net_on_both_boards",
+      "ok": true,
+      "detail": {}
+    },
+    {
+      "name": "socket_contacts_wired_1_to_1_to_joint_pins_1_62",
+      "ok": true,
+      "detail": {
+        "count": 62,
+        "wrong": {}
+      }
+    },
+    {
+      "name": "joint_pins_63_66_5V_and_67_80_GND",
+      "ok": true,
+      "detail": {}
+    },
+    {
+      "name": "main_J2_is_the_right_angle_2x40_2mm_header",
+      "ok": true,
+      "detail": "Connector_PinHeader_2.00mm:PinHeader_2x40_P2.00mm_Horizontal"
+    },
+    {
+      "name": "socket_J2_is_the_vertical_2x40_2mm_socket",
+      "ok": true,
+      "detail": "Connector_PinSocket_2.00mm:PinSocket_2x40_P2.00mm_Vertical"
+    },
+    {
+      "name": "socket_J1_uses_console_replacement_footprint",
+      "ok": true,
+      "detail": "SN64:SNES_Slot_Console_7mm"
+    },
+    {
+      "name": "socket_board_decoupling_on_cartridge_5V",
+      "ok": true,
+      "detail": [
+        "C1",
+        "C2"
+      ]
+    },
+    {
+      "name": "socket_footprint_matches_OpenSFC_geometry",
+      "ok": true,
+      "detail": {
+        "pads": 62,
+        "bad": {},
+        "ears": [
+          [
+            "-47.5",
+            "3.2",
+            "3.2",
+            "3.2"
+          ],
+          [
+            "47.5",
+            "3.2",
+            "3.2",
+            "3.2"
+          ]
+        ]
+      }
+    }
+  ],
+  "scope": "static netlist and footprint-geometry review of the two-board joint; nothing built or measured"
+}

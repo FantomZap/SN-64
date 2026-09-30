@@ -1,0 +1,30 @@
+{
+  "negative_test": "pass",
+  "results": [
+    {
+      "mutation": "joint_pin_swapped",
+      "expected_failure": "socket_contacts_wired_1_to_1_to_joint_pins_1_62",
+      "failed": [
+        "socket_contacts_wired_1_to_1_to_joint_pins_1_62"
+      ],
+      "detected": true
+    },
+    {
+      "mutation": "ground_pin_relabelled_5V",
+      "expected_failure": "joint_pins_63_66_5V_and_67_80_GND",
+      "failed": [
+        "joint_pins_carry_same_net_on_both_boards",
+        "joint_pins_63_66_5V_and_67_80_GND"
+      ],
+      "detected": true
+    },
+    {
+      "mutation": "socket_footprint_changed",
+      "expected_failure": "socket_J1_uses_console_replacement_footprint",
+      "failed": [
+        "socket_J1_uses_console_replacement_footprint"
+      ],
+      "detected": true
+    }
+  ]
+}

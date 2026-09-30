@@ -1,6 +1,6 @@
 # Independent interface review
 
-Result: **PASS** — 30 checks passed; 0 failed.
+Result: **PASS** — 31 checks passed; 0 failed.
 
 The validator independently exports the current schematic with KiCad and checks all 112 pin-to-net assignments against both CSV maps. It compares the N64 footprint with J_N1 loaded directly from the original SummerCart64 PCB, including copper sides, pad geometry, mask polygons and connector edge profile. The SNES footprint must be byte-identical to the original Sanni footprint.
 

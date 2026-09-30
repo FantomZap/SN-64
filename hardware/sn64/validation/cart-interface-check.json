@@ -1,12 +1,12 @@
 {
   "status": "pass",
   "scope": "static schematic/netlist check of the SNES cartridge-side translation sheet only",
-  "generated_at_utc": "2026-09-29T23:58:02.090689+00:00",
+  "generated_at_utc": "2026-09-30T00:51:31.917976+00:00",
   "checks_passed": 20,
   "checks_failed": 0,
   "inputs": {
-    "sn64.kicad_sch": "4fbc588ad545ea6d34c095103af83c9238bc3e5f922bc91e2abdb4711719b5b0",
-    "cart-interface.kicad_sch": "466af5c6f78a321be77d3a1cfa262c58f0f7734d184cdfc74ff529f6120fd3b3",
+    "sn64.kicad_sch": "e6b8db9ae8891be85ceba04973537c6430c2831e07c6bc8b80b56fd22d0e800a",
+    "cart-interface.kicad_sch": "71f79297ebf20618138eb1d05044cdcc1c3e719a6b62d1dfb639b74a56693e1c",
     "interfaces/snes-pin-map.csv": "911a289bfb073aab8048daff42256eae65a527c8a0efd852bca0f37b1fdf7adc",
     "libraries/SN64_CART.kicad_sym": "c9398658a1ded7297d70e912f3a58fedbd5742abe486d00a21b5adf22ffdb092"
   },

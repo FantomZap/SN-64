@@ -1,15 +1,15 @@
 {
   "status": "pass",
   "scope": "static schematic/netlist check of the clock, HDMI and cartridge-audio child sheet only",
-  "generated_at_utc": "2026-09-29T23:58:04.759848+00:00",
+  "generated_at_utc": "2026-09-30T00:51:35.191436+00:00",
   "project_checked": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\hardware\\sn64",
   "checks_passed": 30,
   "checks_failed": 0,
   "inputs": {
-    "sn64.kicad_sch": "4fbc588ad545ea6d34c095103af83c9238bc3e5f922bc91e2abdb4711719b5b0",
+    "sn64.kicad_sch": "e6b8db9ae8891be85ceba04973537c6430c2831e07c6bc8b80b56fd22d0e800a",
     "av-clock.kicad_sch": "66c40c96bddd5d0a8fa40f0638624a2bd0bd515b502e62d219734b05addf6bfa",
     "libraries/SN64_AV.kicad_sym": "486554125953dafa652818d7161acb74f836f4d90ec81f17d1d887b42877a874",
-    "fpga/rtl/sn64_clock_init.sv": "91fb34debe542498378203c234b6137a0a51a495d04bd294e7cb32ecc0f2f8cd"
+    "fpga/rtl/sn64_clock_init.sv": "3a99d3dab2e864348778f65c6fe9e9cc25720e212a86dab001565c965075c9fc"
   },
   "erc_violations_by_type": {
     "warning:isolated_pin_label": 5,

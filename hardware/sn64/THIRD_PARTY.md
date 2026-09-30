@@ -52,3 +52,10 @@ The KiCad library copies use **CC-BY-SA 4.0 with the KiCad library exception**. 
 ## Other round-3 reuse (facts only, no files copied)
 - FPGA sheet: ULX3S `6a92cec6` flash pull values and HDMI ball pairs; SummerCart64 `a1e7996d` N64 pad treatment (no series resistors).
 - Power sheet: the TLV62569 FPGA-rail stages follow the ULX3S rev 1.0.8 `power.sch` topology at commit `6a92cec` (MIT; no files copied).
+
+## OpenSFC cartridge-slot geometry (socket board)
+- Upstream: [starlightk7/OpenSFC](https://github.com/starlightk7/OpenSFC), `Common/libraries/OpenSFC.pretty/CartSlot.kicad_mod`, commit `6574450b1a4594b2aae436cf23869b0fb5808ce8`, SHA-256 `1f9b60ddd99989e69f4395c12e75292c88869fa6cf3515bcd9eee5485d48b5a0`.
+- Reused as geometry in `libraries/SN64.pretty/SNES_Slot_Console_7mm.kicad_mod` (written by `tools/split_socket_board.py`): pad positions (2.5 mm pitch, 7.5 mm gaps, rows 7.0 mm apart), pad/drill sizes, body outline and the two Ø3.2 mm ear holes 95 mm apart. No upstream file is copied byte-for-byte.
+- License: CERN-OHL-S-2.0 (retained as [licenses/OpenSFC-LICENSE.txt](licenses/OpenSFC-LICENSE.txt)). SN64 hardware is published under a compatible strongly-reciprocal licence; keep this notice with the footprint.
+- The sd2snes Rev F board (mrehkopf/sd2snes, commit `cf7e21d7`) and qwertymodo's kicad-snn-cpu-01 (commit `a0018661`, CERN-OHL-S-2.0) were read for dimensions only (docs/dimensions.md); nothing copied.
+

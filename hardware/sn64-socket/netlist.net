@@ -1,0 +1,62 @@
+(export
+	(version "E")
+	(design
+		(source "C:\\Users\\RyanB\\.claude\\projects\\SN64\\hardware\\sn64-socket\\sn64-socket.kicad_sch")
+		(date "2026-09-29T20:49:18")
+		(tool "Eeschema 10.0.6")
+		(sheet
+			(number "1")
+			(name "/")
+			(tstamps "/")
+			(title_block
+				(title "SN 64 socket board")
+				(company)
+				(rev "0.1-socket")
+				(date)
+				(source "sn64-socket.kicad_sch")
+				(comment
+					(number "1")
+					(value "SNES/SFC socket on its own horizontal board; joined to the main board by a 2x40 2.00 mm header (J2 on both boards). Net names match the main root sheet.")
+				)
+				(comment
+					(number "2")
+					(value "Socket footprint: console-replacement family, OpenSFC geometry (7.0 mm rows, ears 95 mm). Unverified on a sample; see docs/dimensions.md.")
+				)
+				(comment
+					(number "3")
+					(value "")
+				)
+				(comment
+					(number "4")
+					(value "")
+				)
+				(comment
+					(number "5")
+					(value "")
+				)
+				(comment
+					(number "6")
+					(value "")
+				)
+				(comment
+					(number "7")
+					(value "")
+				)
+				(comment
+					(number "8")
+					(value "")
+				)
+				(comment
+					(number "9")
+					(value "")
+				)
+			)
+		)
+	)
+	(components)
+	(groups)
+	(variants)
+	(libparts)
+	(libraries)
+	(nets)
+)
