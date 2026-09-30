@@ -12,6 +12,8 @@ Independent static checks on the integrated schematic: ERC 0 errors; 30 interfac
 
 Every target in the original specification remains in scope, including PAL, protection, save integrity, telemetry, independent recovery, factory testing, and the additional requirements. The SNES picture and sound go to the console over the cartridge bus and appear on the console's own output (M64 HDMI, N64 AV jack); the adapter has no video output of its own. M64's reserved contacts stay isolated.
 
+**v2 (branch `v2`, 2026-09-30):** a second board set that keeps every specification target and moves the USB device, clock generation, cartridge-audio ADC and rail telemetry into the FPGA, with a passive N64 riser carrying only the bus. 176 parts on the main board against 380, 16 chips against 47, FPGA signals on the outer three ball rings. Generated schematic (ERC 0 errors), simulated logic, scripted placement and autorouting. See [v2 board write-up](docs/design/v2-board.md); not fabrication-ready.
+
 ## Documents
 
 - [Engineering specification, Rev A](SN_64_Engineering_Specification_Rev_A.docx)
@@ -38,6 +40,7 @@ Every target in the original specification remains in scope, including PAL, prot
 - [Cartridge interface schematic sheet](docs/design/cart-interface-schematic.md)
 - [FPGA schematic sheet and board pinout](docs/design/fpga-schematic.md)
 - [Power schematic sheet](docs/design/power-schematic.md)
+- [v2 board: schematic write-up, rationale, files](docs/design/v2-board.md)
 - [Clock and cartridge-audio schematic sheet](docs/design/av-clock-schematic.md)
 - [Cartridge data-bus source evidence and unresolved behavior](docs/design/bus-electrical-evidence.md)
 - [FPGA/package, supply and board reuse review](docs/design/fpga-board-selection.md)

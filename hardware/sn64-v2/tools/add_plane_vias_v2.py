@@ -180,12 +180,12 @@ def main():
                 added += 1
                 continue
             # BGA balls and other pads with a same-net neighbour pad close by: a short link on the pad layer.
-            for it in idx.near(px, py, 1.8):
+            for it in idx.near(px, py, 3.3):
                 if it[0] != 'pad' or it[5] != codes[net] or (it[6] is not ALL and it[6] != layer):
                     continue
                 qx, qy = (it[1] + it[3]) / 2, (it[2] + it[4]) / 2
                 d = math.hypot(qx - px, qy - py)
-                if d < 0.05 or d > 1.5:
+                if d < 0.05 or d > 3.0:
                     continue
                 n_pts = max(3, int(d / 0.1))
                 if any(not free(px + (qx - px) * f, py + (qy - py) * f, codes[net], layer) for f in (k / n_pts for k in range(1, n_pts))):

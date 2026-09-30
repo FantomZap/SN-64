@@ -41,7 +41,7 @@ horizontal socket. What changed is which board carries the electronics:
 
 | Function | v1 parts | v2 | Where |
 |---|---|---|---|
-| Clocks | Si5351A + 25 MHz crystal, 25 MHz and 12.288 MHz oscillators, I2C start-up machine | One 27 MHz oscillator; three PLLs: NTSC 21.477272 MHz exact (27 x 35/44), PAL 21.288462 MHz (+335 ppm against 21.28137; the ECP5 has no fractional divider), 48/61.71/12 MHz for USB and the host side | `fpga/rtl/sn64_board_top.sv` |
+| Clocks | Si5351A + 25 MHz crystal, 25 MHz and 12.288 MHz oscillators, I2C start-up machine | One 27 MHz oscillator; three PLLs (feedback from CLKOS): NTSC 21.477273 MHz exact (27/2 x 5 x 7 / 22), PAL 21.280788 MHz (-27 ppm against 21.28137: 27/7 x 4 x 40 / 29), 48 / 61.71 / 12 MHz for USB and the host side from one 432 MHz VCO | `fpga/rtl/sn64_board_top.sv` |
 | USB programming and recovery | FT232H, 12 MHz crystal, EEPROM, 3.3 V LDO, 4-bit isolator, second ESD part | Full-speed USB device on two FPGA pins running the TinyFPGA bootloader protocol (`tinyprog` reads, erases, writes the flash and reboots the FPGA); 22 R series, 1.5 k pull-up switched by the FPGA; one ESD part | `fpga/rtl/sn64_usb_prog.sv`, vendor `fpga/vendor/tinyfpga-bootloader` (Apache-2.0) |
 | Rail and temperature telemetry, USB-C detection | 6 x TPS3700, TPS3808, TMP302, TUSB320, 8 x BSS138, ~45 resistors | TLA2528 8-channel I2C ADC read by the FPGA, thresholds in logic; NTC for temperature; CC1/CC2 read directly (Rd resistors do the Type-C sink job); TPS3808 kept as the pre-configuration reset supervisor | `fpga/rtl/sn64_rail_monitor.sv` |
 | Cartridge audio ADC | PCM1808 + 12.288 MHz oscillator + bead | First-order sigma-delta per channel: LVDS input pair as the comparator, 10 k / 1 nF integrator on a feedback pin, 2048-clock boxcar (~30 kHz, ~10 bits) | `fpga/rtl/sn64_sd_adc.sv` |
@@ -82,7 +82,7 @@ horizontal socket. What changed is which board carries the electronics:
 | Libraries | `libraries/SN64_V2.kicad_sym` (TPS2121, TLA2528, TPS2553 drawn from the TI pin tables), v1 libraries reused unchanged; `libraries/v2-provenance.json` |
 | Boards | `build_v2_pcb.py` (placement), `prepare_route_v2.py` (fan-out, planes), `apply_netclasses_v2.py`, `finish_route_v2.py`, `add_plane_vias_v2.py`; router KiCadRoutingTools (see `docs/design/pcb-routing.md`) |
 | Checks | `validation/erc.json` (0 errors, 8 warnings: unused translator inputs tied to ground), `validation/*.xml` netlists, DRC reports under `build/` |
-| FPGA | `fpga/tools/evaluate.py --mode sim` (all benches pass, new `tb_sd_adc`), `fpga/tools/route_top.py --top board --speed 8` |
+| FPGA | `fpga/tools/evaluate.py --mode sim` (all benches pass, new `tb_sd_adc`); `fpga/tools/route_top.py --top board --speed 8` routes with every clock passing timing (`fpga/reports/v2-board-route.json`: 30.7k LUT4, 203/208 block RAMs, 111 I/O) |
 
 ## Provisional values (to confirm at review or bring-up)
 
