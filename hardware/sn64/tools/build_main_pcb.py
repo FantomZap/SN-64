@@ -370,14 +370,18 @@ def main():
                     found = True
             if not found:
                 print(f'  warning: {ref} pad {pin} not in footprint {fp.GetFPIDAsString()}')
-    # FPGA decoupling capacitors on the bottom side under the BGA, in a grid (placed before the
-    # attraction pass so the rest keeps clear of them)
+    # FPGA decoupling capacitors on the bottom side in two bands just above and below the BGA's
+    # dog-bone via field (x +-7.2, y -39.2..-24.8 for U401 at (0, -32); prepare_route.py), 12 per
+    # row at 3.0 mm; placed before the attraction pass so the rest keeps clear of them. The 1.1 V
+    # and ground/3.3 V caps reach their planes through vias; a via-in-pad or 0201 layout between
+    # the balls would sit closer and is a later refinement.
     decaps = sorted(blocks.get('fpga_decap', []), key=lambda f: f.GetReference())
-    cols = 6
+    rows = (-41.5, -43.7, -22.5, -20.3)
+    cols = 12
     for i, fp in enumerate(decaps):
         fp.Flip(fp.GetPosition(), False)
-        x = -7.5 + (i % cols) * 3.0
-        y = -38.0 + (i // cols) * 2.2
+        x = -16.5 + (i % cols) * 3.0
+        y = rows[(i // cols) % len(rows)]
         fp.SetPosition(pcbnew.VECTOR2I(mm(x), mm(y)))
     place_by_attraction(board, fps, blocks, list(FIXED) + [h.GetReference() for h in holes] + [f.GetReference() for f in decaps])
     board.BuildListOfNets()
