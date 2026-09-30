@@ -862,8 +862,8 @@
    ],
    [
     "J1",
-    "Riser joint 2x20 2.00mm",
-    "Connector_PinSocket_2.00mm:PinSocket_2x20_P2.00mm_Vertical"
+    "N64 cartridge edge",
+    "SN64:N64_Edge_SC64_Reference"
    ],
    [
     "C212",
@@ -1129,18 +1129,6 @@
     "C323",
     "10uF 10V",
     "Capacitor_SMD:C_0805_2012Metric"
-   ]
-  ],
-  "riser": [
-   [
-    "J1",
-    "N64 cartridge edge",
-    "SN64:N64_Edge_SC64_Reference"
-   ],
-   [
-    "J2",
-    "Riser joint 2x20 2.00mm",
-    "Connector_PinHeader_2.00mm:PinHeader_2x20_P2.00mm_Horizontal"
    ]
   ]
  }

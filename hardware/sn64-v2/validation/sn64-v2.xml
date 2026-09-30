@@ -2,11 +2,11 @@
 <export version="E">
   <design>
     <source>C:\Users\RyanB\.claude\projects\SN64\hardware\sn64-v2\sn64-v2.kicad_sch</source>
-    <date>2026-09-30T10:44:51</date>
+    <date>2026-09-30T11:45:28</date>
     <tool>Eeschema 10.0.6</tool>
     <sheet number="1" name="/" tstamps="/">
       <title_block>
-        <title>SN64 v2 main board (horizontal): FPGA, SNES socket, translators, power, USB</title>
+        <title>SN64 v2: one board in the N64 slot with the SNES socket on its face; FPGA, translators, power, USB</title>
         <company/>
         <rev>v2 draft 0.1</rev>
         <date>2026-09-30</date>
@@ -3041,65 +3041,73 @@
       </units>
     </comp>
     <comp ref="J1">
-      <value>Riser joint 2x20 2.00mm</value>
-      <footprint>Connector_PinSocket_2.00mm:PinSocket_2x20_P2.00mm_Vertical</footprint>
+      <value>N64 cartridge edge</value>
+      <footprint>SN64:N64_Edge_SC64_Reference</footprint>
       <fields>
-        <field name="Note">pins 1-27 N64 bus, 28-31 HOST_3V3, 32-40 GND; mates hardware/sn64-v2-riser J2</field>
-        <field name="Footprint">Connector_PinSocket_2.00mm:PinSocket_2x20_P2.00mm_Vertical</field>
+        <field name="Note">SummerCart64 edge geometry; 12 V, audio, sync and key fingers unused</field>
+        <field name="Footprint">SN64:N64_Edge_SC64_Reference</field>
         <field name="Datasheet"/>
         <field name="Description"/>
       </fields>
-      <libsource lib="Connector_Generic" part="Conn_02x20_Odd_Even" description="Generic connector, double row, 02x20, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)"/>
-      <property name="Note" value="pins 1-27 N64 bus, 28-31 HOST_3V3, 32-40 GND; mates hardware/sn64-v2-riser J2"/>
+      <libsource lib="SN64" part="N64_Cartridge_Edge_50" description="Reference-verified connector; passive pin types. See interface CSV for endpoint directions."/>
+      <property name="Note" value="SummerCart64 edge geometry; 12 V, audio, sync and key fingers unused"/>
       <property name="Sheetname" value="Cartridge"/>
       <property name="Sheetfile" value="cart.kicad_sch"/>
-      <property name="ki_keywords" value="connector"/>
-      <property name="ki_fp_filters" value="Connector*:*_2x??_*"/>
       <sheetpath names="/Cartridge/" tstamps="/69e05daa-4082-5d3e-8a2d-0d56f4a78932/"/>
       <tstamps>85dbcc47-e49e-58ff-938e-034ee2d40a2f</tstamps>
       <units>
         <unit name="A">
           <pins>
             <pin num="1"/>
-            <pin num="3"/>
-            <pin num="5"/>
-            <pin num="7"/>
-            <pin num="9"/>
-            <pin num="11"/>
-            <pin num="13"/>
-            <pin num="15"/>
-            <pin num="17"/>
-            <pin num="19"/>
-            <pin num="21"/>
-            <pin num="23"/>
-            <pin num="25"/>
-            <pin num="27"/>
-            <pin num="29"/>
-            <pin num="31"/>
-            <pin num="33"/>
-            <pin num="35"/>
-            <pin num="37"/>
-            <pin num="39"/>
             <pin num="2"/>
+            <pin num="3"/>
             <pin num="4"/>
+            <pin num="5"/>
             <pin num="6"/>
+            <pin num="7"/>
             <pin num="8"/>
+            <pin num="9"/>
             <pin num="10"/>
+            <pin num="11"/>
             <pin num="12"/>
+            <pin num="13"/>
             <pin num="14"/>
+            <pin num="15"/>
             <pin num="16"/>
+            <pin num="17"/>
             <pin num="18"/>
+            <pin num="19"/>
             <pin num="20"/>
+            <pin num="21"/>
             <pin num="22"/>
+            <pin num="23"/>
             <pin num="24"/>
+            <pin num="25"/>
             <pin num="26"/>
+            <pin num="27"/>
             <pin num="28"/>
+            <pin num="29"/>
             <pin num="30"/>
+            <pin num="31"/>
             <pin num="32"/>
+            <pin num="33"/>
             <pin num="34"/>
+            <pin num="35"/>
             <pin num="36"/>
+            <pin num="37"/>
             <pin num="38"/>
+            <pin num="39"/>
             <pin num="40"/>
+            <pin num="41"/>
+            <pin num="42"/>
+            <pin num="43"/>
+            <pin num="44"/>
+            <pin num="45"/>
+            <pin num="46"/>
+            <pin num="47"/>
+            <pin num="48"/>
+            <pin num="49"/>
+            <pin num="50"/>
           </pins>
         </unit>
       </units>
@@ -5341,61 +5349,6 @@
         <pin num="1" name="1" type="passive"/>
       </pins>
     </libpart>
-    <libpart lib="Connector_Generic" part="Conn_02x20_Odd_Even">
-      <description>Generic connector, double row, 02x20, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)</description>
-      <footprints>
-        <fp>Connector*:*_2x??_*</fp>
-      </footprints>
-      <fields>
-        <field name="Reference">J</field>
-        <field name="Value">Conn_02x20_Odd_Even</field>
-        <field name="Footprint"/>
-        <field name="Datasheet"/>
-        <field name="Description">Generic connector, double row, 02x20, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)</field>
-      </fields>
-      <pins>
-        <pin num="1" name="Pin_1" type="passive"/>
-        <pin num="2" name="Pin_2" type="passive"/>
-        <pin num="3" name="Pin_3" type="passive"/>
-        <pin num="4" name="Pin_4" type="passive"/>
-        <pin num="5" name="Pin_5" type="passive"/>
-        <pin num="6" name="Pin_6" type="passive"/>
-        <pin num="7" name="Pin_7" type="passive"/>
-        <pin num="8" name="Pin_8" type="passive"/>
-        <pin num="9" name="Pin_9" type="passive"/>
-        <pin num="10" name="Pin_10" type="passive"/>
-        <pin num="11" name="Pin_11" type="passive"/>
-        <pin num="12" name="Pin_12" type="passive"/>
-        <pin num="13" name="Pin_13" type="passive"/>
-        <pin num="14" name="Pin_14" type="passive"/>
-        <pin num="15" name="Pin_15" type="passive"/>
-        <pin num="16" name="Pin_16" type="passive"/>
-        <pin num="17" name="Pin_17" type="passive"/>
-        <pin num="18" name="Pin_18" type="passive"/>
-        <pin num="19" name="Pin_19" type="passive"/>
-        <pin num="20" name="Pin_20" type="passive"/>
-        <pin num="21" name="Pin_21" type="passive"/>
-        <pin num="22" name="Pin_22" type="passive"/>
-        <pin num="23" name="Pin_23" type="passive"/>
-        <pin num="24" name="Pin_24" type="passive"/>
-        <pin num="25" name="Pin_25" type="passive"/>
-        <pin num="26" name="Pin_26" type="passive"/>
-        <pin num="27" name="Pin_27" type="passive"/>
-        <pin num="28" name="Pin_28" type="passive"/>
-        <pin num="29" name="Pin_29" type="passive"/>
-        <pin num="30" name="Pin_30" type="passive"/>
-        <pin num="31" name="Pin_31" type="passive"/>
-        <pin num="32" name="Pin_32" type="passive"/>
-        <pin num="33" name="Pin_33" type="passive"/>
-        <pin num="34" name="Pin_34" type="passive"/>
-        <pin num="35" name="Pin_35" type="passive"/>
-        <pin num="36" name="Pin_36" type="passive"/>
-        <pin num="37" name="Pin_37" type="passive"/>
-        <pin num="38" name="Pin_38" type="passive"/>
-        <pin num="39" name="Pin_39" type="passive"/>
-        <pin num="40" name="Pin_40" type="passive"/>
-      </pins>
-    </libpart>
     <libpart lib="Device" part="C">
       <description>Unpolarized capacitor</description>
       <footprints>
@@ -6015,6 +5968,68 @@
         <pin num="5" name="FB" type="input"/>
       </pins>
     </libpart>
+    <libpart lib="SN64" part="N64_Cartridge_Edge_50">
+      <description>Reference-verified connector; passive pin types. See interface CSV for endpoint directions.</description>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">N64_Cartridge_Edge_50</field>
+        <field name="Footprint">SN64:N64_Edge_SC64_Reference</field>
+        <field name="Datasheet"/>
+        <field name="Description">Reference-verified connector; passive pin types. See interface CSV for endpoint directions.</field>
+      </fields>
+      <pins>
+        <pin num="1" name="GND" type="passive"/>
+        <pin num="2" name="GND" type="passive"/>
+        <pin num="3" name="AD15" type="passive"/>
+        <pin num="4" name="AD14" type="passive"/>
+        <pin num="5" name="AD13" type="passive"/>
+        <pin num="6" name="GND" type="passive"/>
+        <pin num="7" name="AD12" type="passive"/>
+        <pin num="8" name="/WRITE" type="passive"/>
+        <pin num="9" name="3V3" type="passive"/>
+        <pin num="10" name="/READ" type="passive"/>
+        <pin num="11" name="AD11" type="passive"/>
+        <pin num="12" name="AD10" type="passive"/>
+        <pin num="13" name="12V" type="passive"/>
+        <pin num="14" name="KEY1_RESERVED" type="passive"/>
+        <pin num="15" name="AD9" type="passive"/>
+        <pin num="16" name="AD8" type="passive"/>
+        <pin num="17" name="3V3" type="passive"/>
+        <pin num="18" name="CIC_DATA" type="passive"/>
+        <pin num="19" name="PIF_CLK" type="passive"/>
+        <pin num="20" name="/RESET" type="passive"/>
+        <pin num="21" name="JOYBUS" type="passive"/>
+        <pin num="22" name="GND" type="passive"/>
+        <pin num="23" name="GND" type="passive"/>
+        <pin num="24" name="AUDIO_L" type="passive"/>
+        <pin num="25" name="GND" type="passive"/>
+        <pin num="26" name="GND" type="passive"/>
+        <pin num="27" name="GND" type="passive"/>
+        <pin num="28" name="AD0" type="passive"/>
+        <pin num="29" name="AD1" type="passive"/>
+        <pin num="30" name="AD2" type="passive"/>
+        <pin num="31" name="GND" type="passive"/>
+        <pin num="32" name="AD3" type="passive"/>
+        <pin num="33" name="ALE_L" type="passive"/>
+        <pin num="34" name="3V3" type="passive"/>
+        <pin num="35" name="ALE_H" type="passive"/>
+        <pin num="36" name="AD4" type="passive"/>
+        <pin num="37" name="AD5" type="passive"/>
+        <pin num="38" name="12V" type="passive"/>
+        <pin num="39" name="KEY2_RESERVED" type="passive"/>
+        <pin num="40" name="AD6" type="passive"/>
+        <pin num="41" name="AD7" type="passive"/>
+        <pin num="42" name="3V3" type="passive"/>
+        <pin num="43" name="CIC_CLK" type="passive"/>
+        <pin num="44" name="/INT" type="passive"/>
+        <pin num="45" name="/NMI" type="passive"/>
+        <pin num="46" name="VIDEO_SYNC_RESERVED" type="passive"/>
+        <pin num="47" name="GND" type="passive"/>
+        <pin num="48" name="GND" type="passive"/>
+        <pin num="49" name="AUDIO_R" type="passive"/>
+        <pin num="50" name="GND" type="passive"/>
+      </pins>
+    </libpart>
     <libpart lib="SN64" part="SNES_Female_Slot_62">
       <description>Reference-verified connector; passive pin types. See interface CSV for endpoint directions.</description>
       <fields>
@@ -6231,9 +6246,6 @@
     </library>
     <library logical="Connector">
       <uri>${KICAD10_SYMBOL_DIR}/Connector.kicad_sym</uri>
-    </library>
-    <library logical="Connector_Generic">
-      <uri>${KICAD10_SYMBOL_DIR}/Connector_Generic.kicad_sym</uri>
     </library>
     <library logical="Device">
       <uri>${KICAD10_SYMBOL_DIR}/Device.kicad_sym</uri>
@@ -6695,15 +6707,18 @@
       <node ref="C7" pin="2" pintype="passive"/>
       <node ref="C8" pin="2" pintype="passive"/>
       <node ref="C9" pin="2" pintype="passive"/>
-      <node ref="J1" pin="32" pinfunction="Pin_32_32" pintype="passive"/>
-      <node ref="J1" pin="33" pinfunction="Pin_33_33" pintype="passive"/>
-      <node ref="J1" pin="34" pinfunction="Pin_34_34" pintype="passive"/>
-      <node ref="J1" pin="35" pinfunction="Pin_35_35" pintype="passive"/>
-      <node ref="J1" pin="36" pinfunction="Pin_36_36" pintype="passive"/>
-      <node ref="J1" pin="37" pinfunction="Pin_37_37" pintype="passive"/>
-      <node ref="J1" pin="38" pinfunction="Pin_38_38" pintype="passive"/>
-      <node ref="J1" pin="39" pinfunction="Pin_39_39" pintype="passive"/>
-      <node ref="J1" pin="40" pinfunction="Pin_40_40" pintype="passive"/>
+      <node ref="J1" pin="1" pinfunction="GND_1" pintype="passive"/>
+      <node ref="J1" pin="2" pinfunction="GND_2" pintype="passive"/>
+      <node ref="J1" pin="22" pinfunction="GND_22" pintype="passive"/>
+      <node ref="J1" pin="23" pinfunction="GND_23" pintype="passive"/>
+      <node ref="J1" pin="25" pinfunction="GND_25" pintype="passive"/>
+      <node ref="J1" pin="26" pinfunction="GND_26" pintype="passive"/>
+      <node ref="J1" pin="27" pinfunction="GND_27" pintype="passive"/>
+      <node ref="J1" pin="31" pinfunction="GND_31" pintype="passive"/>
+      <node ref="J1" pin="47" pinfunction="GND_47" pintype="passive"/>
+      <node ref="J1" pin="48" pinfunction="GND_48" pintype="passive"/>
+      <node ref="J1" pin="50" pinfunction="GND_50" pintype="passive"/>
+      <node ref="J1" pin="6" pinfunction="GND_6" pintype="passive"/>
       <node ref="J101" pin="A1" pinfunction="GND_A1" pintype="passive"/>
       <node ref="J101" pin="A12" pinfunction="GND_A12" pintype="passive"/>
       <node ref="J101" pin="B1" pinfunction="GND_B1" pintype="passive"/>
@@ -6912,10 +6927,10 @@
     <net code="44" name="HOST_3V3" class="power,Default">
       <node ref="C212" pin="1" pintype="passive"/>
       <node ref="C305" pin="1" pintype="passive"/>
-      <node ref="J1" pin="28" pinfunction="Pin_28_28" pintype="passive"/>
-      <node ref="J1" pin="29" pinfunction="Pin_29_29" pintype="passive"/>
-      <node ref="J1" pin="30" pinfunction="Pin_30_30" pintype="passive"/>
-      <node ref="J1" pin="31" pinfunction="Pin_31_31" pintype="passive"/>
+      <node ref="J1" pin="17" pinfunction="3V3_17" pintype="passive"/>
+      <node ref="J1" pin="34" pinfunction="3V3_34" pintype="passive"/>
+      <node ref="J1" pin="42" pinfunction="3V3_42" pintype="passive"/>
+      <node ref="J1" pin="9" pinfunction="3V3_9" pintype="passive"/>
       <node ref="R24" pin="1" pintype="passive"/>
       <node ref="R305" pin="1" pintype="passive"/>
       <node ref="U7" pin="2" pinfunction="IN2_2" pintype="power_in"/>
@@ -7228,111 +7243,111 @@
       <node ref="U7" pin="9" pinfunction="ST_9" pintype="open_collector"/>
     </net>
     <net code="119" name="N64_AD0" class="Default">
-      <node ref="J1" pin="1" pinfunction="Pin_1_1" pintype="passive"/>
+      <node ref="J1" pin="28" pinfunction="AD0_28" pintype="passive"/>
       <node ref="U1" pin="A6" pinfunction="PT4A_A6" pintype="bidirectional"/>
     </net>
     <net code="120" name="N64_AD1" class="Default">
-      <node ref="J1" pin="2" pinfunction="Pin_2_2" pintype="passive"/>
+      <node ref="J1" pin="29" pinfunction="AD1_29" pintype="passive"/>
       <node ref="U1" pin="A7" pinfunction="PT18A_A7" pintype="bidirectional"/>
     </net>
     <net code="121" name="N64_AD2" class="Default">
-      <node ref="J1" pin="3" pinfunction="Pin_3_3" pintype="passive"/>
+      <node ref="J1" pin="30" pinfunction="AD2_30" pintype="passive"/>
       <node ref="U1" pin="A8" pinfunction="PT18B_A8" pintype="bidirectional"/>
     </net>
     <net code="122" name="N64_AD3" class="Default">
-      <node ref="J1" pin="4" pinfunction="Pin_4_4" pintype="passive"/>
+      <node ref="J1" pin="32" pinfunction="AD3_32" pintype="passive"/>
       <node ref="U1" pin="A9" pinfunction="PT60A_A9" pintype="bidirectional"/>
     </net>
     <net code="123" name="N64_AD4" class="Default">
-      <node ref="J1" pin="5" pinfunction="Pin_5_5" pintype="passive"/>
+      <node ref="J1" pin="36" pinfunction="AD4_36" pintype="passive"/>
       <node ref="U1" pin="A10" pinfunction="PT63A_A10" pintype="bidirectional"/>
     </net>
     <net code="124" name="N64_AD5" class="Default">
-      <node ref="J1" pin="6" pinfunction="Pin_6_6" pintype="passive"/>
+      <node ref="J1" pin="37" pinfunction="AD5_37" pintype="passive"/>
       <node ref="U1" pin="A11" pinfunction="PT63B_A11" pintype="bidirectional"/>
     </net>
     <net code="125" name="N64_AD6" class="Default">
-      <node ref="J1" pin="7" pinfunction="Pin_7_7" pintype="passive"/>
+      <node ref="J1" pin="40" pinfunction="AD6_40" pintype="passive"/>
       <node ref="U1" pin="A12" pinfunction="PT76A_A12" pintype="bidirectional"/>
     </net>
     <net code="126" name="N64_AD7" class="Default">
-      <node ref="J1" pin="8" pinfunction="Pin_8_8" pintype="passive"/>
+      <node ref="J1" pin="41" pinfunction="AD7_41" pintype="passive"/>
       <node ref="U1" pin="A13" pinfunction="PT76B_A13" pintype="bidirectional"/>
     </net>
     <net code="127" name="N64_AD8" class="Default">
-      <node ref="J1" pin="9" pinfunction="Pin_9_9" pintype="passive"/>
+      <node ref="J1" pin="16" pinfunction="AD8_16" pintype="passive"/>
       <node ref="U1" pin="A14" pinfunction="PT83A_A14" pintype="bidirectional"/>
     </net>
     <net code="128" name="N64_AD9" class="Default">
-      <node ref="J1" pin="10" pinfunction="Pin_10_10" pintype="passive"/>
+      <node ref="J1" pin="15" pinfunction="AD9_15" pintype="passive"/>
       <node ref="U1" pin="A15" pinfunction="PT103A_A15" pintype="bidirectional"/>
     </net>
     <net code="129" name="N64_AD10" class="Default">
-      <node ref="J1" pin="11" pinfunction="Pin_11_11" pintype="passive"/>
+      <node ref="J1" pin="12" pinfunction="AD10_12" pintype="passive"/>
       <node ref="U1" pin="A16" pinfunction="PT110A_A16" pintype="bidirectional"/>
     </net>
     <net code="130" name="N64_AD11" class="Default">
-      <node ref="J1" pin="12" pinfunction="Pin_12_12" pintype="passive"/>
+      <node ref="J1" pin="11" pinfunction="AD11_11" pintype="passive"/>
       <node ref="U1" pin="A17" pinfunction="PT116A_A17" pintype="bidirectional"/>
     </net>
     <net code="131" name="N64_AD12" class="Default">
-      <node ref="J1" pin="13" pinfunction="Pin_13_13" pintype="passive"/>
+      <node ref="J1" pin="7" pinfunction="AD12_7" pintype="passive"/>
       <node ref="U1" pin="A18" pinfunction="PT119A_A18" pintype="bidirectional"/>
     </net>
     <net code="132" name="N64_AD13" class="Default">
-      <node ref="J1" pin="14" pinfunction="Pin_14_14" pintype="passive"/>
+      <node ref="J1" pin="5" pinfunction="AD13_5" pintype="passive"/>
       <node ref="U1" pin="A19" pinfunction="PT121A_A19" pintype="bidirectional"/>
     </net>
     <net code="133" name="N64_AD14" class="Default">
-      <node ref="J1" pin="15" pinfunction="Pin_15_15" pintype="passive"/>
+      <node ref="J1" pin="4" pinfunction="AD14_4" pintype="passive"/>
       <node ref="U1" pin="B20" pinfunction="PT121B_B20" pintype="bidirectional"/>
     </net>
     <net code="134" name="N64_AD15" class="Default">
-      <node ref="J1" pin="16" pinfunction="Pin_16_16" pintype="passive"/>
+      <node ref="J1" pin="3" pinfunction="AD15_3" pintype="passive"/>
       <node ref="U1" pin="B6" pinfunction="PT4B_B6" pintype="bidirectional"/>
     </net>
     <net code="135" name="N64_ALE_H" class="Default">
-      <node ref="J1" pin="18" pinfunction="Pin_18_18" pintype="passive"/>
+      <node ref="J1" pin="35" pinfunction="ALE_H_35" pintype="passive"/>
       <node ref="U1" pin="B9" pinfunction="PT58A_B9" pintype="bidirectional"/>
     </net>
     <net code="136" name="N64_ALE_L" class="Default">
-      <node ref="J1" pin="17" pinfunction="Pin_17_17" pintype="passive"/>
+      <node ref="J1" pin="33" pinfunction="ALE_L_33" pintype="passive"/>
       <node ref="U1" pin="B8" pinfunction="PT15B_B8" pintype="bidirectional"/>
     </net>
     <net code="137" name="N64_CIC_CLK" class="Default">
-      <node ref="J1" pin="24" pinfunction="Pin_24_24" pintype="passive"/>
+      <node ref="J1" pin="43" pinfunction="CIC_CLK_43" pintype="passive"/>
       <node ref="U1" pin="B17" pinfunction="PT114A_B17" pintype="bidirectional"/>
     </net>
     <net code="138" name="N64_CIC_DATA" class="Default">
-      <node ref="J1" pin="25" pinfunction="Pin_25_25" pintype="passive"/>
+      <node ref="J1" pin="18" pinfunction="CIC_DATA_18" pintype="passive"/>
       <node ref="U1" pin="B18" pinfunction="PT116B_B18" pintype="bidirectional"/>
     </net>
     <net code="139" name="N64_INT_N" class="Default">
-      <node ref="J1" pin="23" pinfunction="Pin_23_23" pintype="passive"/>
+      <node ref="J1" pin="44" pinfunction="/INT_44" pintype="passive"/>
       <node ref="U1" pin="B16" pinfunction="PT110B_B16" pintype="bidirectional"/>
     </net>
     <net code="140" name="N64_JOYBUS" class="Default">
-      <node ref="J1" pin="27" pinfunction="Pin_27_27" pintype="passive"/>
+      <node ref="J1" pin="21" pinfunction="JOYBUS_21" pintype="passive"/>
       <node ref="U1" pin="C6" pinfunction="PT11A_C6" pintype="bidirectional"/>
     </net>
     <net code="141" name="N64_NMI_N" class="Default">
-      <node ref="J1" pin="22" pinfunction="Pin_22_22" pintype="passive"/>
+      <node ref="J1" pin="45" pinfunction="/NMI_45" pintype="passive"/>
       <node ref="U1" pin="B15" pinfunction="PT105A_B15" pintype="bidirectional"/>
     </net>
     <net code="142" name="N64_PIF_CLK" class="Default">
-      <node ref="J1" pin="26" pinfunction="Pin_26_26" pintype="passive"/>
+      <node ref="J1" pin="19" pinfunction="PIF_CLK_19" pintype="passive"/>
       <node ref="U1" pin="B19" pinfunction="PT119B_B19" pintype="bidirectional"/>
     </net>
     <net code="143" name="N64_READ_N" class="Default">
-      <node ref="J1" pin="19" pinfunction="Pin_19_19" pintype="passive"/>
+      <node ref="J1" pin="10" pinfunction="/READ_10" pintype="passive"/>
       <node ref="U1" pin="B10" pinfunction="PT60B_B10" pintype="bidirectional"/>
     </net>
     <net code="144" name="N64_RESET_N" class="Default">
-      <node ref="J1" pin="21" pinfunction="Pin_21_21" pintype="passive"/>
+      <node ref="J1" pin="20" pinfunction="/RESET_20" pintype="passive"/>
       <node ref="U1" pin="B13" pinfunction="PT78A_B13" pintype="bidirectional"/>
     </net>
     <net code="145" name="N64_WRITE_N" class="Default">
-      <node ref="J1" pin="20" pinfunction="Pin_20_20" pintype="passive"/>
+      <node ref="J1" pin="8" pinfunction="/WRITE_8" pintype="passive"/>
       <node ref="U1" pin="B11" pinfunction="PT65A_B11" pintype="bidirectional"/>
     </net>
     <net code="146" name="OSC_27" class="Default">
@@ -7698,361 +7713,382 @@
       <node ref="C307" pin="1" pintype="passive"/>
       <node ref="U8" pin="3" pinfunction="VAUX_3" pintype="passive"/>
     </net>
-    <net code="222" name="unconnected-(J101-SBU1-PadA8)" class="Default">
+    <net code="222" name="unconnected-(J1-12V-Pad13)" class="Default">
+      <node ref="J1" pin="13" pinfunction="12V_13" pintype="passive+no_connect"/>
+    </net>
+    <net code="223" name="unconnected-(J1-12V-Pad38)" class="Default">
+      <node ref="J1" pin="38" pinfunction="12V_38" pintype="passive+no_connect"/>
+    </net>
+    <net code="224" name="unconnected-(J1-AUDIO_L-Pad24)" class="Default">
+      <node ref="J1" pin="24" pinfunction="AUDIO_L_24" pintype="passive+no_connect"/>
+    </net>
+    <net code="225" name="unconnected-(J1-AUDIO_R-Pad49)" class="Default">
+      <node ref="J1" pin="49" pinfunction="AUDIO_R_49" pintype="passive+no_connect"/>
+    </net>
+    <net code="226" name="unconnected-(J1-KEY1_RESERVED-Pad14)" class="Default">
+      <node ref="J1" pin="14" pinfunction="KEY1_RESERVED_14" pintype="passive+no_connect"/>
+    </net>
+    <net code="227" name="unconnected-(J1-KEY2_RESERVED-Pad39)" class="Default">
+      <node ref="J1" pin="39" pinfunction="KEY2_RESERVED_39" pintype="passive+no_connect"/>
+    </net>
+    <net code="228" name="unconnected-(J1-VIDEO_SYNC_RESERVED-Pad46)" class="Default">
+      <node ref="J1" pin="46" pinfunction="VIDEO_SYNC_RESERVED_46" pintype="passive+no_connect"/>
+    </net>
+    <net code="229" name="unconnected-(J101-SBU1-PadA8)" class="Default">
       <node ref="J101" pin="A8" pinfunction="SBU1_A8" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="223" name="unconnected-(J101-SBU2-PadB8)" class="Default">
+    <net code="230" name="unconnected-(J101-SBU2-PadB8)" class="Default">
       <node ref="J101" pin="B8" pinfunction="SBU2_B8" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="224" name="unconnected-(U1A-RESERVED-PadW4)" class="Default">
+    <net code="231" name="unconnected-(U1A-RESERVED-PadW4)" class="Default">
       <node ref="U1" pin="W4" pinfunction="RESERVED_W4" pintype="no_connect"/>
     </net>
-    <net code="225" name="unconnected-(U1A-RESERVED-PadW5)" class="Default">
+    <net code="232" name="unconnected-(U1A-RESERVED-PadW5)" class="Default">
       <node ref="U1" pin="W5" pinfunction="RESERVED_W5" pintype="no_connect"/>
     </net>
-    <net code="226" name="unconnected-(U1A-RESERVED-PadW8)" class="Default">
+    <net code="233" name="unconnected-(U1A-RESERVED-PadW8)" class="Default">
       <node ref="U1" pin="W8" pinfunction="RESERVED_W8" pintype="no_connect"/>
     </net>
-    <net code="227" name="unconnected-(U1A-RESERVED-PadW9)" class="Default">
+    <net code="234" name="unconnected-(U1A-RESERVED-PadW9)" class="Default">
       <node ref="U1" pin="W9" pinfunction="RESERVED_W9" pintype="no_connect"/>
     </net>
-    <net code="228" name="unconnected-(U1A-RESERVED-PadW13)" class="Default">
+    <net code="235" name="unconnected-(U1A-RESERVED-PadW13)" class="Default">
       <node ref="U1" pin="W13" pinfunction="RESERVED_W13" pintype="no_connect"/>
     </net>
-    <net code="229" name="unconnected-(U1A-RESERVED-PadW14)" class="Default">
+    <net code="236" name="unconnected-(U1A-RESERVED-PadW14)" class="Default">
       <node ref="U1" pin="W14" pinfunction="RESERVED_W14" pintype="no_connect"/>
     </net>
-    <net code="230" name="unconnected-(U1A-RESERVED-PadW17)" class="Default">
+    <net code="237" name="unconnected-(U1A-RESERVED-PadW17)" class="Default">
       <node ref="U1" pin="W17" pinfunction="RESERVED_W17" pintype="no_connect"/>
     </net>
-    <net code="231" name="unconnected-(U1A-RESERVED-PadW18)" class="Default">
+    <net code="238" name="unconnected-(U1A-RESERVED-PadW18)" class="Default">
       <node ref="U1" pin="W18" pinfunction="RESERVED_W18" pintype="no_connect"/>
     </net>
-    <net code="232" name="unconnected-(U1B-PT6A-PadE6)" class="Default">
+    <net code="239" name="unconnected-(U1B-PT6A-PadE6)" class="Default">
       <node ref="U1" pin="E6" pinfunction="PT6A_E6" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="233" name="unconnected-(U1B-PT6B-PadD6)" class="Default">
+    <net code="240" name="unconnected-(U1B-PT6B-PadD6)" class="Default">
       <node ref="U1" pin="D6" pinfunction="PT6B_D6" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="234" name="unconnected-(U1B-PT9A-PadE7)" class="Default">
+    <net code="241" name="unconnected-(U1B-PT9A-PadE7)" class="Default">
       <node ref="U1" pin="E7" pinfunction="PT9A_E7" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="235" name="unconnected-(U1B-PT9B-PadD7)" class="Default">
+    <net code="242" name="unconnected-(U1B-PT9B-PadD7)" class="Default">
       <node ref="U1" pin="D7" pinfunction="PT9B_D7" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="236" name="unconnected-(U1B-PT13A-PadE8)" class="Default">
+    <net code="243" name="unconnected-(U1B-PT13A-PadE8)" class="Default">
       <node ref="U1" pin="E8" pinfunction="PT13A_E8" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="237" name="unconnected-(U1B-PT13B-PadD8)" class="Default">
+    <net code="244" name="unconnected-(U1B-PT13B-PadD8)" class="Default">
       <node ref="U1" pin="D8" pinfunction="PT13B_D8" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="238" name="unconnected-(U1B-PT20A-PadD9)" class="Default">
+    <net code="245" name="unconnected-(U1B-PT20A-PadD9)" class="Default">
       <node ref="U1" pin="D9" pinfunction="PT20A_D9" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="239" name="unconnected-(U1B-PT20B-PadE9)" class="Default">
+    <net code="246" name="unconnected-(U1B-PT20B-PadE9)" class="Default">
       <node ref="U1" pin="E9" pinfunction="PT20B_E9" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="240" name="unconnected-(U1B-PT56A-PadD10)" class="Default">
+    <net code="247" name="unconnected-(U1B-PT56A-PadD10)" class="Default">
       <node ref="U1" pin="D10" pinfunction="PT56A_D10" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="241" name="unconnected-(U1B-PT56B-PadE10)" class="Default">
+    <net code="248" name="unconnected-(U1B-PT56B-PadE10)" class="Default">
       <node ref="U1" pin="E10" pinfunction="PT56B_E10" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="242" name="unconnected-(U1C-PT69A-PadD11)" class="Default">
+    <net code="249" name="unconnected-(U1C-PT69A-PadD11)" class="Default">
       <node ref="U1" pin="D11" pinfunction="PT69A_D11" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="243" name="unconnected-(U1C-PT69B-PadE11)" class="Default">
+    <net code="250" name="unconnected-(U1C-PT69B-PadE11)" class="Default">
       <node ref="U1" pin="E11" pinfunction="PT69B_E11" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="244" name="unconnected-(U1C-PT74A-PadD12)" class="Default">
+    <net code="251" name="unconnected-(U1C-PT74A-PadD12)" class="Default">
       <node ref="U1" pin="D12" pinfunction="PT74A_D12" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="245" name="unconnected-(U1C-PT74B-PadE12)" class="Default">
+    <net code="252" name="unconnected-(U1C-PT74B-PadE12)" class="Default">
       <node ref="U1" pin="E12" pinfunction="PT74B_E12" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="246" name="unconnected-(U1C-PT80A-PadD13)" class="Default">
+    <net code="253" name="unconnected-(U1C-PT80A-PadD13)" class="Default">
       <node ref="U1" pin="D13" pinfunction="PT80A_D13" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="247" name="unconnected-(U1C-PT80B-PadE13)" class="Default">
+    <net code="254" name="unconnected-(U1C-PT80B-PadE13)" class="Default">
       <node ref="U1" pin="E13" pinfunction="PT80B_E13" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="248" name="unconnected-(U1C-PT85A-PadD14)" class="Default">
+    <net code="255" name="unconnected-(U1C-PT85A-PadD14)" class="Default">
       <node ref="U1" pin="D14" pinfunction="PT85A_D14" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="249" name="unconnected-(U1C-PT85B-PadE14)" class="Default">
+    <net code="256" name="unconnected-(U1C-PT85B-PadE14)" class="Default">
       <node ref="U1" pin="E14" pinfunction="PT85B_E14" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="250" name="unconnected-(U1C-PT107A-PadD15)" class="Default">
+    <net code="257" name="unconnected-(U1C-PT107A-PadD15)" class="Default">
       <node ref="U1" pin="D15" pinfunction="PT107A_D15" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="251" name="unconnected-(U1C-PT107B-PadE15)" class="Default">
+    <net code="258" name="unconnected-(U1C-PT107B-PadE15)" class="Default">
       <node ref="U1" pin="E15" pinfunction="PT107B_E15" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="252" name="unconnected-(U1C-PT112B-PadD16)" class="Default">
+    <net code="259" name="unconnected-(U1C-PT112B-PadD16)" class="Default">
       <node ref="U1" pin="D16" pinfunction="PT112B_D16" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="253" name="unconnected-(U1D-PR11B-PadD17)" class="Default">
+    <net code="260" name="unconnected-(U1D-PR11B-PadD17)" class="Default">
       <node ref="U1" pin="D17" pinfunction="PR11B_D17" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="254" name="unconnected-(U1D-PR11C-PadE16)" class="Default">
+    <net code="261" name="unconnected-(U1D-PR11C-PadE16)" class="Default">
       <node ref="U1" pin="E16" pinfunction="PR11C_E16" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="255" name="unconnected-(U1D-PR11D-PadF16)" class="Default">
+    <net code="262" name="unconnected-(U1D-PR11D-PadF16)" class="Default">
       <node ref="U1" pin="F16" pinfunction="PR11D_F16" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="256" name="unconnected-(U1D-PR14B-PadE17)" class="Default">
+    <net code="263" name="unconnected-(U1D-PR14B-PadE17)" class="Default">
       <node ref="U1" pin="E17" pinfunction="PR14B_E17" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="257" name="unconnected-(U1D-PR17A-PadF17)" class="Default">
+    <net code="264" name="unconnected-(U1D-PR17A-PadF17)" class="Default">
       <node ref="U1" pin="F17" pinfunction="PR17A_F17" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="258" name="unconnected-(U1D-PR17C-PadG16)" class="Default">
+    <net code="265" name="unconnected-(U1D-PR17C-PadG16)" class="Default">
       <node ref="U1" pin="G16" pinfunction="PR17C_G16" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="259" name="unconnected-(U1D-PR17D-PadH16)" class="Default">
+    <net code="266" name="unconnected-(U1D-PR17D-PadH16)" class="Default">
       <node ref="U1" pin="H16" pinfunction="PR17D_H16" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="260" name="unconnected-(U1D-PR20B-PadH17)" class="Default">
+    <net code="267" name="unconnected-(U1D-PR20B-PadH17)" class="Default">
       <node ref="U1" pin="H17" pinfunction="PR20B_H17" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="261" name="unconnected-(U1D-PR20C-PadJ17)" class="Default">
+    <net code="268" name="unconnected-(U1D-PR20C-PadJ17)" class="Default">
       <node ref="U1" pin="J17" pinfunction="PR20C_J17" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="262" name="unconnected-(U1D-PR20D-PadJ16)" class="Default">
+    <net code="269" name="unconnected-(U1D-PR20D-PadJ16)" class="Default">
       <node ref="U1" pin="J16" pinfunction="PR20D_J16" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="263" name="unconnected-(U1D-PR29A-PadK16)" class="Default">
+    <net code="270" name="unconnected-(U1D-PR29A-PadK16)" class="Default">
       <node ref="U1" pin="K16" pinfunction="PR29A_K16" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="264" name="unconnected-(U1D-PR29B-PadK17)" class="Default">
+    <net code="271" name="unconnected-(U1D-PR29B-PadK17)" class="Default">
       <node ref="U1" pin="K17" pinfunction="PR29B_K17" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="265" name="unconnected-(U1E-PR50A-PadL16)" class="Default">
+    <net code="272" name="unconnected-(U1E-PR50A-PadL16)" class="Default">
       <node ref="U1" pin="L16" pinfunction="PR50A_L16" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="266" name="unconnected-(U1E-PR50B-PadL17)" class="Default">
+    <net code="273" name="unconnected-(U1E-PR50B-PadL17)" class="Default">
       <node ref="U1" pin="L17" pinfunction="PR50B_L17" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="267" name="unconnected-(U1E-PR50D-PadM18)" class="Default">
+    <net code="274" name="unconnected-(U1E-PR50D-PadM18)" class="Default">
       <node ref="U1" pin="M18" pinfunction="PR50D_M18" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="268" name="unconnected-(U1E-PR53A-PadN16)" class="Default">
+    <net code="275" name="unconnected-(U1E-PR53A-PadN16)" class="Default">
       <node ref="U1" pin="N16" pinfunction="PR53A_N16" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="269" name="unconnected-(U1E-PR53B-PadM17)" class="Default">
+    <net code="276" name="unconnected-(U1E-PR53B-PadM17)" class="Default">
       <node ref="U1" pin="M17" pinfunction="PR53B_M17" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="270" name="unconnected-(U1E-PR53C-PadN18)" class="Default">
+    <net code="277" name="unconnected-(U1E-PR53C-PadN18)" class="Default">
       <node ref="U1" pin="N18" pinfunction="PR53C_N18" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="271" name="unconnected-(U1E-PR53D-PadP17)" class="Default">
+    <net code="278" name="unconnected-(U1E-PR53D-PadP17)" class="Default">
       <node ref="U1" pin="P17" pinfunction="PR53D_P17" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="272" name="unconnected-(U1E-PR56A-PadN17)" class="Default">
+    <net code="279" name="unconnected-(U1E-PR56A-PadN17)" class="Default">
       <node ref="U1" pin="N17" pinfunction="PR56A_N17" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="273" name="unconnected-(U1E-PR56B-PadP16)" class="Default">
+    <net code="280" name="unconnected-(U1E-PR56B-PadP16)" class="Default">
       <node ref="U1" pin="P16" pinfunction="PR56B_P16" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="274" name="unconnected-(U1E-PR56C-PadR16)" class="Default">
+    <net code="281" name="unconnected-(U1E-PR56C-PadR16)" class="Default">
       <node ref="U1" pin="R16" pinfunction="PR56C_R16" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="275" name="unconnected-(U1E-PR56D-PadR17)" class="Default">
+    <net code="282" name="unconnected-(U1E-PR56D-PadR17)" class="Default">
       <node ref="U1" pin="R17" pinfunction="PR56D_R17" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="276" name="unconnected-(U1E-PR77A-PadT16)" class="Default">
+    <net code="283" name="unconnected-(U1E-PR77A-PadT16)" class="Default">
       <node ref="U1" pin="T16" pinfunction="PR77A_T16" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="277" name="unconnected-(U1E-PR83D-PadP18)" class="Default">
+    <net code="284" name="unconnected-(U1E-PR83D-PadP18)" class="Default">
       <node ref="U1" pin="P18" pinfunction="PR83D_P18" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="278" name="unconnected-(U1E-PR89B-PadR18)" class="Default">
+    <net code="285" name="unconnected-(U1E-PR89B-PadR18)" class="Default">
       <node ref="U1" pin="R18" pinfunction="PR89B_R18" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="279" name="unconnected-(U1E-PR89D-PadT18)" class="Default">
+    <net code="286" name="unconnected-(U1E-PR89D-PadT18)" class="Default">
       <node ref="U1" pin="T18" pinfunction="PR89D_T18" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="280" name="unconnected-(U1E-PR92A-PadU18)" class="Default">
+    <net code="287" name="unconnected-(U1E-PR92A-PadU18)" class="Default">
       <node ref="U1" pin="U18" pinfunction="PR92A_U18" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="281" name="unconnected-(U1E-PR92B-PadU17)" class="Default">
+    <net code="288" name="unconnected-(U1E-PR92B-PadU17)" class="Default">
       <node ref="U1" pin="U17" pinfunction="PR92B_U17" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="282" name="unconnected-(U1E-PR92C-PadU16)" class="Default">
+    <net code="289" name="unconnected-(U1E-PR92C-PadU16)" class="Default">
       <node ref="U1" pin="U16" pinfunction="PR92C_U16" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="283" name="unconnected-(U1E-PR92D-PadT17)" class="Default">
+    <net code="290" name="unconnected-(U1E-PR92D-PadT17)" class="Default">
       <node ref="U1" pin="T17" pinfunction="PR92D_T17" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="284" name="unconnected-(U1F-PL50A-PadJ4)" class="Default">
+    <net code="291" name="unconnected-(U1F-PL50A-PadJ4)" class="Default">
       <node ref="U1" pin="J4" pinfunction="PL50A_J4" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="285" name="unconnected-(U1F-PL50B-PadJ5)" class="Default">
+    <net code="292" name="unconnected-(U1F-PL50B-PadJ5)" class="Default">
       <node ref="U1" pin="J5" pinfunction="PL50B_J5" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="286" name="unconnected-(U1F-PL50C-PadJ3)" class="Default">
+    <net code="293" name="unconnected-(U1F-PL50C-PadJ3)" class="Default">
       <node ref="U1" pin="J3" pinfunction="PL50C_J3" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="287" name="unconnected-(U1F-PL50D-PadK3)" class="Default">
+    <net code="294" name="unconnected-(U1F-PL50D-PadK3)" class="Default">
       <node ref="U1" pin="K3" pinfunction="PL50D_K3" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="288" name="unconnected-(U1F-PL56A-PadK4)" class="Default">
+    <net code="295" name="unconnected-(U1F-PL56A-PadK4)" class="Default">
       <node ref="U1" pin="K4" pinfunction="PL56A_K4" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="289" name="unconnected-(U1F-PL56B-PadK5)" class="Default">
+    <net code="296" name="unconnected-(U1F-PL56B-PadK5)" class="Default">
       <node ref="U1" pin="K5" pinfunction="PL56B_K5" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="290" name="unconnected-(U1F-PL56C-PadL4)" class="Default">
+    <net code="297" name="unconnected-(U1F-PL56C-PadL4)" class="Default">
       <node ref="U1" pin="L4" pinfunction="PL56C_L4" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="291" name="unconnected-(U1F-PL56D-PadL5)" class="Default">
+    <net code="298" name="unconnected-(U1F-PL56D-PadL5)" class="Default">
       <node ref="U1" pin="L5" pinfunction="PL56D_L5" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="292" name="unconnected-(U1F-PL77A-PadM5)" class="Default">
+    <net code="299" name="unconnected-(U1F-PL77A-PadM5)" class="Default">
       <node ref="U1" pin="M5" pinfunction="PL77A_M5" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="293" name="unconnected-(U1F-PL83A-PadM4)" class="Default">
+    <net code="300" name="unconnected-(U1F-PL83A-PadM4)" class="Default">
       <node ref="U1" pin="M4" pinfunction="PL83A_M4" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="294" name="unconnected-(U1F-PL83B-PadN5)" class="Default">
+    <net code="301" name="unconnected-(U1F-PL83B-PadN5)" class="Default">
       <node ref="U1" pin="N5" pinfunction="PL83B_N5" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="295" name="unconnected-(U1F-PL83C-PadN4)" class="Default">
+    <net code="302" name="unconnected-(U1F-PL83C-PadN4)" class="Default">
       <node ref="U1" pin="N4" pinfunction="PL83C_N4" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="296" name="unconnected-(U1F-PL83D-PadP5)" class="Default">
+    <net code="303" name="unconnected-(U1F-PL83D-PadP5)" class="Default">
       <node ref="U1" pin="P5" pinfunction="PL83D_P5" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="297" name="unconnected-(U1F-PL86A-PadN3)" class="Default">
+    <net code="304" name="unconnected-(U1F-PL86A-PadN3)" class="Default">
       <node ref="U1" pin="N3" pinfunction="PL86A_N3" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="298" name="unconnected-(U1F-PL86B-PadM3)" class="Default">
+    <net code="305" name="unconnected-(U1F-PL86B-PadM3)" class="Default">
       <node ref="U1" pin="M3" pinfunction="PL86B_M3" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="299" name="unconnected-(U1F-PL86C-PadL3)" class="Default">
+    <net code="306" name="unconnected-(U1F-PL86C-PadL3)" class="Default">
       <node ref="U1" pin="L3" pinfunction="PL86C_L3" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="300" name="unconnected-(U1F-PL92C-PadP3)" class="Default">
+    <net code="307" name="unconnected-(U1F-PL92C-PadP3)" class="Default">
       <node ref="U1" pin="P3" pinfunction="PL92C_P3" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="301" name="unconnected-(U1F-PL92D-PadP4)" class="Default">
+    <net code="308" name="unconnected-(U1F-PL92D-PadP4)" class="Default">
       <node ref="U1" pin="P4" pinfunction="PL92D_P4" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="302" name="unconnected-(U1G-PL11D-PadC5)" class="Default">
+    <net code="309" name="unconnected-(U1G-PL11D-PadC5)" class="Default">
       <node ref="U1" pin="C5" pinfunction="PL11D_C5" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="303" name="unconnected-(U1G-PL17A-PadE4)" class="Default">
+    <net code="310" name="unconnected-(U1G-PL17A-PadE4)" class="Default">
       <node ref="U1" pin="E4" pinfunction="PL17A_E4" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="304" name="unconnected-(U1G-PL17B-PadD5)" class="Default">
+    <net code="311" name="unconnected-(U1G-PL17B-PadD5)" class="Default">
       <node ref="U1" pin="D5" pinfunction="PL17B_D5" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="305" name="unconnected-(U1G-PL17D-PadD3)" class="Default">
+    <net code="312" name="unconnected-(U1G-PL17D-PadD3)" class="Default">
       <node ref="U1" pin="D3" pinfunction="PL17D_D3" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="306" name="unconnected-(U1G-PL20A-PadF4)" class="Default">
+    <net code="313" name="unconnected-(U1G-PL20A-PadF4)" class="Default">
       <node ref="U1" pin="F4" pinfunction="PL20A_F4" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="307" name="unconnected-(U1G-PL20B-PadE3)" class="Default">
+    <net code="314" name="unconnected-(U1G-PL20B-PadE3)" class="Default">
       <node ref="U1" pin="E3" pinfunction="PL20B_E3" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="308" name="unconnected-(U1G-PL20C-PadE5)" class="Default">
+    <net code="315" name="unconnected-(U1G-PL20C-PadE5)" class="Default">
       <node ref="U1" pin="E5" pinfunction="PL20C_E5" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="309" name="unconnected-(U1G-PL20D-PadF5)" class="Default">
+    <net code="316" name="unconnected-(U1G-PL20D-PadF5)" class="Default">
       <node ref="U1" pin="F5" pinfunction="PL20D_F5" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="310" name="unconnected-(U1G-PL41A-PadH4)" class="Default">
+    <net code="317" name="unconnected-(U1G-PL41A-PadH4)" class="Default">
       <node ref="U1" pin="H4" pinfunction="PL41A_H4" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="311" name="unconnected-(U1G-PL41B-PadG5)" class="Default">
+    <net code="318" name="unconnected-(U1G-PL41B-PadG5)" class="Default">
       <node ref="U1" pin="G5" pinfunction="PL41B_G5" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="312" name="unconnected-(U1G-PL41C-PadH5)" class="Default">
+    <net code="319" name="unconnected-(U1G-PL41C-PadH5)" class="Default">
       <node ref="U1" pin="H5" pinfunction="PL41C_H5" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="313" name="unconnected-(U1G-PL41D-PadH3)" class="Default">
+    <net code="320" name="unconnected-(U1G-PL41D-PadH3)" class="Default">
       <node ref="U1" pin="H3" pinfunction="PL41D_H3" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="314" name="unconnected-(U1G-PL44A-PadG3)" class="Default">
+    <net code="321" name="unconnected-(U1G-PL44A-PadG3)" class="Default">
       <node ref="U1" pin="G3" pinfunction="PL44A_G3" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="315" name="unconnected-(U1G-PL44B-PadF3)" class="Default">
+    <net code="322" name="unconnected-(U1G-PL44B-PadF3)" class="Default">
       <node ref="U1" pin="F3" pinfunction="PL44B_F3" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="316" name="unconnected-(U1H-PB4A-PadR1)" class="Default">
+    <net code="323" name="unconnected-(U1H-PB4A-PadR1)" class="Default">
       <node ref="U1" pin="R1" pinfunction="PB4A_R1" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="317" name="unconnected-(U1H-PB4B-PadT1)" class="Default">
+    <net code="324" name="unconnected-(U1H-PB4B-PadT1)" class="Default">
       <node ref="U1" pin="T1" pinfunction="PB4B_T1" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="318" name="unconnected-(U1H-PB6A-PadU1)" class="Default">
+    <net code="325" name="unconnected-(U1H-PB6A-PadU1)" class="Default">
       <node ref="U1" pin="U1" pinfunction="PB6A_U1" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="319" name="unconnected-(U1H-PB6B-PadV1)" class="Default">
+    <net code="326" name="unconnected-(U1H-PB6B-PadV1)" class="Default">
       <node ref="U1" pin="V1" pinfunction="PB6B_V1" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="320" name="unconnected-(U1H-PB13A-PadT2)" class="Default">
+    <net code="327" name="unconnected-(U1H-PB13A-PadT2)" class="Default">
       <node ref="U1" pin="T2" pinfunction="PB13A_T2" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="321" name="unconnected-(U1H-PB13B-PadU2)" class="Default">
+    <net code="328" name="unconnected-(U1H-PB13B-PadU2)" class="Default">
       <node ref="U1" pin="U2" pinfunction="PB13B_U2" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="322" name="unconnected-(U1H-PB15B-PadR3)" class="Default">
+    <net code="329" name="unconnected-(U1H-PB15B-PadR3)" class="Default">
       <node ref="U1" pin="R3" pinfunction="PB15B_R3" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="323" name="unconnected-(U1H-PB18A-PadT3)" class="Default">
+    <net code="330" name="unconnected-(U1H-PB18A-PadT3)" class="Default">
       <node ref="U1" pin="T3" pinfunction="PB18A_T3" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="324" name="unconnected-(U1I-RESERVED-PadW10)" class="Default">
+    <net code="331" name="unconnected-(U1I-RESERVED-PadW10)" class="Default">
       <node ref="U1" pin="W10" pinfunction="RESERVED_W10" pintype="no_connect"/>
     </net>
-    <net code="325" name="unconnected-(U1I-RESERVED-PadW11)" class="Default">
+    <net code="332" name="unconnected-(U1I-RESERVED-PadW11)" class="Default">
       <node ref="U1" pin="W11" pinfunction="RESERVED_W11" pintype="no_connect"/>
     </net>
-    <net code="326" name="unconnected-(U3-CT-Pad4)" class="Default">
+    <net code="333" name="unconnected-(U3-CT-Pad4)" class="Default">
       <node ref="U3" pin="4" pinfunction="CT_4" pintype="input+no_connect"/>
     </net>
-    <net code="327" name="unconnected-(U3-~{MR}-Pad3)" class="Default">
+    <net code="334" name="unconnected-(U3-~{MR}-Pad3)" class="Default">
       <node ref="U3" pin="3" pinfunction="~{MR}_3" pintype="input+no_connect"/>
     </net>
-    <net code="328" name="unconnected-(U6-NC-Pad12)" class="Default">
+    <net code="335" name="unconnected-(U6-NC-Pad12)" class="Default">
       <node ref="U6" pin="12" pinfunction="NC_12" pintype="no_connect"/>
     </net>
-    <net code="329" name="unconnected-(U8-FB2-Pad6)" class="Default">
+    <net code="336" name="unconnected-(U8-FB2-Pad6)" class="Default">
       <node ref="U8" pin="6" pinfunction="FB2_6" pintype="passive+no_connect"/>
     </net>
-    <net code="330" name="unconnected-(U11-NC-Pad4)" class="Default">
+    <net code="337" name="unconnected-(U11-NC-Pad4)" class="Default">
       <node ref="U11" pin="4" pinfunction="NC_4" pintype="no_connect"/>
     </net>
-    <net code="331" name="unconnected-(U203-2B3-Pad17)" class="Default">
+    <net code="338" name="unconnected-(U203-2B3-Pad17)" class="Default">
       <node ref="U203" pin="17" pinfunction="2B3_17" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="332" name="unconnected-(U203-2B4-Pad19)" class="Default">
+    <net code="339" name="unconnected-(U203-2B4-Pad19)" class="Default">
       <node ref="U203" pin="19" pinfunction="2B4_19" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="333" name="unconnected-(U203-2B5-Pad20)" class="Default">
+    <net code="340" name="unconnected-(U203-2B5-Pad20)" class="Default">
       <node ref="U203" pin="20" pinfunction="2B5_20" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="334" name="unconnected-(U203-2B6-Pad22)" class="Default">
+    <net code="341" name="unconnected-(U203-2B6-Pad22)" class="Default">
       <node ref="U203" pin="22" pinfunction="2B6_22" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="335" name="unconnected-(U203-2B7-Pad23)" class="Default">
+    <net code="342" name="unconnected-(U203-2B7-Pad23)" class="Default">
       <node ref="U203" pin="23" pinfunction="2B7_23" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="336" name="unconnected-(U204-2A5-Pad29)" class="Default">
+    <net code="343" name="unconnected-(U204-2A5-Pad29)" class="Default">
       <node ref="U204" pin="29" pinfunction="2A5_29" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="337" name="unconnected-(U204-2A6-Pad27)" class="Default">
+    <net code="344" name="unconnected-(U204-2A6-Pad27)" class="Default">
       <node ref="U204" pin="27" pinfunction="2A6_27" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="338" name="unconnected-(U204-2A7-Pad26)" class="Default">
+    <net code="345" name="unconnected-(U204-2A7-Pad26)" class="Default">
       <node ref="U204" pin="26" pinfunction="2A7_26" pintype="bidirectional+no_connect"/>
     </net>
-    <net code="339" name="unconnected-(U205-Pad10)" class="Default">
+    <net code="346" name="unconnected-(U205-Pad10)" class="Default">
       <node ref="U205" pin="10" pintype="open_collector+no_connect"/>
     </net>
-    <net code="340" name="unconnected-(U205-Pad12)" class="Default">
+    <net code="347" name="unconnected-(U205-Pad12)" class="Default">
       <node ref="U205" pin="12" pintype="open_collector+no_connect"/>
     </net>
   </nets>

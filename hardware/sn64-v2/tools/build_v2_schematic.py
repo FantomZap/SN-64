@@ -1,8 +1,8 @@
-"""Author the SN64 v2 schematic set (main board + passive riser) from one script.
+"""Author the SN64 v2 schematic set (one board) from one script.
 
 v2 (2026-09-30, docs/design/v2-board.md): the FPGA absorbs the USB device, the
 clock generation, the cartridge audio ADC and the power sequencing; rail
-telemetry is one I2C ADC; the N64 bus goes straight from the riser to the
+telemetry is one I2C ADC; the N64 edge is on the board and its bus goes straight to the
 FPGA; the cartridge translators are four 16-bit parts plus one open-drain hex
 driver. Wiring is by global label so the sheets need no hierarchical pins.
 
@@ -12,7 +12,6 @@ Outputs (hardware/sn64-v2): sn64-v2.kicad_sch (root), fpga.kicad_sch,
 cart.kicad_sch, power.kicad_sch, libraries/SN64_V2.kicad_sym (drawn TI parts:
 TPS2121RUX, TLA2528RTE, TPS2553DBV) + copies of the v1 libraries it reuses,
 sym-lib-table, fp-lib-table, sn64-v2.kicad_pro, libraries/v2-provenance.json.
-Riser (hardware/sn64-v2-riser): sn64-v2-riser.kicad_sch + tables + project.
 Pure Python (KiCad's python for the shared parser only).
 """
 import argparse
@@ -28,7 +27,6 @@ HERE = Path(__file__).resolve().parent
 V2 = HERE.parent
 REPO = V2.parents[1]
 V1 = REPO / 'hardware/sn64'
-RISER = REPO / 'hardware/sn64-v2-riser'
 KICAD_SHARE = Path('C:/Program Files/KiCad/10.0/share/kicad')
 sys.path.insert(0, str(V1 / 'tools'))
 sys.path.insert(0, str(HERE))
@@ -459,7 +457,7 @@ def build_fpga_sheet(sh, balls, rows):
 
 
 def build_cart_sheet(sh):
-    sh.note('SN64 v2 CARTRIDGE SHEET - SNES socket J2 on this board (no joint), four SN74ALVC164245 translators (A = 3.3 V, B = 5 V), '
+    sh.note('SN64 v2 CARTRIDGE SHEET - N64 edge J1 and SNES socket J2 on the one board, four SN74ALVC164245 translators (A = 3.3 V, B = 5 V), '
             'SN74LVC07A open-drain driver for the 5 V lines the FPGA pulls.', 1.8)
     sh.place('J2', 'SN64:SNES_Female_Slot_62', 'SNES cartridge socket 62', {str(k): v for k, v in SOCKET.items()},
              'SN64:SNES_Slot_Console_7mm', {'Note': 'candidate NES Repair Shop snspt043; footprint from Sanni cartreader (CC-BY-4.0), 7 mm nose'})
@@ -501,10 +499,12 @@ def build_cart_sheet(sh):
     sh.res('R210', '100k', V33, 'CTL_OE_N'); sh.res('R211', '100k', V33, 'CIC_OE_N'); sh.res('R212', '100k', V33, 'DATA_OE_N')
     sh.res('R213', '100k', GND, 'DATA_DIR')
     sh.newline()
-    # Riser joint: 2x20 2.00 mm socket on the bottom side of this board (riser carries a right-angle header)
-    sh.place('J1', 'Connector_Generic:Conn_02x20_Odd_Even', 'Riser joint 2x20 2.00mm', JOINT_NETS,
-             'Connector_PinSocket_2.00mm:PinSocket_2x20_P2.00mm_Vertical',
-             {'Note': 'pins 1-27 N64 bus, 28-31 HOST_3V3, 32-40 GND; mates hardware/sn64-v2-riser J2'})
+    # N64 cartridge edge on this board (one board: the card stands in the console slot). 12 V, audio,
+    # video-sync and key fingers are left open. SummerCart64 finger geometry (CERN-OHL-S-2.0).
+    edge = {str(k): (None if v in ('HOST_12V', 'N64_AUDIO_L', 'N64_AUDIO_R', 'N64_KEY1_RESERVED', 'N64_KEY2_RESERVED',
+                                   'N64_VIDEO_SYNC_RESERVED') else v) for k, v in N64_EDGE.items()}
+    sh.place('J1', 'SN64:N64_Cartridge_Edge_50', 'N64 cartridge edge', edge, 'SN64:N64_Edge_SC64_Reference',
+             {'Note': 'SummerCart64 edge geometry; 12 V, audio, sync and key fingers unused'})
     sh.cap('C212', '10uF 10V', HOST, GND, C0805)
 
 
@@ -639,34 +639,9 @@ def main():
     build_power_sheet(power)
     for sh in (fpga, cart, power):
         save(V2 / sh.file, sh.render(f'SN64 v2 - {sh.name}'))
-    save(V2 / f'{PROJECT}.kicad_sch', root_sheet(root_uuid, [fpga, cart, power], 'SN64 v2 main board (horizontal): FPGA, SNES socket, translators, power, USB'))
+    save(V2 / f'{PROJECT}.kicad_sch', root_sheet(root_uuid, [fpga, cart, power], 'SN64 v2: one board in the N64 slot with the SNES socket on its face; FPGA, translators, power, USB'))
     write_tables(V2, ['SN64', 'SN64_POWER', 'SN64_USB', 'SN64_V2'], ['SN64', 'SN64_USB'])
     write_project(V2, PROJECT)
-
-    # Riser: N64 edge + right-angle header, no components.
-    rroot = uid('root:sn64-v2-riser')
-    riser = Sheet('Riser', 'sn64-v2-riser.kicad_sch', '1', 'A3', rroot, own, project='sn64-v2-riser', root_level=True)
-    riser.name = 'Riser'
-    riser.note('SN64 v2 RISER - passive: N64 cartridge edge (SummerCart64 reference geometry, CERN-OHL-S-2.0) to a 2x20 2.00 mm right-angle header. '
-               'Header pins 1-27 = N64 bus, 28-31 = HOST_3V3, 32-40 = GND. 12 V, audio, video sync, key pins end here.', 1.6)
-    riser.place('J1', 'SN64:N64_Cartridge_Edge_50', 'N64 cartridge edge', {str(k): v for k, v in N64_EDGE.items()}, 'SN64:N64_Edge_SC64_Reference')
-    riser.place('J2', 'Connector_Generic:Conn_02x20_Odd_Even', 'Riser joint 2x20 2.00mm', JOINT_NETS,
-                'Connector_PinHeader_2.00mm:PinHeader_2x20_P2.00mm_Horizontal', {'Note': 'mates hardware/sn64-v2 J1'})
-    # 12 V, audio, key and video-sync fingers end on the riser (their pads are the probe points)
-    riser.flag(GND); riser.flag(HOST)
-    RISER.mkdir(parents=True, exist_ok=True)
-    (RISER / 'libraries').mkdir(exist_ok=True)
-    shutil.copy(V2 / 'libraries' / 'SN64.kicad_sym', RISER / 'libraries' / 'SN64.kicad_sym')
-    dst = RISER / 'libraries' / 'SN64.pretty'
-    if dst.exists():
-        shutil.rmtree(dst)
-    shutil.copytree(V2 / 'libraries' / 'SN64.pretty', dst)
-
-
-
-    save(RISER / 'sn64-v2-riser.kicad_sch', riser.render('SN64 v2 riser'))
-    write_tables(RISER, ['SN64'], ['SN64'])
-    write_project(RISER, 'sn64-v2-riser')
 
     prov = {'schema_version': 1, 'recorded_date': '2026-09-30', 'scope': 'SN64 v2 schematic draft 0.1 (branch v2); not a manufacturing release',
             'drawn_symbols': {'TPS2121RUX': {'pins': {n: [lab, typ] for n, lab, typ, _ in TPS2121_PINS}, 'source': 'TI SLVSEA3F (Aug 2020) pin table via LCSC C485916 pinout; design values from SLVSEA3F sections 7.5/9.3'},
@@ -677,10 +652,10 @@ def main():
                                         'Regulator_Switching:TLV62569DBV', 'Regulator_Linear:AP2112K-2.5', 'Power_Protection:USBLC6-2SC6', 'Oscillator:ASE-xxxMHz'],
             'lcsc_stock_2026_09_30': LCSC, 'provisional_values': ['TPS2553 RILIM 24.9k', 'TPS2121 CSS 1 nF', 'decoupling counts (Lattice checklist, not per ball)',
                                                                    'sigma-delta ADC RC (10k/1nF)', 'NTC part'],
-            'bom': {'main': fpga.bom + cart.bom + power.bom, 'riser': riser.bom}}
+            'bom': {'main': fpga.bom + cart.bom + power.bom}}
     save(V2 / 'libraries' / 'v2-provenance.json', json.dumps(prov, indent=1))
     n_main = len(fpga.bom) + len(cart.bom) + len(power.bom)
-    print(f'wrote {PROJECT}: {n_main} parts on the main board (fpga {len(fpga.bom)}, cart {len(cart.bom)}, power {len(power.bom)}), riser {len(riser.bom)}')
+    print(f'wrote {PROJECT}: {n_main} parts (fpga {len(fpga.bom)}, cart {len(cart.bom)}, power {len(power.bom)})')
 
 
 if __name__ == '__main__':

@@ -46,3 +46,7 @@ output_files/
 *.cache/
 
 # Manufacturing releases belong in manufacturing/ and are not globally ignored.
+
+# KiCad project history/backups
+**/.history/
+*-backups/

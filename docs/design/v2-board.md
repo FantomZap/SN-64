@@ -1,8 +1,8 @@
 # SN64 v2 board: schematic write-up and rationale
 
-**Status (2026-09-30): draft 0.1 on branch `v2`. Schematic complete (ERC 0 errors), FPGA
-logic simulated and routed with timing met, riser routed and DRC-clean, main board routed to 212 of
-218 nets with 7 hand-routing items open. Not fabrication-ready: see "Open items".**
+**Status (2026-09-30): draft 0.1 on branch `v2`. One board. Schematic complete (ERC 0 errors), FPGA
+logic simulated and routed with timing met, board routed to 211 of 218 nets with 7 nets left for
+hand routing. Not fabrication-ready: see "Open items".**
 
 v1 (`hardware/sn64/`) turned every line of the specification into its own chip: six window
 comparators, a temperature switch, a USB-C controller, three eFuses, a clock synthesiser, two
@@ -18,25 +18,33 @@ layout disappears.
 | Resistors | 136 + 13 arrays | 62 |
 | Capacitors | 162 | 79 |
 | Other (inductors, oscillators, crystals, MOSFETs, LEDs, beads) | 22 | 5 (3 inductors, 1 oscillator, 1 LED) |
-| Placed parts | 380 | 176 + riser 2 connectors |
+| Placed parts | 380 | 176 |
 | FPGA signal balls | 122 over rings 1-5 | 111, all on rings 1-3 |
 | FPGA fan-out vias | 326 | 210 |
-| Joint between the boards | 80 pins (every cartridge signal) | 40 pins (N64 bus + 3.3 V + GND) |
+| Boards | 2 (main + socket board, 80-pin joint) | 1 |
 
-## Arrangement
+## Arrangement (one board, owner decision 2026-09-30)
 
-Two boards, as before, because the N64 slot takes a vertical card and the SNES cartridge needs a
-horizontal socket. What changed is which board carries the electronics:
+One vertical board standing in the N64/M64 slot, as v1 did: the SummerCart64 edge geometry at the
+bottom (tongue 10.5 mm below the shoulders, 1.2 mm thick, 101.8 mm wide with the shell notches, six
+layers, 70 mm above the shoulders). The SNES socket (console-replacement family: 62 contacts, 2.5 mm
+pitch, 7.0 mm rows, 7 mm nose, ears 95 mm apart) is mounted on the board's face 56.5 mm above the
+shoulders with its nose pointing out of the board, so the cartridge lies flat over the console, label
+up. Insertion force therefore acts along the board's plane and goes through the socket ears and six
+screw holes (SummerCart64's two at the shoulders plus four) into the shell, not into the N64 slot.
 
-- **Riser** (`hardware/sn64-v2-riser/`): the SummerCart64 N64 edge geometry (CERN-OHL-S-2.0) on a
-  64.5 x 34 mm two-layer card with a 2 x 20, 2.00 mm right-angle header at the top. No components.
-  Header pins 1-27 carry the N64 signals the FPGA uses, 28-31 HOST_3V3, 32-40 GND. The 12 V, audio,
-  video-sync and key fingers end on the riser. Gold fingers and the chamfer are paid on this small
-  board only.
-- **Main board** (`hardware/sn64-v2/`): 104 x 64 mm, six layers, horizontal on top of the riser.
-  Front edge: SNES socket (Sanni cartreader footprint, CC-BY-4.0, 7 mm nose). Behind it the four
-  translators, then the FPGA, then the riser socket on the bottom side at the rear edge. USB-C on
-  the left edge (the mandatory side port), power on the right.
+Why flat: every SNES socket mounts on a horizontal surface with its pins in two rows 7 mm apart; an
+upright, in-line cartridge on a single flat board would need a right-angle socket, which does not
+exist (generic 2.54 mm edge connectors miss the 2.5 mm pitch and the recessed slot). The upright
+arrangement is possible only as a two-piece assembly (a socket strip soldered across the top edge) or
+a rigid-flex board; both were offered and declined in favour of one flat board.
+
+Height: the SC64 profile widens at 26.4 mm above the shoulders (the console's opening), so a 20 mm
+cartridge whose centre is 56.5 mm up clears the console top by about 20 mm. If a console needs more,
+height is inserted between the fingers and the FPGA and only the thirty finger nets re-route.
+
+Layout is the horizontal v2 layout turned 180 degrees: FPGA banks 0/1 face the N64 edge, the
+translator row sits between the FPGA and the socket, USB-C on the right edge, power lower left.
 
 ## What moved into the FPGA (LFE5U-85F-8BG381I, the grade in stock)
 
@@ -79,7 +87,7 @@ horizontal socket. What changed is which board carries the electronics:
 |---|---|
 | Generator | `hardware/sn64-v2/tools/build_v2_schematic.py` (every part, value, source and net; `--force` regenerates all sheets) |
 | Pin plan | `hardware/sn64-v2/tools/pin_plan.py` -> `interfaces/fpga-pin-map.csv`, `fpga/constraints/sn64_board.lpf` |
-| Sheets | `sn64-v2.kicad_sch` (root), `fpga.kicad_sch`, `cart.kicad_sch`, `power.kicad_sch`; riser `sn64-v2-riser.kicad_sch` |
+| Sheets | `sn64-v2.kicad_sch` (root), `fpga.kicad_sch`, `cart.kicad_sch`, `power.kicad_sch` |
 | Libraries | `libraries/SN64_V2.kicad_sym` (TPS2121, TLA2528, TPS2553 drawn from the TI pin tables), v1 libraries reused unchanged; `libraries/v2-provenance.json` |
 | Boards | `build_v2_pcb.py` (placement), `prepare_route_v2.py` (fan-out, planes), `apply_netclasses_v2.py`, `finish_route_v2.py`, `add_plane_vias_v2.py`; router KiCadRoutingTools (see `docs/design/pcb-routing.md`) |
 | Checks | `validation/erc.json` (0 errors, 8 warnings: unused translator inputs tied to ground), `validation/*.xml` netlists, DRC reports under `build/` |
@@ -93,9 +101,8 @@ footprint exposed-pad size; USB pull-up switched only after PLL lock.
 
 ## Open items
 
-- Routing: 212 of 218 signal nets by one 40 s router pass on the via-first board; 7 open items left for hand routing (`validation/pcb-open-connections.json`: N64_AD6, N64_AD7, USB_PU, AUD_L_N, FLASH_D2, a SNES_5V_CART segment, TLA2528 DVDD). DRC: 0 errors apart from 5 single-spoke thermal reliefs (USB shield pads, mux pin). 3,588 tracks, 922 vias (v1 draft: 7,065 and 1,453 with a fifth of the work left).
-- Shell: the riser joint must not carry the cartridge insertion load; the socket needs support from
-  the enclosure (unchanged from v1).
+- Routing: 211 of 218 signal nets (KiCadRoutingTools passes plus scripted gap closing); 7 nets left for hand routing in KiCad (`validation/pcb-open-connections.json`: N64_AD6 and N64_JOYBUS to the fingers, USB_PU and USB_DP_F across to the USB corner, FLASH_D2, a SNES_5V_CART segment, the TLA2528 DVDD pin). DRC: 0 errors apart from 6 single-spoke thermal reliefs and the USB-C shield pad on the edge (intended). 3,612 tracks, 997 vias (v1 draft: 7,065 and 1,453 with a fifth of the work left).
+- Shell: none yet. SummerCart64's lower shell fits the tongue; the upper part must hold the socket, support the flat cartridge from underneath and clamp the board at its six holes. The socket's height above the board and nose reach are not sourced and set the cartridge-to-board gap.
 - PCBWay: annular ring (6 mil) and spacing (5 mil) against the 0.125 / 0.1 mm rules, as in v1.
 - Four-layer trial: with 210 fan-out vias and signals on the outer rings a four-layer stack may
   route; not tried yet.
