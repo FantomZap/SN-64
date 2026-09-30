@@ -21,6 +21,7 @@ Original carts, Super EverDrive X5/X6 and FXPAK Pro are first-class targets. Man
 
 ## Decisions the user has made (keep them)
 
+- **Video and audio go to the console over the cartridge bus (owner, 2026-09-29): the SN64 streams each SNES frame and its audio to the N64/M64 and the boot program shows them on the console's own output (N64 AV jack, M64 HDMI). This is the primary A/V path; the board's own HDMI is the spec's secondary validation output.** See `docs/design/console-video-path.md`.
 - **Every spec target stays in scope:** PAL, protection, save integrity, telemetry, recovery, factory test, and M64 single-HDMI (an unresolved dependency). One adapter must work on **both** N64 and M64.
 - **Side-mounted USB-C data port is mandatory in rev 1.** It is used for initial FPGA/firmware load, updates and recovery, and must work without a successful console boot. PCBWay pre-programming is optional.
 - **Peripherals:**

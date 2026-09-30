@@ -140,9 +140,9 @@ BLOCKS = {
     ('fpga_support', 'bottom'): (-30.0, -55.0, 30.0, -44.0),
     ('cart', 'top'):         (-41.0, -64.5, 47.0, -51.0),
     ('cart', 'bottom'):      (-41.0, -66.0, 47.0, -45.0),
-    ('power', 'top'):        (-49.0, -38.0, -21.0, -3.0),
+    ('power', 'top'):        (-49.0, -40.0, -13.0, -3.0),
     ('power', 'bottom'):     (-49.0, -50.0, -12.0, -3.0),
-    ('usb', 'top'):          (-49.0, -55.0, -22.0, -36.0),
+    ('usb', 'top'):          (-49.0, -57.0, -18.0, -34.0),
     ('usb', 'bottom'):       (-49.0, -66.0, -12.0, -36.0),
     ('av', 'top'):           (27.0, -58.0, 40.0, -18.0),
     ('av', 'bottom'):        (20.0, -58.0, 49.0, -12.0),
@@ -158,7 +158,7 @@ FIXED = {
     'J1': (0.0, 0.0, 0),
     'J2': (-39.0, -67.0, 90),        # 2x40 right-angle header along the top edge, pins pointing up (pad centroid at x = 0)
     'U401': (0.0, -32.0, 0),         # FPGA, centred
-    'J101': (-47.5, -61.0, 90),      # USB-C on the left edge near the top corner, receptacle facing out
+    'J101': (-47.5, -52.0, 90),      # USB-C on the left edge below the top-left screw hole, receptacle facing out
     'J701': (46.0, -38.0, 270),      # HDMI on the right edge
 }
 
@@ -326,11 +326,13 @@ def main():
     rules(board)
     outline(board)
     # shell mounting holes (SummerCart64: 2.5 mm at +-47.5, 7.25 above the tip)
+    # Shell screw holes, 2.5 mm like SummerCart64: its two at (+-47.5, 3.25) plus four more because this
+    # board is taller and carries the socket, HDMI and USB insertion loads: mid-height and top corners.
     holes = []
-    for x in (-47.5, 47.5):
+    for i, (x, y) in enumerate(((-47.5, 3.25), (47.5, 3.25), (-47.5, -16.0), (47.5, -16.0), (-47.5, -66.0), (47.5, -66.0)), start=1):
         h = load_footprint('MountingHole:MountingHole_2.5mm')
-        h.SetReference('H1' if x < 0 else 'H2')
-        h.SetPosition(pcbnew.VECTOR2I(mm(x), mm(3.25)))
+        h.SetReference(f'H{i}')
+        h.SetPosition(pcbnew.VECTOR2I(mm(x), mm(y)))
         board.Add(h)
         holes.append(h)
     fps = {h.GetReference(): h for h in holes}
@@ -378,7 +380,7 @@ def main():
         x = -7.5 + (i % cols) * 3.0
         y = -38.0 + (i // cols) * 2.2
         fp.SetPosition(pcbnew.VECTOR2I(mm(x), mm(y)))
-    place_by_attraction(board, fps, blocks, list(FIXED) + ['H1', 'H2'] + [f.GetReference() for f in decaps])
+    place_by_attraction(board, fps, blocks, list(FIXED) + [h.GetReference() for h in holes] + [f.GetReference() for f in decaps])
     board.BuildListOfNets()
     pcbnew.SaveBoard(str(a.out), board)
     # custom design rules: the two connectors that sit at the board edge by design
