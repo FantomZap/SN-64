@@ -331,7 +331,7 @@ def build_riser(force):
     local = {'SN64': RISER / 'libraries/SN64.pretty'}
     comps, nets = read_netlist(RISER / 'validation/sn64-v2-riser.xml')
     board = pcbnew.BOARD()
-    rules(board, layers=2, thickness=1.6)
+    rules(board, layers=2, thickness=1.2)    # SummerCart64 stack-up: the N64 slot springs expect a 1.2 mm card (docs/dimensions.md)
     # Outline: the SummerCart64 tongue (the N64 edge footprint's own Edge.Cuts: +y is the tip, fingers
     # at y 1.25 and 6.0) plus a straight body up to the header, 64.5 mm wide, 24 mm above the shoulders.
     pts = [(-32.25, 0.0), (-32.25, 9.5), (-31.25, 10.5), (31.25, 10.5), (32.25, 9.5), (32.25, 0.0), (32.25, -24.0), (-32.25, -24.0)]

@@ -3,7 +3,7 @@
 	(generator "pcbnew")
 	(generator_version "10.0")
 	(general
-		(thickness 1.6)
+		(thickness 1.2)
 		(legacy_teardrops no)
 	)
 	(paper "A4")
