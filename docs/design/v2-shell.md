@@ -1,50 +1,91 @@
-# SN64 v2 shell: envelope model (first look)
+# SN64 v2 shell: upright tower with a mushroom cap (envelope model)
 
-**Status (2026-09-30): envelope only, for the owner to look at before the board is resized. Not a
-manufacturable enclosure. Nothing on the board changed.**
+**Status (2026-09-30): envelope model for the owner's review. Not a manufacturable enclosure. The
+board has not changed yet.**
 
-The owner set the order of work: shell first, then the board's height, shape and USB-C position
-follow from it ("the shell needs to be set so we know where the usbc can be located").
+The owner's arrangement is one continuous vertical item: the SN64 stands in the N64/M64 slot and
+the SNES cartridge stands upright on top of it, in line, like a TriStar 64. A first model that laid
+the cartridge flat on a shelf out of the board's front face was rejected on sight and replaced by
+this one. The owner then asked for a mushroom shape so the shell supports the inserted cartridge:
+above the USB-C the stem bells out into a cap whose pocket wraps the bottom of the cartridge.
 
 ## Model
 
 `mechanical/sn64-v2-shell/sn64_v2_shell.py` (build123d, code-first, diffable). Outputs in the same
-folder: `sn64-v2-shell-assembly.step` (named bodies: shell, board, socket, cartridge, usbc),
-`sn64-v2-shell-assembly.stl`, `sn64-v2-shell-only.stl`, renders `shell-{iso,front,right,top}.png`.
-FreeCAD opens the STEP directly; Blender imports the STL (File > Import > STL).
+folder: `sn64-v2-shell-assembly.step` (named bodies: shell, board, socket, cartridge, usbc,
+console_top), `sn64-v2-shell-assembly.stl`, `sn64-v2-shell-only.stl`, renders
+`shell-{front,right,top,iso}.png` taken in FreeCAD. FreeCAD opens the STEP directly; Blender
+imports the STL (File > Import > STL).
 
 Frame: X across the board, Y up with 0 at the N64 tongue shoulders, Z out of the board's front
 face. The exported files are turned so viewers see Z up with the front face toward -Y.
 
-| Item | Value | Basis |
+## How it goes together
+
+- **Socket**: the 62-contact console-replacement SNES/SFC socket with ears. It sits on the board's
+  top edge with its tails on pads on both faces: pins 1-31 on the front face (they face the front
+  of the console and the cartridge label), pins 32-62 on the back. Its two rows are 7.0 mm apart and
+  the board is 1.2 mm thick, so the tails do not reach the faces as supplied; the owner will adapt
+  the board footprint to the measured sample.
+- **Ears** rest on two brackets in the shell and are screwed from above, so the shell carries the
+  cartridge insertion force and the solder joints carry none.
+- **Cartridge** stands in a 20 mm deep pocket in the mushroom cap, which holds it on all four
+  sides; its bottom face sits on the socket shoulder.
+- **USB-C** in the right wall of the stem, centre 50 mm above the shoulders: 22 mm above the
+  assumed console top and below the flare.
+
+| Item | Value (mm) | Basis |
 |---|---|---|
-| Outer width x thickness | 116.1 x 18.06 mm | SummerCart64 shell STEP (sourced) |
-| Height | -13 (2.5 below the tongue tip) to +88 | assumed bottom margin; top = board top 85 + 1 + wall |
-| Wall | 2.0 mm | assumed |
-| Tongue opening | 66 x 3.2 mm in the bottom wall | board 64.5 x 1.2 plus clearance (derived) |
-| Console top line | 28 mm above the shoulders | **assumed**; to measure on the SC64 shell / a console |
-| Socket window | 100.5 x 12.5 mm in the front wall at Y = 74.5 | socket body 99 x 11.25 (sourced) plus clearance |
-| Socket height above the board | 12 mm | **assumed**; measure the sample socket |
-| Cartridge | 136 x 88 x 20 mm lying flat, underside at Y = 64.5 | nominal; measure a real cartridge |
-| Cartridge tray | 3 mm plate at Y = 61.5..64.5, 10 mm rails, two ribs to the front wall | first idea, not engineered |
-| USB-C window | 13 x 7 mm in the right wall at Y = 50 | plug envelope 12.35 x 6.5 **assumed**; 22 above the console line, plug top 5 under the tray |
-| Board in this model | socket centreline 74.5, board top 85 | proposal: 18 mm higher than the committed board (socket at 56.5, top 70) |
-| Over-all | 142 x 101 x 108 mm including the tray | derived |
+| Stem width x thickness | 116.1 x 18.06, from -13 (2.5 below the tongue tip) to 57.5 | SummerCart64 shell STEP (sourced); bottom margin assumed |
+| Bell flare | 57.5 to 68, smooth loft from the stem to the cap | assumed; starts above the USB-C window |
+| Cap | 142.6 x 26.6, corner radius 4, 68 to 96.5 | cartridge + 0.3 clearance + 3 wall |
+| Cartridge pocket | 136.6 x 20.6, 20 deep, floor at 76.5 (socket shoulder) | depth assumed |
+| Wall | 2.0 stem, 2.0 to 2.9 through the flare (checked), 3.0 around the pocket | assumed |
+| Tongue opening | 66 x 3.2 in the bottom wall | board 64.5 x 1.2 plus clearance |
+| Console top line | 28 above the shoulders | **assumed**; M64 opening unknown |
+| Socket body | 99.0 x 11.25, ear holes 3.2 at 95.0 | OpenSFC console footprint (sourced) |
+| Socket base / nose height | 6 / 9, nose 88 x 9 | **assumed**; a marketplace listing gives 21 mm overall |
+| Board top edge | 70 (committed board height) | socket underside 0.5 above it |
+| Cartridge | 136 x 88 x 20 upright, seat at 76.5, top at 164.5 | Wikipedia (unverified); 136.5 above the console top |
+| USB-C window | 13 x 7 in the right wall at 50 | plug envelope 12.35 x 6.5 **assumed** |
+| Overall shell | 142.6 x 109.5 x 26.6 | derived |
 
-## What the model shows
+## Board changes this shell asks for (not made yet)
 
-- With the socket 74.5 mm up, the flat cartridge sits 20 mm clear of the console top line and the
-  USB-C port has 22 mm of clear wall above the console for a plug and fingers.
-- The shell is 116.1 mm wide (SummerCart64) but the board is 101.8 mm wide, so a USB-C receptacle on
-  the board's right edge ends about 7 mm inside the right wall. Either the board widens above the
-  console line (to about 110 mm; the SC64 profile only constrains the lower 26 mm) or the right wall
-  steps in at the port. This is the decision the owner's review should settle.
-- The cartridge overhangs the shell by 10 mm each side (136 vs 116), so the tray is wider than
-  the body; a real shell would take the cartridge width as its upper width.
+- J2 moves from the face (through-hole at 56.5) to a footprint on the top edge at 70, pins 1-31 on
+  the front face. The existing routing can stay: the old J2 holes become vias with short stubs to
+  the edge pads.
+- Outline widened to 111 mm between 32 and 60 mm above the shoulders so the USB-C reaches the
+  right wall; the top 10 mm narrowed to 88 mm so the ear screws pass beside the board. The two top
+  mounting holes at 66.5 move into the wide section.
+- USB-C J101 moves from 18 mm (inside the console) to 50 mm on the right edge; only the USB nets
+  re-route.
+
+## Socket sourcing (searched 2026-09-30)
+
+The part is sold widely as a console repair part, "62 pin with ear". No seller publishes a drawing,
+and no 3D model was found.
+
+| Source | Evidence at inspection | Note |
+|---|---|---|
+| [NES Repair Shop `snspt043`](https://www.nesrepairsshop.com/Catalog/index.php?main_page=product_info&products_id=2262) | $9.99; 62 pins with soldering legs; fits SNES and SFC | sample candidate |
+| [Shenzhen Co-Growing, Alibaba "SNES-Slot"](https://www.alibaba.com/product-detail/SFC-62-Pin-Game-Cartridge-Card_62358974795.html) | with ear / without ear; MOQ 50; $1.15 each at 50 | volume source; no dimensions |
+| [Hexir `HXR-19-18637`](https://www.hexir.com/snes-62-pin-with-ear-cartridge-slot-connector-replacement-bulk-hexir/) | with ear; $10.28; pre-order; states 2.54 mm spacing | spacing claim conflicts with 2.5 mm |
+| [Amazon B0H35742NX](https://www.amazon.com/SNES-Game-Slot-Connector-Replacement/dp/B0H35742NX) | with / without ears; search summary gives 13.7 x 2.1 x 0.9 cm with ears, 9.7 x 2.1 x 0.9 cm without | unverified; 137 mm conflicts with the 95 mm hole spacing |
+
+Avoid listings for clone consoles that state a 2.54 mm gap.
+
+Sourced geometry (OpenSFC footprint of the original console board, `docs/dimensions.md`): 62
+contacts, 31 per row, 2.5 mm pitch with two 7.5 mm gaps (between contacts 4-5 and 27-28),
+85.0 mm first to last, rows 7.0 mm apart, body 99.0 x 11.25 mm, holes 3.2 mm, 95.0 mm apart.
+A 75 mm figure would be 31 contacts at 2.5 mm with no gaps; that part would miss the outer contact
+groups, which carry the cartridge audio inputs (pins 31 and 62, used by FXPAK Pro MSU-1).
 
 ## Open
 
-- Console line (N64) and the M64 opening: measure, do not assume.
-- Socket height and nose reach: from the sample socket (`docs/design/socket-selection.md`).
-- Split line, screw bosses at the board's six holes, how the tray carries insertion force.
-- Board height and width, USB-C position: after the owner's review of this model.
+- Buy one sample and measure it: height, nose, tail length and section, ear shape and hole
+  spacing, and how deep a cartridge seats.
+- Console top line (N64) and the M64 opening.
+- SFC and PAL cartridges are 130 mm wide against the 136.6 mm pocket: guide ribs to centre them.
+- Pocket depth against grip: the cartridge must still be easy to pull out by its top.
+- Split line, bosses at the board's mounting holes, the ear screw detail.

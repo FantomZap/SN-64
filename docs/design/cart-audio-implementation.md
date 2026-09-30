@@ -1,6 +1,6 @@
 # Cartridge analog audio into the console audio stream
 
-Snapshot 2026-09-29. Some SNES cartridges put their own sound on socket pins 31/32: MSU-1 music on the FXPAK Pro, and a few coprocessor boards. This block adds that sound to the SNES core's sound before it goes to the console ([console-video-path.md](console-video-path.md)).
+Snapshot 2026-09-29. Some SNES cartridges put their own sound on socket pins 31 and 62: MSU-1 music on the FXPAK Pro, and a few coprocessor boards. This block adds that sound to the SNES core's sound before it goes to the console ([console-video-path.md](console-video-path.md)).
 
 **Status: simulated and synthesised only.** It has run in Verilator and also in Icarus, which is four-state and therefore able to see unknown (X) values. Nothing has run on hardware. The ADC part number, its oscillator and the analog front end belong to the clock/A-V schematic sheet and are not chosen here.
 

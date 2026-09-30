@@ -23,28 +23,26 @@ layout disappears.
 | FPGA fan-out vias | 326 | 210 |
 | Boards | 2 (main + socket board, 80-pin joint) | 1 |
 
-## Arrangement (one board, owner decision 2026-09-30)
+## Arrangement (one board, owner decisions 2026-09-30)
 
-One vertical board standing in the N64/M64 slot, as v1 did: the SummerCart64 edge geometry at the
-bottom (tongue 10.5 mm below the shoulders, 1.2 mm thick, 101.8 mm wide with the shell notches, six
-layers, 70 mm above the shoulders). The SNES socket (console-replacement family: 62 contacts, 2.5 mm
-pitch, 7.0 mm rows, 7 mm nose, ears 95 mm apart) is mounted on the board's face 56.5 mm above the
-shoulders with its nose pointing out of the board, so the cartridge lies flat over the console, label
-up. Insertion force therefore acts along the board's plane and goes through the socket ears and six
-screw holes (SummerCart64's two at the shoulders plus four) into the shell, not into the N64 slot.
+One vertical board standing in the N64/M64 slot with the SNES cartridge upright on top of it, in
+line: one continuous vertical item like a TriStar 64. The bottom is the SummerCart64 edge geometry
+(tongue 10.5 mm below the shoulders, 1.2 mm thick, 101.8 mm wide with the shell notches, six
+layers). The SNES socket (console-replacement family with ears: 62 contacts, 2.5 mm pitch, rows
+7.0 mm apart, ear holes 95 mm apart) sits on the board's top edge with its tails on pads on both
+faces, pins 1-31 on the front face. Its ears screw into the shell, which takes the insertion force,
+and above the USB-C the shell bells out into a mushroom cap whose pocket holds the bottom of the
+cartridge on all four sides. How the tails reach the pads is settled in the board footprint once a sample is measured. Shell
+envelope: [v2-shell.md](v2-shell.md).
 
-Why flat: every SNES socket mounts on a horizontal surface with its pins in two rows 7 mm apart; an
-upright, in-line cartridge on a single flat board would need a right-angle socket, which does not
-exist (generic 2.54 mm edge connectors miss the 2.5 mm pitch and the recessed slot). The upright
-arrangement is possible only as a two-piece assembly (a socket strip soldered across the top edge) or
-a rigid-flex board; both were offered and declined in favour of one flat board.
+History: the board was first drawn with the socket through-hole on its face and the cartridge lying
+flat over the console; the owner rejected that when he saw it in 3D. The committed routed board
+still has J2 on the face at 56.5 mm. Moving it to the top edge, widening the outline for the USB-C
+and moving the USB-C above the console line are the next board change (list in v2-shell.md).
 
-Height: the SC64 profile widens at 26.4 mm above the shoulders (the console's opening), so a 20 mm
-cartridge whose centre is 56.5 mm up clears the console top by about 20 mm. If a console needs more,
-height is inserted between the fingers and the FPGA and only the thirty finger nets re-route.
-
-Layout is the horizontal v2 layout turned 180 degrees: FPGA banks 0/1 face the N64 edge, the
-translator row sits between the FPGA and the socket, USB-C on the right edge, power lower left.
+Layout (committed board) is the horizontal v2 layout turned 180 degrees: FPGA banks 0/1 face the
+N64 edge, the translator row sits between the FPGA and the socket, USB-C on the right edge, power
+lower left.
 
 ## What moved into the FPGA (LFE5U-85F-8BG381I, the grade in stock)
 
@@ -102,7 +100,7 @@ footprint exposed-pad size; USB pull-up switched only after PLL lock.
 ## Open items
 
 - Routing: 211 of 218 signal nets (KiCadRoutingTools passes plus scripted gap closing); 7 nets left for hand routing in KiCad (`validation/pcb-open-connections.json`: N64_AD6 and N64_JOYBUS to the fingers, USB_PU and USB_DP_F across to the USB corner, FLASH_D2, a SNES_5V_CART segment, the TLA2528 DVDD pin). DRC: 0 errors apart from 6 single-spoke thermal reliefs and the USB-C shield pad on the edge (intended). 3,612 tracks, 997 vias (v1 draft: 7,065 and 1,453 with a fifth of the work left).
-- Shell: envelope model only (`docs/design/v2-shell.md`, `mechanical/sn64-v2-shell/`). The upper part must hold the socket, support the flat cartridge from underneath and clamp the board at its six holes. The socket's height above the board and nose reach are not sourced and set the cartridge-to-board gap. Board height and the USB-C position follow the owner's review of the shell.
+- Shell: envelope model only (`docs/design/v2-shell.md`, `mechanical/sn64-v2-shell/`): upright tower, socket ears screwed to brackets in the shell. The board changes it asks for (socket on the top edge, outline widened for the USB-C, USB-C above the console line) are listed there and not made yet.
 - PCBWay: annular ring (6 mil) and spacing (5 mil) against the 0.125 / 0.1 mm rules, as in v1.
 - Four-layer trial: with 210 fan-out vias and signals on the outer rings a four-layer stack may
   route; not tried yet.
