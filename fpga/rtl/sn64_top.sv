@@ -103,6 +103,11 @@ module sn64_top #(
     wire run_req_h, soft_reset_h; wire [1:0] region_mode_h;
     wire [15:0] status_h, fault_h, region_info_h, region_source_h;
     wire n64_cic_invalid_region; wire [3:0] n64_cic_step;
+    // SNES-domain signals the endpoint's frame window consumes (declared here for the synthesis
+    // front-end; produced further down by the core, the audio mixer and the reset synchroniser)
+    wire core_reset_n, region_pal_s;
+    wire [14:0] snes_rgb; wire snes_hde, snes_vde, snes_high_res, snes_interlace; wire [8:0] snes_video_x, snes_video_y;
+    wire [15:0] mix_audio_left, mix_audio_right; wire mix_audio_ready;
     sn64_n64_endpoint #(.ROM_ADDR_BITS(ROM_ADDR_BITS), .ROM_FROM_FLASH(ROM_FROM_FLASH),
                         .FLASH_OFFSET(FLASH_OFFSET), .FLASH_USE_USRMCLK(FLASH_USE_USRMCLK)) endpoint (
         .clk(clk_host), .reset(!rsthost_n), .cic_cpu_clk(clk_host),
@@ -115,6 +120,10 @@ module sn64_top #(
         .run_request(run_req_h), .soft_reset(soft_reset_h), .region_mode(region_mode_h), .mailbox_seq(seq_h),
         .status_flags(status_h), .fault_flags(fault_h), .build_id(BUILD_ID),
         .region_info(region_info_h), .region_source(region_source_h),
+        .clk_snes(clk_snes), .rst_snes_n(core_reset_n),
+        .video_rgb(snes_rgb), .video_hde(snes_hde), .video_vde(snes_vde), .video_x(snes_video_x), .video_y(snes_video_y),
+        .video_high_res(snes_high_res), .video_interlace(snes_interlace), .video_pal(region_pal_s),
+        .audio_left(mix_audio_left), .audio_right(mix_audio_right), .audio_ready(mix_audio_ready),
         .n64_cic_clk(n64_cic_clk), .n64_cic_dq(n64_cic_dq), .n64_si_clk(n64_si_clk), .cic_region(region_pal),
         .cic_invalid_region(n64_cic_invalid_region), .cic_step(n64_cic_step),
         .host_reset_event(), .host_nmi_event());
@@ -252,10 +261,8 @@ module sn64_top #(
     sn64_sync_bit #(1'b0) s_permit (.clk(clk_snes), .d(bus_permit), .q(permit_s));
     wire bridge_permit = bus_permit & permit_s;
     // Core reset follows the socket /RESET level (our pull or the cartridge's).
-    wire core_reset_n;
     sn64_sync_bit #(1'b0) s_core_rst (.clk(clk_snes), .d(cart_reset_n_sense & bus_permit), .q(core_reset_n));
 
-    wire [14:0] snes_rgb; wire snes_hde, snes_vde; wire [8:0] snes_video_x, snes_video_y;
     wire [15:0] snes_audio_left, snes_audio_right; wire snes_audio_ready;
     wire [15:0] joy1_s, joy2_s;
     sn64_cdc_word #(.W(16)) x_joy1 (.src_clk(clk_host), .src_data(joy1_h), .dst_clk(clk_snes), .dst_data(joy1_s));
@@ -265,7 +272,6 @@ module sn64_top #(
         .joy_strobe(joy_strobe), .joy1_clock(joy1_clock), .joy2_clock(joy2_clock),
         .joy1_di(joy1_di), .joy2_di(joy2_di));
 
-    wire region_pal_s;
     sn64_sync_bit #(1'b0) s_pal (.clk(clk_snes), .d(region_pal), .q(region_pal_s));
     wire bridge_reset_pull_n;
     wire [23:0] br_address; wire [7:0] br_pa;
@@ -281,7 +287,7 @@ module sn64_top #(
         .ctl_oe_n(br_ctl_oe_n), .data_oe_n(br_data_oe_n), .data_dir(br_data_dir), .contention_guard(),
         .joy1_di(joy1_di), .joy2_di(joy2_di), .joy_strobe(joy_strobe), .joy1_clock(joy1_clock), .joy2_clock(joy2_clock),
         .rgb(snes_rgb), .hsync(), .vsync(), .hde(snes_hde), .vde(snes_vde), .dot_clock(),
-        .high_res(), .field(), .interlace(), .video_x(snes_video_x), .video_y(snes_video_y),
+        .high_res(snes_high_res), .field(), .interlace(snes_interlace), .video_x(snes_video_x), .video_y(snes_video_y),
         .audio_left(snes_audio_left), .audio_right(snes_audio_right), .audio_ready(snes_audio_ready));
 
     // Socket owner mux: the bridge while bus-permitted, the header probe only
@@ -317,7 +323,6 @@ module sn64_top #(
     sn64_i2s_rx adc_rx (.clk(clk_host), .rst_n(rsthost_n), .bck(adc_bck), .lrck(adc_lrck), .dout(adc_dout),
         .left(adc_left_h), .right(adc_right_h), .frame_tog(adc_tog_h), .frame_stb(),
         .locked(adc_locked_h), .frame_errors(adc_frame_errors_h));
-    wire [15:0] mix_audio_left, mix_audio_right; wire mix_audio_ready;
     wire [15:0] audio_ovf_slips, audio_unf_slips; wire cart_audio_active;
     sn64_audio_mix audio_mix (.clk(clk_snes), .rst_n(core_reset_n), .cart_enable(1'b1),
         .adc_left(adc_left_h), .adc_right(adc_right_h), .adc_tog(adc_tog_h), .adc_locked(adc_locked_h),

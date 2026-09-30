@@ -54,6 +54,15 @@ module sn64_n64_endpoint #(
     input  wire [15:0] build_id,
     input  wire [15:0] region_info,       // REGION_INFO: ROM-header probe result (layout in the register map below)
     input  wire [15:0] region_source,     // REGION_SOURCE: how the region was decided
+    // ---------------- Frame window: SNES picture and audio for the console (clk_snes domain) ----------------
+    input  wire        clk_snes,
+    input  wire        rst_snes_n,
+    input  wire [14:0] video_rgb,
+    input  wire        video_hde, video_vde,
+    input  wire [8:0]  video_x, video_y,
+    input  wire        video_high_res, video_interlace, video_pal,
+    input  wire [15:0] audio_left, audio_right,
+    input  wire        audio_ready,
 
     // CIC lockout (vendored SummerCart64 implementation on a SERV soft core)
     input  wire        n64_cic_clk,
@@ -78,7 +87,7 @@ module sn64_n64_endpoint #(
     assign n64_scb.rom_write_enabled    = 1'b0;
     assign n64_scb.rom_shadow_enabled   = 1'b0;
     assign n64_scb.rom_extended_enabled = 1'b0;
-    assign n64_scb.sram_enabled         = 1'b0;
+    assign n64_scb.sram_enabled         = 1'b1;   // frame/audio window at 0x0800_0000 (PI domain 2), docs/design/console-video-path.md
     assign n64_scb.sram_banked          = 1'b0;
     assign n64_scb.flashram_enabled     = 1'b0;
     assign n64_scb.dd_enabled           = 1'b0;
@@ -118,6 +127,31 @@ module sn64_n64_endpoint #(
         .n64_reset(n64_reset), .n64_cic_clk(n64_cic_clk), .n64_cic_dq(n64_cic_dq), .n64_si_clk(n64_si_clk));
 
     // ---------------------------------------------------------------------
+    // mem_bus split: the SRAM window (mem_bus 0x03FE_0000-0x03FF_FFFF, SummerCart64
+    // SAVE_OFFSET) goes to the frame window; everything else is the ROM window.
+    // ---------------------------------------------------------------------
+    mem_bus rom_bus ();
+    wire sel_fb = (mem_bus.address[26:17] == 10'h1FF);
+    assign rom_bus.request = mem_bus.request & ~sel_fb;
+    assign rom_bus.write   = mem_bus.write;
+    assign rom_bus.wmask   = mem_bus.wmask;
+    assign rom_bus.address = mem_bus.address;
+    assign rom_bus.wdata   = mem_bus.wdata;
+    wire        fb_ack;
+    wire [15:0] fb_rdata, frame_status, audio_wptr, video_mode;
+    sn64_frame_window frame_window (
+        .clk_snes(clk_snes), .rst_snes_n(rst_snes_n),
+        .rgb(video_rgb), .hde(video_hde), .vde(video_vde), .video_x(video_x), .video_y(video_y),
+        .high_res(video_high_res), .interlace(video_interlace), .pal(video_pal),
+        .audio_left(audio_left), .audio_right(audio_right), .audio_ready(audio_ready),
+        .clk_host(clk), .reset(reset),
+        .req(mem_bus.request & sel_fb), .write(mem_bus.write), .address(mem_bus.address), .wdata(mem_bus.wdata),
+        .ack(fb_ack), .rdata(fb_rdata),
+        .frame_status(frame_status), .audio_wptr(audio_wptr), .video_mode(video_mode));
+    assign mem_bus.ack   = sel_fb ? fb_ack   : rom_bus.ack;
+    assign mem_bus.rdata = sel_fb ? fb_rdata : rom_bus.rdata;
+
+    // ---------------------------------------------------------------------
     // Bootstrap ROM: mem_bus memory. Word address = byte address >> 1. Reads
     // outside the ROM return the word address mirrored into the ROM (small
     // ROM mirrored across the window); writes are ignored (rom_write_enabled=0).
@@ -125,7 +159,7 @@ module sn64_n64_endpoint #(
     if (ROM_FROM_FLASH) begin : g_rom_flash
         sn64_bootrom_flash #(.FLASH_OFFSET(FLASH_OFFSET), .WINDOW_BITS(ROM_ADDR_BITS + 1),
                              .USE_USRMCLK(FLASH_USE_USRMCLK)) u_flash (
-            .clk(clk), .reset(reset), .mem_bus(mem_bus),
+            .clk(clk), .reset(reset), .mem_bus(rom_bus),
             .flash_sck_pin(flash_sck), .flash_cs_n(flash_cs_n), .flash_dq(flash_dq));
     end else begin : g_rom_bram
         reg [15:0] rom [0:(1<<ROM_ADDR_BITS)-1];
@@ -135,13 +169,13 @@ module sn64_n64_endpoint #(
         reg [15:0] mem_rdata;
         always @(posedge clk) begin
             mem_ack <= 1'b0;
-            if (mem_bus.request && !mem_ack) begin
-                mem_rdata <= rom[mem_bus.address[ROM_ADDR_BITS:1]];
+            if (rom_bus.request && !mem_ack) begin
+                mem_rdata <= rom[rom_bus.address[ROM_ADDR_BITS:1]];
                 mem_ack   <= 1'b1;
             end
         end
-        assign mem_bus.ack   = mem_ack;
-        assign mem_bus.rdata = mem_rdata;
+        assign rom_bus.ack   = mem_ack;
+        assign rom_bus.rdata = mem_rdata;
         assign flash_sck     = 1'b0;
         assign flash_cs_n    = 1'b1;
         // flash_dq is left undriven (released) in the block-RAM build.
@@ -161,6 +195,9 @@ module sn64_n64_endpoint #(
     //   0x1C REGION_SOURCE  r  [1:0] source (0 forced by CONTROL, 1 key CIC, 2 ROM header, 3 NTSC default
     //                          or timeout), [2] decided (fields describe the last cartridge start),
     //                          [3] region timeout expired, [4] decided region PAL, [15:5] 0
+    //   0x1E FRAME_STATUS  r  {frame_count[7:0], lines_done[7:0]} of the frame window (0x0800_0000)
+    //   0x20 AUDIO_WPTR    r  next stereo pair index the audio ring will receive
+    //   0x22 VIDEO_MODE    r  {12'd0, pal, interlace, high_res, overscan}
     //   Writes to 0x1A/0x1C are ignored (a 32-bit write at 0x18 also writes 0x1A).
     //   Both words are produced in the clk_25 domain and cross with sn64_cdc_word (sn64_top).
     // ---------------------------------------------------------------------
@@ -205,6 +242,9 @@ module sn64_n64_endpoint #(
             8'h1A: cfg_rdata = region_info;
             8'h1C: cfg_rdata = region_source;
 `endif
+            8'h1E: cfg_rdata = frame_status;
+            8'h20: cfg_rdata = audio_wptr;
+            8'h22: cfg_rdata = video_mode;
             default: cfg_rdata = 16'h0000;
         endcase
     end

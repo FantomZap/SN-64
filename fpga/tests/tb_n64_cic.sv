@@ -33,6 +33,8 @@ module tb_n64_cic;
         .rom_we(1'b0),.rom_waddr(4'd0),.rom_wdata(16'd0),
         .joy1_buttons(j1),.joy2_buttons(j2),.joy1_stick_x(sx),.joy1_stick_y(sy),
         .run_request(run),.soft_reset(),.region_mode(),.mailbox_seq(seq),.fault_flags(16'h0000),.status_flags(16'h0),.build_id(16'h0),
+        .clk_snes(1'b0), .rst_snes_n(1'b0), .video_rgb(15'd0), .video_hde(1'b0), .video_vde(1'b0), .video_x(9'd0), .video_y(9'd0),
+        .video_high_res(1'b0), .video_interlace(1'b0), .video_pal(1'b0), .audio_left(16'd0), .audio_right(16'd0), .audio_ready(1'b0),
         .n64_cic_clk(cic_clk),.n64_cic_dq(cic_dq),.n64_si_clk(si_clk),.cic_region(1'b0),
         .cic_invalid_region(inv),.cic_step(step),
         .host_reset_event(rst_ev),.host_nmi_event(nmi_ev));

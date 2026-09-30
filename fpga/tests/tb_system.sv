@@ -382,7 +382,7 @@ module tb_system;
     wire [7:0] exp_4219 = {JOY[0],JOY[1],JOY[2],JOY[3],JOY[4],JOY[5],JOY[6],JOY[7]};
     wire [7:0] exp_4218 = {JOY[8],JOY[9],JOY[10],JOY[11],4'b0000};
 
-    reg [15:0] d0, d1, d2;
+    reg [15:0] d0, d1, d2, f0, f1, f2;
     integer t_start;
     bit key_present = 0, exp_pal = 0; bit [1:0] exp_src = 0;
     string exp_region_s, exp_src_s;
@@ -459,6 +459,14 @@ module tb_system;
             $fatal(1,"REGION_INFO does not show the valid %s header: %h", pal_header ? "EU" : "USA", d1);
         if (!(pal_header || ntsc_header) && (d1[13] || d1[11:8]==4'b0000)) $fatal(1,"REGION_INFO: absent header not rejected: %h", d1);
         if (cic_contention != 0) $fatal(1,"CIC data pins driven by lock and key at once (%0d clk_25 cycles)", cic_contention);
+        // Console video path: the frame window has completed frames, VIDEO_MODE follows the
+        // region, and the first two pixels read back through the PI carry the RGBA5551 alpha bit.
+        pi_addr(32'h1FFF_001E); pi_read(f0); pi_read(f1); pi_read(f2); pi_end;
+        $display("frame window: FRAME_STATUS=%h AUDIO_WPTR=%h VIDEO_MODE=%h", f0, f1, f2);
+        if (f0[15:8] == 8'd0) $fatal(1,"frame window: no SNES frame completed");
+        if (f2[3] !== region_pal) $fatal(1,"VIDEO_MODE pal bit %0d does not match the region", f2[3]);
+        pi_addr(32'h0800_0000); pi_read(f1); pi_read(f2); pi_end;
+        if (f1[0] !== 1'b1 || f2[0] !== 1'b1) $fatal(1,"frame pixels lack the RGBA5551 alpha bit: %h %h", f1, f2);
         // Cartridge audio reached the HDMI block mixed with the DSP samples.
         $display("audio at sn64_av_out: %0d priming (DSP only), %0d mixed with the ADC words, %0d wrong; slips ovf %0d unf %0d; ADC frame errors %0d",
                  audio_priming, audio_mixed, audio_bad, dut.audio_ovf_slips, dut.audio_unf_slips, dut.adc_frame_errors_h);

@@ -50,7 +50,7 @@ def main():
              ['fpga/rtl/sn64_av_hdmi_tx.sv', 'fpga/rtl/sn64_av_serializer.sv', 'fpga/rtl/sn64_av_out.sv',
               'fpga/rtl/sn64_cdc.sv', 'fpga/rtl/sn64_clock_init.sv', 'fpga/rtl/sn64_power_sequencer.sv',
               'fpga/rtl/sn64_snes_cic_lock.sv', 'fpga/vendor/snestang-controller/src/controller_adapter.sv',
-              'fpga/rtl/sn64_snes_joypad.sv', 'fpga/rtl/sn64_header_probe.sv',
+              'fpga/rtl/sn64_snes_joypad.sv', 'fpga/rtl/sn64_header_probe.sv', 'fpga/rtl/sn64_frame_window.sv',
               'fpga/vendor/summercart64/fw/rtl/memory/memory_flash.sv', 'fpga/rtl/sn64_bootrom_flash.sv',
               'fpga/rtl/sn64_i2s_rx.sv', 'fpga/rtl/sn64_audio_mix.sv', 'fpga/rtl/sn64_top.sv'])
     top = 'sn64_board_top' if args.top == 'board' else 'sn64_pnr_wrap'

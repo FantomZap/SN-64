@@ -22,6 +22,7 @@ The vendored `n64_pi.sv` implements the N64 PI bus: input synchronisation, the A
 New SN64 logic:
 
 - **Bootstrap ROM window** at N64 address `0x1000_0000`, the ordinary cartridge-ROM range the console boots from. Served from block RAM (`ROM_ADDR_BITS` parameter; 4 KiB words in the test) with a write port for loading the image. The window mirrors the small ROM; the final image size is a bootstrap decision.
+- **Frame/audio window** at N64 address `0x0800_0000` (PI domain 2, so the boot program can give it fast timing without touching the flash ROM window): the vendored controller's 128 KiB "SRAM" region, which lands on mem_bus `0x03FE_0000`. Byte offsets `0x00000` = the SNES frame as 240 lines × 256 pixels of RGBA5551 (`line*512 + x*2`), `0x1E000` = the 32 kHz stereo audio ring (1024 pairs, `pair*4`). Written by [sn64_frame_window.sv](../../fpga/rtl/sn64_frame_window.sv) in the SNES clock domain; see [console-video-path.md](console-video-path.md). Mailbox words `0x1E FRAME_STATUS` {frame_count[7:0], lines_done[7:0]}, `0x20 AUDIO_WPTR`, `0x22 VIDEO_MODE` {pal, interlace, high_res, overscan} tell the reader what is ready.
 - **Mailbox** at `0x1FFF_0000`, SummerCart64's register range, so its unlocked-register convention carries over to the bootstrap software:
 
 | Offset | Name | Access | Contents |

@@ -124,7 +124,7 @@ def main():
         n64_common = ['fpga/vendor/summercart64/fw/rtl/memory/mem_bus.sv', 'fpga/rtl/sn64_n64_reg_bus.sv',
                       'fpga/vendor/summercart64/fw/rtl/n64/n64_scb.sv', 'fpga/vendor/summercart64/fw/rtl/n64/n64_pi_fifo.sv',
                       'fpga/vendor/summercart64/fw/rtl/n64/n64_pi.sv', 'build/generated/summercart64/n64_cic.sv',
-                      'fpga/rtl/sn64_n64_endpoint.sv'] + serv
+                      'fpga/rtl/sn64_cdc.sv', 'fpga/rtl/sn64_frame_window.sv', 'fpga/rtl/sn64_n64_endpoint.sv'] + serv
         n64_sources = n64_common + ['fpga/tests/tb_n64_endpoint.sv']
         n64_obj = obj / 'n64-endpoint'
         run('n64-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
@@ -143,6 +143,24 @@ def main():
         run('n64-endpoint-region-swap', [str(n64_fault_obj / ('Vtb_n64_endpoint.exe' if os.name == 'nt' else 'Vtb_n64_endpoint'))],
             'REGION_INFO/REGION_SOURCE read wrong')
         report['simulation']['injected_n64_endpoint_fault'] = 'Rejected: swapped REGION_INFO/REGION_SOURCE decode is detected'
+        # Console video path: frame/audio window read by an N64 host model at fast domain-2 timing,
+        # plus a fault build (R/B swapped) that must fail.
+        fw_src = n64_common + ['fpga/tests/tb_frame_window.sv']
+        fw_obj = obj / 'frame-window'
+        run('frame-window-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+            '--top-module', 'tb_frame_window', '--Mdir', str(fw_obj).replace('\\', '/')] + fw_src)
+        fw_exe = fw_obj / ('Vtb_frame_window.exe' if os.name == 'nt' else 'Vtb_frame_window')
+        fw_body = run('frame-window', [str(fw_exe), '+pwd=5', '+rls=1'])
+        fw_pass = next((line for line in fw_body.splitlines() if line.startswith('PASS:')), None)
+        if fw_pass is None:
+            raise RuntimeError('Frame window test exited without its acceptance marker')
+        report['simulation']['frame_window'] = fw_pass
+        fwf_obj = obj / 'frame-window-fault'
+        run('frame-window-fault-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+            '+define+SN64_FAULT_FRAME_RB_SWAP', '--top-module', 'tb_frame_window', '--Mdir', str(fwf_obj).replace('\\', '/')] + fw_src)
+        run('frame-window-rb-swap', [str(fwf_obj / ('Vtb_frame_window.exe' if os.name == 'nt' else 'Vtb_frame_window')), '+pwd=5', '+rls=1'],
+            'FAIL: tb_frame_window')
+        report['simulation']['injected_frame_window_fault'] = 'Rejected: swapped red/blue in the RGBA5551 conversion is detected on every pixel'
         # Bootstrap ROM window from the configuration flash: SummerCart64 memory_flash (unmodified) + QSPI flash model.
         flash_sources = n64_common + ['fpga/vendor/summercart64/fw/rtl/memory/memory_flash.sv',
                                       'fpga/rtl/sn64_bootrom_flash.sv', 'fpga/tests/tb_bootrom_flash.sv']

@@ -126,6 +126,14 @@ Built by parallel helper agents with self-checking and fault-injection tests, th
 - **Power/schematic decisions closed.** `efuse_fault_n` pulled up to FPGA_3V3 (a 5V_PRE divider would back-drive a non-hot-socket ECP5 bank, DS-02012 section 3.6); cartridge enable pull-ups 10k -> 4.7k (ECP5 configuration-time pull-down up to 150 µA, Table 3.7); FPGA bucks fed from 5V_PRE accepted (a buck cannot make 3.3 V from the host's 3.3 V).
 - Sources: MiSTer `SNES_MiSTer` commit `c61bfd45171c62000417333cd4679890bcd091a6` (`rtl/PPU.vhd` lines 323-324, `rtl/DSP.vhd` lines 238-247).
 
+## 2026-09-29 — Console video path: frames and audio to the N64 over the cartridge bus
+
+- **Decision (owner):** the SNES picture and sound go to the console through the cartridge bus and the boot program shows them on the console's own output (N64 AV jack, M64 HDMI). This is the primary A/V path; the board's own HDMI is secondary and is to be removed unless kept on purpose. Design: [console-video-path.md](design/console-video-path.md).
+- **FPGA side done in simulation:** `sn64_frame_window` (RGBA5551 frame buffer + audio ring) behind the vendored PI controller's SRAM window at `0x0800_0000` (PI domain 2, fast timing), three new mailbox words. Bench: a full frame reads back exactly at 128 ns/word (15.6 MB/s, 2.3× the 60 Hz need) while following the line counter; R/B-swap fault build fails; whole-system runs read frames from the real core in NTSC and PAL. Suite: 42/42.
+- **Next:** the boot program's display loop (libdragon: PI domain-2 timing, frame DMA following `lines_done`, VI 256×224 16-bit, AI 32 kHz), then HDMI removal from the schematic/board, then routing.
+- **PCB:** six shell-screw holes (2.5 mm), corrected SummerCart64 outline, connectivity-pulled placement.
+- Setback acknowledged: the HDMI output block and its schematic corner were built on the spec's "independent digital output" line without confirming intent with the owner.
+
 ## Remaining work
 
 Select and validate the FPGA/storage and physical-cartridge bridge, complete system/cartridge power and protection, N64 endpoint, controller/firmware functions, clocks, A/V and diagnostics. Retain PAL and the required M64 single-HDMI target; its supported integration mechanism remains unresolved. Complete PCB placement/routing and the FreeCAD enclosure, then perform electrical, programming, compatibility and fit tests on prototypes before producing a PCBWay release. No working SN 64 hardware or fabrication-ready package exists yet.
