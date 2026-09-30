@@ -49,6 +49,23 @@ def main():
     tracks = list(board.GetTracks())
     n_via = sum(1 for t in tracks if t.GetClass() == 'PCB_VIA')
     print(f'SES import: {ok}; tracks+vias {before} -> {len(tracks)} ({n_via} vias)')
+    # The importer gives the plane-net (power class) vias the class drill (0.3 mm) while the BGA
+    # dog-bones keep their 0.45 mm diameter, which breaks the annular-ring rule: pin every via's
+    # drill to its diameter (0.45 -> 0.2, 0.6 -> 0.3), and never widen a via inside the BGA field.
+    u = board.FindFootprintByReference('U401')
+    c = u.GetPosition()
+    fixed = 0
+    for t in tracks:
+        if t.GetClass() != 'PCB_VIA':
+            continue
+        w = t.GetWidth()
+        in_bga = abs(t.GetPosition().x - c.x) < mm(8.2) and abs(t.GetPosition().y - c.y) < mm(8.2)
+        if in_bga and w != mm(0.45):
+            t.SetWidth(mm(0.45)); w = mm(0.45); fixed += 1
+        drill = mm(0.2) if w <= mm(0.5) else mm(0.3)
+        if t.GetDrillValue() != drill:
+            t.SetDrill(drill); fixed += 1
+    print(f'via geometry corrected on {fixed} vias')
     for z in list(board.Zones()):
         if z.GetZoneName().startswith(TAG):
             board.Remove(z)

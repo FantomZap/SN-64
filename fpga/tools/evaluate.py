@@ -68,7 +68,7 @@ def main():
     if args.mode in ('sim', 'all'):
         obj.mkdir(parents=True, exist_ok=True)
         run('verilator-version', [verilator, '--version'])
-        run('simulation-build', [verilator, '--binary', '--timing', '--build-jobs', '4',
+        run('simulation-build', [verilator, '--binary', '--timing', '--build-jobs', '16',
             '-Wno-fatal', '--top-module', 'tb_console_boot', '--Mdir', str(obj).replace('\\', '/'),
             '-Ibuild/generated/snestang/src', '-Ibuild/generated/snestang/src/spc700',
             '-Ibuild/generated/snestang/src/65C816', '-f', 'build/core-sources.f',
@@ -84,7 +84,7 @@ def main():
         run('corrupt-cartridge-read', [str(executable), '+corrupt_read'], 'cartridge low readback')
         report['simulation']['injected_bad_read'] = 'Rejected with expected cartridge low readback assertion'
         wram_obj = obj / 'wram-bus'
-        run('wram-build', [verilator, '--binary', '--timing', '--build-jobs', '4',
+        run('wram-build', [verilator, '--binary', '--timing', '--build-jobs', '16',
             '-Wno-fatal', '--top-module', 'tb_wram_bus', '--Mdir', str(wram_obj).replace('\\', '/'),
             '-Ibuild/generated/snestang/src', '-Ibuild/generated/snestang/src/spc700',
             '-Ibuild/generated/snestang/src/65C816', '-f', 'build/core-sources.f',
@@ -98,7 +98,7 @@ def main():
         bridge_sources = ['fpga/rtl/sn64_console_candidate.sv', 'fpga/rtl/sn64_cart_bridge.sv',
                           'fpga/rtl/sn64_console_with_bridge.sv', 'fpga/tests/tb_cart_bridge.sv']
         bridge_obj = obj / 'cart-bridge'
-        run('bridge-build', [verilator, '--binary', '--timing', '--build-jobs', '4',
+        run('bridge-build', [verilator, '--binary', '--timing', '--build-jobs', '16',
             '-Wno-fatal', '--top-module', 'tb_cart_bridge', '--Mdir', str(bridge_obj).replace('\\', '/'),
             '-Ibuild/generated/snestang/src', '-Ibuild/generated/snestang/src/spc700',
             '-Ibuild/generated/snestang/src/65C816', '-f', 'build/core-sources.f'] + bridge_sources)
@@ -110,7 +110,7 @@ def main():
         report['simulation']['cart_bridge'] = bridge_pass
         # Fault injection: a bridge without the turnaround clock must be caught as contention.
         fault_obj = obj / 'cart-bridge-fault'
-        run('bridge-fault-build', [verilator, '--binary', '--timing', '--build-jobs', '4',
+        run('bridge-fault-build', [verilator, '--binary', '--timing', '--build-jobs', '16',
             '-Wno-fatal', '+define+SN64_FAULT_NO_GUARD', '--top-module', 'tb_cart_bridge',
             '--Mdir', str(fault_obj).replace('\\', '/'),
             '-Ibuild/generated/snestang/src', '-Ibuild/generated/snestang/src/spc700',
@@ -127,7 +127,7 @@ def main():
                       'fpga/rtl/sn64_cdc.sv', 'fpga/rtl/sn64_frame_window.sv', 'fpga/rtl/sn64_n64_endpoint.sv'] + serv
         n64_sources = n64_common + ['fpga/tests/tb_n64_endpoint.sv']
         n64_obj = obj / 'n64-endpoint'
-        run('n64-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+        run('n64-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
             '--top-module', 'tb_n64_endpoint', '--Mdir', str(n64_obj).replace('\\', '/')] + n64_sources)
         n64_exe = n64_obj / ('Vtb_n64_endpoint.exe' if os.name == 'nt' else 'Vtb_n64_endpoint')
         n64_body = run('n64-endpoint', [str(n64_exe)])
@@ -137,7 +137,7 @@ def main():
         report['simulation']['n64_endpoint'] = n64_pass
         # Fault injection: REGION_INFO and REGION_SOURCE swapped in the register decode must be caught.
         n64_fault_obj = obj / 'n64-endpoint-region-swap'
-        run('n64-region-swap-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+        run('n64-region-swap-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
             '+define+SN64_FAULT_REGION_SWAP', '--top-module', 'tb_n64_endpoint',
             '--Mdir', str(n64_fault_obj).replace('\\', '/')] + n64_sources)
         run('n64-endpoint-region-swap', [str(n64_fault_obj / ('Vtb_n64_endpoint.exe' if os.name == 'nt' else 'Vtb_n64_endpoint'))],
@@ -147,7 +147,7 @@ def main():
         # plus a fault build (R/B swapped) that must fail.
         fw_src = n64_common + ['fpga/tests/tb_frame_window.sv']
         fw_obj = obj / 'frame-window'
-        run('frame-window-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+        run('frame-window-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
             '--top-module', 'tb_frame_window', '--Mdir', str(fw_obj).replace('\\', '/')] + fw_src)
         fw_exe = fw_obj / ('Vtb_frame_window.exe' if os.name == 'nt' else 'Vtb_frame_window')
         fw_body = run('frame-window', [str(fw_exe), '+pwd=5', '+rls=1'])
@@ -156,7 +156,7 @@ def main():
             raise RuntimeError('Frame window test exited without its acceptance marker')
         report['simulation']['frame_window'] = fw_pass
         fwf_obj = obj / 'frame-window-fault'
-        run('frame-window-fault-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+        run('frame-window-fault-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
             '+define+SN64_FAULT_FRAME_RB_SWAP', '--top-module', 'tb_frame_window', '--Mdir', str(fwf_obj).replace('\\', '/')] + fw_src)
         run('frame-window-rb-swap', [str(fwf_obj / ('Vtb_frame_window.exe' if os.name == 'nt' else 'Vtb_frame_window')), '+pwd=5', '+rls=1'],
             'FAIL: tb_frame_window')
@@ -165,7 +165,7 @@ def main():
         flash_sources = n64_common + ['fpga/vendor/summercart64/fw/rtl/memory/memory_flash.sv',
                                       'fpga/rtl/sn64_bootrom_flash.sv', 'fpga/tests/tb_bootrom_flash.sv']
         flash_obj = obj / 'bootrom-flash'
-        run('bootrom-flash-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+        run('bootrom-flash-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
             '--top-module', 'tb_bootrom_flash', '--Mdir', str(flash_obj).replace('\\', '/')] + flash_sources)
         flash_exe = flash_obj / ('Vtb_bootrom_flash.exe' if os.name == 'nt' else 'Vtb_bootrom_flash')
         flash_body = run('bootrom-flash', [str(flash_exe)])
@@ -181,7 +181,7 @@ def main():
         # CIC lockout handshake against a console-side model; needs the built firmware image.
         if (ROOT / 'build/cic/cic-build.json').exists():
             cic_obj = obj / 'n64-cic'
-            run('cic-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+            run('cic-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
                 '--top-module', 'tb_n64_cic', '--Mdir', str(cic_obj).replace('\\', '/')] + n64_common + ['fpga/tests/tb_n64_cic.sv'])
             cic_exe = cic_obj / ('Vtb_n64_cic.exe' if os.name == 'nt' else 'Vtb_n64_cic')
             cic_body = run('n64-cic', [str(cic_exe)])
@@ -196,7 +196,7 @@ def main():
             report['simulation']['n64_cic'] = 'SKIPPED: build/cic/cic-build.json missing; run fpga/tools/build_cic.py first'
         # Power-control state machine
         pwr_obj = obj / 'power-sequencer'
-        run('power-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+        run('power-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
             '--top-module', 'tb_power_sequencer', '--Mdir', str(pwr_obj).replace('\\', '/'),
             'fpga/rtl/sn64_power_sequencer.sv', 'fpga/tests/tb_power_sequencer.sv'])
         pwr_exe = pwr_obj / ('Vtb_power_sequencer.exe' if os.name == 'nt' else 'Vtb_power_sequencer')
@@ -207,7 +207,7 @@ def main():
         report['simulation']['power_sequencer'] = pwr_pass
         # Si5351 start-up and region latch
         clk_obj = obj / 'clock-init'
-        run('clock-init-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+        run('clock-init-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
             '--top-module', 'tb_clock_init', '--Mdir', str(clk_obj).replace('\\', '/'),
             'fpga/rtl/sn64_clock_init.sv', 'fpga/tests/tb_clock_init.sv'])
         clk_exe = clk_obj / ('Vtb_clock_init.exe' if os.name == 'nt' else 'Vtb_clock_init')
@@ -220,7 +220,7 @@ def main():
         report['simulation']['injected_clock_fault'] = 'Rejected: a non-responding Si5351 is reported as i2c_error'
         # Clock-domain crossing word transfer
         cdc_obj = obj / 'cdc'
-        run('cdc-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+        run('cdc-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
             '--top-module', 'tb_cdc', '--Mdir', str(cdc_obj).replace('\\', '/'), 'fpga/rtl/sn64_cdc.sv', 'fpga/tests/tb_cdc.sv'])
         cdc_body = run('cdc', [str(cdc_obj / ('Vtb_cdc.exe' if os.name == 'nt' else 'Vtb_cdc'))])
         cdc_pass = next((line for line in cdc_body.splitlines() if line.startswith('PASS:')), None)
@@ -239,7 +239,7 @@ def main():
                            'fpga/rtl/sn64_header_probe.sv', 'fpga/rtl/sn64_i2s_rx.sv', 'fpga/rtl/sn64_audio_mix.sv',
                            'fpga/rtl/sn64_top.sv', 'fpga/tests/tb_system.sv']
             sys_obj = obj / 'system'
-            run('system-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+            run('system-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
                 '-Wno-lint', '-Wno-style', '-Wno-TIMESCALEMOD',
                 '--top-module', 'tb_system', '--Mdir', str(sys_obj).replace('\\', '/')] + sys_sources)
             sys_body = run('system', [str(sys_obj / ('Vtb_system.exe' if os.name == 'nt' else 'Vtb_system'))])
@@ -275,7 +275,7 @@ def main():
         for tag, define in (('', None), ('-swap-lr', 'SN64_FAULT_AUDIO_SWAP_LR'), ('-no-signext', 'SN64_FAULT_AUDIO_NO_SIGNEXT'),
                             ('-wrap', 'SN64_FAULT_AUDIO_WRAP'), ('-late-sample', 'SN64_FAULT_I2S_LATE_SAMPLE')):
             a_obj = obj / ('audio-mix' + tag)
-            run('audio-mix' + tag + '-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal']
+            run('audio-mix' + tag + '-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal']
                 + (['+define+' + define] if define else []) + ['--top-module', 'tb_audio_mix',
                 '--Mdir', str(a_obj).replace('\\', '/')] + aud_src)
             if define:
@@ -307,7 +307,7 @@ def main():
         pad_sources = ['fpga/vendor/snestang-controller/src/controller_adapter.sv',
                        'fpga/rtl/sn64_snes_joypad.sv', 'fpga/tests/tb_snes_joypad.sv']
         pad_obj = obj / 'snes-joypad'
-        run('joypad-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+        run('joypad-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
             '--top-module', 'tb_snes_joypad', '--Mdir', str(pad_obj).replace('\\', '/')] + pad_sources)
         pad_body = run('snes-joypad', [str(pad_obj / ('Vtb_snes_joypad.exe' if os.name == 'nt' else 'Vtb_snes_joypad'))])
         pad_pass = next((line for line in pad_body.splitlines() if line.startswith('PASS:')), None)
@@ -315,14 +315,14 @@ def main():
             raise RuntimeError('Joypad protocol test exited without its acceptance marker')
         report['simulation']['snes_joypad'] = pad_pass
         pad_fault_obj = obj / 'snes-joypad-fault'
-        run('joypad-fault-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+        run('joypad-fault-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
             '+define+SN64_FAULT_SWAP_BY', '--top-module', 'tb_snes_joypad',
             '--Mdir', str(pad_fault_obj).replace('\\', '/')] + pad_sources)
         run('snes-joypad-swap', [str(pad_fault_obj / ('Vtb_snes_joypad.exe' if os.name == 'nt' else 'Vtb_snes_joypad'))],
             'bit order/ID/trailing 1s')
         report['simulation']['injected_joypad_fault'] = 'Rejected: B/Y swap detected by the serial protocol check'
         core_pad_obj = obj / 'snes-joypad-core'
-        run('joypad-core-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+        run('joypad-core-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
             '+define+SN64_JOYPAD_CORE_TEST', '--top-module', 'tb_snes_joypad_core',
             '--Mdir', str(core_pad_obj).replace('\\', '/'),
             '-Ibuild/generated/snestang/src', '-Ibuild/generated/snestang/src/spc700',
@@ -336,7 +336,7 @@ def main():
         # SNES CIC lock, plus two fault builds that must fail
         scic_src = ['fpga/rtl/sn64_snes_cic_lock.sv', 'fpga/tests/tb_snes_cic_lock.sv']
         scic_obj = obj / 'snes-cic'
-        run('snes-cic-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+        run('snes-cic-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
             '--top-module', 'tb_snes_cic_lock', '--Mdir', str(scic_obj).replace('\\', '/')] + scic_src)
         scic_body = run('snes-cic', [str(scic_obj / ('Vtb_snes_cic_lock.exe' if os.name == 'nt' else 'Vtb_snes_cic_lock'))])
         scic_pass = next((line for line in scic_body.splitlines() if line.startswith('PASS:')), None)
@@ -345,7 +345,7 @@ def main():
         report['simulation']['snes_cic'] = scic_pass
         for tag, define in (('no-compare', 'SN64_FAULT_CIC_NO_COMPARE'), ('mangle', 'SN64_FAULT_CIC_MANGLE')):
             f_obj = obj / ('snes-cic-' + tag)
-            run('snes-cic-' + tag + '-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+            run('snes-cic-' + tag + '-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
                 '+define+' + define, '--top-module', 'tb_snes_cic_lock', '--Mdir', str(f_obj).replace('\\', '/')] + scic_src)
             run('snes-cic-' + tag, [str(f_obj / ('Vtb_snes_cic_lock.exe' if os.name == 'nt' else 'Vtb_snes_cic_lock'))],
                 'FAIL: SNES CIC lock')
@@ -353,7 +353,7 @@ def main():
         # ROM-header region probe, plus two fault builds that must fail
         hdr_src = ['fpga/rtl/sn64_header_probe.sv', 'fpga/tests/tb_header_probe.sv']
         hdr_obj = obj / 'header-probe'
-        run('header-probe-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+        run('header-probe-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
             '--top-module', 'tb_header_probe', '--Mdir', str(hdr_obj).replace('\\', '/')] + hdr_src)
         hdr_body = run('header-probe', [str(hdr_obj / ('Vtb_header_probe.exe' if os.name == 'nt' else 'Vtb_header_probe'))])
         hdr_pass = next((line for line in hdr_body.splitlines() if line.startswith('PASS:')), None)
@@ -362,7 +362,7 @@ def main():
         report['simulation']['header_probe'] = hdr_pass
         for tag, define in (('skip-checksum', 'SN64_FAULT_SKIP_CHECKSUM'), ('short-access', 'TB_SHORT_ACCESS')):
             f_obj = obj / ('header-probe-' + tag)
-            run('header-probe-' + tag + '-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+            run('header-probe-' + tag + '-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
                 '+define+' + define, '--top-module', 'tb_header_probe', '--Mdir', str(f_obj).replace('\\', '/')] + hdr_src)
             run('header-probe-' + tag, [str(f_obj / ('Vtb_header_probe.exe' if os.name == 'nt' else 'Vtb_header_probe'))],
                 'FAIL: tb_header_probe')
@@ -372,7 +372,7 @@ def main():
         cpad_src = ['fpga/rtl/sn64_cic_pad.sv', 'fpga/tests/tb_cic_pad.sv']
         for tag, defines, expect in (('', [], None), ('-order', ['+define+SN64_FAULT_CIC_PAD_ORDER'], 'FAIL: tb_cic_pad')):
             c_obj = obj / ('cic-pad' + tag)
-            run('cic-pad' + tag + '-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal'] + defines +
+            run('cic-pad' + tag + '-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal'] + defines +
                 ['--top-module', 'tb_cic_pad', '--Mdir', str(c_obj).replace('\\', '/')] + cpad_src)
             c_body = run('cic-pad' + tag, [str(c_obj / ('Vtb_cic_pad.exe' if os.name == 'nt' else 'Vtb_cic_pad'))], expect)
             if not tag:

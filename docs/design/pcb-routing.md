@@ -57,6 +57,10 @@ Notes on the tools, found on the way:
 - KiCad 10.0.6's Python: after `board.Remove()` every further lookup (even a fresh `LoadBoard` in the same process) returns bare SWIG pointers, so `prepare_route.py` clears an earlier fan-out, saves and asks to be run again.
 - Freerouting's GUI mode (`java -jar ... -de -do`) died with a NullPointerException in its shape search tree on this board; the headless API server (what the MCP starts) is used instead.
 - The DSN export carries the zones as `plane` items, so Freerouting treats every GND/3.3 V/1.1 V via as connected and does not route those nets as traces.
+- Freerouting does not read KiCad's hole-to-copper rule (0.25 mm here) from the DSN; it must be given as a job setting (`holeClearanceUm: 250`), together with the edge clearance (`copperToEdgeClearanceUm: 300`). A run without it routes tracks 0.1 mm from via copper, 0.225 mm from the hole, and KiCad then reports every one of them.
+- On import, KiCad gives the plane-net vias the power class drill (0.3 mm) while the BGA dog-bones keep their 0.45 mm diameter; `finish_route.py` pins each via's drill to its diameter afterwards.
+- Freerouting's routing pass is single-threaded, and one API server instance time-slices its jobs: three jobs in one instance ran on less than one core in total. Separate instances (one JVM each, `hardware/sn64/tools/fr_instance.ps1`, driven through the REST API with the identity headers the MCP uses) run in parallel.
+- The first fan-out attempt put the through vias straight onto the FPGA decoupling capacitors on the back (58 shorts): the decoupling now sits in two bands outside the via field.
 
 ## Results
 
