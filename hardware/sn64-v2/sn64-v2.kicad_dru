@@ -1,0 +1,4 @@
+(version 1)
+(rule "USB-C receptacle sits on the board edge"
+    (condition "A.memberOfFootprint('J101') || B.memberOfFootprint('J101')")
+    (constraint edge_clearance (min 0mm)))

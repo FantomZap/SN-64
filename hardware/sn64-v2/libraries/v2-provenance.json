@@ -1,0 +1,1147 @@
+{
+ "schema_version": 1,
+ "recorded_date": "2026-09-30",
+ "scope": "SN64 v2 schematic draft 0.1 (branch v2); not a manufacturing release",
+ "drawn_symbols": {
+  "TPS2121RUX": {
+   "pins": {
+    "7": [
+     "IN1",
+     "power_in"
+    ],
+    "2": [
+     "IN2",
+     "power_in"
+    ],
+    "6": [
+     "PR1",
+     "input"
+    ],
+    "3": [
+     "CP2",
+     "input"
+    ],
+    "5": [
+     "OV1",
+     "input"
+    ],
+    "4": [
+     "OV2",
+     "input"
+    ],
+    "1": [
+     "OUT",
+     "power_out"
+    ],
+    "8": [
+     "OUT",
+     "passive"
+    ],
+    "9": [
+     "ST",
+     "open_collector"
+    ],
+    "10": [
+     "ILM",
+     "passive"
+    ],
+    "11": [
+     "SS",
+     "passive"
+    ],
+    "12": [
+     "GND",
+     "power_in"
+    ]
+   },
+   "source": "TI SLVSEA3F (Aug 2020) pin table via LCSC C485916 pinout; design values from SLVSEA3F sections 7.5/9.3"
+  },
+  "TLA2528RTE": {
+   "pins": {
+    "15": [
+     "AIN0",
+     "input"
+    ],
+    "16": [
+     "AIN1",
+     "input"
+    ],
+    "1": [
+     "AIN2",
+     "input"
+    ],
+    "2": [
+     "AIN3",
+     "input"
+    ],
+    "3": [
+     "AIN4",
+     "input"
+    ],
+    "4": [
+     "AIN5",
+     "input"
+    ],
+    "5": [
+     "AIN6",
+     "input"
+    ],
+    "6": [
+     "AIN7",
+     "input"
+    ],
+    "13": [
+     "SCL",
+     "input"
+    ],
+    "14": [
+     "SDA",
+     "bidirectional"
+    ],
+    "11": [
+     "ADDR",
+     "input"
+    ],
+    "8": [
+     "DECAP",
+     "passive"
+    ],
+    "12": [
+     "NC",
+     "no_connect"
+    ],
+    "7": [
+     "AVDD",
+     "power_in"
+    ],
+    "10": [
+     "DVDD",
+     "power_in"
+    ],
+    "9": [
+     "GND",
+     "power_in"
+    ],
+    "17": [
+     "EP",
+     "power_in"
+    ]
+   },
+   "source": "TI SBAS925 pin table via LCSC C2866175 pinout"
+  },
+  "TPS2553DBV": {
+   "pins": {
+    "1": [
+     "IN",
+     "power_in"
+    ],
+    "3": [
+     "EN",
+     "input"
+    ],
+    "5": [
+     "ILIM",
+     "passive"
+    ],
+    "6": [
+     "OUT",
+     "power_out"
+    ],
+    "4": [
+     "~{FAULT}",
+     "open_collector"
+    ],
+    "2": [
+     "GND",
+     "power_in"
+    ]
+   },
+   "source": "TI SLVS963 pin table via LCSC C55266 pinout"
+  }
+ },
+ "reused_v1_libraries": [
+  "SN64 (socket, N64 edge: Sanni CC-BY-4.0, SummerCart64 CERN-OHL-S-2.0)",
+  "SN64_POWER (TPS63070RNM, TI SLVSC58B)",
+  "SN64_USB (JAE DX07S016JA3R1500)"
+ ],
+ "installed_kicad_symbols": [
+  "FPGA_Lattice:LFE5U-85F-8BG381x",
+  "74xx:74ALVC164245",
+  "74xx:74LS07 (as SN74LVC07APW)",
+  "Memory_Flash:W25Q128JVS",
+  "Power_Supervisor:TPS3808DBV",
+  "Regulator_Switching:TLV62569DBV",
+  "Regulator_Linear:AP2112K-2.5",
+  "Power_Protection:USBLC6-2SC6",
+  "Oscillator:ASE-xxxMHz"
+ ],
+ "lcsc_stock_2026_09_30": {
+  "LFE5U-85F-8BG381I": [
+   "Mouser 842-LFE5U85F8BG381I",
+   141
+  ],
+  "W25Q128JVSIQ": [
+   "C97521",
+   null
+  ],
+  "1631-27005-BTBEYA": [
+   "C3003262",
+   7439
+  ],
+  "TPS3808G01DBVR": [
+   "C19653",
+   18100
+  ],
+  "USBLC6-2SC6": [
+   "C7519",
+   null
+  ],
+  "SN74ALVC164245DGGR": [
+   "C7128",
+   14549
+  ],
+  "SN74LVC07APWR": [
+   "C7809",
+   14747
+  ],
+  "TLA2528IRTER": [
+   "C2866175",
+   4658
+  ],
+  "TPS2121RUXR": [
+   "C485916",
+   32370
+  ],
+  "TPS63070RNMR": [
+   "C109322",
+   25100
+  ],
+  "TLV62569DBVR": [
+   "C141836",
+   246272
+  ],
+  "AP2112K-2.5TRG1": [
+   "C51118",
+   null
+  ],
+  "TPS2553DBVR": [
+   "C55266",
+   59074
+  ],
+  "PNR4020-1R5M": [
+   "C54620133",
+   7449
+  ],
+  "FNR4030S2R2MT": [
+   "C167869",
+   67195
+  ],
+  "DX07S016JA3R1500": [
+   "C2939926",
+   null
+  ]
+ },
+ "provisional_values": [
+  "TPS2553 RILIM 24.9k",
+  "TPS2121 CSS 1 nF",
+  "decoupling counts (Lattice checklist, not per ball)",
+  "sigma-delta ADC RC (10k/1nF)",
+  "NTC part"
+ ],
+ "bom": {
+  "main": [
+   [
+    "U1",
+    "LFE5U-85F-8BG381I",
+    "Package_BGA:Lattice_caBGA-381_17x17mm_Layout20x20_P0.8mm"
+   ],
+   [
+    "C1",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C2",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C3",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C4",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C5",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C6",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C7",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C8",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C9",
+    "10uF 10V X5R",
+    "Capacitor_SMD:C_0805_2012Metric"
+   ],
+   [
+    "C10",
+    "10uF 10V X5R",
+    "Capacitor_SMD:C_0805_2012Metric"
+   ],
+   [
+    "C11",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C12",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C13",
+    "10uF 10V X5R",
+    "Capacitor_SMD:C_0805_2012Metric"
+   ],
+   [
+    "C14",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C15",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C16",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C17",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C18",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C19",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C20",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C21",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C22",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C23",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C24",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C25",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C26",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C27",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C28",
+    "10uF 10V X5R",
+    "Capacitor_SMD:C_0805_2012Metric"
+   ],
+   [
+    "C29",
+    "10uF 10V X5R",
+    "Capacitor_SMD:C_0805_2012Metric"
+   ],
+   [
+    "C30",
+    "10uF 10V X5R",
+    "Capacitor_SMD:C_0805_2012Metric"
+   ],
+   [
+    "U2",
+    "W25Q128JVSIQ",
+    "Package_SO:SOIC-8_5.3x5.3mm_P1.27mm"
+   ],
+   [
+    "R1",
+    "33",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R2",
+    "1k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R3",
+    "4.7k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R4",
+    "10k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R5",
+    "10k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "C31",
+    "100nF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "R6",
+    "4.7k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R7",
+    "4.7k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R8",
+    "4.7k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R9",
+    "4.7k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R10",
+    "10k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R11",
+    "10k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "TP1",
+    "JTAG_TCK",
+    "TestPoint:TestPoint_Pad_1.5x1.5mm"
+   ],
+   [
+    "TP2",
+    "JTAG_TMS",
+    "TestPoint:TestPoint_Pad_1.5x1.5mm"
+   ],
+   [
+    "TP3",
+    "JTAG_TDI",
+    "TestPoint:TestPoint_Pad_1.5x1.5mm"
+   ],
+   [
+    "TP4",
+    "JTAG_TDO",
+    "TestPoint:TestPoint_Pad_1.5x1.5mm"
+   ],
+   [
+    "TP5",
+    "GND",
+    "TestPoint:TestPoint_Pad_1.5x1.5mm"
+   ],
+   [
+    "R12",
+    "4.7k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R13",
+    "4.7k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R14",
+    "4.7k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "X1",
+    "27MHz 1631-27005-BTBEYA",
+    "Oscillator:Oscillator_SMD_Abracon_ASE-4Pin_3.2x2.5mm"
+   ],
+   [
+    "C32",
+    "100nF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "U3",
+    "TPS3808G01DBVR",
+    "Package_TO_SOT_SMD:SOT-23-6"
+   ],
+   [
+    "R15",
+    "649k 1%",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R16",
+    "100k 1%",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R17",
+    "10k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "C33",
+    "100nF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "D1",
+    "LED green 0603",
+    "LED_SMD:LED_0603_1608Metric"
+   ],
+   [
+    "R18",
+    "1k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R19",
+    "22",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R20",
+    "22",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R21",
+    "1.5k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "U6",
+    "TLA2528IRTER",
+    "Package_DFN_QFN:Texas_RTE0016D_WQFN-16-1EP_3x3mm_P0.5mm_EP0.8x0.8mm"
+   ],
+   [
+    "C34",
+    "1uF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C35",
+    "100nF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "R22",
+    "4.7k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R23",
+    "4.7k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R24",
+    "10k 1%",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R25",
+    "10k 1%",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R26",
+    "20k 1%",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R27",
+    "10k 1%",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R28",
+    "20k 1%",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R29",
+    "10k 1%",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R30",
+    "20k 1%",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R31",
+    "10k 1%",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "RT1",
+    "NTC 10k B3950 0603",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R32",
+    "10k 1%",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "C36",
+    "1uF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "R33",
+    "10k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R34",
+    "10k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R35",
+    "10k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "C37",
+    "1nF C0G",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C38",
+    "1uF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "R36",
+    "10k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R37",
+    "10k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R38",
+    "10k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "C39",
+    "1nF C0G",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "R39",
+    "10k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R40",
+    "10k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "C40",
+    "1uF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "J2",
+    "SNES cartridge socket 62",
+    "SN64:SNES_Slot_Console_7mm"
+   ],
+   [
+    "U201",
+    "SN74ALVC164245DGGR",
+    "Package_SO:TSSOP-48_6.1x12.5mm_P0.5mm"
+   ],
+   [
+    "U202",
+    "SN74ALVC164245DGGR",
+    "Package_SO:TSSOP-48_6.1x12.5mm_P0.5mm"
+   ],
+   [
+    "U203",
+    "SN74ALVC164245DGGR",
+    "Package_SO:TSSOP-48_6.1x12.5mm_P0.5mm"
+   ],
+   [
+    "U204",
+    "SN74ALVC164245DGGR",
+    "Package_SO:TSSOP-48_6.1x12.5mm_P0.5mm"
+   ],
+   [
+    "C201",
+    "100nF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C202",
+    "100nF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C203",
+    "100nF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C204",
+    "100nF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C205",
+    "100nF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C206",
+    "100nF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C207",
+    "100nF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C208",
+    "100nF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C209",
+    "22uF 10V",
+    "Capacitor_SMD:C_0805_2012Metric"
+   ],
+   [
+    "C210",
+    "22uF 10V",
+    "Capacitor_SMD:C_0805_2012Metric"
+   ],
+   [
+    "U205",
+    "SN74LVC07APWR",
+    "Package_SO:TSSOP-14_4.4x5mm_P0.65mm"
+   ],
+   [
+    "C211",
+    "100nF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "R201",
+    "10k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R202",
+    "10k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R203",
+    "10k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R204",
+    "10k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R205",
+    "4.7k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R206",
+    "4.7k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R207",
+    "4.7k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R208",
+    "4.7k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R209",
+    "10k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R210",
+    "100k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R211",
+    "100k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R212",
+    "100k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R213",
+    "100k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "J1",
+    "Riser joint 2x20 2.00mm",
+    "Connector_PinSocket_2.00mm:PinSocket_2x20_P2.00mm_Vertical"
+   ],
+   [
+    "C212",
+    "10uF 10V",
+    "Capacitor_SMD:C_0805_2012Metric"
+   ],
+   [
+    "J101",
+    "DX07S016JA3R1500",
+    "SN64_USB:USB_C_JAE_DX07S016JA3R1500"
+   ],
+   [
+    "U4",
+    "USBLC6-2SC6",
+    "Package_TO_SOT_SMD:SOT-23-6"
+   ],
+   [
+    "R301",
+    "5.1k 1%",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R302",
+    "5.1k 1%",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "C301",
+    "4.7uF 10V",
+    "Capacitor_SMD:C_0805_2012Metric"
+   ],
+   [
+    "C302",
+    "1uF 10V",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "U7",
+    "TPS2121RUXR",
+    "Package_DFN_QFN:Texas_VQFN-HR-12_2x2.5mm_P0.5mm"
+   ],
+   [
+    "R303",
+    "274k 1%",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R304",
+    "100k 1%",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R305",
+    "182k 1%",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R306",
+    "100k 1%",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R307",
+    "44.2k 1%",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "C303",
+    "1nF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "R308",
+    "10k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "C304",
+    "10uF 10V",
+    "Capacitor_SMD:C_0805_2012Metric"
+   ],
+   [
+    "C305",
+    "10uF 10V",
+    "Capacitor_SMD:C_0805_2012Metric"
+   ],
+   [
+    "C306",
+    "10uF 10V",
+    "Capacitor_SMD:C_0805_2012Metric"
+   ],
+   [
+    "U8",
+    "TPS63070RNMR",
+    "SN64:Texas_RNM0015A_VQFN-HR-15_2.5x3mm"
+   ],
+   [
+    "L1",
+    "1.5uH PNR4020-1R5M",
+    "SN64:L_APV_PNR4020"
+   ],
+   [
+    "R309",
+    "232k 0.1%",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R310",
+    "44.2k 0.1%",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R311",
+    "100k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "C307",
+    "100nF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C308",
+    "10uF 25V",
+    "Capacitor_SMD:C_0805_2012Metric"
+   ],
+   [
+    "C309",
+    "22uF 25V",
+    "Capacitor_SMD:C_0805_2012Metric"
+   ],
+   [
+    "C310",
+    "22uF 10V",
+    "Capacitor_SMD:C_0805_2012Metric"
+   ],
+   [
+    "C311",
+    "22uF 10V",
+    "Capacitor_SMD:C_0805_2012Metric"
+   ],
+   [
+    "C312",
+    "22uF 10V",
+    "Capacitor_SMD:C_0805_2012Metric"
+   ],
+   [
+    "C313",
+    "22uF 10V",
+    "Capacitor_SMD:C_0805_2012Metric"
+   ],
+   [
+    "U9",
+    "TLV62569DBVR",
+    "Package_TO_SOT_SMD:SOT-23-5"
+   ],
+   [
+    "L2",
+    "2.2uH FNR4030S2R2MT",
+    "Inductor_SMD:L_Changjiang_FNR4030S"
+   ],
+   [
+    "R312",
+    "459k 0.1%",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R313",
+    "102k 0.1%",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "C314",
+    "6.8pF C0G",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C316",
+    "22uF 10V",
+    "Capacitor_SMD:C_0805_2012Metric"
+   ],
+   [
+    "C317",
+    "22uF 10V",
+    "Capacitor_SMD:C_0805_2012Metric"
+   ],
+   [
+    "U10",
+    "TLV62569DBVR",
+    "Package_TO_SOT_SMD:SOT-23-5"
+   ],
+   [
+    "L3",
+    "2.2uH FNR4030S2R2MT",
+    "Inductor_SMD:L_Changjiang_FNR4030S"
+   ],
+   [
+    "R315",
+    "100k 0.1%",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R316",
+    "120k 0.1%",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "C315",
+    "6.8pF C0G",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C318",
+    "22uF 10V",
+    "Capacitor_SMD:C_0805_2012Metric"
+   ],
+   [
+    "C319",
+    "22uF 10V",
+    "Capacitor_SMD:C_0805_2012Metric"
+   ],
+   [
+    "U11",
+    "AP2112K-2.5TRG1",
+    "Package_TO_SOT_SMD:SOT-23-5"
+   ],
+   [
+    "C320",
+    "1uF 10V",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C321",
+    "4.7uF 10V",
+    "Capacitor_SMD:C_0805_2012Metric"
+   ],
+   [
+    "U12",
+    "TPS2553DBVR",
+    "Package_TO_SOT_SMD:SOT-23-6"
+   ],
+   [
+    "R318",
+    "24.9k 1%",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R319",
+    "100k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R320",
+    "10k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "C322",
+    "100nF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C323",
+    "10uF 10V",
+    "Capacitor_SMD:C_0805_2012Metric"
+   ]
+  ],
+  "riser": [
+   [
+    "J1",
+    "N64 cartridge edge",
+    "SN64:N64_Edge_SC64_Reference"
+   ],
+   [
+    "J2",
+    "Riser joint 2x20 2.00mm",
+    "Connector_PinHeader_2.00mm:PinHeader_2x20_P2.00mm_Horizontal"
+   ]
+  ]
+ }
+}

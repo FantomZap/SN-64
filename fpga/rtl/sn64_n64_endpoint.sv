@@ -39,6 +39,8 @@ module sn64_n64_endpoint #(
     output wire        flash_sck,         // only with FLASH_USE_USRMCLK = 0; else MCLK comes from USRMCLK
     output wire        flash_cs_n,
     inout  wire [3:0]  flash_dq,
+    input  wire        ext_spi_sel_req, ext_spi_sck, ext_spi_cs_n, ext_spi_mosi,   // v2 USB programmer (sn64_bootrom_flash)
+    output wire        ext_spi_miso, ext_spi_active,
 
     // Mailbox: N64 -> SNES side
     output reg  [15:0] joy1_buttons, joy2_buttons,   // SNES button image (active-high bits)
@@ -160,7 +162,9 @@ module sn64_n64_endpoint #(
         sn64_bootrom_flash #(.FLASH_OFFSET(FLASH_OFFSET), .WINDOW_BITS(ROM_ADDR_BITS + 1),
                              .USE_USRMCLK(FLASH_USE_USRMCLK)) u_flash (
             .clk(clk), .reset(reset), .mem_bus(rom_bus),
-            .flash_sck_pin(flash_sck), .flash_cs_n(flash_cs_n), .flash_dq(flash_dq));
+            .flash_sck_pin(flash_sck), .flash_cs_n(flash_cs_n), .flash_dq(flash_dq),
+            .ext_sel_req(ext_spi_sel_req), .ext_sck(ext_spi_sck), .ext_cs_n(ext_spi_cs_n), .ext_mosi(ext_spi_mosi),
+            .ext_miso(ext_spi_miso), .ext_active(ext_spi_active));
     end else begin : g_rom_bram
         reg [15:0] rom [0:(1<<ROM_ADDR_BITS)-1];
         always @(posedge clk) if (rom_we) rom[rom_waddr] <= rom_wdata;
@@ -178,6 +182,8 @@ module sn64_n64_endpoint #(
         assign rom_bus.rdata = mem_rdata;
         assign flash_sck     = 1'b0;
         assign flash_cs_n    = 1'b1;
+        assign ext_spi_miso  = 1'b0;
+        assign ext_spi_active = 1'b0;
         // flash_dq is left undriven (released) in the block-RAM build.
     end
 

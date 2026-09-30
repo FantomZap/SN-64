@@ -1,0 +1,113 @@
+{
+    "$schema": "https://schemas.kicad.org/erc.v1.json",
+    "coordinate_units": "mm",
+    "date": "2026-09-30T10:55:14",
+    "ignored_checks": [
+        {
+            "description": "Global label only appears once in the schematic",
+            "key": "single_global_label"
+        },
+        {
+            "description": "Four connection points are joined together",
+            "key": "four_way_junction"
+        },
+        {
+            "description": "SPICE model issue",
+            "key": "simulation_model_issue"
+        },
+        {
+            "description": "Assigned footprint doesn't match footprint filters",
+            "key": "footprint_filter"
+        }
+    ],
+    "included_severities": [
+        "error",
+        "warning",
+        "exclusion"
+    ],
+    "kicad_version": "10.0.6",
+    "sheets": [
+        {
+            "path": "/",
+            "uuid_path": "/6c942294-f4ac-57f6-8416-33864e91801b",
+            "violations": [
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'N64_KEY1_RESERVED'",
+                            "pos": {
+                                "x": 0.4445,
+                                "y": 1.2065
+                            },
+                            "uuid": "e10162b2-2865-5f2b-8a26-3cc541dc164e"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'N64_AUDIO_L'",
+                            "pos": {
+                                "x": 0.4445,
+                                "y": 1.7145
+                            },
+                            "uuid": "c69a50dd-d262-55b5-bb7b-bd13c391eefd"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'N64_KEY2_RESERVED'",
+                            "pos": {
+                                "x": 1.4097,
+                                "y": 1.2065
+                            },
+                            "uuid": "fdfc2bcc-e99f-5bf9-b0ac-fde7a5a635cb"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'N64_VIDEO_SYNC_RESERVED'",
+                            "pos": {
+                                "x": 1.4097,
+                                "y": 1.5621
+                            },
+                            "uuid": "da67d579-5ae4-50ad-9da1-d1fecb3909e1"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                },
+                {
+                    "description": "Label connected to only one pin",
+                    "items": [
+                        {
+                            "description": "Global Label 'N64_AUDIO_R'",
+                            "pos": {
+                                "x": 1.4097,
+                                "y": 1.7145
+                            },
+                            "uuid": "dff159e9-039a-5ebf-a426-5e1ad9c49aef"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "isolated_pin_label"
+                }
+            ]
+        }
+    ],
+    "source": "sn64-v2-riser.kicad_sch"
+}

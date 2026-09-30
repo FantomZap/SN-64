@@ -49,10 +49,12 @@ module sn64_top #(
     inout  wire [3:0]  flash_dq,                   // MOSI/D0, MISO/D1, D2/WP#, D3/HOLD#
 
     // ---------------- Si5351 I2C and SNES clock control ----------------
-    output wire        si_scl_oe, si_sda_oe,
-    input  wire        si_sda_in,
+    input  wire        ext_spi_sel_req, ext_spi_sck, ext_spi_cs_n, ext_spi_mosi,   // v2 USB programmer
+    output wire        ext_spi_miso, ext_spi_active,
+    input  wire        pll_locked,                 // board: every PLL locked (v2: no external clock chip)
+    input  wire        monitor_error,              // board: telemetry ADC not answering
     output reg         snes_clk_run,               // board: start the SNES master clock domain
-    output wire        region_pal,                 // board: 0 = Si5351 CLK0 (NTSC), 1 = CLK1 (PAL)
+    output wire        region_pal,                 // board: 0 = NTSC PLL, 1 = PAL PLL (frozen while the SNES clock runs)
 
     // ---------------- Power monitors and enables ----------------
     input  wire        host_3v3_ok, fpga_rails_ok, cart_5v_ok, iface_rail_ok, efuse_fault_n, overtemp,
@@ -77,7 +79,8 @@ module sn64_top #(
     input  wire        snes_cic_data1_i,
 
     // ---------------- Cartridge-audio ADC (I2S master, asynchronous) ----------------
-    input  wire        adc_bck, adc_lrck, adc_dout,   // 64 fs bit clock, word select, data (docs/design/cart-audio-implementation.md)
+    input  wire        aud_l_cmp, aud_r_cmp,       // cartridge-audio sigma-delta comparators (sn64_sd_adc)
+    output wire        aud_l_fb, aud_r_fb,
 
     // ---------------- Diagnostics ----------------
     output wire [15:0] status_word
@@ -109,6 +112,8 @@ module sn64_top #(
         .n64_pi_ad(n64_ad),
         .rom_we(rom_we), .rom_waddr(rom_waddr), .rom_wdata(rom_wdata),
         .flash_sck(flash_sck), .flash_cs_n(flash_cs_n), .flash_dq(flash_dq),
+        .ext_spi_sel_req(ext_spi_sel_req), .ext_spi_sck(ext_spi_sck), .ext_spi_cs_n(ext_spi_cs_n), .ext_spi_mosi(ext_spi_mosi),
+        .ext_spi_miso(ext_spi_miso), .ext_spi_active(ext_spi_active),
         .joy1_buttons(joy1_h), .joy2_buttons(joy2_h), .joy1_stick_x(stick_x_h), .joy1_stick_y(stick_y_h),
         .run_request(run_req_h), .soft_reset(soft_reset_h), .region_mode(region_mode_h), .mailbox_seq(seq_h),
         .status_flags(status_h), .fault_flags(fault_h), .build_id(BUILD_ID),
@@ -134,17 +139,13 @@ module sn64_top #(
     sn64_sync_bit #(1'b0) s_creset (.clk(clk_25), .d(cart_reset_n_sense), .q(cart_reset_sense_25));
 
     // =====================================================================
-    // Si5351 start-up and region latch (clk_25)
+    // Clocks ready (v2: PLL lock from the board) and monitor health (clk_25)
     // =====================================================================
     wire clocks_ready, i2c_error;
+    sn64_sync_bit #(1'b0) s_pll_lock (.clk(clk_25), .d(pll_locked), .q(clocks_ready));
+    sn64_sync_bit #(1'b0) s_mon_err  (.clk(clk_25), .d(monitor_error), .q(i2c_error));
     wire cic_region_valid, cic_region_pal, cic_key_ok, cic_key_fail;
     wire det_valid, det_pal;                     // combined key CIC / ROM header / NTSC-default result
-    sn64_clock_init #(.CLK_HZ(CLK25_HZ)) clock_init (
-        .clk(clk_25), .reset_n(rst25_n),
-        .scl_oe(si_scl_oe), .sda_oe(si_sda_oe), .sda_in(si_sda_in),
-        .region_mode(region_mode_25), .detected_valid(det_valid), .detected_pal(det_pal),
-        .snes_clock_stopped(!snes_clk_run), .region_pal(region_pal), .region_change_pending(),
-        .clocks_ready(clocks_ready), .i2c_error(i2c_error));
 
     // =====================================================================
     // Power sequencer (clk_25)
@@ -221,6 +222,7 @@ module sn64_top #(
     reg        rgn_decided = 1'b0, rgn_timeout = 1'b0, rgn_pal = 1'b0;
     reg [1:0]  rgn_src = 2'd0;
     reg [15:0] rgn_hdr = 16'd0;
+    assign region_pal = rgn_pal;                 // latched on the edge that starts the SNES clock
     wire [15:0] hdr_word = {hdr_aborted, hdr_pal, hdr_valid, hdr_done, hdr_reject, hdr_country};
     wire rgn_wanted_pal = (region_mode_25 == 2'd2) ? 1'b1 : (region_mode_25 == 2'd1) ? 1'b0 : det_pal;
     always @(posedge clk_25) begin
@@ -305,7 +307,7 @@ module sn64_top #(
     // =====================================================================
     wire signed [23:0] adc_left_h, adc_right_h;
     wire adc_tog_h, adc_locked_h; wire [15:0] adc_frame_errors_h;
-    sn64_i2s_rx adc_rx (.clk(clk_host), .rst_n(rsthost_n), .bck(adc_bck), .lrck(adc_lrck), .dout(adc_dout),
+    sn64_sd_adc adc_rx (.clk(clk_host), .rst_n(rsthost_n), .cmp_l(aud_l_cmp), .cmp_r(aud_r_cmp), .fb_l(aud_l_fb), .fb_r(aud_r_fb),
         .left(adc_left_h), .right(adc_right_h), .frame_tog(adc_tog_h), .frame_stb(),
         .locked(adc_locked_h), .frame_errors(adc_frame_errors_h));
     wire [15:0] audio_ovf_slips, audio_unf_slips; wire cart_audio_active;
@@ -325,10 +327,10 @@ module sn64_top #(
     // =====================================================================
     // Status and fault words to the N64 mailbox (clk_25 -> clk_host).
     // STATUS layout (shared with firmware/bootstrap/src/sn64_mailbox.h):
-    //   [0] configured (Si5351 locked)  [1] host+FPGA rails ok  [2] cart 5 V ok
+    //   [0] configured (PLLs locked)  [1] host+FPGA rails ok  [2] cart 5 V ok
     //   [3] interface rail ok  [4] bus permit  [5] fault latched  [6] run request seen
     //   [7] PAL  [11:8] power sequencer state  [12] SNES clock running
-    //   [13] SNES key CIC ok  [14] SNES key CIC fail  [15] Si5351 I2C error
+    //   [13] SNES key CIC ok  [14] SNES key CIC fail  [15] telemetry ADC error
     // FAULT: {fault_code, 8'h00}
     // =====================================================================
     assign status_word = {i2c_error, cic_key_fail, cic_key_ok, snes_clk_run, seq_state,

@@ -14,6 +14,7 @@ import shutil
 import subprocess
 
 from prepare_core import prepare, ROOT
+from prepare_flash_pads import generate as prepare_flash_pads
 
 
 def sha(path):
@@ -161,8 +162,9 @@ def main():
         run('frame-window-rb-swap', [str(fwf_obj / ('Vtb_frame_window.exe' if os.name == 'nt' else 'Vtb_frame_window')), '+pwd=5', '+rls=1'],
             'FAIL: tb_frame_window')
         report['simulation']['injected_frame_window_fault'] = 'Rejected: swapped red/blue in the RGBA5551 conversion is detected on every pixel'
+        prepare_flash_pads()
         # Bootstrap ROM window from the configuration flash: SummerCart64 memory_flash (unmodified) + QSPI flash model.
-        flash_sources = n64_common + ['fpga/vendor/summercart64/fw/rtl/memory/memory_flash.sv',
+        flash_sources = n64_common + ['build/generated/summercart64/memory_flash_dq.sv',
                                       'fpga/rtl/sn64_bootrom_flash.sv', 'fpga/tests/tb_bootrom_flash.sv']
         flash_obj = obj / 'bootrom-flash'
         run('bootrom-flash-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
@@ -205,19 +207,17 @@ def main():
         if pwr_pass is None:
             raise RuntimeError('Power sequencer test exited without its acceptance marker')
         report['simulation']['power_sequencer'] = pwr_pass
-        # Si5351 start-up and region latch
-        clk_obj = obj / 'clock-init'
-        run('clock-init-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
-            '--top-module', 'tb_clock_init', '--Mdir', str(clk_obj).replace('\\', '/'),
-            'fpga/rtl/sn64_clock_init.sv', 'fpga/tests/tb_clock_init.sv'])
-        clk_exe = clk_obj / ('Vtb_clock_init.exe' if os.name == 'nt' else 'Vtb_clock_init')
-        clk_body = run('clock-init', [str(clk_exe)])
-        clk_pass = next((line for line in clk_body.splitlines() if line.startswith('PASS:')), None)
-        if clk_pass is None:
-            raise RuntimeError('Clock init test exited without its acceptance marker')
-        report['simulation']['clock_init'] = clk_pass
-        run('clock-init-no-ack', [str(clk_exe), '+wrong_addr'], 'master reported i2c_error on NACK')
-        report['simulation']['injected_clock_fault'] = 'Rejected: a non-responding Si5351 is reported as i2c_error'
+        # Sigma-delta cartridge-audio ADC (v2: replaces the PCM1808 and the Si5351 start-up test)
+        adc_obj = obj / 'sd-adc'
+        run('sd-adc-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
+            '--top-module', 'tb_sd_adc', '--Mdir', str(adc_obj).replace('\\', '/'),
+            'fpga/rtl/sn64_sd_adc.sv', 'fpga/tests/tb_sd_adc.sv'])
+        adc_exe = adc_obj / ('Vtb_sd_adc.exe' if os.name == 'nt' else 'Vtb_sd_adc')
+        adc_body = run('sd-adc', [str(adc_exe)])
+        adc_pass = next((line for line in adc_body.splitlines() if line.startswith('PASS:')), None)
+        if adc_pass is None:
+            raise RuntimeError('Sigma-delta ADC test exited without its acceptance marker')
+        report['simulation']['sd_adc'] = adc_pass
         # Clock-domain crossing word transfer
         cdc_obj = obj / 'cdc'
         run('cdc-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
@@ -233,10 +233,10 @@ def main():
                            '-Ibuild/generated/snestang/src/65C816', '-f', 'build/core-sources.f',
                            'fpga/rtl/sn64_console_candidate.sv', 'fpga/rtl/sn64_cart_bridge.sv',
                            'fpga/rtl/sn64_console_with_bridge.sv'] + n64_common + [
-                           'fpga/rtl/sn64_cdc.sv', 'fpga/rtl/sn64_clock_init.sv', 'fpga/rtl/sn64_power_sequencer.sv',
+                           'fpga/rtl/sn64_cdc.sv', 'fpga/rtl/sn64_power_sequencer.sv',
                            'fpga/rtl/sn64_snes_cic_lock.sv', 'fpga/vendor/snestang-controller/src/controller_adapter.sv',
                            'fpga/rtl/sn64_snes_joypad.sv',
-                           'fpga/rtl/sn64_header_probe.sv', 'fpga/rtl/sn64_i2s_rx.sv', 'fpga/rtl/sn64_audio_mix.sv',
+                           'fpga/rtl/sn64_header_probe.sv', 'fpga/rtl/sn64_sd_adc.sv', 'fpga/rtl/sn64_audio_mix.sv',
                            'fpga/rtl/sn64_top.sv', 'fpga/tests/tb_system.sv']
             sys_obj = obj / 'system'
             run('system-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',

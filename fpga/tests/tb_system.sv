@@ -40,7 +40,7 @@ module tb_system;
     always #8  clk_host = ~clk_host;              // 62.5 MHz
     wire snes_clk_run;
     // verilator lint_off ZERODLY
-    always #(dut.region_pal ? 23.76 : 23.22892) clk_snes = snes_clk_run ? ~clk_snes : 1'b0;   // Si5351 CLK1 (PAL) / CLK0 (NTSC) master, gated by the board
+    always #(dut.region_pal ? 23.76 : 23.22892) clk_snes = snes_clk_run ? ~clk_snes : 1'b0;   // PAL / NTSC master PLL, gated by the board
     // verilator lint_on ZERODLY
     reg por_n=0;
 
@@ -50,32 +50,7 @@ module tb_system;
     wire [15:0] ad = host_drive ? host_ad : 16'hzzzz;
     wire n64_cic_dq; pullup(n64_cic_dq);
 
-    // ---------------- Si5351 I2C slave ----------------
-    wire scl_oe, sda_oe; reg slave_low=0;
-    wire scl = scl_oe ? 1'b0 : 1'b1;
-    wire sda = (sda_oe || slave_low) ? 1'b0 : 1'b1;
-    integer status_reads=0; reg [7:0] shift, tx; integer bitc=0; reg in_frame=0, addressed=0, is_read=0, have_reg=0, ack_phase=0, send_phase=0;
-    reg [7:0] si_regs [0:255]; reg [7:0] si_ptr = 0; integer si_writes = 0;
-    initial for (integer i = 0; i < 256; i++) si_regs[i] = 8'h00;
-    always @(negedge sda) if (scl) begin
-        in_frame=1; bitc=0; addressed=0; have_reg=0; slave_low=0; ack_phase=0; send_phase=0;
-        if (snes_clk_run) $fatal(1,"Si5351 accessed while the SNES clock runs");
-    end
-    always @(posedge sda) if (scl) begin in_frame=0; slave_low=0; end
-    always @(posedge scl) if (in_frame) begin
-        if (send_phase) begin bitc=bitc+1; if (bitc==9) begin send_phase=0; bitc=0; end end
-        else if (!ack_phase) begin shift={shift[6:0],sda}; bitc=bitc+1; end
-    end
-    always @(negedge scl) if (in_frame) begin
-        if (ack_phase) begin slave_low=0; ack_phase=0; bitc=0;
-            if (is_read && addressed && have_reg==0) begin send_phase=1; tx=(status_reads<3)?8'h80:8'h00; status_reads=status_reads+1; slave_low=!tx[7]; end
-        end else if (send_phase) begin if (bitc<8) slave_low=!tx[7-bitc]; else slave_low=0; end
-        else if (bitc==8) begin
-            if (!addressed) begin if (shift[7:1]==7'h60) begin addressed=1; is_read=shift[0]; slave_low=1; ack_phase=1; end end
-            else if (!have_reg) begin have_reg=1; si_ptr=shift; slave_low=1; ack_phase=1; end
-            else begin si_regs[si_ptr]=shift; si_ptr=si_ptr+1; si_writes=si_writes+1; slave_low=1; ack_phase=1; end
-        end
-    end
+    // (v2: no clock chip; the board's PLL lock is tied high below)
 
     // ---------------- Power rails ----------------
     wire cart_5v_enable, iface_rail_enable;
@@ -239,26 +214,23 @@ module tb_system;
         end
     endtask
 
-    // ---------------- Cartridge-audio ADC (I2S master on its own time base) ----------------
-    // Philips I2S, 24-bit words in 32-bit slots, BCK = 64 x 32 kHz (488.28125 ns);
-    // WS/SD change 20 ns after each BCK falling edge. Constant words:
-    // L = $123456 -> $1234, R = $DCBA98 -> $DCBA (negative) after the 24 -> 16 bit shift.
+    // ---------------- Cartridge-audio sigma-delta front end (RC model) ----------------
+    // Board: comparator + input = biased audio, - input = 10 k / 1 nF node driven by the feedback pin.
+    // DC levels chosen so the delivered words are ADC_L / ADC_R (24-bit) within the modulator's noise.
     localparam logic [23:0] ADC_L = 24'h123456, ADC_R = 24'hDCBA98;
-    logic adc_bck = 1'b0, adc_lrck = 1'b0, adc_dout = 1'b0;
-    initial begin : adc_master
-        int j, p, sl;
-        j = 0;
-        #777;
-        forever begin
-            #224.140625 adc_bck = 1'b1;                    // rising edge r_j (period 488.28125 ns)
-            #244.140625 adc_bck = 1'b0;
-            #20;                                           // values the receiver samples at r_(j+1)
-            p = (j + 1) % 32; sl = ((j + 1) / 32) % 2;
-            adc_lrck = sl[0];
-            adc_dout = (p >= 1 && p <= 24) ? (sl[0] ? ADC_R[24 - p] : ADC_L[24 - p]) : 1'b0;
-            j++;
-        end
+    localparam real VIN_L = 0.5 + 0.5 * 1193046.0 / 8388608.0, VIN_R = 0.5 - 0.5 * 2311528.0 / 8388608.0;
+    localparam real ALPHA = 16.0e-9 / (10.0e3 * 1.0e-9);
+    real vnode_l = 0.5, vnode_r = 0.5;
+    wire aud_l_fb, aud_r_fb;
+    wire aud_l_cmp = VIN_L > vnode_l, aud_r_cmp = VIN_R > vnode_r;
+    always @(posedge clk_host) begin
+        vnode_l <= vnode_l + ((aud_l_fb ? 1.0 : 0.0) - vnode_l) * ALPHA;
+        vnode_r <= vnode_r + ((aud_r_fb ? 1.0 : 0.0) - vnode_r) * ALPHA;
     end
+    localparam int AUD_TOL = 256;                    // 16-bit units (0.8 % FS): 2048-clock boxcar plus the first-order loop limit cycle; precision is tb_sd_adc's job
+    function automatic bit near16(input logic [15:0] a, input logic [15:0] b);
+        int d; d = $signed(a) - $signed(b); return (d <= AUD_TOL) && (d >= -AUD_TOL);
+    endfunction
     // Audio reaching the frame window: SNES DSP sample alone while the mixer
     // primes, then sat16(DSP + ADC word) on every sample.
     function automatic logic [15:0] sat_add(input logic [15:0] a, input logic [15:0] b);
@@ -271,8 +243,8 @@ module tb_system;
     always @(posedge clk_snes) begin
         mix_ready_q <= dut.mix_audio_ready;
         if (dut.mix_audio_ready && !mix_ready_q) begin
-            if (dut.cart_audio_active && dut.mix_audio_left === sat_add(dut.audio_mix.snes_left, ADC_L[23:8])
-                                      && dut.mix_audio_right === sat_add(dut.audio_mix.snes_right, ADC_R[23:8]))
+            if (dut.cart_audio_active && near16(dut.mix_audio_left, sat_add(dut.audio_mix.snes_left, ADC_L[23:8]))
+                                      && near16(dut.mix_audio_right, sat_add(dut.audio_mix.snes_right, ADC_R[23:8])))
                 audio_mixed++;
             else if (audio_mixed == 0 && dut.mix_audio_left === dut.audio_mix.snes_left && dut.mix_audio_right === dut.audio_mix.snes_right)
                 audio_priming++;
@@ -297,7 +269,8 @@ module tb_system;
         .n64_reset_n(n64_reset_n), .n64_nmi_n(1'b1), .n64_alel(alel), .n64_aleh(aleh), .n64_read_n(rd_n), .n64_write_n(wr_n),
         .n64_ad(ad), .n64_cic_clk(1'b1), .n64_si_clk(1'b0), .n64_cic_dq(n64_cic_dq),
         .rom_we(1'b0), .rom_waddr(4'd0), .rom_wdata(16'd0),
-        .si_scl_oe(scl_oe), .si_sda_oe(sda_oe), .si_sda_in(sda), .snes_clk_run(snes_clk_run), .region_pal(region_pal),
+        .pll_locked(1'b1), .monitor_error(1'b0), .snes_clk_run(snes_clk_run), .region_pal(region_pal),
+        .ext_spi_sel_req(1'b0), .ext_spi_sck(1'b0), .ext_spi_cs_n(1'b1), .ext_spi_mosi(1'b0), .ext_spi_miso(), .ext_spi_active(),
         .host_3v3_ok(1'b1), .fpga_rails_ok(1'b1), .cart_5v_ok(cart_5v_ok), .iface_rail_ok(iface_rail_ok),
         .efuse_fault_n(1'b1), .overtemp(1'b0), .cart_5v_enable(cart_5v_enable), .iface_rail_enable(iface_rail_enable),
         .cart_address(a), .cart_pa(pa), .cart_rd_n(rd_c), .cart_wr_n(wr_c), .cart_prd_n(prd_c), .cart_pwr_n(pwr_c),
@@ -307,7 +280,7 @@ module tb_system;
         .snes_cic_oe_n(),.snes_cic_clk(cic_clk), .snes_cic_slave_reset(cic_srst),
         .snes_cic_data0_o(d0o), .snes_cic_data0_oe(d0oe), .snes_cic_data0_i(line0),
         .snes_cic_data1_o(d1o), .snes_cic_data1_oe(d1oe), .snes_cic_data1_i(line1),
-        .adc_bck(adc_bck), .adc_lrck(adc_lrck), .adc_dout(adc_dout),
+        .aud_l_cmp(aud_l_cmp), .aud_r_cmp(aud_r_cmp), .aud_l_fb(aud_l_fb), .aud_r_fb(aud_r_fb),
         .status_word(status_word));
 
     // ---------------- Invariants ----------------
@@ -321,10 +294,6 @@ module tb_system;
             run_seen=1; pal_at_start=region_pal;
             // Si5351 image at SNES clock start: CLK0 (NTSC, PLLA) and CLK1 (PAL, PLLB) on,
             // CLK2 powered down and disabled (register 3 = 0xFC), MS2 never written.
-            if (si_regs[16] !== 8'h4F || si_regs[17] !== 8'h6F || si_regs[18] !== 8'h80 || si_regs[3] !== 8'hFC)
-                $fatal(1,"Si5351 clock controls wrong at SNES clock start (16=%h 17=%h 18=%h 3=%h)", si_regs[16], si_regs[17], si_regs[18], si_regs[3]);
-            if (si_regs[58] !== 8'h00 || si_regs[61] !== 8'h00 || si_regs[62] !== 8'h00)
-                $fatal(1,"Si5351 MultiSynth 2 programmed (no pixel clock exists)");
         end
         if (snes_clk_run && region_pal !== pal_at_start) $fatal(1,"region changed while the SNES clock runs");
         if (!snes_clk_run && !cart_reset_pull && cart_5v_ok) $fatal(1,"cartridge /RESET released before the SNES clock runs");
@@ -437,10 +406,10 @@ module tb_system;
         pi_addr(32'h0800_0000); pi_read(f1); pi_read(f2); pi_end;
         if (f1[0] !== 1'b1 || f2[0] !== 1'b1) $fatal(1,"frame pixels lack the RGBA5551 alpha bit: %h %h", f1, f2);
         // Cartridge audio reached the frame window mixed with the DSP samples.
-        $display("audio at the frame window: %0d priming (DSP only), %0d mixed with the ADC words, %0d wrong; slips ovf %0d unf %0d; ADC frame errors %0d; Si5351 writes %0d",
-                 audio_priming, audio_mixed, audio_bad, dut.audio_ovf_slips, dut.audio_unf_slips, dut.adc_frame_errors_h, si_writes);
+        $display("audio at the frame window: %0d priming (DSP only), %0d mixed with the ADC words, %0d wrong; slips ovf %0d unf %0d; ADC frame errors %0d",
+                 audio_priming, audio_mixed, audio_bad, dut.audio_ovf_slips, dut.audio_unf_slips, dut.adc_frame_errors_h);
         if (audio_bad != 0 || audio_mixed < 100) $fatal(1,"cartridge audio path: %0d wrong samples, only %0d mixed", audio_bad, audio_mixed);
-        $display("PASS: system power-on: N64 mailbox, ordered cartridge power, Si5351 lock, region decided before the SNES clock (%s via %s), reset release, SNES program from cartridge, controller image via auto-joypad, cartridge audio mixed (%0d samples), STATUS=%h REGION_INFO=%h REGION_SOURCE=%h",
+        $display("PASS: system power-on: N64 mailbox, ordered cartridge power, PLL lock, region decided before the SNES clock (%s via %s), reset release, SNES program from cartridge, controller image via auto-joypad, cartridge audio mixed (%0d samples), STATUS=%h REGION_INFO=%h REGION_SOURCE=%h",
                  exp_region_s, exp_src_s, audio_mixed, d0, d1, d2);
         $finish;
     end
