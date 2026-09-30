@@ -119,7 +119,7 @@ module sn64_board_top (
     assign hdmi_sda = 1'bz;
 
     wire [15:0] status_word;
-    sn64_top #(.ROM_FROM_FLASH(1), .FLASH_USE_USRMCLK(1)) top (
+    sn64_top #(.ROM_ADDR_BITS(17), .ROM_FROM_FLASH(1), .FLASH_USE_USRMCLK(1)) top (   // 256 KiB flash ROM window: headroom for the boot program
         .clk_25(osc_25), .clk_host(clk_host), .clk_snes(clk_snes), .clk_pixel(si_clk2), .clk_pixel_x5(clk_pixel_x5),
         .hdmi_clock_ok(tmds_locked), .por_n(por_n),
         .n64_reset_n(n64_reset_n), .n64_nmi_n(n64_nmi_n), .n64_alel(n64_alel), .n64_aleh(n64_aleh),

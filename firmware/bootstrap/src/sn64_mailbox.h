@@ -34,7 +34,29 @@
 #define SN64_REG_STICK_CONTROL   0x14u
 #define SN64_REG_COMMIT          0x18u
 #define SN64_REG_COMMIT_REGION   0x18u         // read: low half = REGION_INFO (0x1A)
-#define SN64_REG_REGION_SOURCE   0x1Cu         // read: high half = REGION_SOURCE (0x1C)
+#define SN64_REG_REGION_SOURCE   0x1Cu         // read: high half = REGION_SOURCE (0x1C), low half = FRAME_STATUS (0x1E)
+#define SN64_REG_AUDIO_MODE      0x20u         // read: high half = AUDIO_WPTR (0x20), low half = VIDEO_MODE (0x22)
+
+// Console video path (docs/design/console-video-path.md): the SNES frame and audio ring the
+// N64 reads through PI domain 2 at SN64_FRAME_BASE. Frame: 240 lines x 256 pixels RGBA5551,
+// line*512 + x*2. Audio ring: 1024 stereo pairs at SN64_AUDIO_OFFSET, pair*4 = {left, right}.
+#define SN64_FRAME_BASE          0x08000000u
+#define SN64_FRAME_LINE_BYTES    512u
+#define SN64_FRAME_LINES         224u          // lines shown (the buffer holds 240)
+#define SN64_AUDIO_OFFSET        0x1E000u
+#define SN64_AUDIO_PAIRS         1024u
+#define SN64_FRAME_STATUS_COUNT(w)  (((w) >> 8) & 0xFFu)   // FRAME_STATUS: frames completed
+#define SN64_FRAME_STATUS_LINES(w)  ((w) & 0xFFu)          // FRAME_STATUS: last line done (0xFF = none yet)
+#define SN64_VMODE_OVERSCAN      0x0001u
+#define SN64_VMODE_HIRES         0x0002u
+#define SN64_VMODE_INTERLACE     0x0004u
+#define SN64_VMODE_PAL           0x0008u
+// PI domain-2 timing used for the frame window (62.5 MHz PI cycles): /RD low (PWD+1), high (RLS+1);
+// simulated: PWD 5 / RLS 1 streams at 128 ns per word, 2.3x what a 60 Hz frame needs.
+#define SN64_PI_DOM2_LAT         0x40u
+#define SN64_PI_DOM2_PWD         0x05u
+#define SN64_PI_DOM2_PGS         0x07u
+#define SN64_PI_DOM2_RLS         0x01u
 
 #define SN64_MAGIC               0x534Eu       // "SN"
 #define SN64_CONTROL_RUN_REQUEST 0x0001u       // CONTROL bit 0: cartridge power and run

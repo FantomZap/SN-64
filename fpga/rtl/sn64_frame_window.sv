@@ -92,19 +92,33 @@ module sn64_frame_window #(
                                      .dst_clk(clk_host), .dst_data(video_mode));
 
     // ------------------------------------------------------------------
-    // Host read port: one registered read per request (writes ignored)
+    // Host read port. Both memories are read unconditionally every clock
+    // (plain synchronous reads, so the tool maps them to block RAM); the
+    // request is answered one clock after it is registered, with the value
+    // selected then. Writes are ignored.
     // ------------------------------------------------------------------
     wire [16:0] off = address[16:0];
     wire        aud_sel = off >= AUDIO_BASE;
     wire [15:0] fb_idx = off[16:1];
     wire [AUDIO_LOG2:0] aud_idx = off[AUDIO_LOG2+1:1];
+    reg  [15:0] fb_q = 16'h0000, aud_q = 16'h0000;
+    reg         pend = 1'b0, sel_q = 1'b0, in_range_q = 1'b0;
+    always @(posedge clk_host) begin
+        fb_q  <= fb[fb_idx];
+        aud_q <= aud[aud_idx];
+    end
     always @(posedge clk_host) begin
         ack <= 1'b0;
         if (reset) begin
-            ack <= 1'b0;
-        end else if (req && !ack) begin
-            rdata <= aud_sel ? aud[aud_idx] : (fb_idx < FB_WORDS ? fb[fb_idx] : 16'h0000);
+            pend <= 1'b0;
+        end else if (req && !pend && !ack) begin
+            pend       <= 1'b1;
+            sel_q      <= aud_sel;
+            in_range_q <= (fb_idx < FB_WORDS);
+        end else if (pend) begin
+            rdata <= sel_q ? aud_q : (in_range_q ? fb_q : 16'h0000);
             ack   <= 1'b1;
+            pend  <= 1'b0;
         end
     end
 endmodule

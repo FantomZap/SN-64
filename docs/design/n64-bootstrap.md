@@ -136,3 +136,8 @@ Options, not yet decided:
 6. **Telemetry (SN64-08-13):** voltage/current/temperature registers do not exist in the mailbox yet.
 7. **SNES serializer:** `joy1_buttons` to `JOY1_DI`/`JOY2_DI` is not in the RTL. It must follow the polarity above (1 = pressed in the image).
 8. **Controller-2 menu input** and GameCube-style pads on the M64 are untested. libdragon reports them through the same `joypad` API.
+
+## Console video path (2026-09-29): the game on the console's own screen
+
+When a cartridge runs, the boot program no longer draws a status page: it switches the display to 256 × 240 (16-bit), sets PI domain-2 timing to LAT 0x40 / PWD 5 / PGS 7 / RLS 1 for the frame window at `0x0800_0000`, and every frame copies the SNES picture in four 56-line DMAs, each only after `FRAME_STATUS.lines_done` says those lines are finished (or the SNES has moved on to the next frame), so a line is never read while it is being written. The 224 lines sit centred in the 240-line screen; the borders are cleared once per buffer. Audio: `audio_init(32000, 4)`; each frame the new samples since the last read pointer are fetched from the ring at `0x0801_E000` (wrapping at 1024 pairs) into the N64's audio buffers, padded with silence if the ring is empty. The menu hotkey (Z+L+R for 1 s) switches back to the 320 × 240 menu. Rebuilt: 131,072 bytes, exactly the 128 KiB window at `ROM_ADDR_BITS = 16`; the board top now uses a 256 KiB flash window (`ROM_ADDR_BITS = 17`) for headroom. SHA-256 `92868c03f98ba7b5e5e8173d7d09b4a97128712b45c68f22e18346a7c100c36e`, CIC-6102 OK. **Not run on a console; the VI 256-wide framebuffer scaling and the PI domain-2 timing on real hardware are the first things to check on a prototype.**
+

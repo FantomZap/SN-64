@@ -15,6 +15,86 @@
 #include "sn64_mailbox.h"
 #include "sn64_mapping.h"
 
+// ---- console video path: the SNES picture and sound through the console's own output
+#define PI_BSD_DOM2_LAT_REG ((volatile uint32_t *)0xA4600024)
+#define PI_BSD_DOM2_PWD_REG ((volatile uint32_t *)0xA4600028)
+#define PI_BSD_DOM2_PGS_REG ((volatile uint32_t *)0xA460002C)
+#define PI_BSD_DOM2_RLS_REG ((volatile uint32_t *)0xA4600030)
+#define FRAME_CHUNK_LINES   56                 // 4 DMAs per frame, each after the SNES has finished those lines
+#define GAME_TOP_LINE       8                  // the 224 SNES lines sit centred in the 240-line screen
+static bool     game_display;                  // display is in the 256x240 game mode
+static int      game_frames_shown;
+static uint16_t aud_rptr;                      // next audio pair to fetch from the ring
+static short    aud_tmp[2 * SN64_AUDIO_PAIRS] __attribute__((aligned(16)));
+
+static void pi_dom2_fast(void)
+{
+    *PI_BSD_DOM2_LAT_REG = SN64_PI_DOM2_LAT;
+    *PI_BSD_DOM2_PWD_REG = SN64_PI_DOM2_PWD;
+    *PI_BSD_DOM2_PGS_REG = SN64_PI_DOM2_PGS;
+    *PI_BSD_DOM2_RLS_REG = SN64_PI_DOM2_RLS;
+}
+
+static void display_mode(bool game)
+{
+    if (game == game_display) return;
+    display_close();
+    if (game) display_init(RESOLUTION_256x240, DEPTH_16_BPP, 2, GAMMA_NONE, FILTERS_RESAMPLE);
+    else      display_init(RESOLUTION_320x240, DEPTH_16_BPP, 2, GAMMA_NONE, FILTERS_RESAMPLE);
+    game_display = game;
+}
+
+// Copy the SNES frame into the screen buffer, chunk by chunk, each chunk only after the
+// SNES has finished writing those lines (FRAME_STATUS.lines_done) or has already moved on
+// to the next frame; the reader therefore stays behind the writer and never tears a line.
+static void game_frame(surface_t *d)
+{
+    uint8_t *dst = (uint8_t *)d->buffer;
+    uint32_t fs = io_read(SN64_MBOX_BASE + SN64_REG_REGION_SOURCE) & 0xFFFFu;
+    uint32_t f0 = SN64_FRAME_STATUS_COUNT(fs);
+    for (unsigned L = 0; L < SN64_FRAME_LINES; L += FRAME_CHUNK_LINES) {
+        unsigned last = L + FRAME_CHUNK_LINES - 1;
+        for (;;) {
+            fs = io_read(SN64_MBOX_BASE + SN64_REG_REGION_SOURCE) & 0xFFFFu;
+            uint32_t ld = SN64_FRAME_STATUS_LINES(fs);
+            if (SN64_FRAME_STATUS_COUNT(fs) != f0) break;          // writer is already on the next frame
+            if (ld != 0xFFu && ld >= last) break;                   // these lines are done
+        }
+        dma_read_raw_async(dst + (GAME_TOP_LINE + L) * SN64_FRAME_LINE_BYTES,
+                           SN64_FRAME_BASE + L * SN64_FRAME_LINE_BYTES,
+                           FRAME_CHUNK_LINES * SN64_FRAME_LINE_BYTES);
+        dma_wait();
+    }
+}
+
+// Move whatever the SNES has produced since last time from the audio ring to the N64's
+// audio output. The ring is 1024 pairs (32 ms); the N64 buffers are filled whenever they
+// have room, padding with silence if the ring runs dry.
+static void game_audio(void)
+{
+    uint32_t aw = io_read(SN64_MBOX_BASE + SN64_REG_AUDIO_MODE) >> 16;
+    while (audio_can_write()) {
+        short *buf = audio_write_begin();
+        int n = audio_get_buffer_length();                          // stereo pairs per N64 buffer
+        int avail = (int)((aw - aud_rptr) & (SN64_AUDIO_PAIRS - 1));
+        int take = avail < n ? avail : n;
+        int done = 0;
+        while (done < take) {
+            int run = take - done;
+            if (aud_rptr + run > SN64_AUDIO_PAIRS) run = SN64_AUDIO_PAIRS - aud_rptr;   // ring wrap
+            data_cache_hit_writeback_invalidate(aud_tmp, run * 4);
+            dma_read_raw_async(aud_tmp, SN64_FRAME_BASE + SN64_AUDIO_OFFSET + aud_rptr * 4u, run * 4u);
+            dma_wait();
+            data_cache_hit_invalidate(aud_tmp, run * 4);
+            for (int i = 0; i < run * 2; i++) buf[(done * 2) + i] = aud_tmp[i];
+            done += run;
+            aud_rptr = (aud_rptr + run) & (SN64_AUDIO_PAIRS - 1);
+        }
+        for (int i = take * 2; i < n * 2; i++) buf[i] = 0;
+        audio_write_end();
+    }
+}
+
 #ifndef SN64_BOOTSTRAP_VERSION
 #define SN64_BOOTSTRAP_VERSION "0.1.0"
 #endif
@@ -276,6 +356,9 @@ static void draw_status(surface_t *d)
 int main(void)
 {
     display_init(RESOLUTION_320x240, DEPTH_16_BPP, 2, GAMMA_NONE, FILTERS_RESAMPLE);
+    game_display = false;
+    audio_init(32000, 4);
+    pi_dom2_fast();
     joypad_init();
     sn64_map_default(&map);
 
@@ -320,6 +403,8 @@ int main(void)
 
         // While the menu owns controller 1, the SNES sees a neutral pad.
         if (mode == MODE_MENU) {
+            display_mode(false);
+            game_frames_shown = 0;
             uint16_t live1 = s1;
             s1 = 0; s2 = 0; stick = 0;
             mailbox_write_frame(s1, s2, stick, run_request);
@@ -331,16 +416,16 @@ int main(void)
             else                              draw_main(d);
             display_show(d);
         } else {
+            // Game: the SNES picture and sound go to the console's own output.
             mailbox_write_frame(s1, s2, stick, run_request);
             mailbox_read();
+            display_mode(true);
             surface_t *d = display_get();
-            graphics_fill_screen(d, col_bg);
-            draw_header(d);
-            line(d, 3, col_hi, "SNES cartridge running");
-            line(d, 4, col_text, "P1 SNES %04X  P2 SNES %04X", s1, s2);
-            line(d, 5, col_text, "SEQ %u  STATUS %04X", mbox.seq, mbox.status);
-            line(d, 7, col_dim, "Hold Z+L+R for 1 s: menu");
+            if (game_frames_shown < 2) graphics_fill_screen(d, graphics_make_color(0, 0, 0, 0xFF));   // both buffers' borders once
+            game_frame(d);
+            game_audio();
             display_show(d);
+            game_frames_shown++;
         }
     }
 }

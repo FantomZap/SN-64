@@ -1,6 +1,6 @@
 # Console video path: the SNES picture and sound through the N64/M64's own output
 
-Decision (owner, 2026-09-29): **this is the primary video and audio path.** FPGA side implemented and simulated the same evening (below); the boot program's display loop is next. The SN64 hands every SNES frame and its audio to the console over the cartridge bus, and the SN64 boot program displays them through the console's normal output: the AV jack on an original N64, the HDMI on an M64. This is the "single-HDMI operation through the M64" of the spec, achieved with ordinary N64 software and no undocumented console interface. The board's own HDMI output (sn64_av_out) stays as the spec's validation output, secondary.
+Decision (owner, 2026-09-29): **this is the primary video and audio path.** FPGA side implemented and simulated the same evening (below); the boot program's display loop is written and builds ([n64-bootstrap.md](n64-bootstrap.md)); neither has run on a console. The SN64 hands every SNES frame and its audio to the console over the cartridge bus, and the SN64 boot program displays them through the console's normal output: the AV jack on an original N64, the HDMI on an M64. This is the "single-HDMI operation through the M64" of the spec, achieved with ordinary N64 software and no undocumented console interface. The board's own HDMI output (sn64_av_out) stays as the spec's validation output, secondary.
 
 ## How it works
 

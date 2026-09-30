@@ -45,7 +45,7 @@ Build outputs stay under `build/n64-bootstrap/`. Do not commit ROM binaries.
 
 ## FPGA contract
 
-- The ROM image needs **`ROM_ADDR_BITS = 16`** (64 Ki words = 128 KiB) with the default aPLib compression (`N64_ROM_ELFCOMPRESS=2`). It is 114,688 bytes. With libdragon's default LZ4 it is 147,456 bytes and needs 17. The endpoint's current default of 12 (8 KiB) is too small; the converter rejects the image for it.
+- The ROM image needs **`ROM_ADDR_BITS = 16`** (64 Ki words = 128 KiB) with the default aPLib compression (`N64_ROM_ELFCOMPRESS=2`). It was 114,688 bytes before the console video path; with the display loop it is 131,072 bytes (exactly the 128 KiB window; the board top uses `ROM_ADDR_BITS = 17`, 256 KiB, for headroom). With libdragon's default LZ4 it is 147,456 bytes and needs 17. The endpoint's current default of 12 (8 KiB) is too small; the converter rejects the image for it.
 - Word image: `word[i] = rom[2i] << 8 | rom[2i+1]`. Line *i* of the `.mem` file is `rom_waddr` *i*, with zero padding up to `2**ROM_ADDR_BITS`.
 - Mailbox registers are accessed only as 32-bit pairs: `{MAGIC,VERSION}`, `{STATUS,SEQ}`, `{JOY1,JOY2}`, `{JOY1_STICK,CONTROL}`, `{COMMIT,REGION_INFO}` (COMMIT written, REGION_INFO read) and `{REGION_SOURCE,-}` (read). The bootstrap never writes unless MAGIC reads `0x534E`.
 - SNES button image: bit 0 = B, then Y, Select, Start, Up, Down, Left, Right, A, X, L, R (bit 11). **1 = pressed.** Bits 15:12 are 0.
