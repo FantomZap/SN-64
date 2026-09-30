@@ -64,4 +64,4 @@ Notes on the tools, found on the way:
 
 ## Results
 
-_(filled in as runs complete)_
+**Run 2 (FPGA at 0°, abandoned after 70 min at pass 3):** 327 of the routable nets connected; the leftovers were almost all the N64 bus between the FPGA and the bus switches (`fpga_n64_ad0..15`, `read_n`, `write_n`, `aleh`, `reset_n`, `nmi_n`, `cic_clk`, `int_n`, `si_dq`). Cause: with the package at 0° its bank 0 (the N64 bus) faces the top of the board while the bus switches sit at the bottom by the edge fingers, so those 27 signals had to cross the whole ball grid. The FPGA is now placed at 180° (bank 0 toward the switches, banks 2/3 toward the translator row) and the board rebuilt.

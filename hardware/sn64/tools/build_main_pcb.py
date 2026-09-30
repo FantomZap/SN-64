@@ -157,7 +157,8 @@ def side_of(fp):
 FIXED = {
     'J1': (0.0, 0.0, 0),
     'J2': (-39.0, -67.0, 90),        # 2x40 right-angle header along the top edge, pins pointing up (pad centroid at x = 0)
-    'U401': (0.0, -32.0, 0),         # FPGA, centred
+    'U401': (0.0, -32.0, 180),       # FPGA, centred, rotated so bank 0 (N64 bus) faces the bus switches at the
+                                     # bottom and banks 2/3 (cartridge) face the translator row at the top
     'J101': (-47.5, -52.0, 90),      # USB-C on the left edge below the top-left screw hole, receptacle facing out
 }
 
