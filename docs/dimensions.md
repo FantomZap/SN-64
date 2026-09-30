@@ -47,6 +47,23 @@ With the insertion-tip midpoint as (0,0) and positive Y upward: holes are at (-4
 
 The downloaded board uses a two-layer stack-up and ENIG. Reuse its mechanical interface; SN 64's multilayer stack-up and repeated-insertion contact finish still follow our own requirements. Its 1.2 mm stack-up includes a 1.11 mm FR4 core, two 0.035 mm copper layers and two 0.01 mm soldermask layers. KiCad's board-only STEP export reports **1.11 mm** because it exports that core; do not substitute that number for the PCB thickness setting.
 
+## SNES socket body and cartridge edge (looked up 2026-09-29, unverified on parts)
+
+Two socket families exist and their solder-tail rows differ; the footprint must match the purchased part:
+
+| Source | Row spacing | Body / mounting | Notes |
+|---|---|---|---|
+| [OpenSFC `CartSlot.kicad_mod`](https://github.com/starlightk7/OpenSFC/blob/6574450b1a4594b2aae436cf23869b0fb5808ce8/Common/libraries/OpenSFC.pretty/CartSlot.kicad_mod) (original SHVC-CPU-01 console socket; SHA-256 `1f9b60ddd99989e69f4395c12e75292c88869fa6cf3515bcd9eee5485d48b5a0`) | **7.0** (pads at y = ±3.5) | Silkscreen body 99.0 × 11.25 mm (x ±49.5, y −5.65..+5.60); two Ø3.2 mm mounting holes at x = ±47.5 (95.0 mm apart), y ≈ 0 | 62 pads 1.5 mm / drill 1.0 mm; 2.5 mm pitch with the two 7.5 mm gaps; 85.0 mm first-to-last, same as Sanni |
+| Sanni cartreader `SNES Slot` (already in this project) | **5.0** | none drawn | the cart-reader style socket |
+
+The console-replacement socket (7.0 mm rows, ears) is the better-documented family; the NES Repair Shop `snspt043` sample must be checked against both rows before the socket-board footprint is fixed. Height above board and contact engagement depth are still not sourced.
+
+Cartridge edge, from the [sd2snes Rev F board](https://github.com/mrehkopf/sd2snes/blob/cf7e21d7a5978fcd74981d71c3cfbf6e982a4dd1/pcb/kicad/RevF/sd2snes.kicad_pcb) (SHA-256 `4255ad5c5b5ac93a13cf587f136c206f534536050f01960bcf7d00ebcc313dcf`, footprint `SNESCART_EXT2_SMTUSB`): 31 fingers per side, 1.5 × 7.0 mm (three wider 2.0 mm), 85.0 mm first-to-last, fingers from 1.0 mm to 8.0 mm above the board's bottom edge; board outline 101.5 × 83.0 mm. The file's thickness setting is 1.6 mm (a default); cartridge PCBs are 1.2 mm per community sources (MouseBiteLabs) and the N64 reference; measure before relying on it. So a socket engages roughly the bottom 8 mm of a cartridge; the exact seated depth depends on the socket's contact position.
+
+## Cartridge shells (looked up 2026-09-29, encyclopaedic values, unverified)
+
+[Wikipedia, "Super Nintendo Entertainment System Game Pak"](https://en.wikipedia.org/wiki/Super_Nintendo_Entertainment_System_Game_Pak): North American shell about **136 × 88 × 20 mm** (width × height × thickness); Super Famicom / PAL shell about **130 × 86 × 20 mm**. The same article records that the North American console slot is larger and has two plastic tabs near the connector that fit spaces in the wider North American shell; Super Famicom and PAL shells are the same shape as each other. For the SN64's universal opening this means: width for the 136 mm shell, guidance that also centres a 130 mm shell, and no region tabs. Community-sourced numbers; measure both shell types (bottom-edge profile, thickness, the notch positions) before the enclosure is cut.
+
 ## Existing N64 cartridge shell
 
 Downloaded [SummerCart64 front/back STL and STEP shell parts](https://github.com/Polprzewodnikowy/SummerCart64/tree/a1e7996d2cbece686820a5c785029c68514f17b0/hw/shell). FreeCAD opened the combined STEP as two valid solids. Its assembled XYZ envelope is approximately **116.116 × 89.371 × 18.056 mm**. The separate halves have different transforms; use the combined assembly to preserve their alignment.

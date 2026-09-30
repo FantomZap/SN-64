@@ -31,8 +31,8 @@ Alternatives kept open: rigid-flex (costly), or a right-angle 2.5 mm socket if a
 | Interface | Known (source) | Missing |
 |---|---|---|
 | SN64 into N64/M64 | Edge contacts 2.5 mm pitch, 60.0 mm span; tongue shoulder to insertion tip 10.5 mm; PCB 1.2 mm ([dimensions.md](../dimensions.md), SummerCart64 `a1e7996d`). SummerCart64 shell envelope about 116.1 × 89.4 × 18.1 mm. | How far the shell enters each console; M64 bay, door and eject travel (ModRetro publishes cartridge and door CAD: [official files](https://support.modretro.com/en_us/articles/m64-open-source-files-ByrpukdUGg)). |
-| SNES cartridge into SN64 | Socket pin pattern (Sanni footprint): 62 contacts, 2.5 mm pitch, 5.0 mm row spacing. | Socket body height, board seating, contact engagement depth, ears (needs a manufacturer drawing or a measured sample). Cartridge edge engagement length. |
-| Cartridge shells | Super Famicom shell CAD (SNESDRONE, usagi_ CC-BY-3.0). | A North American SNES shell source, PAL shell confirmation, and the flashcart shells (Super EverDrive X5/X6, FXPAK Pro). |
+| SNES cartridge into SN64 | Socket pin pattern: 62 contacts, 2.5 mm pitch; rows 5.0 mm (Sanni cart-reader socket) or 7.0 mm (OpenSFC original console socket, body 99.0 × 11.25 mm, Ø3.2 mm ears 95.0 mm apart). Cartridge fingers occupy the bottom 1–8 mm of the edge (sd2snes Rev F). See [dimensions.md](../dimensions.md). | Socket height above board and contact position (sample); which socket family the sample is. |
+| Cartridge shells | Super Famicom shell CAD (SNESDRONE, usagi_ CC-BY-3.0); published outer sizes NA 136 × 88 × 20 mm, SFC/PAL 130 × 86 × 20 mm (Wikipedia; see [dimensions.md](../dimensions.md)). | Measured bottom-edge profiles of a NA and an SFC/PAL shell, and the flashcart shells (Super EverDrive X5/X6, FXPAK Pro). |
 
 "Safely inside" means: the edge fully engaged in the socket, the shell resting on the SN64's top rim (as on a console) so a tall cartridge cannot lever against the N64 slot, and keying that stops reversed insertion for every shell style.
 
