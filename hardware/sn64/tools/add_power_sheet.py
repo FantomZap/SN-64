@@ -292,9 +292,9 @@ def build(a, root_uuid):
         tag = ref
         place(ref, LIB + ':TPS259470LRPW', 'TPS259470LRPWR', x, y1,
               {'1': en, '2': ovlo, '3': aux, '4': flt, '5': vin, '6': vout, '7': 'DVDT_' + tag, '8': 'GND',
-               '9': 'ILM_' + tag, '10': 'ITIMER_' + tag}, '',
+               '9': 'ILM_' + tag, '10': 'ITIMER_' + tag}, 'SN64:Texas_RPW0010A_VQFN-HR-10_2x2mm',
               fields={'Datasheet': TI + 'tps25947.pdf', 'LCSC': LCSC['TPS259470LRPWR'],
-                      'Footprint_status': 'RPW0010A land pattern pending (TI mechanical drawing); not guessed'})
+                      'Footprint_status': 'RPW0010A from TI 4225183/A example board layout (tools/make_power_footprints.py); unbuilt'})
         R(f'R{rn}', r_uv + ' 1%', vin, en); R(f'R{rn + 1}', '100k 1%', en, 'GND')
         R(f'R{rn + 2}', r_ov + ' 1%', vin, ovlo); R(f'R{rn + 3}', '100k 1%', ovlo, 'GND')
         R(f'R{rn + 4}', rilm + ' 1%', 'ILM_' + tag, 'GND')
@@ -326,10 +326,10 @@ def build(a, root_uuid):
     place('U304', LIB + ':TPS63070RNM', 'TPS63070RNMR', 60.96, y2,
           {'1': 'GND', '2': 'PG_5V', '3': 'VAUX_5V', '4': 'GND', '5': 'FB_5V', '6': None, '7': '5V_PRE',
            '8': '5V_PRE', '9': 'L2_5V', '10': 'GND', '11': 'L1_5V', '12': 'SYS_VIN', '13': 'SYS_VIN',
-           '14': 'SYS_VIN', '15': 'GND'}, '',
+           '14': 'SYS_VIN', '15': 'GND'}, 'SN64:Texas_RNM0015A_VQFN-HR-15_2.5x3mm',
           fields={'Datasheet': TI + 'tps63070.pdf', 'LCSC': LCSC['TPS63070RNMR'],
-                  'Footprint_status': 'RNM0015A land pattern pending (TI mechanical drawing); not guessed'})
-    passives.append(('L301', 'Device:L', '1.5uH PNR4020-1R5M', 'L1_5V', 'L2_5V', ''))
+                  'Footprint_status': 'RNM0015A from TI SLVSC58B example board layout (tools/make_power_footprints.py); unbuilt'})
+    passives.append(('L301', 'Device:L', '1.5uH PNR4020-1R5M', 'L1_5V', 'L2_5V', 'SN64:L_APV_PNR4020'))
     R('R331', '232k 0.1%', '5V_PRE', 'FB_5V'); R('R332', '44.2k 0.1%', 'FB_5V', 'GND')
     R('R333', '100k', '5V_PRE', 'PG_5V')
     C('C311', '100nF', 'VAUX_5V')
@@ -343,7 +343,7 @@ def build(a, root_uuid):
         place(ref, 'Regulator_Switching:TLV62569DBV', 'TLV62569DBVR', x, y2,
               {'1': 'PG_5V', '2': 'GND', '3': sw, '4': '5V_PRE', '5': fbn}, 'Package_TO_SOT_SMD:SOT-23-5',
               fields={'Datasheet': TI + 'tlv62569.pdf', 'LCSC': LCSC['TLV62569DBVR']})
-        passives.append((lref, 'Device:L', '2.2uH FNR4030S2R2MT', sw, rail, ''))
+        passives.append((lref, 'Device:L', '2.2uH FNR4030S2R2MT', sw, rail, 'Inductor_SMD:L_Changjiang_FNR4030S'))
         R(f'R{rn}', r1 + ' 0.1%', rail, fbn); R(f'R{rn + 1}', r2 + ' 0.1%', fbn, 'GND')
         rn += 2
         C(f'C{cn}', '6.8pF C0G', rail, fbn)
@@ -442,7 +442,7 @@ def build(a, root_uuid):
             'U315 INTERFACE_3V3 -> iface_rail_ok | U309 FLT (10k to FPGA_3V3) -> efuse_fault_n | U317 TMP302A + Q308 -> overtemp (1 = hot or sensor dead).',
             20.32, 241.3),
         txt('DRAFT 0.1-power: schematic candidate only. No PCB, no measured load. Values marked PROV depend on unmeasured cartridge and FPGA current.\n'
-            'Footprints for U302/U303/U309 (RPW), U304 (RNM) and L301-L304 are pending vendor land-pattern review; they are left empty, not guessed.',
+            'Footprints for U302/U303/U309 (RPW0010A), U304 (RNM0015A) and L301 (PNR4020) are drawn from the manufacturer land patterns by tools/make_power_footprints.py; L302-L304 use KiCad Inductor_SMD:L_Changjiang_FNR4030S, checked against the Changjiang datasheet. Unbuilt.',
             20.32, 518.16)]
     contents = (f'(kicad_sch (version 20250114) (generator "sn64_power_authoring") (uuid {q(uid("page"))}) (paper "A1") '
                 f'(title_block (title "SN 64 - Power") (date "2026-09-29") (rev "0.1-power") (company "SN 64") '

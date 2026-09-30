@@ -248,6 +248,7 @@
     "Capacitor_SMD:C_0603_1608Metric",
     "Capacitor_SMD:C_0805_2012Metric",
     "Capacitor_SMD:C_1206_3216Metric",
+    "Inductor_SMD:L_Changjiang_FNR4030S",
     "Package_DFN_QFN:Texas_X2QFN-12_1.6x1.6mm_P0.4mm",
     "Package_TO_SOT_SMD:SOT-23",
     "Package_TO_SOT_SMD:SOT-23-5",
@@ -255,6 +256,9 @@
     "Package_TO_SOT_SMD:SOT-563",
     "Resistor_SMD:R_0603_1608Metric",
     "Resistor_SMD:R_0805_2012Metric",
+    "SN64:L_APV_PNR4020",
+    "SN64:Texas_RNM0015A_VQFN-HR-15_2.5x3mm",
+    "SN64:Texas_RPW0010A_VQFN-HR-10_2x2mm",
     "TestPoint:TestPoint_Pad_D1.0mm"
   ],
   "footprints_pending": {

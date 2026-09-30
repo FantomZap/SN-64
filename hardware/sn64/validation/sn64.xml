@@ -2,7 +2,7 @@
 <export version="E">
   <design>
     <source>C:\Users\RyanB\.claude\projects\SN64\hardware\sn64\sn64.kicad_sch</source>
-    <date>2026-09-29T20:47:04</date>
+    <date>2026-09-29T21:14:01</date>
     <tool>Eeschema 10.0.6</tool>
     <sheet number="1" name="/" tstamps="/">
       <title_block>
@@ -7594,10 +7594,11 @@
     </comp>
     <comp ref="L301">
       <value>1.5uH PNR4020-1R5M</value>
+      <footprint>SN64:L_APV_PNR4020</footprint>
       <fields>
         <field name="MPN">PNR4020-1R5M</field>
         <field name="LCSC">C54620133</field>
-        <field name="Footprint"/>
+        <field name="Footprint">SN64:L_APV_PNR4020</field>
         <field name="Datasheet"/>
         <field name="Description"/>
       </fields>
@@ -7621,10 +7622,11 @@
     </comp>
     <comp ref="L302">
       <value>2.2uH FNR4030S2R2MT</value>
+      <footprint>Inductor_SMD:L_Changjiang_FNR4030S</footprint>
       <fields>
         <field name="MPN">FNR4030S2R2MT</field>
         <field name="LCSC">C167869</field>
-        <field name="Footprint"/>
+        <field name="Footprint">Inductor_SMD:L_Changjiang_FNR4030S</field>
         <field name="Datasheet"/>
         <field name="Description"/>
       </fields>
@@ -7648,10 +7650,11 @@
     </comp>
     <comp ref="L303">
       <value>2.2uH FNR4030S2R2MT</value>
+      <footprint>Inductor_SMD:L_Changjiang_FNR4030S</footprint>
       <fields>
         <field name="MPN">FNR4030S2R2MT</field>
         <field name="LCSC">C167869</field>
-        <field name="Footprint"/>
+        <field name="Footprint">Inductor_SMD:L_Changjiang_FNR4030S</field>
         <field name="Datasheet"/>
         <field name="Description"/>
       </fields>
@@ -7675,10 +7678,11 @@
     </comp>
     <comp ref="L304">
       <value>2.2uH FNR4030S2R2MT</value>
+      <footprint>Inductor_SMD:L_Changjiang_FNR4030S</footprint>
       <fields>
         <field name="MPN">FNR4030S2R2MT</field>
         <field name="LCSC">C167869</field>
-        <field name="Footprint"/>
+        <field name="Footprint">Inductor_SMD:L_Changjiang_FNR4030S</field>
         <field name="Datasheet"/>
         <field name="Description"/>
       </fields>
@@ -9817,17 +9821,18 @@
     </comp>
     <comp ref="U302">
       <value>TPS259470LRPWR</value>
+      <footprint>SN64:Texas_RPW0010A_VQFN-HR-10_2x2mm</footprint>
       <datasheet>https://www.ti.com/lit/ds/symlink/tps25947.pdf</datasheet>
       <fields>
         <field name="LCSC">C3662793</field>
-        <field name="Footprint_status">RPW0010A land pattern pending (TI mechanical drawing); not guessed</field>
-        <field name="Footprint"/>
+        <field name="Footprint_status">RPW0010A from TI 4225183/A example board layout (tools/make_power_footprints.py); unbuilt</field>
+        <field name="Footprint">SN64:Texas_RPW0010A_VQFN-HR-10_2x2mm</field>
         <field name="Datasheet">https://www.ti.com/lit/ds/symlink/tps25947.pdf</field>
         <field name="Description"/>
       </fields>
       <libsource lib="SN64_POWER" part="TPS259470LRPW" description="2.7-23 V eFuse, adjustable UVLO/OVLO, active current limit, latch-off, true reverse blocking"/>
       <property name="LCSC" value="C3662793"/>
-      <property name="Footprint_status" value="RPW0010A land pattern pending (TI mechanical drawing); not guessed"/>
+      <property name="Footprint_status" value="RPW0010A from TI 4225183/A example board layout (tools/make_power_footprints.py); unbuilt"/>
       <property name="Sheetname" value="Power"/>
       <property name="Sheetfile" value="power.kicad_sch"/>
       <sheetpath names="/Power/" tstamps="/4c37b7d7-17a3-5df8-bbfc-6c34ee2cc3b6/"/>
@@ -9851,17 +9856,18 @@
     </comp>
     <comp ref="U303">
       <value>TPS259470LRPWR</value>
+      <footprint>SN64:Texas_RPW0010A_VQFN-HR-10_2x2mm</footprint>
       <datasheet>https://www.ti.com/lit/ds/symlink/tps25947.pdf</datasheet>
       <fields>
         <field name="LCSC">C3662793</field>
-        <field name="Footprint_status">RPW0010A land pattern pending (TI mechanical drawing); not guessed</field>
-        <field name="Footprint"/>
+        <field name="Footprint_status">RPW0010A from TI 4225183/A example board layout (tools/make_power_footprints.py); unbuilt</field>
+        <field name="Footprint">SN64:Texas_RPW0010A_VQFN-HR-10_2x2mm</field>
         <field name="Datasheet">https://www.ti.com/lit/ds/symlink/tps25947.pdf</field>
         <field name="Description"/>
       </fields>
       <libsource lib="SN64_POWER" part="TPS259470LRPW" description="2.7-23 V eFuse, adjustable UVLO/OVLO, active current limit, latch-off, true reverse blocking"/>
       <property name="LCSC" value="C3662793"/>
-      <property name="Footprint_status" value="RPW0010A land pattern pending (TI mechanical drawing); not guessed"/>
+      <property name="Footprint_status" value="RPW0010A from TI 4225183/A example board layout (tools/make_power_footprints.py); unbuilt"/>
       <property name="Sheetname" value="Power"/>
       <property name="Sheetfile" value="power.kicad_sch"/>
       <sheetpath names="/Power/" tstamps="/4c37b7d7-17a3-5df8-bbfc-6c34ee2cc3b6/"/>
@@ -9885,17 +9891,18 @@
     </comp>
     <comp ref="U304">
       <value>TPS63070RNMR</value>
+      <footprint>SN64:Texas_RNM0015A_VQFN-HR-15_2.5x3mm</footprint>
       <datasheet>https://www.ti.com/lit/ds/symlink/tps63070.pdf</datasheet>
       <fields>
         <field name="LCSC">C109322</field>
-        <field name="Footprint_status">RNM0015A land pattern pending (TI mechanical drawing); not guessed</field>
-        <field name="Footprint"/>
+        <field name="Footprint_status">RNM0015A from TI SLVSC58B example board layout (tools/make_power_footprints.py); unbuilt</field>
+        <field name="Footprint">SN64:Texas_RNM0015A_VQFN-HR-15_2.5x3mm</field>
         <field name="Datasheet">https://www.ti.com/lit/ds/symlink/tps63070.pdf</field>
         <field name="Description"/>
       </fields>
       <libsource lib="SN64_POWER" part="TPS63070RNM" description="2-16 V input buck-boost converter, adjustable output, power good"/>
       <property name="LCSC" value="C109322"/>
-      <property name="Footprint_status" value="RNM0015A land pattern pending (TI mechanical drawing); not guessed"/>
+      <property name="Footprint_status" value="RNM0015A from TI SLVSC58B example board layout (tools/make_power_footprints.py); unbuilt"/>
       <property name="Sheetname" value="Power"/>
       <property name="Sheetfile" value="power.kicad_sch"/>
       <sheetpath names="/Power/" tstamps="/4c37b7d7-17a3-5df8-bbfc-6c34ee2cc3b6/"/>
@@ -10043,17 +10050,18 @@
     </comp>
     <comp ref="U309">
       <value>TPS259470LRPWR</value>
+      <footprint>SN64:Texas_RPW0010A_VQFN-HR-10_2x2mm</footprint>
       <datasheet>https://www.ti.com/lit/ds/symlink/tps25947.pdf</datasheet>
       <fields>
         <field name="LCSC">C3662793</field>
-        <field name="Footprint_status">RPW0010A land pattern pending (TI mechanical drawing); not guessed</field>
-        <field name="Footprint"/>
+        <field name="Footprint_status">RPW0010A from TI 4225183/A example board layout (tools/make_power_footprints.py); unbuilt</field>
+        <field name="Footprint">SN64:Texas_RPW0010A_VQFN-HR-10_2x2mm</field>
         <field name="Datasheet">https://www.ti.com/lit/ds/symlink/tps25947.pdf</field>
         <field name="Description"/>
       </fields>
       <libsource lib="SN64_POWER" part="TPS259470LRPW" description="2.7-23 V eFuse, adjustable UVLO/OVLO, active current limit, latch-off, true reverse blocking"/>
       <property name="LCSC" value="C3662793"/>
-      <property name="Footprint_status" value="RPW0010A land pattern pending (TI mechanical drawing); not guessed"/>
+      <property name="Footprint_status" value="RPW0010A from TI 4225183/A example board layout (tools/make_power_footprints.py); unbuilt"/>
       <property name="Sheetname" value="Power"/>
       <property name="Sheetfile" value="power.kicad_sch"/>
       <sheetpath names="/Power/" tstamps="/4c37b7d7-17a3-5df8-bbfc-6c34ee2cc3b6/"/>

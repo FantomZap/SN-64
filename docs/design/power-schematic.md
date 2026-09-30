@@ -30,7 +30,7 @@ LCSC numbers and stock come from the pcbparts database query of 2026-09-29. Re-c
 
 Generic resistors and capacitors carry values only; monitor and feedback dividers are E192 0.1 %. Five symbols are drawn from TI pin tables because KiCad 10 has none: TPS259470L, TPS63070, TPS3700, TPS22918 and TMP302. Their pins and sources are in [power-provenance.json](../../hardware/sn64/libraries/power-provenance.json). The other symbols are installed KiCad library symbols, used unmodified.
 
-**Footprints are deliberately left empty** for four groups: RPW0010A (the eFuses), RNM0015A (the TPS63070) and the inductors. No land pattern is guessed. They are an open item.
+**Footprints (2026-09-29):** RPW0010A (eFuses), RNM0015A (TPS63070) and the PNR4020 inductor are drawn from the manufacturers' land-pattern drawings by `tools/make_power_footprints.py` (TI 4225183/A example board layout; TI SLVSC58B example board layout, with VOUT 7+8 and VIN 12+13 as joined U pads since each pair is one signal; APV PNR datasheet p.2: 1.20 × 3.50 pads, 1.80 gap). L302–L304 use KiCad's `Inductor_SMD:L_Changjiang_FNR4030S`, which matches the Changjiang FNR datasheet (a 1.9, b 1.1, c 3.7). All 419 main-board parts now carry a footprint that loads; none has been built or stencil-checked.
 
 ## Input selection (qualified, never paralleled)
 

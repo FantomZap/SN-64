@@ -59,3 +59,6 @@ The KiCad library copies use **CC-BY-SA 4.0 with the KiCad library exception**. 
 - License: CERN-OHL-S-2.0 (retained as [licenses/OpenSFC-LICENSE.txt](licenses/OpenSFC-LICENSE.txt)). SN64 hardware is published under a compatible strongly-reciprocal licence; keep this notice with the footprint.
 - The sd2snes Rev F board (mrehkopf/sd2snes, commit `cf7e21d7`) and qwertymodo's kicad-snn-cpu-01 (commit `a0018661`, CERN-OHL-S-2.0) were read for dimensions only (docs/dimensions.md); nothing copied.
 
+## Power footprints cross-checks (facts only, nothing copied)
+`tools/make_power_footprints.py` draws RPW0010A, RNM0015A and PNR4020 from the manufacturers' land-pattern drawings (TI 4225183/A in SLVSFC9C; TI SLVSC58B; APV PNR series datasheet). Their pad geometry was cross-checked against independent community footprints read for comparison only: cheyao/ckl (CERN-OHL-P-2.0), ISSUIUC/ISS-PCB, ripaaf/ups-orangepizero3w (MIT), mehrantsi/MSAP-2 (MIT), and the JLCPCB/EasyEDA TPS63070RNMR footprint as found in jvanderberg/RP2350B-Dev-Board. No file from these was copied.
+
