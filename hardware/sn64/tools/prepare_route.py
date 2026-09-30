@@ -162,6 +162,23 @@ def planes(board):
     m = 1.0
     island = [(min(xs) - m, min(ys) - m), (max(xs) + m, min(ys) - m), (max(xs) + m, max(ys) + m), (min(xs) - m, max(ys) + m)]
     add_zone(board, '/FPGA_1V1', pcbnew.In4_Cu, island, 0, 'fpga_1v1_in4')
+    # Keep-out over the N64 edge tongue on both outer layers: no tracks or vias between or under the
+    # contact fingers (the console's connector wipes there). J1's fingers are pads, not affected.
+    k = pcbnew.ZONE(board)
+    k.SetIsRuleArea(True)
+    k.SetDoNotAllowTracks(True)
+    k.SetDoNotAllowVias(True)
+    k.SetDoNotAllowZoneFills(False)
+    k.SetDoNotAllowPads(False)          # J1's fingers live here
+    k.SetDoNotAllowFootprints(False)
+    ls = pcbnew.LSET()
+    ls.addLayer(pcbnew.F_Cu)
+    ls.addLayer(pcbnew.B_Cu)
+    k.SetLayerSet(ls)
+    k.SetZoneName(f'{TAG}:finger_keepout')
+    for x, y in ((-32.5, -1.0), (32.5, -1.0), (32.5, 11.0), (-32.5, 11.0)):
+        k.AppendCorner(V(mm(x), mm(y)), -1)
+    board.Add(k)
     return island
 
 

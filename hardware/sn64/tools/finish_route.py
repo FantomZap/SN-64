@@ -41,11 +41,13 @@ def pour(board, layer, name):
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--ses', type=Path, default=REPO / 'build' / 'route-pcb' / 'sn64.ses')
+    ap.add_argument('--board', type=Path, default=PCB, help='board to finish (default: the tracked main board)')
+    ap.add_argument('--no-import', action='store_true', help='board already carries the routing (e.g. KiCadRoutingTools output)')
     ap.add_argument('--no-pour', action='store_true')
     a = ap.parse_args()
-    board = pcbnew.LoadBoard(str(PCB))
-    before = board.GetTracks().__len__() if hasattr(board.GetTracks(), '__len__') else len(list(board.GetTracks()))
-    ok = pcbnew.ImportSpecctraSES(board, str(a.ses))
+    board = pcbnew.LoadBoard(str(a.board))
+    before = len(list(board.GetTracks()))
+    ok = True if a.no_import else pcbnew.ImportSpecctraSES(board, str(a.ses))
     tracks = list(board.GetTracks())
     n_via = sum(1 for t in tracks if t.GetClass() == 'PCB_VIA')
     print(f'SES import: {ok}; tracks+vias {before} -> {len(tracks)} ({n_via} vias)')
@@ -58,7 +60,7 @@ def main():
     for t in tracks:
         if t.GetClass() != 'PCB_VIA':
             continue
-        w = t.GetWidth()
+        w = t.GetWidth(pcbnew.F_Cu)      # KiCad 10: PCB_VIA.GetWidth() without a layer asserts (and hangs in a dialog)
         in_bga = abs(t.GetPosition().x - c.x) < mm(8.2) and abs(t.GetPosition().y - c.y) < mm(8.2)
         if in_bga and w != mm(0.45):
             t.SetWidth(mm(0.45)); w = mm(0.45); fixed += 1
@@ -73,8 +75,9 @@ def main():
         pour(board, pcbnew.F_Cu, 'gnd_fcu')
         pour(board, pcbnew.B_Cu, 'gnd_bcu')
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
-    pcbnew.SaveBoard(str(PCB), board)
-    print('saved', PCB)
+    pcbnew.SaveBoard(str(a.board), board)
+    print('saved', a.board)
+    sys.stdout.flush()
     return 0 if ok else 1
 
 

@@ -72,7 +72,7 @@ def rules(board):
     ds.m_ViasMinAnnularWidth = mm(0.125)
     ds.m_MinSilkTextHeight = mm(0.8)
     ds.m_SolderMaskMinWidth = mm(0.1)
-    ds.m_HoleClearance = mm(0.25)
+    ds.m_HoleClearance = mm(0.2)      # PCBWay standard 6-layer: hole to copper >= 8 mil (0.203 mm), capabilities page 2026-09-30
     ds.m_CopperEdgeClearance = mm(0.3)
     # The N64 edge fingers share one solder-mask opening (SummerCart64 footprint, mask polygons):
     # keep the mask-bridge check visible as a warning instead of an error.

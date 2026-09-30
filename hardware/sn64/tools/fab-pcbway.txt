@@ -1,0 +1,10 @@
+# Fab floors for KiCadRoutingTools (--fab-overrides): the SN64 main board's own rules as set by
+# build_main_pcb.py for PCBWay's standard 6-layer process. Pins the router to one rung so it never
+# "escalates" to finer features than the board allows.
+via_diameter = 0.45
+via_drill    = 0.20
+hole_to_hole = 0.25
+pad_hole_to_hole = 0.45
+clearance    = 0.10
+track_width  = 0.10
+board_edge   = 0.30
