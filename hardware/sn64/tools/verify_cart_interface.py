@@ -47,6 +47,13 @@ import xml.etree.ElementTree as ET
 
 SHEET = 'cart-interface.kicad_sch'
 FPGA_PREFIX = '/SNES cartridge interface/'
+# Round-3 integration: the cartridge sheet's FPGA-side pins are wired to the FPGA sheet by same-name
+# root labels, so these nets are now named '/<label>' and also hold one ECP5 ball (U401).
+FPGA_REFS = {'U401'}
+
+
+def fpga_side(name):
+    return bool(name) and (name.startswith(FPGA_PREFIX) or (name.startswith('/') and name.count('/') == 1))
 
 # --- Fixed datasheet tables (independent copy) -------------------------------
 # TI SCAS375K Table 4-1 (PW): pin -> name
@@ -300,15 +307,15 @@ def run_checks(project: Path, cli: Path):
                 probs.append(f'supply: {ref} must have VCCA=INTERFACE_3V3 (FPGA/DIR side), VCCB=SNES_5V_CART, GND')
             a_net, d_net = pin_net(ref, 3), pin_net(ref, 5)
             out.update(fpga_net=a_net, dir_net=d_net)
-            if base(a_net) != a_label or not (a_net or '').startswith(FPGA_PREFIX):
+            if base(a_net) != a_label or not fpga_side(a_net):
                 probs.append(f'path: A side {a_net} is not the FPGA label {a_label}')
             a_ics = [(m['ref'], m['pin']) for m in members(a_net) if comps.get(m['ref'], {}).get('part') != 'R']
-            if a_ics != [(ref, '3')]:
+            if [p for p in a_ics if p[0] not in FPGA_REFS] != [(ref, '3')] or len([p for p in a_ics if p[0] in FPGA_REFS]) > 1:
                 probs.append(f'path: A-side net shared with other pins {a_ics}')
-            if base(d_net) != dir_label or not (d_net or '').startswith(FPGA_PREFIX):
+            if base(d_net) != dir_label or not fpga_side(d_net):
                 probs.append(f'dir: DIR on {d_net}, not its own FPGA label {dir_label}')
             d_ics = [(m['ref'], m['pin']) for m in members(d_net) if comps.get(m['ref'], {}).get('part') != 'R']
-            if d_ics != [(ref, '5')]:
+            if [p for p in d_ics if p[0] not in FPGA_REFS] != [(ref, '5')] or len([p for p in d_ics if p[0] in FPGA_REFS]) > 1:
                 probs.append(f'dir: DIR net shared with other pins/enables {d_ics}')
             if not pulls_to(d_net, GND):
                 probs.append('dir: DIR has no pull-down (must default to L = B->A = listen)')
@@ -403,11 +410,14 @@ def run_checks(project: Path, cli: Path):
             rec['handling'] = {'/IRQ': 'sensed, 5 V pull-up, never driven', '/RESET': 'open-drain NMOS sink + sense, 5 V pull-up',
                                'EXPAND': 'bias (5 V pull-up) + sense'}[sig]
         elif direction == 'analog_in':
-            active = [n for n in members(net) if n['ref'] != 'J2' and comps.get(n['ref'], {}).get('part') != 'TestPoint']
+            # The A/V sheet's console-equivalent load and divider (R7xx/C7xx, passive) sit on this net
+            # since the round-3 integration; anything active or digital is still rejected.
+            active = [n for n in members(net) if n['ref'] != 'J2' and not (
+                comps.get(n['ref'], {}).get('part') in ('TestPoint', 'R', 'C') and n['type'] == 'passive')]
             if active:
                 ok = False
                 why.append(f'analog audio touches active/digital parts: {active}')
-            rec['handling'] = 'analog pass-through (test point only)'
+            rec['handling'] = 'analog: test point + passive A/V-sheet input network only (no active part on the socket net)'
         elif sig == 'GND':
             rec['handling'] = 'ground return'
         elif sig == '+5V_CART':
@@ -461,7 +471,7 @@ def run_checks(project: Path, cli: Path):
     check('data_octet_DIR_level_safe_inverting_open_drain', d_ok, d_detail)
 
     # ---- no 5 V net reaches an FPGA-side label ----------------------------------
-    fpga_nets = {n for n in nodes if n.startswith(FPGA_PREFIX) and base(n) in FPGA_LABELS}
+    fpga_nets = {n for n in nodes if fpga_side(n) and base(n) in FPGA_LABELS}
     check('all_FPGA_side_labels_present', {base(n) for n in fpga_nets} == FPGA_LABELS,
           sorted(FPGA_LABELS - {base(n) for n in fpga_nets}))
     five_v = {RAIL5} | {n for n in nodes if any(m['ref'] == 'J2' for m in members(n))} | \
@@ -494,7 +504,7 @@ def run_checks(project: Path, cli: Path):
             fine = ((m['ref'] in octets and re.fullmatch(r'B[1-8]', m['name'])) or
                     (m['ref'] in receivers and re.fullmatch(r'[12]Y[1-4]', m['name'])) or
                     (m['ref'] in od_buf + od_inv and m['pin'] == '2') or
-                    (m['ref'] in xl and m['name'] in ('A', 'DIR')) or part == 'R')
+                    (m['ref'] in xl and m['name'] in ('A', 'DIR')) or part == 'R' or m['ref'] in FPGA_REFS)
             if not fine:
                 allowed.append((net, m['ref'], m['pin'], m['name']))
     check('no_5V_net_reaches_FPGA_label', not leaks and not allowed and seen == fpga_nets and rail3 not in five_v,
@@ -593,7 +603,7 @@ def main():
         'limitations': [
             'Static connectivity only: no timing, signal-integrity, ESD, power-sequencing or cartridge test was performed.',
             'Component values (33 R damping, 1k/2.2k/10k/100k pulls) are provisional engineering choices, not measured.',
-            'FPGA-side pins end at no-connect markers in the root until the FPGA sheet exists; INTERFACE_3V3 has no source yet.',
+            'Since the round-3 integration the FPGA-side pins reach ECP5 balls on the FPGA sheet and INTERFACE_3V3/SNES_5V_CART come from the power sheet (#FLG201/#FLG202 stay: the power-sheet switch outputs are passive pins).',
             'CIC_DATA0/1 direction sequencing (DIR high before the FPGA drives A; FPGA releases A before DIR low) is an FPGA/board-wrapper '
             'obligation that a netlist check cannot see; the CIC pull-down value is provisional until checked against a real key CIC.',
             'Socket-side ESD protection is not yet selected.',

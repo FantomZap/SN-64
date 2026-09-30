@@ -1,14 +1,16 @@
 {
   "status": "pass",
-  "generated_at_utc": "2026-09-29T22:15:08.369016+00:00",
+  "generated_at_utc": "2026-09-29T23:58:28.854749+00:00",
   "scope": "independent USB programmer static connectivity review",
   "kicad": "10.0.6",
-  "checks_passed": 64,
+  "checks_passed": 69,
   "checks_failed": 0,
   "inputs": {
-    "sn64.kicad_sch": "7e7c31aa2f6f8a496f9e544541f85b013ff636c4fa4920a66c76662725faf8db",
-    "usb-programmer.kicad_sch": "de8b536223ca8ce2d8d8059e9678f495efc755403f25b18025af4e47beaa6481",
-    "libraries/SN64_USB.kicad_sym": "f26ef1391fa4cfc9e1da1ab88492ed9628f75d8df63a385852dbe0ca17650fc1"
+    "sn64.kicad_sch": "4fbc588ad545ea6d34c095103af83c9238bc3e5f922bc91e2abdb4711719b5b0",
+    "usb-programmer.kicad_sch": "b8cfd904b2ea9a024f47461d22f97630a7414379b5f59f308514e877f118861d",
+    "libraries/SN64_USB.kicad_sym": "f26ef1391fa4cfc9e1da1ab88492ed9628f75d8df63a385852dbe0ca17650fc1",
+    "power.kicad_sch": "14d5328907a943e9cbbbecc31dc1b685f4714dc595a91a176ed44d8a1d50d2c1",
+    "fpga.kicad_sch": "0a2c5c6b651acf6349636239c4eb994d2c3bba8bcb526bd7f8e938f781867e75"
   },
   "sources": {
     "FT232H_v2_2": "https://www.ftdichip.cn/Support/Documents/DataSheets/ICs/DS_FT232H.pdf",
@@ -53,7 +55,7 @@
       "passed": true,
       "detail": {
         "actual_nets": [
-          "/USB-C programmer/USB_VBUS"
+          "/USB_VBUS"
         ],
         "missing_pins": [],
         "unexpected_USB_pins": [],
@@ -89,7 +91,7 @@
       "passed": true,
       "detail": {
         "actual_nets": [
-          "/USB-C programmer/USB_CC1"
+          "/USB_CC1"
         ],
         "missing_pins": [],
         "unexpected_USB_pins": [],
@@ -101,7 +103,7 @@
       "passed": true,
       "detail": {
         "actual_nets": [
-          "/USB-C programmer/USB_CC2"
+          "/USB_CC2"
         ],
         "missing_pins": [],
         "unexpected_USB_pins": [],
@@ -113,7 +115,7 @@
       "passed": true,
       "detail": {
         "actual_nets": [
-          "/USB-C programmer/USB_3V3"
+          "/USB_3V3"
         ],
         "missing_pins": [],
         "unexpected_USB_pins": [],
@@ -329,7 +331,7 @@
       "passed": true,
       "detail": {
         "actual_nets": [
-          "/USB-C programmer/JTAG_TCK"
+          "/jtag_tck"
         ],
         "missing_pins": [],
         "unexpected_USB_pins": [],
@@ -341,7 +343,7 @@
       "passed": true,
       "detail": {
         "actual_nets": [
-          "/USB-C programmer/JTAG_TDI"
+          "/jtag_tdi"
         ],
         "missing_pins": [],
         "unexpected_USB_pins": [],
@@ -353,7 +355,7 @@
       "passed": true,
       "detail": {
         "actual_nets": [
-          "/USB-C programmer/JTAG_TDO"
+          "/jtag_tdo"
         ],
         "missing_pins": [],
         "unexpected_USB_pins": [],
@@ -365,7 +367,7 @@
       "passed": true,
       "detail": {
         "actual_nets": [
-          "/USB-C programmer/JTAG_TMS"
+          "/jtag_tms"
         ],
         "missing_pins": [],
         "unexpected_USB_pins": [],
@@ -377,7 +379,7 @@
       "passed": true,
       "detail": {
         "actual_nets": [
-          "/USB-C programmer/TARGET_VREF"
+          "/TARGET_VREF"
         ],
         "missing_pins": [],
         "unexpected_USB_pins": [],
@@ -552,20 +554,91 @@
       "check": "six_power_domains_distinct",
       "passed": true,
       "detail": {
-        "USB_VBUS": "/USB-C programmer/USB_VBUS",
-        "USB_3V3": "/USB-C programmer/USB_3V3",
-        "TARGET_VREF": "/USB-C programmer/TARGET_VREF",
+        "USB_VBUS": "/USB_VBUS",
+        "USB_3V3": "/USB_3V3",
+        "TARGET_VREF": "/TARGET_VREF",
         "HOST_3V3": "/HOST_3V3",
         "HOST_12V": "/HOST_12V",
         "SNES_5V": "/SNES_5V_CART"
       }
     },
     {
-      "check": "independent_CC_5k1_resistors",
+      "check": "CC_5k1_Rd_DNP_TUSB320_provides_Rd",
       "passed": true,
       "detail": {
-        "R101": "5.1k 1%",
-        "R102": "5.1k 1%"
+        "R101": {
+          "value": "5.1k 1%",
+          "dnp": true
+        },
+        "R102": {
+          "value": "5.1k 1%",
+          "dnp": true
+        }
+      }
+    },
+    {
+      "check": "CC_exported_to_TUSB320",
+      "passed": true,
+      "detail": {
+        "CC1": [
+          "/USB_CC1",
+          "/USB_CC1"
+        ],
+        "CC2": [
+          "/USB_CC2",
+          "/USB_CC2"
+        ]
+      }
+    },
+    {
+      "check": "USB_VBUS_exported_to_power_sheet",
+      "passed": true,
+      "detail": {
+        "J101.A4": "/USB_VBUS",
+        "U302.5": "/USB_VBUS",
+        "R301.1": "/USB_VBUS"
+      }
+    },
+    {
+      "check": "USB_3V3_powers_TUSB320",
+      "passed": true,
+      "detail": {
+        "U103.5": "/USB_3V3",
+        "U301.12": "/USB_3V3"
+      }
+    },
+    {
+      "check": "JTAG_exported_to_ECP5_dedicated_balls",
+      "passed": true,
+      "detail": {
+        "TCK": [
+          "/jtag_tck",
+          "/jtag_tck"
+        ],
+        "TDI": [
+          "/jtag_tdi",
+          "/jtag_tdi"
+        ],
+        "TDO": [
+          "/jtag_tdo",
+          "/jtag_tdo"
+        ],
+        "TMS": [
+          "/jtag_tms",
+          "/jtag_tms"
+        ]
+      }
+    },
+    {
+      "check": "TARGET_VREF_from_FPGA_3V3_through_R414",
+      "passed": true,
+      "detail": {
+        "R414": [
+          "/FPGA_3V3",
+          "/TARGET_VREF"
+        ],
+        "U105.15": "/TARGET_VREF",
+        "VCCIO0 ball F9": "/FPGA_3V3"
       }
     },
     {
@@ -804,7 +877,7 @@
   "limitations": [
     "This checks schematic connectivity against fixed pin tables; it does not prove physical routing, signal integrity, protection performance or USB compliance.",
     "Crystal startup, effective load capacitance and frequency accuracy require layout and prototype measurements. The 11 pF values are explicitly provisional.",
-    "The USB supply powers the bridge only. The actual FPGA/flash power, pin allocation and persistent-loading algorithm remain unimplemented.",
+    "USB_VBUS also feeds the power sheet default-off target input (U302), enabled only when the TUSB320 (U301) reports >=1.5 A and USB_3V3 is present; USB_3V3 also powers U301. JTAG reaches the ECP5 dedicated balls and TARGET_VREF comes from FPGA_3V3 through R414 (FPGA sheet). The persistent-loading algorithm remains unimplemented.",
     "A fitted EEPROM must preserve the safe ACBUS6 startup contract. Host loading must use the documented --status-pin 14 option.",
     "Target-off leakage, USB/target power sequencing, abnormal process termination/reset, inrush, thermal margin, suspend current and cold-boot persistence require bench tests.",
     "ESD array pin connectivity is checked; this is not a short-to-VBUS/USB-PD protection claim. USB and target supplies have no direct schematic connection to host power."

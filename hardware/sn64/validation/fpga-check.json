@@ -1,0 +1,349 @@
+{
+  "schema_version": 1,
+  "tool": "hardware/sn64/tools/verify_fpga_sheet.py",
+  "scope": "static netlist/LPF/CSV consistency of the FPGA sheet; not electrical, timing or hardware validation",
+  "inputs": {
+    "project": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\hardware\\sn64",
+    "board_top": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\fpga\\rtl\\sn64_board_top.sv",
+    "lpf": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\fpga\\constraints\\sn64_board.lpf",
+    "csv": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\hardware\\sn64\\interfaces\\fpga-pin-map.csv",
+    "lattice_csv": "build\\fpga-sheet\\datasheets\\ECP5U-85-pinout.csv"
+  },
+  "result": "pass",
+  "checks": {
+    "single_LFE5U_85F_CABGA381": {
+      "pass": true,
+      "detail": {
+        "refs": [
+          "U401"
+        ],
+        "footprint": "Package_BGA:Lattice_caBGA-381_17x17mm_Layout20x20_P0.8mm"
+      }
+    },
+    "every_power_ball_on_its_rail": {
+      "pass": true,
+      "detail": {
+        "violations": [],
+        "gnd": 113,
+        "vcc": 20,
+        "vccaux": 4,
+        "vccio": 18,
+        "reserved_unconnected": 10,
+        "bank_plan": {
+          "VCCIO0": "FPGA_3V3",
+          "VCCIO1": "FPGA_3V3",
+          "VCCIO2": "FPGA_3V3",
+          "VCCIO3": "FPGA_3V3",
+          "VCCIO6": "FPGA_3V3",
+          "VCCIO7": "FPGA_3V3",
+          "VCCIO8": "FPGA_3V3"
+        }
+      }
+    },
+    "decoupling_per_TN02038_table_3_1": {
+      "pass": true,
+      "detail": {
+        "VCC": {
+          "net": "/FPGA_1V1",
+          "100nF": 20,
+          ">=10uF": 5,
+          "required": [
+            20,
+            3
+          ]
+        },
+        "VCCAUX": {
+          "net": "/FPGA/FPGA_VCCAUX",
+          "100nF": 4,
+          ">=10uF": 1,
+          "required": [
+            4,
+            1
+          ]
+        },
+        "VCCIO": {
+          "net": "/FPGA_3V3",
+          "100nF": 38,
+          ">=10uF": 10,
+          "required": [
+            18,
+            7
+          ]
+        }
+      }
+    },
+    "config_straps_master_spi_010_and_pullups": {
+      "pass": true,
+      "detail": {
+        "CFG_0": {
+          "net": "/GND",
+          "low": true
+        },
+        "CFG_2": {
+          "net": "/GND",
+          "low": true
+        },
+        "CFG_1": {
+          "net": "/FPGA/fpga_cfg1",
+          "pullup_1k_10k_to_VCCIO8": [
+            "R401"
+          ]
+        },
+        "PROGRAMN": {
+          "net": "/FPGA/fpga_programn",
+          "pullup_1k_10k_to_VCCIO8": [
+            "R402"
+          ],
+          "testpoint": [
+            "TP401"
+          ]
+        },
+        "INITN": {
+          "net": "/FPGA/fpga_initn",
+          "pullup_1k_10k_to_VCCIO8": [
+            "R403"
+          ],
+          "testpoint": [
+            "TP402"
+          ]
+        },
+        "DONE": {
+          "net": "/FPGA/fpga_done",
+          "pullup_1k_10k_to_VCCIO8": [
+            "R404"
+          ],
+          "testpoint": [
+            "TP403"
+          ]
+        },
+        "PROGRAMN_hold": {
+          "open_drain": [
+            [
+              "U407",
+              "4"
+            ]
+          ],
+          "input": "/fpga_rails_ok"
+        }
+      }
+    },
+    "config_flash_wired_to_bank8_sysconfig_balls": {
+      "pass": true,
+      "detail": {
+        "refs": [
+          "U405"
+        ],
+        "pins": {
+          "1": "/FPGA/flash_cs_n",
+          "2": "/FPGA/flash_dq1",
+          "3": "/FPGA/flash_dq2",
+          "4": "/GND",
+          "5": "/FPGA/flash_dq0",
+          "6": "/FPGA/flash_sck",
+          "7": "/FPGA/flash_dq3",
+          "8": "/FPGA_3V3"
+        },
+        "mclk_series": [
+          [
+            "R405",
+            "33"
+          ]
+        ],
+        "sck_pullup": [
+          "R406"
+        ],
+        "cs_pullup": [
+          "R407"
+        ],
+        "io2_pullup": [
+          "R408"
+        ],
+        "io3_pullup": [
+          "R409"
+        ],
+        "value": "W25Q128JVSIQ"
+      }
+    },
+    "jtag_balls_labels_pulls_and_target_vref": {
+      "pass": true,
+      "detail": {
+        "TCK": {
+          "net": "/jtag_tck",
+          "label_ok": true,
+          "pull_down": [
+            "R112",
+            "R413"
+          ],
+          "opposite_pull": []
+        },
+        "TDI": {
+          "net": "/jtag_tdi",
+          "label_ok": true,
+          "pull_up": [
+            "R410"
+          ],
+          "opposite_pull": []
+        },
+        "TDO": {
+          "net": "/jtag_tdo",
+          "label_ok": true,
+          "pull_up": [
+            "R412"
+          ],
+          "opposite_pull": []
+        },
+        "TMS": {
+          "net": "/jtag_tms",
+          "label_ok": true,
+          "pull_up": [
+            "R411"
+          ],
+          "opposite_pull": []
+        },
+        "TARGET_VREF": {
+          "net": [
+            "/TARGET_VREF"
+          ],
+          "link_to_VCCIO8_rail": [
+            "R414"
+          ]
+        }
+      }
+    },
+    "every_board_top_port_ball_matches_lpf_csv_netlist": {
+      "pass": true,
+      "detail": {
+        "ports": 121,
+        "mismatches": [],
+        "lpf_locates_without_port": [],
+        "duplicate_balls": [],
+        "frequency": [
+          [
+            "NET",
+            "clk_snes",
+            21.477272
+          ],
+          [
+            "PORT",
+            "osc_25",
+            25.0
+          ],
+          [
+            "PORT",
+            "si_clk0",
+            21.477272
+          ],
+          [
+            "PORT",
+            "si_clk1",
+            21.28137
+          ],
+          [
+            "PORT",
+            "si_clk2",
+            27.0399
+          ]
+        ],
+        "clock_pins_on_PCLKT": {
+          "osc_25": [
+            "G2",
+            "PCLKT6_1"
+          ],
+          "si_clk0": [
+            "H2",
+            "PCLKT6_0"
+          ],
+          "si_clk1": [
+            "G3",
+            "PCLKT7_1"
+          ],
+          "si_clk2": [
+            "F2",
+            "PCLKT7_0"
+          ]
+        },
+        "dedicated_balls_in_lpf": [],
+        "flash_bank8_sites": true,
+        "unparsed_lpf_lines": [
+          "SYSCONFIG CONFIG_IOVOLTAGE=3.3 COMPRESS_CONFIG=ON;"
+        ]
+      }
+    },
+    "no_5V_12V_or_VBUS_net_reaches_any_FPGA_ball": {
+      "pass": true,
+      "detail": {
+        "hits": []
+      }
+    },
+    "n64_edge_reaches_fpga_only_through_host_gated_bus_switches": {
+      "pass": true,
+      "detail": {
+        "switches": [
+          "U402",
+          "U403",
+          "U404"
+        ],
+        "oe_nets": [
+          "/FPGA/n64_sw_oe_n"
+        ],
+        "oe_driver": [
+          [
+            "U406",
+            "4"
+          ]
+        ],
+        "oe_pullup_to_switch_vcc": [
+          "R418"
+        ],
+        "detector_input": "/FPGA/host_det",
+        "detector_from_HOST_3V3": true,
+        "detector_pulldown": true,
+        "channel_faults": []
+      }
+    },
+    "cartridge_balls_reach_cartridge_sheet_ICs": {
+      "pass": true,
+      "detail": {
+        "unconnected": [],
+        "cart_rows": 63
+      }
+    },
+    "all_381_balls_accounted_unused_io_open": {
+      "pass": true,
+      "detail": {
+        "tables": 381,
+        "symbol_pins": 381,
+        "unused_io_connected": [],
+        "user_io_assigned": 125,
+        "user_io_total": 205
+      }
+    },
+    "embedded_tables_match_lattice_pinout_csv": {
+      "pass": true,
+      "detail": {
+        "rows": 381,
+        "diffs": [],
+        "sha256": "c97b21eca6f07893c6e4643a74221436c889c2580238537e9f679a7731ca45a3"
+      }
+    },
+    "erc_zero_errors": {
+      "pass": true,
+      "detail": {
+        "warning:isolated_pin_label": 5,
+        "warning:pin_to_pin": 5
+      }
+    }
+  },
+  "source_sha256": {
+    "DS-02012.pdf": "26570f8bb2b800123120829cacd75d818d7a985d573797610521b5bda2e293c3",
+    "ECP5U-85-pinout.csv": "c97b21eca6f07893c6e4643a74221436c889c2580238537e9f679a7731ca45a3",
+    "IS25LP128F.pdf": "40e97f5edba8db626da6ba7de83385d7d00bbbcb37616d14c6ed427aff0d3496",
+    "sn74cb3q3384a.pdf": "f5deefac358fd9c042a8bd61b14d4859563ee1d45ca84243589945dabe650575",
+    "sn74lvc1g07.pdf": "5c68b82a5110b337457ca918b149432c6b9c605be7849e76116f108ddbd7abee",
+    "sn74lvc1g14.pdf": "d64e41f0a267e8c5f73873058561642c57e093a2b7ecb4715d7ab62f0ef31a4f",
+    "TN-02032.pdf": "47830ffc0c7a879c8458431a1861c82a7656d0015092826337a317a6b08ee5cc",
+    "TN-02038.pdf": "7b32b411d44a9b585972ea43583c9000fdb596f5322e4c9c5f3182591c44feae",
+    "TN-02039.pdf": "6931b2a1733b3530dfe6f8b661f56f6744b0c08b0fa731193dec6fa9d00a341b",
+    "W25Q128JV.pdf": "809f066e62bcde10b12c2202daf05f4776929ad7dc5f9d3b5131cdcc84502bc1"
+  }
+}

@@ -109,3 +109,7 @@ Separate fixed console outputs from D0–D7. IRQ/shared reset/CIC/releasing sign
 2. After configuration, check input margin and FPGA rails. Assert cartridge reset through a releasing sink; enable 5 V with limited slew, verify its window, then enable/verify the interface rail. Establish idle ownership before releasing OE/reset.
 3. Fault, window loss, configuration loss or source loss asynchronously disables the relevant OEs and cartridge enable. Controlled shutdown disables outputs before discharging rails. Read/write turnaround disables the octet before changing DIR.
 4. Close blank/configuring/running power with the chosen FPGA estimator and measurement. Include memories, flash, I/O switching, host bridge/CIC, A/V, indicators and converter losses. Test both hosts and all host/USB power combinations before manufacturing. ERC is not a power-budget or hot-plug test.
+
+## Schematic implementation (2026-09-29)
+
+The architecture above is drawn in [power-schematic.md](power-schematic.md) / `hardware/sn64/power.kicad_sch`. Obligations from the FPGA sheet that the power sheet must keep: monotonic rail ramps of 0.01-10 V/ms (ECP5 DS-02012 Table 3.3); FPGA_3V3 up before or with FPGA_1V1/FPGA_2V5 (TN-02038 section 4); regulators within ±3 %; `fpga_rails_ok` high only when all three rails are valid; default-off pull-downs on `cart_5v_enable` and `iface_rail_enable`.

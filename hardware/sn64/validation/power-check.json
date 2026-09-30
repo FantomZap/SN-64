@@ -1,0 +1,579 @@
+{
+  "status": "pass",
+  "generated_at_utc": "2026-09-29T23:57:56.687894+00:00",
+  "scope": "independent power-sheet static connectivity and divider arithmetic review",
+  "project_checked": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\hardware\\sn64",
+  "checks_passed": 23,
+  "checks_failed": 0,
+  "inputs_sha256": {
+    "sn64.kicad_sch": "4fbc588ad545ea6d34c095103af83c9238bc3e5f922bc91e2abdb4711719b5b0",
+    "power.kicad_sch": "14d5328907a943e9cbbbecc31dc1b685f4714dc595a91a176ed44d8a1d50d2c1",
+    "libraries/SN64_POWER.kicad_sym": "828065e92ca1941d4ea8da258a00ebc7d5570a401bc9cec2ed6d0d1417847ef5",
+    "usb-programmer.kicad_sch": "b8cfd904b2ea9a024f47461d22f97630a7414379b5f59f308514e877f118861d",
+    "cart-interface.kicad_sch": "466af5c6f78a321be77d3a1cfa262c58f0f7734d184cdfc74ff529f6120fd3b3"
+  },
+  "checks": [
+    {
+      "check": "fresh_netlist_export",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "power_sheet_attached",
+      "passed": true,
+      "detail": "power sheet symbol present in root and its parts in the netlist"
+    },
+    {
+      "check": "each_pin_in_one_net",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "check": "power_parts_present",
+      "passed": true,
+      "detail": {}
+    },
+    {
+      "check": "ic_and_fet_pin_maps",
+      "passed": true,
+      "detail": {}
+    },
+    {
+      "check": "rails_are_distinct_nets",
+      "passed": true,
+      "detail": {
+        "HOST_3V3": true,
+        "USB_VBUS": true,
+        "USB_3V3": true,
+        "SYS_VIN": true,
+        "5V_PRE": true,
+        "SNES_5V_CART": true,
+        "FPGA_1V1": true,
+        "FPGA_2V5": true,
+        "FPGA_3V3": true,
+        "INTERFACE_3V3": true
+      }
+    },
+    {
+      "check": "no_source_directly_paralleled",
+      "passed": true,
+      "detail": {
+        "bridges": {
+          "HOST_3V3~SYS_VIN": [
+            "U303"
+          ],
+          "USB_VBUS~SYS_VIN": [
+            "U302"
+          ],
+          "HOST_3V3~USB_VBUS": [],
+          "USB_3V3~SYS_VIN": [],
+          "HOST_3V3~USB_3V3": [],
+          "5V_PRE~SNES_5V_CART": [
+            "U309"
+          ],
+          "FPGA_3V3~INTERFACE_3V3": [
+            "U308"
+          ]
+        },
+        "SYS_VIN_feeders": [
+          [
+            "U302",
+            "6"
+          ],
+          [
+            "U303",
+            "6"
+          ]
+        ]
+      }
+    },
+    {
+      "check": "priority_mux_interlock",
+      "passed": true,
+      "detail": "U302 AUXOFF -> Q304 gate; Q304 drain clamps U303 EN/UVLO (SLVSFC9C Fig. 8-14)"
+    },
+    {
+      "check": "usb_input_default_off_permission",
+      "passed": true,
+      "detail": {
+        "chain_ok": true,
+        "unexpected_EN_pullups": [],
+        "logic": "U302 EN only released when TUSB320 OUT1 low (>=1.5 A) and USB_3V3 present"
+      }
+    },
+    {
+      "check": "tusb320_straps",
+      "passed": true,
+      "detail": {
+        "VBUS_DET_R": [
+          "887k 1%"
+        ],
+        "PORT(UFP=GND)": "GND",
+        "EN_N": "GND",
+        "ADDR(open=GPIO)": "unconnected-(U301-ADDR-Pad5)",
+        "VDD": "USB_3V3",
+        "source": "TI SLLSEN9F Table 5-1, RVBUS 855/887/920 k"
+      }
+    },
+    {
+      "check": "cart_efuse_enable_default_low",
+      "passed": true,
+      "detail": {
+        "pull_down": [
+          "1k"
+        ],
+        "other_pulls": [],
+        "worst_gate_V_with_ECP5_IPU": 0.15,
+        "BSS138BK_VGSth_min": 0.48
+      }
+    },
+    {
+      "check": "cart_rail_discharge_bounded",
+      "passed": true,
+      "detail": {
+        "R": [
+          "470 0805"
+        ],
+        "P_at_5V5_W": 0.064
+      }
+    },
+    {
+      "check": "iface_switch_default_off",
+      "passed": true,
+      "detail": {
+        "pull_down": [
+          "1k"
+        ],
+        "other_pulls": [],
+        "worst_ON_V": 0.15
+      }
+    },
+    {
+      "check": "monitors_on_socket_side",
+      "passed": true,
+      "detail": {
+        "cart_top": [
+          "R354"
+        ],
+        "iface_top": [
+          "R357"
+        ]
+      }
+    },
+    {
+      "check": "contract_signals_present_with_direction",
+      "passed": true,
+      "detail": {}
+    },
+    {
+      "check": "monitor_outputs_pulled_to_FPGA_3V3",
+      "passed": true,
+      "detail": {
+        "pulls": {
+          "host_3v3_ok": [
+            "FPGA_3V3"
+          ],
+          "fpga_rails_ok": [
+            "GND",
+            "FPGA_3V3"
+          ],
+          "cart_5v_ok": [
+            "FPGA_3V3"
+          ],
+          "iface_rail_ok": [
+            "FPGA_3V3"
+          ],
+          "efuse_fault_n": [
+            "FPGA_3V3"
+          ],
+          "overtemp": [
+            "FPGA_3V3"
+          ],
+          "board_reset_n": [
+            "FPGA_3V3"
+          ]
+        },
+        "high_level_with_pulldown_at_3V3": {
+          "fpga_rails_ok": 3.0
+        }
+      }
+    },
+    {
+      "check": "monitor_supply_equals_pullup_rail",
+      "passed": true,
+      "detail": "TPS3700/TPS3808/TMP302 on FPGA_3V3; loss of it removes every pull-up"
+    },
+    {
+      "check": "efuse_fault_n_pulled_to_FPGA_3V3_not_5V",
+      "passed": true,
+      "detail": {
+        "to_FPGA_3V3": [
+          "R329"
+        ],
+        "to_5V_PRE": []
+      }
+    },
+    {
+      "check": "overtemp_active_high_failsafe",
+      "passed": true,
+      "detail": "TMP302 OUT low (hot) or unpowered -> Q308 off -> overtemp pulled high"
+    },
+    {
+      "check": "board_reset_chain",
+      "passed": true,
+      "detail": "TPS3808 MR on the FPGA-rail window node; RESET -> board_reset_n (CT open, 12-28 ms)"
+    },
+    {
+      "check": "regulator_enable_chain",
+      "passed": true,
+      "detail": "TPS63070 PG enables the three TLV62569 bucks"
+    },
+    {
+      "check": "divider_values_reproduce_documented_thresholds",
+      "passed": true,
+      "detail": {
+        "mismatch": {},
+        "computed": {
+          "U310": {
+            "rail": "SYS_VIN",
+            "UV_fall": 2.8504,
+            "OV_rise": 6.1071,
+            "doc": [
+              2.85,
+              6.107
+            ]
+          },
+          "U311": {
+            "rail": "FPGA_1V1",
+            "UV_fall": 1.0623,
+            "OV_rise": 1.1398,
+            "doc": [
+              1.062,
+              1.14
+            ]
+          },
+          "U312": {
+            "rail": "FPGA_2V5",
+            "UV_fall": 2.4106,
+            "OV_rise": 2.5899,
+            "doc": [
+              2.411,
+              2.59
+            ]
+          },
+          "U313": {
+            "rail": "FPGA_3V3",
+            "UV_fall": 3.1701,
+            "OV_rise": 3.4202,
+            "doc": [
+              3.17,
+              3.42
+            ]
+          },
+          "U314": {
+            "rail": "SNES_5V_CART",
+            "UV_fall": 4.7513,
+            "OV_rise": 5.2307,
+            "doc": [
+              4.751,
+              5.231
+            ]
+          },
+          "U315": {
+            "rail": "INTERFACE_3V3",
+            "UV_fall": 2.9983,
+            "OV_rise": 3.5502,
+            "doc": [
+              2.998,
+              3.55
+            ]
+          },
+          "U302": {
+            "UVLO_rise": 4.404,
+            "OVLO_rise": 5.796,
+            "ILIM_A": 1.3075,
+            "doc": [
+              4.404,
+              5.796,
+              1.307
+            ]
+          },
+          "U303": {
+            "UVLO_rise": 3.0,
+            "OVLO_rise": 3.78,
+            "ILIM_A": 0.5014,
+            "doc": [
+              3.0,
+              3.78,
+              0.501
+            ]
+          },
+          "U309": {
+            "UVLO_rise": 4.644,
+            "OVLO_rise": 5.484,
+            "ILIM_A": 1.0042,
+            "doc": [
+              4.644,
+              5.484,
+              1.004
+            ]
+          },
+          "5V_PRE": {
+            "Vout": 4.9991,
+            "doc": 4.999
+          },
+          "FPGA_1V1": {
+            "Vout": 1.1,
+            "doc": 1.1
+          },
+          "FPGA_2V5": {
+            "Vout": 2.5,
+            "doc": 2.5
+          },
+          "FPGA_3V3": {
+            "Vout": 3.3,
+            "doc": 3.3
+          },
+          "U316_SENSE": {
+            "falling": 3.0335,
+            "doc": 3.033
+          }
+        }
+      }
+    },
+    {
+      "check": "HOST_12V_unused",
+      "passed": true,
+      "detail": {
+        "net": "HOST_12V"
+      }
+    }
+  ],
+  "limitations": [
+    "Static schematic connectivity and nominal divider arithmetic only; no load, thermal, ripple, inrush, timing or fault-injection measurement.",
+    "Thresholds use typical reference voltages; worst-case tolerance bands are computed in docs/design/power-schematic.md.",
+    "Cartridge current limit, dVdt and ITIMER values are provisional until cartridge loads are measured.",
+    "Footprints for RPW/RNM packages and the inductors are pending; no PCB exists."
+  ],
+  "negative_test_previous_run": {
+    "status": "pass",
+    "mutations": 11,
+    "detected": 11,
+    "results": [
+      {
+        "mutation": "host_shorted_to_SYS_VIN",
+        "expected_failing_check": "no_source_directly_paralleled",
+        "failed_checks": [
+          "ic_and_fet_pin_maps",
+          "rails_are_distinct_nets",
+          "no_source_directly_paralleled",
+          "regulator_enable_chain",
+          "divider_values_reproduce_documented_thresholds"
+        ],
+        "detected": true
+      },
+      {
+        "mutation": "usb_shorted_to_SYS_VIN",
+        "expected_failing_check": "no_source_directly_paralleled",
+        "failed_checks": [
+          "ic_and_fet_pin_maps",
+          "rails_are_distinct_nets",
+          "no_source_directly_paralleled",
+          "regulator_enable_chain",
+          "divider_values_reproduce_documented_thresholds"
+        ],
+        "detected": true
+      },
+      {
+        "mutation": "cart_enable_pulled_up",
+        "expected_failing_check": "cart_efuse_enable_default_low",
+        "failed_checks": [
+          "cart_efuse_enable_default_low"
+        ],
+        "detected": true
+      },
+      {
+        "mutation": "cart_monitor_on_supply_side",
+        "expected_failing_check": "monitors_on_socket_side",
+        "failed_checks": [
+          "monitors_on_socket_side",
+          "divider_values_reproduce_documented_thresholds"
+        ],
+        "detected": true
+      },
+      {
+        "mutation": "iface_enable_pulled_up",
+        "expected_failing_check": "iface_switch_default_off",
+        "failed_checks": [
+          "iface_switch_default_off"
+        ],
+        "detected": true
+      },
+      {
+        "mutation": "cart_window_resistor_changed",
+        "expected_failing_check": "divider_values_reproduce_documented_thresholds",
+        "failed_checks": [
+          "divider_values_reproduce_documented_thresholds"
+        ],
+        "detected": true
+      },
+      {
+        "mutation": "usb_ovlo_resistor_changed",
+        "expected_failing_check": "divider_values_reproduce_documented_thresholds",
+        "failed_checks": [
+          "divider_values_reproduce_documented_thresholds"
+        ],
+        "detected": true
+      },
+      {
+        "mutation": "contract_signal_renamed",
+        "expected_failing_check": "contract_signals_present_with_direction",
+        "failed_checks": [
+          "contract_signals_present_with_direction"
+        ],
+        "detected": true
+      },
+      {
+        "mutation": "monitor_pullup_to_5V",
+        "expected_failing_check": "monitor_outputs_pulled_to_FPGA_3V3",
+        "failed_checks": [
+          "monitor_outputs_pulled_to_FPGA_3V3"
+        ],
+        "detected": true
+      },
+      {
+        "mutation": "usb_permission_bypassed",
+        "expected_failing_check": "usb_input_default_off_permission",
+        "failed_checks": [
+          "ic_and_fet_pin_maps",
+          "usb_input_default_off_permission"
+        ],
+        "detected": true
+      },
+      {
+        "mutation": "cart_pulldown_too_weak",
+        "expected_failing_check": "cart_efuse_enable_default_low",
+        "failed_checks": [
+          "cart_efuse_enable_default_low"
+        ],
+        "detected": true
+      }
+    ],
+    "generated_at_utc": "2026-09-29T23:40:28.094862+00:00"
+  },
+  "negative_test": {
+    "status": "pass",
+    "mutations": 12,
+    "detected": 12,
+    "results": [
+      {
+        "mutation": "host_shorted_to_SYS_VIN",
+        "expected_failing_check": "no_source_directly_paralleled",
+        "failed_checks": [
+          "ic_and_fet_pin_maps",
+          "rails_are_distinct_nets",
+          "no_source_directly_paralleled",
+          "regulator_enable_chain",
+          "divider_values_reproduce_documented_thresholds"
+        ],
+        "detected": true
+      },
+      {
+        "mutation": "usb_shorted_to_SYS_VIN",
+        "expected_failing_check": "no_source_directly_paralleled",
+        "failed_checks": [
+          "ic_and_fet_pin_maps",
+          "rails_are_distinct_nets",
+          "no_source_directly_paralleled",
+          "regulator_enable_chain",
+          "divider_values_reproduce_documented_thresholds"
+        ],
+        "detected": true
+      },
+      {
+        "mutation": "cart_enable_pulled_up",
+        "expected_failing_check": "cart_efuse_enable_default_low",
+        "failed_checks": [
+          "cart_efuse_enable_default_low"
+        ],
+        "detected": true
+      },
+      {
+        "mutation": "cart_monitor_on_supply_side",
+        "expected_failing_check": "monitors_on_socket_side",
+        "failed_checks": [
+          "monitors_on_socket_side",
+          "divider_values_reproduce_documented_thresholds"
+        ],
+        "detected": true
+      },
+      {
+        "mutation": "iface_enable_pulled_up",
+        "expected_failing_check": "iface_switch_default_off",
+        "failed_checks": [
+          "iface_switch_default_off"
+        ],
+        "detected": true
+      },
+      {
+        "mutation": "cart_window_resistor_changed",
+        "expected_failing_check": "divider_values_reproduce_documented_thresholds",
+        "failed_checks": [
+          "divider_values_reproduce_documented_thresholds"
+        ],
+        "detected": true
+      },
+      {
+        "mutation": "usb_ovlo_resistor_changed",
+        "expected_failing_check": "divider_values_reproduce_documented_thresholds",
+        "failed_checks": [
+          "divider_values_reproduce_documented_thresholds"
+        ],
+        "detected": true
+      },
+      {
+        "mutation": "contract_signal_renamed",
+        "expected_failing_check": "contract_signals_present_with_direction",
+        "failed_checks": [
+          "contract_signals_present_with_direction"
+        ],
+        "detected": true
+      },
+      {
+        "mutation": "monitor_pullup_to_5V",
+        "expected_failing_check": "monitor_outputs_pulled_to_FPGA_3V3",
+        "failed_checks": [
+          "monitor_outputs_pulled_to_FPGA_3V3"
+        ],
+        "detected": true
+      },
+      {
+        "mutation": "usb_permission_bypassed",
+        "expected_failing_check": "usb_input_default_off_permission",
+        "failed_checks": [
+          "ic_and_fet_pin_maps",
+          "usb_input_default_off_permission"
+        ],
+        "detected": true
+      },
+      {
+        "mutation": "cart_pulldown_too_weak",
+        "expected_failing_check": "cart_efuse_enable_default_low",
+        "failed_checks": [
+          "cart_efuse_enable_default_low"
+        ],
+        "detected": true
+      },
+      {
+        "mutation": "fault_pullup_to_5V",
+        "expected_failing_check": "efuse_fault_n_pulled_to_FPGA_3V3_not_5V",
+        "failed_checks": [
+          "monitor_outputs_pulled_to_FPGA_3V3",
+          "efuse_fault_n_pulled_to_FPGA_3V3_not_5V"
+        ],
+        "detected": true
+      }
+    ],
+    "generated_at_utc": "2026-09-30T00:00:55.719413+00:00"
+  }
+}

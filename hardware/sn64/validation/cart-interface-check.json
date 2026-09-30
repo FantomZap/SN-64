@@ -1,17 +1,17 @@
 {
   "status": "pass",
   "scope": "static schematic/netlist check of the SNES cartridge-side translation sheet only",
-  "generated_at_utc": "2026-09-29T22:14:51.514092+00:00",
+  "generated_at_utc": "2026-09-29T23:58:02.090689+00:00",
   "checks_passed": 20,
   "checks_failed": 0,
   "inputs": {
-    "sn64.kicad_sch": "7e7c31aa2f6f8a496f9e544541f85b013ff636c4fa4920a66c76662725faf8db",
-    "cart-interface.kicad_sch": "d36100f7a024c560e34dff2041f68d98f3db25c198a857e95e5628a64f353079",
+    "sn64.kicad_sch": "4fbc588ad545ea6d34c095103af83c9238bc3e5f922bc91e2abdb4711719b5b0",
+    "cart-interface.kicad_sch": "466af5c6f78a321be77d3a1cfa262c58f0f7734d184cdfc74ff529f6120fd3b3",
     "interfaces/snes-pin-map.csv": "911a289bfb073aab8048daff42256eae65a527c8a0efd852bca0f37b1fdf7adc",
     "libraries/SN64_CART.kicad_sym": "c9398658a1ded7297d70e912f3a58fedbd5742abe486d00a21b5adf22ffdb092"
   },
   "erc_violations_by_type": {
-    "warning:isolated_pin_label": 32,
+    "warning:isolated_pin_label": 5,
     "warning:pin_to_pin": 5
   },
   "checks": [
@@ -26,7 +26,7 @@
       "detail": {
         "report_written": true,
         "violations_by_type": {
-          "warning:isolated_pin_label": 32,
+          "warning:isolated_pin_label": 5,
           "warning:pin_to_pin": 5
         }
       }
@@ -74,7 +74,7 @@
       "check": "interface_rail_distinct_from_cart_rail",
       "passed": true,
       "detail": {
-        "INTERFACE_3V3": "/SNES cartridge interface/INTERFACE_3V3",
+        "INTERFACE_3V3": "/INTERFACE_3V3",
         "cart_rail": "/SNES_5V_CART"
       }
     },
@@ -85,7 +85,7 @@
         "U201": {
           "VCCA": "/SNES_5V_CART",
           "VCCB": [
-            "/SNES cartridge interface/INTERFACE_3V3"
+            "/INTERFACE_3V3"
           ],
           "GND": [
             "/GND"
@@ -94,7 +94,7 @@
         "U202": {
           "VCCA": "/SNES_5V_CART",
           "VCCB": [
-            "/SNES cartridge interface/INTERFACE_3V3"
+            "/INTERFACE_3V3"
           ],
           "GND": [
             "/GND"
@@ -103,7 +103,7 @@
         "U203": {
           "VCCA": "/SNES_5V_CART",
           "VCCB": [
-            "/SNES cartridge interface/INTERFACE_3V3"
+            "/INTERFACE_3V3"
           ],
           "GND": [
             "/GND"
@@ -112,7 +112,7 @@
         "U204": {
           "VCCA": "/SNES_5V_CART",
           "VCCB": [
-            "/SNES cartridge interface/INTERFACE_3V3"
+            "/INTERFACE_3V3"
           ],
           "GND": [
             "/GND"
@@ -121,7 +121,7 @@
         "U205": {
           "VCCA": "/SNES_5V_CART",
           "VCCB": [
-            "/SNES cartridge interface/INTERFACE_3V3"
+            "/INTERFACE_3V3"
           ],
           "GND": [
             "/GND"
@@ -130,7 +130,7 @@
         "U206": {
           "VCCA": "/SNES_5V_CART",
           "VCCB": [
-            "/SNES cartridge interface/INTERFACE_3V3"
+            "/INTERFACE_3V3"
           ],
           "GND": [
             "/GND"
@@ -139,7 +139,7 @@
         "U207": {
           "VCCA": "/SNES_5V_CART",
           "VCCB": [
-            "/SNES cartridge interface/INTERFACE_3V3"
+            "/INTERFACE_3V3"
           ],
           "GND": [
             "/GND"
@@ -233,16 +233,16 @@
       "detail": {
         "CIC_DATA1": {
           "translator": "U216",
-          "dir_net": "/SNES cartridge interface/cic_data1_dir",
-          "fpga_net": "/SNES cartridge interface/cic_data1",
+          "dir_net": "/cic_data1_dir",
+          "fpga_net": "/cic_data1",
           "b_net": "/SNES cartridge interface/XB_CIC_DATA1",
           "series": "R215",
           "problems": []
         },
         "CIC_DATA0": {
           "translator": "U215",
-          "dir_net": "/SNES cartridge interface/cic_data0_dir",
-          "fpga_net": "/SNES cartridge interface/cic_data0",
+          "dir_net": "/cic_data0_dir",
+          "fpga_net": "/cic_data0",
           "b_net": "/SNES cartridge interface/XB_CIC_DATA0",
           "series": "R214",
           "problems": []
@@ -310,7 +310,7 @@
         ],
         "dir_net": "/SNES cartridge interface/DATA_DIR_5V",
         "driver": "U213",
-        "control": "/SNES cartridge interface/data_dir",
+        "control": "/data_dir",
         "default": "data_dir pulled low -> 1G06 output released -> DIR high (A->B, listen)"
       }
     },
@@ -332,10 +332,12 @@
       "check": "5V_pullups_only_on_cartridge_side_nets",
       "passed": true,
       "detail": [
+        "CART_DIS",
         "CIC_OE_N_5V",
         "CTL_OE_N_5V",
         "DATA_DIR_5V",
         "DATA_OE_N_5V",
+        "MON_A_U314",
         "RESET_GATE_5V",
         "SNES_EXPAND",
         "SNES_IRQ_N",
@@ -347,11 +349,11 @@
       "passed": true,
       "detail": {
         "supply_pins": {
-          "/SNES cartridge interface/INTERFACE_3V3": 22,
+          "/INTERFACE_3V3": 22,
           "/SNES_5V_CART": 9
         },
         "100nF_caps": {
-          "/SNES cartridge interface/INTERFACE_3V3": 22,
+          "/INTERFACE_3V3": 22,
           "/SNES_5V_CART": 9
         }
       }
@@ -380,7 +382,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U206",
       "channel": 1,
-      "fpga_net": "/SNES cartridge interface/cart_sysclk",
+      "fpga_net": "/cart_sysclk",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -390,7 +392,7 @@
       "signal": "EXPAND",
       "csv_direction": "passive_bidirectional",
       "socket_net": "/SNES_EXPAND",
-      "fpga_net": "/SNES cartridge interface/expand_sense",
+      "fpga_net": "/expand_sense",
       "handling": "bias (5 V pull-up) + sense",
       "passed": true
     },
@@ -403,7 +405,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U204",
       "channel": 7,
-      "fpga_net": "/SNES cartridge interface/cart_pa6",
+      "fpga_net": "/cart_pa6",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -417,7 +419,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U205",
       "channel": 3,
-      "fpga_net": "/SNES cartridge interface/cart_prd_n",
+      "fpga_net": "/cart_prd_n",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -439,7 +441,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U202",
       "channel": 4,
-      "fpga_net": "/SNES cartridge interface/cart_address11",
+      "fpga_net": "/cart_address11",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -453,7 +455,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U202",
       "channel": 3,
-      "fpga_net": "/SNES cartridge interface/cart_address10",
+      "fpga_net": "/cart_address10",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -467,7 +469,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U202",
       "channel": 2,
-      "fpga_net": "/SNES cartridge interface/cart_address9",
+      "fpga_net": "/cart_address9",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -481,7 +483,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U202",
       "channel": 1,
-      "fpga_net": "/SNES cartridge interface/cart_address8",
+      "fpga_net": "/cart_address8",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -495,7 +497,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U201",
       "channel": 8,
-      "fpga_net": "/SNES cartridge interface/cart_address7",
+      "fpga_net": "/cart_address7",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -509,7 +511,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U201",
       "channel": 7,
-      "fpga_net": "/SNES cartridge interface/cart_address6",
+      "fpga_net": "/cart_address6",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -523,7 +525,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U201",
       "channel": 6,
-      "fpga_net": "/SNES cartridge interface/cart_address5",
+      "fpga_net": "/cart_address5",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -537,7 +539,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U201",
       "channel": 5,
-      "fpga_net": "/SNES cartridge interface/cart_address4",
+      "fpga_net": "/cart_address4",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -551,7 +553,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U201",
       "channel": 4,
-      "fpga_net": "/SNES cartridge interface/cart_address3",
+      "fpga_net": "/cart_address3",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -565,7 +567,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U201",
       "channel": 3,
-      "fpga_net": "/SNES cartridge interface/cart_address2",
+      "fpga_net": "/cart_address2",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -579,7 +581,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U201",
       "channel": 2,
-      "fpga_net": "/SNES cartridge interface/cart_address1",
+      "fpga_net": "/cart_address1",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -593,7 +595,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U201",
       "channel": 1,
-      "fpga_net": "/SNES cartridge interface/cart_address0",
+      "fpga_net": "/cart_address0",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -603,7 +605,7 @@
       "signal": "/IRQ",
       "csv_direction": "in_shared_active_low",
       "socket_net": "/SNES_IRQ_N",
-      "fpga_net": "/SNES cartridge interface/cart_irq_n",
+      "fpga_net": "/cart_irq_n",
       "handling": "sensed, 5 V pull-up, never driven",
       "passed": true
     },
@@ -616,7 +618,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U207",
       "channel": 1,
-      "fpga_net": "/SNES cartridge interface/cart_data0",
+      "fpga_net": "/cart_data0",
       "direction_control": "variable (FPGA data_dir via open-drain)",
       "handling": "data octet: variable DIR + gated OE",
       "passed": true
@@ -630,7 +632,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U207",
       "channel": 2,
-      "fpga_net": "/SNES cartridge interface/cart_data1",
+      "fpga_net": "/cart_data1",
       "direction_control": "variable (FPGA data_dir via open-drain)",
       "handling": "data octet: variable DIR + gated OE",
       "passed": true
@@ -644,7 +646,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U207",
       "channel": 3,
-      "fpga_net": "/SNES cartridge interface/cart_data2",
+      "fpga_net": "/cart_data2",
       "direction_control": "variable (FPGA data_dir via open-drain)",
       "handling": "data octet: variable DIR + gated OE",
       "passed": true
@@ -658,7 +660,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U207",
       "channel": 4,
-      "fpga_net": "/SNES cartridge interface/cart_data3",
+      "fpga_net": "/cart_data3",
       "direction_control": "variable (FPGA data_dir via open-drain)",
       "handling": "data octet: variable DIR + gated OE",
       "passed": true
@@ -672,7 +674,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U205",
       "channel": 1,
-      "fpga_net": "/SNES cartridge interface/cart_rd_n",
+      "fpga_net": "/cart_rd_n",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -686,8 +688,8 @@
       "series_value": "33",
       "b_net": "/SNES cartridge interface/XB_CIC_DATA1",
       "translator": "U216",
-      "fpga_net": "/SNES cartridge interface/cic_data1",
-      "dir_net": "/SNES cartridge interface/cic_data1_dir",
+      "fpga_net": "/cic_data1",
+      "dir_net": "/cic_data1_dir",
       "a_side_pulldown": [
         [
           "R219",
@@ -712,7 +714,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U206",
       "channel": 3,
-      "fpga_net": "/SNES cartridge interface/cic_slave_reset",
+      "fpga_net": "/cic_slave_reset",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -722,12 +724,12 @@
       "signal": "/RESET",
       "csv_direction": "bidirectional_open_drain",
       "socket_net": "/SNES_RESET_N",
-      "fpga_net": "/SNES cartridge interface/cart_reset_n_sense",
+      "fpga_net": "/cart_reset_n_sense",
       "reset_sink": {
         "nmos": "Q201",
         "gate": "/SNES cartridge interface/RESET_GATE_5V",
         "gate_driver": "U214",
-        "control": "/SNES cartridge interface/cart_reset_pull_n"
+        "control": "/cart_reset_pull_n"
       },
       "handling": "open-drain NMOS sink + sense, 5 V pull-up",
       "passed": true
@@ -758,7 +760,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U204",
       "channel": 1,
-      "fpga_net": "/SNES cartridge interface/cart_pa0",
+      "fpga_net": "/cart_pa0",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -772,7 +774,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U204",
       "channel": 3,
-      "fpga_net": "/SNES cartridge interface/cart_pa2",
+      "fpga_net": "/cart_pa2",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -786,7 +788,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U204",
       "channel": 5,
-      "fpga_net": "/SNES cartridge interface/cart_pa4",
+      "fpga_net": "/cart_pa4",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -796,7 +798,7 @@
       "signal": "AUDIO_L_IN",
       "csv_direction": "analog_in",
       "socket_net": "/SNES_AUDIO_L_IN",
-      "handling": "analog pass-through (test point only)",
+      "handling": "analog: test point + passive A/V-sheet input network only (no active part on the socket net)",
       "passed": true
     },
     {
@@ -808,7 +810,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U205",
       "channel": 6,
-      "fpga_net": "/SNES cartridge interface/cart_wramsel_n",
+      "fpga_net": "/cart_wramsel_n",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -822,7 +824,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U205",
       "channel": 7,
-      "fpga_net": "/SNES cartridge interface/cart_refresh",
+      "fpga_net": "/cart_refresh",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -836,7 +838,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U204",
       "channel": 8,
-      "fpga_net": "/SNES cartridge interface/cart_pa7",
+      "fpga_net": "/cart_pa7",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -850,7 +852,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U205",
       "channel": 4,
-      "fpga_net": "/SNES cartridge interface/cart_pwr_n",
+      "fpga_net": "/cart_pwr_n",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -872,7 +874,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U202",
       "channel": 5,
-      "fpga_net": "/SNES cartridge interface/cart_address12",
+      "fpga_net": "/cart_address12",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -886,7 +888,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U202",
       "channel": 6,
-      "fpga_net": "/SNES cartridge interface/cart_address13",
+      "fpga_net": "/cart_address13",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -900,7 +902,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U202",
       "channel": 7,
-      "fpga_net": "/SNES cartridge interface/cart_address14",
+      "fpga_net": "/cart_address14",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -914,7 +916,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U202",
       "channel": 8,
-      "fpga_net": "/SNES cartridge interface/cart_address15",
+      "fpga_net": "/cart_address15",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -928,7 +930,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U203",
       "channel": 1,
-      "fpga_net": "/SNES cartridge interface/cart_address16",
+      "fpga_net": "/cart_address16",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -942,7 +944,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U203",
       "channel": 2,
-      "fpga_net": "/SNES cartridge interface/cart_address17",
+      "fpga_net": "/cart_address17",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -956,7 +958,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U203",
       "channel": 3,
-      "fpga_net": "/SNES cartridge interface/cart_address18",
+      "fpga_net": "/cart_address18",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -970,7 +972,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U203",
       "channel": 4,
-      "fpga_net": "/SNES cartridge interface/cart_address19",
+      "fpga_net": "/cart_address19",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -984,7 +986,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U203",
       "channel": 5,
-      "fpga_net": "/SNES cartridge interface/cart_address20",
+      "fpga_net": "/cart_address20",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -998,7 +1000,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U203",
       "channel": 6,
-      "fpga_net": "/SNES cartridge interface/cart_address21",
+      "fpga_net": "/cart_address21",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -1012,7 +1014,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U203",
       "channel": 7,
-      "fpga_net": "/SNES cartridge interface/cart_address22",
+      "fpga_net": "/cart_address22",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -1026,7 +1028,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U203",
       "channel": 8,
-      "fpga_net": "/SNES cartridge interface/cart_address23",
+      "fpga_net": "/cart_address23",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -1040,7 +1042,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U205",
       "channel": 5,
-      "fpga_net": "/SNES cartridge interface/cart_romsel_n",
+      "fpga_net": "/cart_romsel_n",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -1054,7 +1056,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U207",
       "channel": 5,
-      "fpga_net": "/SNES cartridge interface/cart_data4",
+      "fpga_net": "/cart_data4",
       "direction_control": "variable (FPGA data_dir via open-drain)",
       "handling": "data octet: variable DIR + gated OE",
       "passed": true
@@ -1068,7 +1070,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U207",
       "channel": 6,
-      "fpga_net": "/SNES cartridge interface/cart_data5",
+      "fpga_net": "/cart_data5",
       "direction_control": "variable (FPGA data_dir via open-drain)",
       "handling": "data octet: variable DIR + gated OE",
       "passed": true
@@ -1082,7 +1084,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U207",
       "channel": 7,
-      "fpga_net": "/SNES cartridge interface/cart_data6",
+      "fpga_net": "/cart_data6",
       "direction_control": "variable (FPGA data_dir via open-drain)",
       "handling": "data octet: variable DIR + gated OE",
       "passed": true
@@ -1096,7 +1098,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U207",
       "channel": 8,
-      "fpga_net": "/SNES cartridge interface/cart_data7",
+      "fpga_net": "/cart_data7",
       "direction_control": "variable (FPGA data_dir via open-drain)",
       "handling": "data octet: variable DIR + gated OE",
       "passed": true
@@ -1110,7 +1112,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U205",
       "channel": 2,
-      "fpga_net": "/SNES cartridge interface/cart_wr_n",
+      "fpga_net": "/cart_wr_n",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -1124,8 +1126,8 @@
       "series_value": "33",
       "b_net": "/SNES cartridge interface/XB_CIC_DATA0",
       "translator": "U215",
-      "fpga_net": "/SNES cartridge interface/cic_data0",
-      "dir_net": "/SNES cartridge interface/cic_data0_dir",
+      "fpga_net": "/cic_data0",
+      "dir_net": "/cic_data0_dir",
       "a_side_pulldown": [
         [
           "R218",
@@ -1150,7 +1152,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U206",
       "channel": 2,
-      "fpga_net": "/SNES cartridge interface/cic_clk",
+      "fpga_net": "/cic_clk",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -1164,7 +1166,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U205",
       "channel": 8,
-      "fpga_net": "/SNES cartridge interface/cart_phi2",
+      "fpga_net": "/cart_phi2",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -1195,7 +1197,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U204",
       "channel": 2,
-      "fpga_net": "/SNES cartridge interface/cart_pa1",
+      "fpga_net": "/cart_pa1",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -1209,7 +1211,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U204",
       "channel": 4,
-      "fpga_net": "/SNES cartridge interface/cart_pa3",
+      "fpga_net": "/cart_pa3",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -1223,7 +1225,7 @@
       "value": "33 (4x0603, tune)",
       "octet": "U204",
       "channel": 6,
-      "fpga_net": "/SNES cartridge interface/cart_pa5",
+      "fpga_net": "/cart_pa5",
       "direction_control": "fixed B->A",
       "handling": "driven: fixed-direction translator",
       "passed": true
@@ -1233,14 +1235,14 @@
       "signal": "AUDIO_R_IN",
       "csv_direction": "analog_in",
       "socket_net": "/SNES_AUDIO_R_IN",
-      "handling": "analog pass-through (test point only)",
+      "handling": "analog: test point + passive A/V-sheet input network only (no active part on the socket net)",
       "passed": true
     }
   ],
   "limitations": [
     "Static connectivity only: no timing, signal-integrity, ESD, power-sequencing or cartridge test was performed.",
     "Component values (33 R damping, 1k/2.2k/10k/100k pulls) are provisional engineering choices, not measured.",
-    "FPGA-side pins end at no-connect markers in the root until the FPGA sheet exists; INTERFACE_3V3 has no source yet.",
+    "Since the round-3 integration the FPGA-side pins reach ECP5 balls on the FPGA sheet and INTERFACE_3V3/SNES_5V_CART come from the power sheet (#FLG201/#FLG202 stay: the power-sheet switch outputs are passive pins).",
     "CIC_DATA0/1 direction sequencing (DIR high before the FPGA drives A; FPGA releases A before DIR low) is an FPGA/board-wrapper obligation that a netlist check cannot see; the CIC pull-down value is provisional until checked against a real key CIC.",
     "Socket-side ESD protection is not yet selected."
   ]

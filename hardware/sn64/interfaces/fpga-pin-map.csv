@@ -1,0 +1,137 @@
+port,ball,bank,IO_TYPE,lpf_attributes,fpga_net,sheet_label,group,notes
+n64_ad[0],E6,0,LVCMOS33,PULLMODE=NONE,fpga_n64_ad0,N64_AD0,n64,via N64 bus switch to root N64_AD0; pull as SummerCart64 sc64.lpf
+n64_ad[1],D6,0,LVCMOS33,PULLMODE=NONE,fpga_n64_ad1,N64_AD1,n64,via N64 bus switch to root N64_AD1; pull as SummerCart64 sc64.lpf
+n64_ad[2],E7,0,LVCMOS33,PULLMODE=NONE,fpga_n64_ad2,N64_AD2,n64,via N64 bus switch to root N64_AD2; pull as SummerCart64 sc64.lpf
+n64_ad[3],D7,0,LVCMOS33,PULLMODE=NONE,fpga_n64_ad3,N64_AD3,n64,via N64 bus switch to root N64_AD3; pull as SummerCart64 sc64.lpf
+n64_ad[4],C6,0,LVCMOS33,PULLMODE=NONE,fpga_n64_ad4,N64_AD4,n64,via N64 bus switch to root N64_AD4; pull as SummerCart64 sc64.lpf
+n64_ad[5],C7,0,LVCMOS33,PULLMODE=NONE,fpga_n64_ad5,N64_AD5,n64,via N64 bus switch to root N64_AD5; pull as SummerCart64 sc64.lpf
+n64_ad[6],E8,0,LVCMOS33,PULLMODE=NONE,fpga_n64_ad6,N64_AD6,n64,via N64 bus switch to root N64_AD6; pull as SummerCart64 sc64.lpf
+n64_ad[7],D8,0,LVCMOS33,PULLMODE=NONE,fpga_n64_ad7,N64_AD7,n64,via N64 bus switch to root N64_AD7; pull as SummerCart64 sc64.lpf
+n64_ad[8],C8,0,LVCMOS33,PULLMODE=NONE,fpga_n64_ad8,N64_AD8,n64,via N64 bus switch to root N64_AD8; pull as SummerCart64 sc64.lpf
+n64_ad[9],B8,0,LVCMOS33,PULLMODE=NONE,fpga_n64_ad9,N64_AD9,n64,via N64 bus switch to root N64_AD9; pull as SummerCart64 sc64.lpf
+n64_ad[10],A7,0,LVCMOS33,PULLMODE=NONE,fpga_n64_ad10,N64_AD10,n64,via N64 bus switch to root N64_AD10; pull as SummerCart64 sc64.lpf
+n64_ad[11],A8,0,LVCMOS33,PULLMODE=NONE,fpga_n64_ad11,N64_AD11,n64,via N64 bus switch to root N64_AD11; pull as SummerCart64 sc64.lpf
+n64_ad[12],D9,0,LVCMOS33,PULLMODE=NONE,fpga_n64_ad12,N64_AD12,n64,via N64 bus switch to root N64_AD12; pull as SummerCart64 sc64.lpf
+n64_ad[13],E9,0,LVCMOS33,PULLMODE=NONE,fpga_n64_ad13,N64_AD13,n64,via N64 bus switch to root N64_AD13; pull as SummerCart64 sc64.lpf
+n64_ad[14],C9,0,LVCMOS33,PULLMODE=NONE,fpga_n64_ad14,N64_AD14,n64,via N64 bus switch to root N64_AD14; pull as SummerCart64 sc64.lpf
+n64_ad[15],D10,0,LVCMOS33,PULLMODE=NONE,fpga_n64_ad15,N64_AD15,n64,via N64 bus switch to root N64_AD15; pull as SummerCart64 sc64.lpf
+n64_alel,E10,0,LVCMOS33,PULLMODE=DOWN,fpga_n64_alel,N64_ALE_L,n64,via N64 bus switch to root N64_ALE_L; pull as SummerCart64 sc64.lpf
+n64_aleh,B9,0,LVCMOS33,PULLMODE=UP,fpga_n64_aleh,N64_ALE_H,n64,via N64 bus switch to root N64_ALE_H; pull as SummerCart64 sc64.lpf
+n64_read_n,C10,0,LVCMOS33,PULLMODE=UP,fpga_n64_read_n,N64_READ_N,n64,via N64 bus switch to root N64_READ_N; pull as SummerCart64 sc64.lpf
+n64_write_n,A9,0,LVCMOS33,PULLMODE=UP,fpga_n64_write_n,N64_WRITE_N,n64,via N64 bus switch to root N64_WRITE_N; pull as SummerCart64 sc64.lpf
+n64_reset_n,B10,0,LVCMOS33,PULLMODE=DOWN,fpga_n64_reset_n,N64_RESET_N,n64,via N64 bus switch to root N64_RESET_N; pull as SummerCart64 sc64.lpf
+n64_nmi_n,A11,0,LVCMOS33,PULLMODE=DOWN,fpga_n64_nmi_n,N64_NMI_N,n64,via N64 bus switch to root N64_NMI_N; pull as SummerCart64 sc64.lpf
+n64_cic_clk,A10,0,LVCMOS33,PULLMODE=UP,fpga_n64_cic_clk,N64_CIC_CLK,n64,via N64 bus switch to root N64_CIC_CLK; pull as SummerCart64 sc64.lpf
+n64_si_clk,B11,0,LVCMOS33,PULLMODE=DOWN,fpga_n64_si_clk,N64_PIF_CLK,n64,via N64 bus switch to root N64_PIF_CLK; pull as SummerCart64 sc64.lpf
+n64_cic_dq,C11,0,LVCMOS33,PULLMODE=UP,fpga_n64_cic_dq,N64_CIC_DATA,n64,via N64 bus switch to root N64_CIC_DATA; pull as SummerCart64 sc64.lpf
+n64_si_dq,A6,0,LVCMOS33,PULLMODE=UP,fpga_n64_si_dq,N64_JOYBUS,n64,via N64 bus switch to root N64_JOYBUS; pull as SummerCart64 sc64.lpf
+n64_int_n,B6,0,LVCMOS33,PULLMODE=UP,fpga_n64_int_n,N64_INT_N,n64,via N64 bus switch to root N64_INT_N; pull as SummerCart64 sc64.lpf
+cart_address[0],C18,2,LVCMOS33,,cart_address0,cart_address[0..23],cart,U201-U203 B side (cart sheet)
+cart_address[1],D17,2,LVCMOS33,,cart_address1,cart_address[0..23],cart,U201-U203 B side (cart sheet)
+cart_address[2],E16,2,LVCMOS33,,cart_address2,cart_address[0..23],cart,U201-U203 B side (cart sheet)
+cart_address[3],F16,2,LVCMOS33,,cart_address3,cart_address[0..23],cart,U201-U203 B side (cart sheet)
+cart_address[4],D18,2,LVCMOS33,,cart_address4,cart_address[0..23],cart,U201-U203 B side (cart sheet)
+cart_address[5],E17,2,LVCMOS33,,cart_address5,cart_address[0..23],cart,U201-U203 B side (cart sheet)
+cart_address[6],E18,2,LVCMOS33,,cart_address6,cart_address[0..23],cart,U201-U203 B side (cart sheet)
+cart_address[7],F18,2,LVCMOS33,,cart_address7,cart_address[0..23],cart,U201-U203 B side (cart sheet)
+cart_address[8],F17,2,LVCMOS33,,cart_address8,cart_address[0..23],cart,U201-U203 B side (cart sheet)
+cart_address[9],G18,2,LVCMOS33,,cart_address9,cart_address[0..23],cart,U201-U203 B side (cart sheet)
+cart_address[10],G16,2,LVCMOS33,,cart_address10,cart_address[0..23],cart,U201-U203 B side (cart sheet)
+cart_address[11],H16,2,LVCMOS33,,cart_address11,cart_address[0..23],cart,U201-U203 B side (cart sheet)
+cart_address[12],H18,2,LVCMOS33,,cart_address12,cart_address[0..23],cart,U201-U203 B side (cart sheet)
+cart_address[13],H17,2,LVCMOS33,,cart_address13,cart_address[0..23],cart,U201-U203 B side (cart sheet)
+cart_address[14],J17,2,LVCMOS33,,cart_address14,cart_address[0..23],cart,U201-U203 B side (cart sheet)
+cart_address[15],J16,2,LVCMOS33,,cart_address15,cart_address[0..23],cart,U201-U203 B side (cart sheet)
+cart_address[16],K16,2,LVCMOS33,,cart_address16,cart_address[0..23],cart,U201-U203 B side (cart sheet)
+cart_address[17],K17,2,LVCMOS33,,cart_address17,cart_address[0..23],cart,U201-U203 B side (cart sheet)
+cart_address[18],C20,2,LVCMOS33,,cart_address18,cart_address[0..23],cart,U201-U203 B side (cart sheet)
+cart_address[19],D19,2,LVCMOS33,,cart_address19,cart_address[0..23],cart,U201-U203 B side (cart sheet)
+cart_address[20],D20,2,LVCMOS33,,cart_address20,cart_address[0..23],cart,U201-U203 B side (cart sheet)
+cart_address[21],E19,2,LVCMOS33,,cart_address21,cart_address[0..23],cart,U201-U203 B side (cart sheet)
+cart_address[22],E20,2,LVCMOS33,,cart_address22,cart_address[0..23],cart,U201-U203 B side (cart sheet)
+cart_address[23],F19,2,LVCMOS33,,cart_address23,cart_address[0..23],cart,U201-U203 B side (cart sheet)
+cart_pa[0],F20,2,LVCMOS33,,cart_pa0,cart_pa[0..7],cart,U204 B side (cart sheet)
+cart_pa[1],G20,2,LVCMOS33,,cart_pa1,cart_pa[0..7],cart,U204 B side (cart sheet)
+cart_pa[2],G19,2,LVCMOS33,,cart_pa2,cart_pa[0..7],cart,U204 B side (cart sheet)
+cart_pa[3],H20,2,LVCMOS33,,cart_pa3,cart_pa[0..7],cart,U204 B side (cart sheet)
+cart_pa[4],J18,2,LVCMOS33,,cart_pa4,cart_pa[0..7],cart,U204 B side (cart sheet)
+cart_pa[5],K18,2,LVCMOS33,,cart_pa5,cart_pa[0..7],cart,U204 B side (cart sheet)
+cart_pa[6],J19,2,LVCMOS33,,cart_pa6,cart_pa[0..7],cart,U204 B side (cart sheet)
+cart_pa[7],K19,2,LVCMOS33,,cart_pa7,cart_pa[0..7],cart,U204 B side (cart sheet)
+cart_sysclk,L20,3,LVCMOS33,,cart_sysclk,cart_sysclk,cart,U206 B; SNES master clock out (DCSC output)
+cart_phi2,M20,3,LVCMOS33,,cart_phi2,cart_phi2,cart,U205 B
+cart_refresh,L19,3,LVCMOS33,,cart_refresh,cart_refresh,cart,U205 B
+cart_rd_n,M19,3,LVCMOS33,,cart_rd_n,cart_rd_n,cart,U205 B
+cart_data[0],L16,3,LVCMOS33,PULLMODE=DOWN,cart_data0,cart_data[0..7],cart,U207 B; FPGA drives only while data_dir=1
+cart_data[1],L17,3,LVCMOS33,PULLMODE=DOWN,cart_data1,cart_data[0..7],cart,U207 B; FPGA drives only while data_dir=1
+cart_data[2],L18,3,LVCMOS33,PULLMODE=DOWN,cart_data2,cart_data[0..7],cart,U207 B; FPGA drives only while data_dir=1
+cart_data[3],M18,3,LVCMOS33,PULLMODE=DOWN,cart_data3,cart_data[0..7],cart,U207 B; FPGA drives only while data_dir=1
+cart_data[4],N16,3,LVCMOS33,PULLMODE=DOWN,cart_data4,cart_data[0..7],cart,U207 B; FPGA drives only while data_dir=1
+cart_data[5],M17,3,LVCMOS33,PULLMODE=DOWN,cart_data5,cart_data[0..7],cart,U207 B; FPGA drives only while data_dir=1
+cart_data[6],N18,3,LVCMOS33,PULLMODE=DOWN,cart_data6,cart_data[0..7],cart,U207 B; FPGA drives only while data_dir=1
+cart_data[7],P17,3,LVCMOS33,PULLMODE=DOWN,cart_data7,cart_data[0..7],cart,U207 B; FPGA drives only while data_dir=1
+cart_wr_n,N17,3,LVCMOS33,,cart_wr_n,cart_wr_n,cart,U205 B
+cart_prd_n,P16,3,LVCMOS33,,cart_prd_n,cart_prd_n,cart,U205 B
+cart_pwr_n,R16,3,LVCMOS33,,cart_pwr_n,cart_pwr_n,cart,U205 B
+cart_romsel_n,R17,3,LVCMOS33,,cart_romsel_n,cart_romsel_n,cart,U205 B
+cart_wramsel_n,T16,3,LVCMOS33,,cart_wramsel_n,cart_wramsel_n,cart,U205 B
+ctl_oe_n,N19,3,LVCMOS33,,ctl_oe_n,ctl_oe_n,cart,U210 input (0 = translators on)
+data_oe_n,N20,3,LVCMOS33,,data_oe_n,data_oe_n,cart,U212 input (0 = data octet on)
+data_dir,P19,3,LVCMOS33,,data_dir,data_dir,cart,U213 input (1 = FPGA drives)
+snes_cic_oe_n,P18,3,LVCMOS33,,cic_oe_n,cic_oe_n,cart,U211 input
+snes_cic_clk,P20,3,LVCMOS33,,cic_clk,cic_clk,cart,U206 B
+snes_cic_slave_reset,R20,3,LVCMOS33,,cic_slave_reset,cic_slave_reset,cart,U206 B
+cic_data0,T20,3,LVCMOS33,PULLMODE=DOWN,cic_data0,cic_data0,cart,U215 A (100k pull-down on cart sheet)
+cic_data0_dir,U20,3,LVCMOS33,,cic_data0_dir,cic_data0_dir,cart,U215 DIR (1 = drive cartridge)
+cic_data1,T19,3,LVCMOS33,PULLMODE=DOWN,cic_data1,cic_data1,cart,U216 A (100k pull-down on cart sheet)
+cic_data1_dir,R18,3,LVCMOS33,,cic_data1_dir,cic_data1_dir,cart,U216 DIR
+cart_reset_pull_n,U19,3,LVCMOS33,,cart_reset_pull_n,cart_reset_pull_n,cart,U214 input (1 = release /RESET); board-top edit
+cart_irq_n,T18,3,LVCMOS33,,cart_irq_n,cart_irq_n,cart,U209 1Y1
+cart_reset_n_sense,U18,3,LVCMOS33,,cart_reset_n_sense,cart_reset_n_sense,cart,U209 1Y2
+expand_sense,U17,3,LVCMOS33,,expand_sense,expand_sense,cart,U209 1Y3; new board-top input
+osc_25,G2,6,LVCMOS33,PULLMODE=NONE,osc_25,osc_25,clock,PCLKT6_1: primary clock pin; housekeeping + host PLL CLKI via primary clock
+si_clk0,H2,6,LVCMOS33,PULLMODE=NONE,si_clk0,si_clk0,clock,PCLKT6_0: DCSC CLK0 (NTSC)
+si_clk1,G3,7,LVCMOS33,PULLMODE=NONE,si_clk1,si_clk1,clock,PCLKT7_1: DCSC CLK1 (PAL)
+si_clk2,F2,7,LVCMOS33,PULLMODE=NONE,si_clk2,si_clk2,clock,PCLKT7_0: pixel clock + TMDS PLL CLKI via primary clock
+si_scl,E4,7,LVCMOS33,PULLMODE=UP,si_scl,si_scl,clock,open drain (board-top edit); bus pull-ups on clock sheet
+si_sda,F4,7,LVCMOS33,PULLMODE=UP,si_sda,si_sda,clock,open drain (board-top edit)
+adc_bck,J4,6,LVCMOS33,PULLMODE=DOWN,adc_bck,adc_bck,av,GR_PCLK6_0; ADC is I2S master (reserved port)
+adc_lrck,J3,6,LVCMOS33,PULLMODE=DOWN,adc_lrck,adc_lrck,av,GR_PCLK6_1 (reserved port)
+adc_dout,K3,6,LVCMOS33,PULLMODE=DOWN,adc_dout,adc_dout,av,reserved port
+hdmi_tmds[0],A16,1,LVCMOS33D,DRIVE=4,hdmi_d0_p,hdmi_d0_p,av,PT110A true; complement B16 = hdmi_d0_n
+hdmi_tmds[1],A14,1,LVCMOS33D,DRIVE=4,hdmi_d1_p,hdmi_d1_p,av,PT83A true; complement C14 = hdmi_d1_n
+hdmi_tmds[2],A12,1,LVCMOS33D,DRIVE=4,hdmi_d2_p,hdmi_d2_p,av,PT76A true; complement A13 = hdmi_d2_n
+hdmi_tmds_clock,A17,1,LVCMOS33D,DRIVE=4,hdmi_ck_p,hdmi_ck_p,av,PT116A true; complement B18 = hdmi_ck_n
+hdmi_hpd,E13,1,LVCMOS33,PULLMODE=DOWN,hdmi_hpd,hdmi_hpd,av,reserved port; A/V sheet must deliver <= 3.3 V
+hdmi_scl,D15,1,LVCMOS33,PULLMODE=UP,hdmi_scl,hdmi_scl,av,reserved port; 3.3 V side of the A/V sheet DDC shifter
+hdmi_sda,E15,1,LVCMOS33,PULLMODE=UP,hdmi_sda,hdmi_sda,av,reserved port; 3.3 V side of the A/V sheet DDC shifter
+host_3v3_ok,K2,6,LVCMOS33,PULLMODE=DOWN,host_3v3_ok,host_3v3_ok,power,floating = not ok
+fpga_rails_ok,J1,6,LVCMOS33,PULLMODE=DOWN,fpga_rails_ok,fpga_rails_ok,power,also holds PROGRAMN low via U407
+cart_5v_ok,H1,6,LVCMOS33,PULLMODE=DOWN,cart_5v_ok,cart_5v_ok,power,floating = not ok
+iface_rail_ok,K1,6,LVCMOS33,PULLMODE=DOWN,iface_rail_ok,iface_rail_ok,power,floating = not ok
+efuse_fault_n,K4,6,LVCMOS33,PULLMODE=DOWN,efuse_fault_n,efuse_fault_n,power,floating = fault
+overtemp,K5,6,LVCMOS33,PULLMODE=UP,overtemp,overtemp,power,floating = overtemp; VREF1_6 ball used as I/O
+board_reset_n,L4,6,LVCMOS33,PULLMODE=DOWN,board_reset_n,board_reset_n,power,floating = reset
+cart_5v_enable,L5,6,LVCMOS33,,cart_5v_enable,cart_5v_enable,power,power sheet keeps its own default-off pull-down
+iface_rail_enable,M5,6,LVCMOS33,,iface_rail_enable,iface_rail_enable,power,power sheet keeps its own default-off pull-down
+flash_cs_n,R2,8,LVCMOS33,,flash_cs_n,,flash,CSSPIN (bank 8); GPIO after configuration (MASTER_SPI_PORT=DISABLE default)
+flash_dq[0],W2,8,LVCMOS33,,flash_dq0,,flash,D0/MOSI -> W25Q128JV DI/IO0 (pin 5)
+flash_dq[1],V2,8,LVCMOS33,,flash_dq1,,flash,D1/MISO -> DO/IO1 (pin 2)
+flash_dq[2],Y2,8,LVCMOS33,,flash_dq2,,flash,"D2 -> IO2 (pin 3), 10k pull-up"
+flash_dq[3],W1,8,LVCMOS33,,flash_dq3,,flash,"D3 -> IO3 (pin 7), 10k pull-up"
+led_status,B1,7,LVCMOS33,DRIVE=8,led_status,,misc,D401 via R (active high)
+(LVCMOS33D complement),B16,1,LVCMOS33D,,hdmi_d0_n,hdmi_d0_n,av,complement pad of the pair above; driven by nextpnr from the true pad
+(LVCMOS33D complement),C14,1,LVCMOS33D,,hdmi_d1_n,hdmi_d1_n,av,complement pad of the pair above; driven by nextpnr from the true pad
+(LVCMOS33D complement),A13,1,LVCMOS33D,,hdmi_d2_n,hdmi_d2_n,av,complement pad of the pair above; driven by nextpnr from the true pad
+(LVCMOS33D complement),B18,1,LVCMOS33D,,hdmi_ck_n,hdmi_ck_n,av,complement pad of the pair above; driven by nextpnr from the true pad
+(dedicated),U3,8,-,,fpga_mclk,,config,sysCONFIG/JTAG dedicated ball
+(dedicated),U4,8,-,,GND,,config,sysCONFIG/JTAG dedicated ball
+(dedicated),T4,8,-,,fpga_cfg1,,config,sysCONFIG/JTAG dedicated ball
+(dedicated),R4,8,-,,GND,,config,sysCONFIG/JTAG dedicated ball
+(dedicated),W3,8,-,,fpga_programn,,config,sysCONFIG/JTAG dedicated ball
+(dedicated),V3,8,-,,fpga_initn,,config,sysCONFIG/JTAG dedicated ball
+(dedicated),Y3,8,-,,fpga_done,,config,sysCONFIG/JTAG dedicated ball
+(dedicated),T5,JTAG (VCCIO8),-,,jtag_tck,jtag_tck,config,sysCONFIG/JTAG dedicated ball
+(dedicated),R5,JTAG (VCCIO8),-,,jtag_tdi,jtag_tdi,config,sysCONFIG/JTAG dedicated ball
+(dedicated),V4,JTAG (VCCIO8),-,,jtag_tdo,jtag_tdo,config,sysCONFIG/JTAG dedicated ball
+(dedicated),U5,JTAG (VCCIO8),-,,jtag_tms,jtag_tms,config,sysCONFIG/JTAG dedicated ball

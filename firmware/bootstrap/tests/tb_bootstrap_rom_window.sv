@@ -28,6 +28,7 @@ module tb_bootstrap_rom_window #(
         .rom_we(rom_we),.rom_waddr(rom_waddr),.rom_wdata(rom_wdata),
         .joy1_buttons(j1),.joy2_buttons(j2),.joy1_stick_x(sx),.joy1_stick_y(sy),
         .run_request(run),.mailbox_seq(seq),.fault_flags(16'h0000),.status_flags(16'h0011),.build_id(16'h0102),
+        .region_info(16'h7002),.region_source(16'h0016),
         .n64_cic_clk(1'b1),.n64_cic_dq(),.n64_si_clk(1'b0),.cic_region(1'b0),.cic_invalid_region(),.cic_step(),
         .host_reset_event(rst_ev),.host_nmi_event(nmi_ev));
 
@@ -119,6 +120,11 @@ module tb_bootstrap_rom_window #(
         if (v !== 32'h534E_0102) begin errors=errors+1; $display("  FAIL MAGIC/VERSION pair %h", v); end
         io_read32(32'h1FFF_0004, v);
         if (v[31:16] !== 16'h0011 || v[15:0] !== 16'h0000) begin errors=errors+1; $display("  FAIL STATUS/SEQ pair %h", v); end
+        // Region telemetry pairs, as mailbox_read() issues them: {COMMIT reads 0, REGION_INFO}, {REGION_SOURCE, 0x1E}.
+        io_read32(32'h1FFF_0018, v);
+        if (v !== 32'h0000_7002) begin errors=errors+1; $display("  FAIL COMMIT/REGION_INFO pair %h", v); end
+        io_read32(32'h1FFF_001C, v);
+        if (v !== 32'h0016_0000) begin errors=errors+1; $display("  FAIL REGION_SOURCE pair %h", v); end
         // Frame 1: P1 A+Start (SNES B|Start = 0x0009), P2 idle, stick (x=-40,y=40), run_request.
         io_write32(32'h1FFF_0010, {16'h0009, 16'h0000});
         io_write32(32'h1FFF_0014, {8'd40, 8'hD8, 16'h0001});
@@ -148,7 +154,7 @@ module tb_bootstrap_rom_window #(
             $display("FAIL: bootstrap ROM window, %0d error(s)%s", errors, $test$plusargs("corrupt_load") ? " (corrupt_load injected)" : "");
             $fatal(1, "bootstrap ROM window check failed");
         end
-        $display("PASS: bootstrap image (%0d words, last non-zero word %0d) loaded via rom_we, %0d words read back over PI, mailbox frame traffic (32-bit pairs, COMMIT once per frame, run/power-down) correct (%0d clocks)",
+        $display("PASS: bootstrap image (%0d words, last non-zero word %0d) loaded via rom_we, %0d words read back over PI, mailbox frame traffic (32-bit pairs, REGION_INFO/REGION_SOURCE reads, COMMIT once per frame, run/power-down) correct (%0d clocks)",
                  DEPTH, last, words_checked, cycles);
         $finish;
     end

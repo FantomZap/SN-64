@@ -35,7 +35,11 @@ New SN64 logic:
 | `0x12` | JOY2_BUTTONS | r/w | SNES button image for controller 2 |
 | `0x14` | JOY1_STICK | r/w | `{y, x}` analog stick, retained for the deferred virtual mouse |
 | `0x16` | CONTROL | r/w | bit 0 `run_request` (cartridge power and run); bit 1 soft reset ("reset SNES": holds /RESET, keeps cartridge power); bits 3:2 region mode (0 auto, 1 NTSC, 2 PAL; applied at the next cartridge power-up, never live) |
-| `0x18` | COMMIT | w | any write increments SEQ after a complete controller update |
+| `0x18` | COMMIT | w | any write increments SEQ after a complete controller update; reads 0 |
+| `0x1A` | REGION_INFO | r | ROM-header probe result ([header-region-probe.md](header-region-probe.md)): bits 7:0 country byte (`$FFD9`), 11:8 reject `{unstable, checksum, map, country}`, 12 done, 13 valid, 14 PAL, 15 aborted. Snapshot taken on the clk_25 edge that starts the SNES clock, kept until the next cartridge start; live probe state before the first decision. Writes ignored |
+| `0x1C` | REGION_SOURCE | r | bits 1:0 decision source (0 forced by CONTROL, 1 key CIC, 2 ROM header, 3 NTSC default, i.e. no passing key and no valid header, or the region timeout); 2 decided (the fields describe the last cartridge start); 3 region timeout had expired; 4 decided region is PAL; 15:5 zero. Writes ignored |
+
+`REGION_INFO` and `REGION_SOURCE` are produced in the clk_25 domain by `sn64_top` and cross to the host clock as one 32-bit `sn64_cdc_word`, so both halves always come from the same snapshot. The bootstrap reads them as the 32-bit pairs `0x18 = {COMMIT (reads 0), REGION_INFO}` and `0x1C = {REGION_SOURCE, 0x1E reserved}`. Offsets `0x00`-`0x18` are unchanged.
 
 `run_request` is cleared by hardware whenever the host asserts reset: the bootstrap must re-request cartridge power after every console reset, in line with the default-off principle in the [power architecture](power-architecture.md). `run_request` is an input to the hardware permission chain, not the permission itself; the hardware veto still applies.
 
@@ -46,9 +50,10 @@ New SN64 logic:
 1. burst ROM reads from `0x1000_0000` return the loaded words, and an offset read returns the right word;
 2. mailbox reads return MAGIC, VERSION and STATUS;
 3. mailbox writes reach `joy1_buttons`, `joy2_buttons`, the stick, `run_request` and increment SEQ, and read back;
-4. host reset clears `run_request`.
+4. host reset clears `run_request`;
+5. (2026-09-29) `REGION_INFO`/`REGION_SOURCE` read back at `0x1A`/`0x1C` (also as the bootstrap's pairs at `0x18` and `0x1C`), follow their inputs, ignore writes, and the COMMIT pair write `{0x18, 0x1A}` increments SEQ exactly once.
 
-Result: **PASS, 4,595 master clocks.** Two host-model errors were found and fixed while writing the bench (ALE states held too briefly for the controller's three-stage synchroniser, and ALE_H/ALE_L dropped in the wrong order); both were in the test, not the design, and are recorded here because the same mistakes would matter in a bootstrap or fixture.
+Result: **PASS, 4,953 master clocks** (4,595 before the REGION registers were added). Fault build `+define+SN64_FAULT_REGION_SWAP` (the two words swapped in the decode) **fails as required**: `REGION_INFO/REGION_SOURCE read wrong: 0000 0016 7e02 0000`. Both are part of `evaluate.py --mode sim`. The whole path (header probe and key CIC in clk_25 → `sn64_cdc_word` → mailbox → N64 read) is checked by `tb_system` in four runs; see [system-integration.md](system-integration.md). Two host-model errors were found and fixed while writing the bench (ALE states held too briefly for the controller's three-stage synchroniser, and ALE_H/ALE_L dropped in the wrong order); both were in the test, not the design, and are recorded here because the same mistakes would matter in a bootstrap or fixture.
 
 Limits: the host model's timing is representative, not measured N64 or M64 timing. Two-state simulation cannot show electrical contention on AD; the bench uses the controller's output enable. No CIC, SI/joybus, /INT or DMA-boundary behaviour is exercised.
 
@@ -61,5 +66,5 @@ Limits: the host model's timing is representative, not measured N64 or M64 timin
 1. **CIC lockout.** SummerCart64's CIC runs on a soft RISC-V core with a firmware image; adopting it means vendoring the core (`serv`) and building the image. Without a valid CIC response an original N64 will not boot the cartridge. This is the next endpoint task.
 2. **SI/joybus.** Not needed while the bootstrap reads controllers through the console's own PIF and forwards them through the mailbox; revisit only if EEPROM emulation or direct joybus access becomes necessary.
 3. **/INT** to the host and the exact IRQ electrical mode (see the [host interface notes](n64-interface-notes.md)).
-4. **Bootstrap program:** first version implemented, see [n64-bootstrap.md](n64-bootstrap.md). The N64 CPU accesses these registers only as 32-bit pairs (0x00, 0x04, 0x08, 0x10, 0x14, 0x18); a write to 0x18 also writes 0x1A, which is ignored, so SEQ increments once per COMMIT. The image needs a 64 K-word window (`ROM_ADDR_BITS = 16`); where that ROM lives (block RAM, configuration flash or external RAM) is an open decision in the [integration notes](system-integration.md).
+4. **Bootstrap program:** first version implemented, see [n64-bootstrap.md](n64-bootstrap.md). The N64 CPU accesses these registers only as 32-bit pairs (0x00, 0x04, 0x08, 0x10, 0x14, 0x18, 0x1C); a write to 0x18 also writes 0x1A (REGION_INFO, read-only), which is ignored, so SEQ increments once per COMMIT. The menu shows the region and its source on the main screen and the header probe result on the status screen. The image needs a 64 K-word window (`ROM_ADDR_BITS = 16`); where that ROM lives (block RAM, configuration flash or external RAM) is an open decision in the [integration notes](system-integration.md).
 5. Board-level: 3.3 V I/O bank allocation, host-first/adapter-first power sequencing, and measured PI timing on both consoles.

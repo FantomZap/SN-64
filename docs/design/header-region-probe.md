@@ -150,11 +150,35 @@ This trial does not replace running `evaluate.py --mode sim` after the real merg
 
 1. **Hardware**: nothing measured. Check real mask-ROM, MAD-1 decoder and translator timing, and the floating-bus behaviour with no cartridge, on the prototype.
 2. **Cartridges that do not answer in reset or without a clock**: the probe runs with `/RESET` held and no SYSTEM_CLK. Coprocessor boards whose ROM is reached through the coprocessor (for example SA-1), and flashcarts that are still booting (FXPAK Pro / Super EverDrive load their FPGA from SD), may return garbage or their menu header. Validation fails closed (NTSC), or reports the flashcart menu's own region, as the clock plan already expects. A late retry (re-probe shortly before the region timeout) is not implemented.
-3. **Telemetry**: STATUS is full (16 bits). `hdr_valid`, `hdr_country`, `hdr_reject` and `hdr_aborted` need a new mailbox word before the menu can show why a region was chosen.
+3. **Telemetry: done 2026-09-29**, see "Telemetry" below.
 4. **`tb_system`** must accept probe ownership in its "socket enabled without permission" invariant (edit listed in the integration notes).
 5. **Constraints**: the mux mixes clk_25-domain and clk_snes-domain signals onto the same pads. They are never active together, so the cross-domain paths into the mux are false paths for timing. `SYSTEM_CLK` gains one LUT level through the mux (review with the board wrapper's clock-output choice).
 6. **Glitches on `cart_5v_ok`/`iface_rail_ok`** drop the probe permit combinationally, which aborts the probe (invalid, so NTSC). The sequencer faults on a real rail loss in IFACE anyway.
 7. The 256-flop header store could shrink to the six used bytes plus a signature for the stability check if LUT/FF budget becomes tight.
+
+## Telemetry
+
+Added 2026-09-29. STATUS is full, so the probe result and the reason for the region choice are in two new mailbox words, [n64-endpoint-implementation.md](n64-endpoint-implementation.md):
+
+| Word | Bits |
+|---|---|
+| `0x1A` REGION_INFO | 7:0 `header_country`, 11:8 `reject` `{unstable, checksum, map, country}`, 12 `done`, 13 `header_valid`, 14 `header_pal`, 15 `aborted` |
+| `0x1C` REGION_SOURCE | 1:0 source: 0 forced (CONTROL region mode), 1 passing key CIC, 2 valid ROM header, 3 NTSC default (no passing key and no valid header, or the timeout); 2 decided; 3 region timeout had expired; 4 decided region PAL |
+
+- **Where it is computed.** In `sn64_top` (clk_25). The source follows the same priority as the decision: forced > key > header > default.
+- **Snapshot.** Both words are captured on the clk_25 edge that sets `snes_clk_run`. That is the edge on which `sn64_clock_init` latches `region_pal` from the same inputs, so the telemetry describes the region actually used.
+- **Before and after.** The snapshot is kept until the next cartridge start. Before the first decision REGION_INFO shows the live probe outputs and `decided` is 0.
+- **Crossing.** One 32-bit `sn64_cdc_word` to the host clock.
+- **Menu.** The bootstrap shows "Region: PAL via key CIC" (or ROM header, menu (forced), default) on the main screen. The status screen adds "Header: ok/bad, ctry XX, rej ....".
+
+| `tb_system` run | REGION_INFO | REGION_SOURCE | STATUS |
+|---|---|---|---|
+| no header, no key | `1600` (done, invalid, reject `0110`, country `00`) | `0007` (NTSC default, decided) | `545F` |
+| `+pal_header` | `7002` (valid EU) | `0016` (header, PAL) | `54DF` |
+| `+pal_key +ntsc_header` | `3001` (valid USA) | `0015` (**key**, PAL) | `34DF` |
+| `+ntsc_key +pal_header` | `7002` (valid EU) | `0005` (**key**, NTSC) | `345F` |
+
+The endpoint bench has a fault build with the two words swapped, and it fails as required.
 
 ## Reuse
 

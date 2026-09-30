@@ -52,6 +52,8 @@ module sn64_n64_endpoint #(
     input  wire [15:0] status_flags,      // STATUS layout: docs/design/n64-endpoint-implementation.md
     input  wire [15:0] fault_flags,       // {fault_code, reserved}
     input  wire [15:0] build_id,
+    input  wire [15:0] region_info,       // REGION_INFO: ROM-header probe result (layout in the register map below)
+    input  wire [15:0] region_source,     // REGION_SOURCE: how the region was decided
 
     // CIC lockout (vendored SummerCart64 implementation on a SERV soft core)
     input  wire        n64_cic_clk,
@@ -153,7 +155,14 @@ module sn64_n64_endpoint #(
     //   0x10 JOY1_BUTTONS   w                      0x12 JOY2_BUTTONS  w
     //   0x14 JOY1_STICK     w  {y,x}               0x16 CONTROL       w  bit0 run_request, bit1 soft reset,
     //                                                                        bits3:2 region mode (0 auto, 1 NTSC, 2 PAL)
-    //   0x18 COMMIT         w  any write increments SEQ (bootstrap writes after a full update)
+    //   0x18 COMMIT         w  any write increments SEQ (bootstrap writes after a full update); reads 0
+    //   0x1A REGION_INFO    r  ROM-header probe snapshot: [7:0] country byte ($FFD9), [11:8] reject
+    //                          {unstable, checksum, map, country}, [12] done, [13] valid, [14] PAL, [15] aborted
+    //   0x1C REGION_SOURCE  r  [1:0] source (0 forced by CONTROL, 1 key CIC, 2 ROM header, 3 NTSC default
+    //                          or timeout), [2] decided (fields describe the last cartridge start),
+    //                          [3] region timeout expired, [4] decided region PAL, [15:5] 0
+    //   Writes to 0x1A/0x1C are ignored (a 32-bit write at 0x18 also writes 0x1A).
+    //   Both words are produced in the clk_25 domain and cross with sn64_cdc_word (sn64_top).
     // ---------------------------------------------------------------------
     localparam [15:0] MAGIC = 16'h534E;
     wire [16:0] ra = reg_bus.address;
@@ -189,6 +198,13 @@ module sn64_n64_endpoint #(
             8'h12: cfg_rdata = joy2_buttons;
             8'h14: cfg_rdata = {joy1_stick_y, joy1_stick_x};
             8'h16: cfg_rdata = {12'd0, region_mode, soft_reset, run_request};
+`ifdef SN64_FAULT_REGION_SWAP
+            8'h1A: cfg_rdata = region_source;   // fault injection: words swapped (tb_n64_endpoint must fail)
+            8'h1C: cfg_rdata = region_info;
+`else
+            8'h1A: cfg_rdata = region_info;
+            8'h1C: cfg_rdata = region_source;
+`endif
             default: cfg_rdata = 16'h0000;
         endcase
     end

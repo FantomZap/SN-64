@@ -74,7 +74,7 @@ The native [USB child sheet](../../hardware/sn64/usb-programmer.kicad_sch) now i
 
 | References | Implemented purpose and remaining qualification |
 |---|---|
-| J101, R101/R102 | JAE DX07S016JA3R1500, two separate 5.1 kΩ 1% CC pulldowns; side placement and shell cutout remain open |
+| J101, R101/R102 | JAE DX07S016JA3R1500; R101/R102 5.1 kΩ 1% are now DNP because the TUSB320 (U301, power sheet) presents Rd; side placement and shell cutout remain open. JTAG reaches ECP5 balls T5/R5/V4/U5 and TARGET_VREF comes from FPGA_3V3 through R414 (FPGA sheet). |
 | U101/U102 | USBLC6-2SC6 arrays on D+/D− and CC1/CC2 respectively; paired pins need flow-through placement/routing and short ground paths |
 | U103, C101–C103 | AP2112K-3.3TRG1 regulator for programmer-only USB_3V3; 4.7 µF + 1 µF VBUS input and 4.7 µF output; exact capacitor MPNs/derating and power behavior pending |
 | U104, L101/L102, R103/R104, C104–C111 | FT232HL revision C, filtered analog supplies, REF/reset and local bypassing; not the SummerCart64 FT1248 interface |

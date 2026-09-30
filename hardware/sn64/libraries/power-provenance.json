@@ -1,0 +1,370 @@
+{
+  "schema_version": 1,
+  "recorded_date": "2026-09-29",
+  "scope": "Power child-sheet symbols; schematic draft only, not a manufacturing or functional-validation release.",
+  "tool_version": "KiCad 10.0.6",
+  "drawn_symbols": {
+    "TPS259470LRPW": {
+      "library": "libraries/SN64_POWER.kicad_sym",
+      "source": {
+        "url": "https://www.ti.com/lit/ds/symlink/tps25947.pdf",
+        "revision": "SLVSFC9C, revised May 2026",
+        "sha256_of_downloaded_copy": "8f96de389903091650d4f462dcfad3210071c3ae7093623a7978f34baf8a65b4"
+      },
+      "source_section": "Figure 5-1 RPW 10-pin QFN and Table 5-1",
+      "pins": {
+        "1": [
+          "EN/UVLO",
+          "input"
+        ],
+        "2": [
+          "OVLO",
+          "input"
+        ],
+        "3": [
+          "AUXOFF",
+          "open_collector"
+        ],
+        "4": [
+          "~{FLT}",
+          "open_collector"
+        ],
+        "5": [
+          "IN",
+          "power_in"
+        ],
+        "6": [
+          "OUT",
+          "passive"
+        ],
+        "7": [
+          "DVDT",
+          "passive"
+        ],
+        "8": [
+          "GND",
+          "power_in"
+        ],
+        "9": [
+          "ILM",
+          "passive"
+        ],
+        "10": [
+          "ITIMER",
+          "passive"
+        ]
+      }
+    },
+    "TPS63070RNM": {
+      "library": "libraries/SN64_POWER.kicad_sym",
+      "source": {
+        "url": "https://www.ti.com/lit/ds/symlink/tps63070.pdf",
+        "revision": "SLVSC58B, revised March 2019",
+        "sha256_of_downloaded_copy": "a88ef66f3493156ff6e7da0849de0e0e1068647f2553d08c1844d4a90c5c65ef"
+      },
+      "source_section": "Pin Functions table (pdftotext -raw re-read)",
+      "pins": {
+        "1": [
+          "PS/SYNC",
+          "input"
+        ],
+        "2": [
+          "PG",
+          "open_collector"
+        ],
+        "3": [
+          "VAUX",
+          "passive"
+        ],
+        "4": [
+          "GND",
+          "power_in"
+        ],
+        "5": [
+          "FB",
+          "input"
+        ],
+        "6": [
+          "FB2",
+          "passive"
+        ],
+        "7": [
+          "VOUT",
+          "power_out"
+        ],
+        "8": [
+          "VOUT",
+          "passive"
+        ],
+        "9": [
+          "L2",
+          "passive"
+        ],
+        "10": [
+          "PGND",
+          "power_in"
+        ],
+        "11": [
+          "L1",
+          "passive"
+        ],
+        "12": [
+          "VIN",
+          "power_in"
+        ],
+        "13": [
+          "VIN",
+          "power_in"
+        ],
+        "14": [
+          "EN",
+          "input"
+        ],
+        "15": [
+          "VSEL",
+          "input"
+        ]
+      }
+    },
+    "TPS3700DDC": {
+      "library": "libraries/SN64_POWER.kicad_sym",
+      "source": {
+        "url": "https://www.ti.com/lit/ds/symlink/tps3700.pdf",
+        "revision": "SBVS187G, revised February 2019",
+        "sha256_of_downloaded_copy": "3bb7daed20b154bf22ded78e23269c6437eb587400b89bce0f543813df94ebf0"
+      },
+      "source_section": "DDC (SOT) top view and Pin Functions",
+      "pins": {
+        "1": [
+          "OUTA",
+          "open_collector"
+        ],
+        "2": [
+          "GND",
+          "power_in"
+        ],
+        "3": [
+          "INA+",
+          "input"
+        ],
+        "4": [
+          "INB-",
+          "input"
+        ],
+        "5": [
+          "VDD",
+          "power_in"
+        ],
+        "6": [
+          "OUTB",
+          "open_collector"
+        ]
+      }
+    },
+    "TPS22918DBV": {
+      "library": "libraries/SN64_POWER.kicad_sym",
+      "source": {
+        "url": "https://www.ti.com/lit/ds/symlink/tps22918.pdf",
+        "revision": "SLVSD76C, revised July 2017",
+        "sha256_of_downloaded_copy": "1b28eb58003d28b18bf919a15734056f296a499bebee2bd493a1e4358c4dfb1c"
+      },
+      "source_section": "DBV 6-pin SOT-23 top view and Pin Functions",
+      "pins": {
+        "1": [
+          "VIN",
+          "power_in"
+        ],
+        "2": [
+          "GND",
+          "power_in"
+        ],
+        "3": [
+          "ON",
+          "input"
+        ],
+        "4": [
+          "CT",
+          "passive"
+        ],
+        "5": [
+          "QOD",
+          "passive"
+        ],
+        "6": [
+          "VOUT",
+          "passive"
+        ]
+      }
+    },
+    "TMP302DRL": {
+      "library": "libraries/SN64_POWER.kicad_sym",
+      "source": {
+        "url": "https://www.ti.com/lit/ds/symlink/tmp302.pdf",
+        "revision": "SBOS488E, revised December 2018",
+        "sha256_of_downloaded_copy": "5413acb9f08d49360a8f2f60474895ea84890e4a9bb20e06cbc03af96bfe275b"
+      },
+      "source_section": "DRL 6-pin SOT top view and Pin Functions",
+      "pins": {
+        "1": [
+          "TRIPSET0",
+          "input"
+        ],
+        "2": [
+          "GND",
+          "power_in"
+        ],
+        "3": [
+          "~{OUT}",
+          "open_collector"
+        ],
+        "4": [
+          "HYSTSET",
+          "input"
+        ],
+        "5": [
+          "VS",
+          "power_in"
+        ],
+        "6": [
+          "TRIPSET1",
+          "input"
+        ]
+      }
+    }
+  },
+  "pin_type_note": "eFuse OUT and load-switch VOUT drawn passive (switch outputs; two eFuses share SYS_VIN). TPS63070 pin 8 drawn passive so the stacked VOUT pair has one power_out.",
+  "installed_kicad_symbols_used_unmodified": [
+    "Connector:TestPoint",
+    "Device:C",
+    "Device:L",
+    "Device:R",
+    "Interface_USB:TUSB320I",
+    "Power_Supervisor:TPS3808DBV",
+    "Regulator_Switching:TLV62569DBV",
+    "Transistor_FET:BSS138",
+    "power:PWR_FLAG"
+  ],
+  "installed_kicad_footprints_referenced": [
+    "Capacitor_SMD:C_0603_1608Metric",
+    "Capacitor_SMD:C_0805_2012Metric",
+    "Capacitor_SMD:C_1206_3216Metric",
+    "Package_DFN_QFN:Texas_X2QFN-12_1.6x1.6mm_P0.4mm",
+    "Package_TO_SOT_SMD:SOT-23",
+    "Package_TO_SOT_SMD:SOT-23-5",
+    "Package_TO_SOT_SMD:SOT-23-6",
+    "Package_TO_SOT_SMD:SOT-563",
+    "Resistor_SMD:R_0603_1608Metric",
+    "Resistor_SMD:R_0805_2012Metric",
+    "TestPoint:TestPoint_Pad_D1.0mm"
+  ],
+  "footprints_pending": {
+    "U302/U303/U309 TPS259470LRPWR": "TI RPW0010A (VQFN-HR 2x2)",
+    "U304 TPS63070RNMR": "TI RNM0015A (VQFN-HR 2.5x3)",
+    "L301 PNR4020-1R5M, L302-L304 FNR4030S2R2MT": "vendor land patterns"
+  },
+  "datasheets": {
+    "tps25947": {
+      "url": "https://www.ti.com/lit/ds/symlink/tps25947.pdf",
+      "revision": "SLVSFC9C, revised May 2026",
+      "sha256_of_downloaded_copy": "8f96de389903091650d4f462dcfad3210071c3ae7093623a7978f34baf8a65b4"
+    },
+    "tps63070": {
+      "url": "https://www.ti.com/lit/ds/symlink/tps63070.pdf",
+      "revision": "SLVSC58B, revised March 2019",
+      "sha256_of_downloaded_copy": "a88ef66f3493156ff6e7da0849de0e0e1068647f2553d08c1844d4a90c5c65ef"
+    },
+    "tps3700": {
+      "url": "https://www.ti.com/lit/ds/symlink/tps3700.pdf",
+      "revision": "SBVS187G, revised February 2019",
+      "sha256_of_downloaded_copy": "3bb7daed20b154bf22ded78e23269c6437eb587400b89bce0f543813df94ebf0"
+    },
+    "tps22918": {
+      "url": "https://www.ti.com/lit/ds/symlink/tps22918.pdf",
+      "revision": "SLVSD76C, revised July 2017",
+      "sha256_of_downloaded_copy": "1b28eb58003d28b18bf919a15734056f296a499bebee2bd493a1e4358c4dfb1c"
+    },
+    "tmp302": {
+      "url": "https://www.ti.com/lit/ds/symlink/tmp302.pdf",
+      "revision": "SBOS488E, revised December 2018",
+      "sha256_of_downloaded_copy": "5413acb9f08d49360a8f2f60474895ea84890e4a9bb20e06cbc03af96bfe275b"
+    },
+    "tusb320": {
+      "url": "https://www.ti.com/lit/ds/symlink/tusb320.pdf",
+      "revision": "SLLSEN9F, revised March 2022",
+      "sha256_of_downloaded_copy": "1306e448c3f3b169f3b90854710033b9a1aede1d04ba35088f3d2e3ed260d2c4"
+    },
+    "tlv62569": {
+      "url": "https://www.ti.com/lit/ds/symlink/tlv62569.pdf",
+      "revision": "SLVSDG1C, revised October 2017",
+      "sha256_of_downloaded_copy": "1ba6f55dfe678d06d563acd6632f1f950a497d812270806021097b55cd81d3c4"
+    },
+    "tps3808": {
+      "url": "https://www.ti.com/lit/ds/symlink/tps3808.pdf",
+      "revision": "SBVS050N, revised August 2026",
+      "sha256_of_downloaded_copy": "74d889c0f68af88032f1633c26381817cc03e10d9fd3b4c177a044ad3ed86eed"
+    },
+    "ecp5_ds": {
+      "url": "https://www.latticesemi.com/view_document?document_id=50461",
+      "revision": "FPGA-DS-02012-3.4",
+      "sha256_of_downloaded_copy": "26570f8bb2b800123120829cacd75d818d7a985d573797610521b5bda2e293c3"
+    },
+    "bss138": {
+      "url": "https://assets.nexperia.com/documents/data-sheet/BSS138BK.pdf",
+      "revision": "BSS138BK Rev. 1, 4 August 2011",
+      "sha256_of_downloaded_copy": "7ee99c2ff94d07a981fa018ea9c1b86302d179fbff5a466d29e21bebd6eba617"
+    },
+    "ulx3s_power": {
+      "url": "https://github.com/emard/ulx3s/blob/6a92cec6b177191c5b0f80e260013a1f8ec147dd/power.sch",
+      "revision": "ULX3S rev 1.0.8 power sheet at commit 6a92cec (MIT)",
+      "sha256_of_downloaded_copy": "0a7ea4d8aa82dd30be2c21654e6e38d335413440c477129f8a6e45eb70c23b43"
+    }
+  },
+  "lcsc_parts_stock_2026_09_29": {
+    "TPS259470LRPWR": [
+      "C3662793",
+      2797
+    ],
+    "TUSB320IRWBR": [
+      "C80170",
+      1628
+    ],
+    "TPS3700DDCR": [
+      "C33002",
+      8920
+    ],
+    "TPS63070RNMR": [
+      "C109322",
+      25100
+    ],
+    "TLV62569DBVR": [
+      "C141836",
+      246272
+    ],
+    "TPS22918DBVR": [
+      "C131941",
+      18885
+    ],
+    "TPS3808G01DBVR": [
+      "C19653",
+      18100
+    ],
+    "TMP302ADRLR": [
+      "C2877557",
+      39857
+    ],
+    "BSS138BK,215": [
+      "C282529",
+      52253
+    ],
+    "PNR4020-1R5M": [
+      "C54620133",
+      7449
+    ],
+    "FNR4030S2R2MT": [
+      "C167869",
+      67195
+    ]
+  },
+  "lcsc_source": "pcbparts MCP jlc_get_part/jlc_search database query, 2026-09-29; re-check before ordering.",
+  "licenses": "KiCad library content: CC-BY-SA-4.0 with the KiCad library exception. Drawn symbols: SN64 project content; pin data are facts from the cited TI datasheets. Buck topology follows ULX3S (MIT); no ULX3S files are copied."
+}

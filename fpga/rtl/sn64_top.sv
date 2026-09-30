@@ -3,7 +3,8 @@
 //
 // Clock domains (see docs/design/clock-plan.md):
 //   clk_25   25 MHz oscillator: power sequencer, Si5351 start-up, SNES CIC lock
-//   clk_host 62.5 MHz (PLL from clk_25), always on: N64 endpoint and N64 CIC
+//   clk_host 62.5 MHz (PLL from clk_25), always on: N64 endpoint and N64 CIC,
+//            and the I2S receiver that oversamples the cartridge-audio ADC
 //   clk_snes Si5351 output (NTSC or PAL master), started once at power-on:
 //            SNES core, cartridge bridge, controller emulation
 // The board wrapper owns the PLL, the SNES clock select/gate (driven by
@@ -29,7 +30,7 @@ module sn64_top #(
     parameter        CIC_LOCK_T_PWRUP = 49605      // lock start-up wait (instruction cycles)
 ) (
     input  wire        clk_25, clk_host, clk_snes,
-    input  wire        clk_pixel, clk_pixel_x5,        // HDMI: Si5351 CLK2 (27.0198 MHz, locked to the NTSC master) and ECP5 PLL x5
+    input  wire        clk_pixel, clk_pixel_x5,        // HDMI: Si5351 CLK2 (NTSC master x 39/31 = 27.0198 MHz or PAL master x 108/85 = 27.0399 MHz) and ECP5 PLL x5
     input  wire        hdmi_clock_ok,                  // TMDS PLL locked (it locks only after the Si5351 is programmed)
     input  wire        por_n,                      // board power-on reset / FPGA configured
 
@@ -77,7 +78,10 @@ module sn64_top #(
     output wire        snes_cic_data1_o, snes_cic_data1_oe,
     input  wire        snes_cic_data1_i,
 
-    // ---------------- HDMI output (720x480p, 32 kHz audio) ----------------
+    // ---------------- Cartridge-audio ADC (I2S master, asynchronous) ----------------
+    input  wire        adc_bck, adc_lrck, adc_dout,   // 64 fs bit clock, word select, data (docs/design/cart-audio-implementation.md)
+
+    // ---------------- HDMI output (720x480p or 720x576p50, 32 kHz audio) ----------------
     output wire [2:0]  hdmi_tmds,                   // serial TMDS data lanes (single-ended view; board adds differential I/O)
     output wire        hdmi_tmds_clock,
     output wire        av_locked,
@@ -97,7 +101,7 @@ module sn64_top #(
     // =====================================================================
     wire [15:0] joy1_h, joy2_h, seq_h; wire [7:0] stick_x_h, stick_y_h;
     wire run_req_h, soft_reset_h; wire [1:0] region_mode_h;
-    wire [15:0] status_h, fault_h;
+    wire [15:0] status_h, fault_h, region_info_h, region_source_h;
     wire n64_cic_invalid_region; wire [3:0] n64_cic_step;
     sn64_n64_endpoint #(.ROM_ADDR_BITS(ROM_ADDR_BITS), .ROM_FROM_FLASH(ROM_FROM_FLASH),
                         .FLASH_OFFSET(FLASH_OFFSET), .FLASH_USE_USRMCLK(FLASH_USE_USRMCLK)) endpoint (
@@ -110,6 +114,7 @@ module sn64_top #(
         .joy1_buttons(joy1_h), .joy2_buttons(joy2_h), .joy1_stick_x(stick_x_h), .joy1_stick_y(stick_y_h),
         .run_request(run_req_h), .soft_reset(soft_reset_h), .region_mode(region_mode_h), .mailbox_seq(seq_h),
         .status_flags(status_h), .fault_flags(fault_h), .build_id(BUILD_ID),
+        .region_info(region_info_h), .region_source(region_source_h),
         .n64_cic_clk(n64_cic_clk), .n64_cic_dq(n64_cic_dq), .n64_si_clk(n64_si_clk), .cic_region(region_pal),
         .cic_invalid_region(n64_cic_invalid_region), .cic_step(n64_cic_step),
         .host_reset_event(), .host_nmi_event());
@@ -130,6 +135,7 @@ module sn64_top #(
     // Si5351 start-up and region latch (clk_25)
     // =====================================================================
     wire clocks_ready, i2c_error;
+    wire pixel_clock_ready, pixel_region_pal;    // Si5351 CLK2 programmed for region_pal (HDMI raster mode)
     wire cic_region_valid, cic_region_pal, cic_key_ok, cic_key_fail;
     wire det_valid, det_pal;                     // combined key CIC / ROM header / NTSC-default result
     sn64_clock_init #(.CLK_HZ(CLK25_HZ)) clock_init (
@@ -137,7 +143,8 @@ module sn64_top #(
         .scl_oe(si_scl_oe), .sda_oe(si_sda_oe), .sda_in(si_sda_in),
         .region_mode(region_mode_25), .detected_valid(det_valid), .detected_pal(det_pal),
         .snes_clock_stopped(!snes_clk_run), .region_pal(region_pal), .region_change_pending(),
-        .clocks_ready(clocks_ready), .i2c_error(i2c_error));
+        .clocks_ready(clocks_ready), .i2c_error(i2c_error),
+        .pixel_clock_ready(pixel_clock_ready), .pixel_region_pal(pixel_region_pal));
 
     // =====================================================================
     // Power sequencer (clk_25)
@@ -202,13 +209,33 @@ module sn64_top #(
     assign det_valid    = cic_region_valid || (key_settled && (hdr_done || region_timeout));
     assign det_pal      = cic_region_valid ? cic_region_pal : ((hdr_done && hdr_valid) ? hdr_pal : 1'b0);
     wire region_decided = (region_mode_25 != 2'd0) || det_valid;
+    // Decision source, same priority as above (REGION_SOURCE[1:0]).
+    wire [1:0] region_src = (region_mode_25 != 2'd0)  ? 2'd0 :     // forced by CONTROL
+                            cic_region_valid          ? 2'd1 :     // passing key CIC
+                            (hdr_done && hdr_valid)   ? 2'd2 :     // valid ROM header
+                                                        2'd3;      // NTSC default (no key, no valid header, or timeout)
+    // Region telemetry snapshot, taken on the clk_25 edge that starts the SNES
+    // clock (the same edge on which sn64_clock_init latches region_pal from
+    // the same inputs). Kept until the next cartridge start; before the
+    // first decision the header fields are live and `decided` is 0.
+    reg        rgn_decided = 1'b0, rgn_timeout = 1'b0, rgn_pal = 1'b0;
+    reg [1:0]  rgn_src = 2'd0;
+    reg [15:0] rgn_hdr = 16'd0;
+    wire [15:0] hdr_word = {hdr_aborted, hdr_pal, hdr_valid, hdr_done, hdr_reject, hdr_country};
+    wire rgn_wanted_pal = (region_mode_25 == 2'd2) ? 1'b1 : (region_mode_25 == 2'd1) ? 1'b0 : det_pal;
     always @(posedge clk_25) begin
         if (!rst25_n || seq_state == 4'd0 || seq_state >= 4'd5) begin   // OFF, SHUTDOWN, FAULT: clock stops
             snes_clk_run <= 1'b0; release_ok <= 1'b0; region_timer <= 0; settle_timer <= 0;
         end else begin
             if (seq_state == 4'd3 && !snes_clk_run) begin
                 region_timer <= region_timer + 1;
-                if (clocks_ready && region_decided) snes_clk_run <= 1'b1;
+                // pixel_clock_ready: Si5351 CLK2 already retargeted for the latched
+                // region (MS2 is only rewritten while the SNES clock is stopped).
+                if (clocks_ready && region_decided && pixel_clock_ready) begin
+                    snes_clk_run <= 1'b1;
+                    rgn_decided <= 1'b1; rgn_src <= region_src; rgn_timeout <= region_timeout;
+                    rgn_pal <= rgn_wanted_pal; rgn_hdr <= hdr_word;
+                end
             end
             if (snes_clk_run) begin
                 if (settle_timer >= SETTLE_TICKS) release_ok <= 1'b1; else settle_timer <= settle_timer + 1;
@@ -274,20 +301,44 @@ module sn64_top #(
         .ctl_oe_n(ctl_oe_n), .data_oe_n(data_oe_n), .data_dir(data_dir), .probe_owns(hdr_owns));
 
     // =====================================================================
-    // HDMI output: SNES picture line-doubled to 720x480p, audio as 32 kHz
-    // HDMI audio (docs/design/av-output-implementation.md). The pixel clock
-    // comes from the same Si5351 PLL as the NTSC master, so the raster is
-    // frequency-locked to the SNES frame.
+    // HDMI output: SNES picture line-doubled to 720x480p (NTSC) or 720x576p50
+    // (PAL), audio as 32 kHz HDMI audio (docs/design/av-output-implementation.md).
+    // The pixel clock comes from the same Si5351 PLL as the running SNES master
+    // (PLLA for NTSC, PLLB for PAL), so the raster is frequency-locked to the
+    // SNES frame.
     // =====================================================================
+    // Cartridge audio (docs/design/cart-audio-implementation.md): the ADC's
+    // I2S lines are oversampled by clk_host (always on, 30x BCK); each stereo
+    // frame crosses to clk_snes through the mixer's toggle synchroniser and
+    // elastic buffer and is added (saturating) to the core's DSP samples.
+    // sn64_av_out's audio contract is unchanged.
+    wire signed [23:0] adc_left_h, adc_right_h;
+    wire adc_tog_h, adc_locked_h; wire [15:0] adc_frame_errors_h;
+    sn64_i2s_rx adc_rx (.clk(clk_host), .rst_n(rsthost_n), .bck(adc_bck), .lrck(adc_lrck), .dout(adc_dout),
+        .left(adc_left_h), .right(adc_right_h), .frame_tog(adc_tog_h), .frame_stb(),
+        .locked(adc_locked_h), .frame_errors(adc_frame_errors_h));
+    wire [15:0] mix_audio_left, mix_audio_right; wire mix_audio_ready;
+    wire [15:0] audio_ovf_slips, audio_unf_slips; wire cart_audio_active;
+    sn64_audio_mix audio_mix (.clk(clk_snes), .rst_n(core_reset_n), .cart_enable(1'b1),
+        .adc_left(adc_left_h), .adc_right(adc_right_h), .adc_tog(adc_tog_h), .adc_locked(adc_locked_h),
+        .snes_left(snes_audio_left), .snes_right(snes_audio_right), .snes_ready(snes_audio_ready),
+        .mix_left(mix_audio_left), .mix_right(mix_audio_right), .mix_ready(mix_audio_ready),
+        .overflow_slips(audio_ovf_slips), .underflow_slips(audio_unf_slips), .cart_active(cart_audio_active), .fill());
+
+    // The HDMI pixel domain stays in reset until CLK2 is programmed for the
+    // latched region (pixel_clock_ready drops as soon as a new region is
+    // latched, before MS2 is rewritten); av takes its raster mode (858x524
+    // VIC 2 or 864x624 VIC 17) from pixel_region_pal while in reset.
     wire rst_pixel_n;
-    sn64_sync_bit #(1'b0) s_rst_pix (.clk(clk_pixel), .d(por_n & clocks_ready & hdmi_clock_ok), .q(rst_pixel_n));
+    sn64_sync_bit #(1'b0) s_rst_pix (.clk(clk_pixel), .d(por_n & pixel_clock_ready & hdmi_clock_ok), .q(rst_pixel_n));
     sn64_av_out av (
         .clk_snes(clk_snes), .rst_snes_n(core_reset_n),
         .rgb(snes_rgb), .hde(snes_hde), .vde(snes_vde), .video_x(snes_video_x), .video_y(snes_video_y),
-        .audio_left(snes_audio_left), .audio_right(snes_audio_right), .audio_ready(snes_audio_ready),
+        .audio_left(mix_audio_left), .audio_right(mix_audio_right), .audio_ready(mix_audio_ready),
+        .pal(pixel_region_pal),
         .clk_pixel(clk_pixel), .clk_pixel_x5(clk_pixel_x5), .rst_pixel_n(rst_pixel_n),
         .tmds(hdmi_tmds), .tmds_clock(hdmi_tmds_clock),
-        .locked(av_locked), .lock_error(), .rephase_count());
+        .locked(av_locked), .lock_error(), .rephase_count(), .mode_pal());
 
     // Socket /RESET: open-drain pull owned by the power sequencer (held in
     // every state except RUN, and during a soft reset) or whenever the bus is
@@ -310,4 +361,10 @@ module sn64_top #(
                           iface_rail_ok, cart_5v_ok, host_3v3_ok & fpga_rails_ok, clocks_ready};
     sn64_cdc_word #(.W(16)) x_status (.src_clk(clk_25), .src_data(status_word), .dst_clk(clk_host), .dst_data(status_h));
     sn64_cdc_word #(.W(16)) x_fault (.src_clk(clk_25), .src_data({fault_code, 8'h00}), .dst_clk(clk_host), .dst_data(fault_h));
+    // REGION_INFO / REGION_SOURCE (mailbox 0x1A / 0x1C): one 32-bit word so
+    // both halves always come from the same snapshot.
+    wire [15:0] region_info_25   = rgn_decided ? rgn_hdr : hdr_word;
+    wire [15:0] region_source_25 = {11'd0, rgn_pal, rgn_timeout, rgn_decided, rgn_src};
+    sn64_cdc_word #(.W(32)) x_region (.src_clk(clk_25), .src_data({region_source_25, region_info_25}),
+                                      .dst_clk(clk_host), .dst_data({region_source_h, region_info_h}));
 endmodule

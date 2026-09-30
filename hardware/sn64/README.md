@@ -1,6 +1,14 @@
 # SN 64 KiCad schematic draft
 
-Open **[sn64.kicad_pro](sn64.kicad_pro)** in KiCad 10, then open the schematic. The [PDF](exports/sn64-interface-draft.pdf) is a review export of the root cartridge sheet, the [USB programmer child sheet](usb-programmer.kicad_sch) and the [SNES cartridge interface child sheet](cart-interface.kicad_sch) (rev 0.3.1-cart: 5 V/3.3 V translators, reset/IRQ/CIC paths, per-pin CIC data translators; see [notes](../../docs/design/cart-interface-schematic.md)). The project contains two cartridge connectors, a USB-C programming circuit and the cartridge interface, with project-local libraries. It is not a complete electrical design or a manufacturing package.
+Open **[sn64.kicad_pro](sn64.kicad_pro)** in KiCad 10, then open the schematic. The root (rev `0.4-r3`, A2) holds both cartridge connectors and five child sheets, wired by same-name root labels (the shared net-name contract in [system-integration.md](../../docs/design/system-integration.md#schematic-integration-round-3-2026-09-29)):
+
+- page 2: the [USB programmer child sheet](usb-programmer.kicad_sch) (exports USB_VBUS, USB_3V3, USB_CC1/CC2, jtag_tck/tms/tdi/tdo, TARGET_VREF; R101/R102 DNP because the power sheet's TUSB320 presents Rd);
+- page 3: the [SNES cartridge interface child sheet](cart-interface.kicad_sch) (rev 0.3.1-cart: 5 V/3.3 V translators, reset/IRQ/CIC paths, per-pin CIC data translators; see [notes](../../docs/design/cart-interface-schematic.md));
+- page 4: the [FPGA child sheet](fpga.kicad_sch) (rev 0.4-fpga, designators 4xx: LFE5U-85F CABGA381 with all 381 balls assigned, W25Q128JVSIQ configuration flash, JTAG, SN74CB3Q3384A N64 bus switches; see [notes](../../docs/design/fpga-schematic.md)). Its pin table also generates [interfaces/fpga-pin-map.csv](interfaces/fpga-pin-map.csv) and [fpga/constraints/sn64_board.lpf](../../fpga/constraints/sn64_board.lpf);
+- page 5: the [power child sheet](power.kicad_sch) (designators 3xx: host/USB eFuse priority mux, TUSB320, TPS63070 5V_PRE, three TLV62569 FPGA rails, default-off cartridge eFuse and interface switch, monitors; see [notes](../../docs/design/power-schematic.md));
+- page 6: the [clock/HDMI/cartridge-audio child sheet](av-clock.kicad_sch) (draft 0.1-av, designators 7xx: Si5351A + 25 MHz crystal, 25 MHz FPGA oscillator, HDMI type-A with TPD12S016 and ULX3S 22 nF TMDS coupling, PCM1808 I2S-master cartridge-audio ADC; see [notes](../../docs/design/av-clock-schematic.md)).
+
+The [PDF](exports/sn64-interface-draft.pdf) is a review export of all six pages; the round-3 export was not visually inspected (no rasteriser available). Project-local libraries hold the symbols KiCad does not ship. It is not a complete electrical design or a manufacturing package.
 
 ## What is present
 
@@ -8,17 +16,18 @@ Open **[sn64.kicad_pro](sn64.kicad_pro)** in KiCad 10, then open the schematic. 
 |---|---|
 | J1 | 50-contact N64 edge, intended for both original N64 and M64 |
 | J2 | Full 62-contact SNES/SFC female socket, including outer contacts and analog audio |
-| USB child sheet | J101 JAE USB-C, separate CC resistors, data/CC ESD arrays, AP2112K-3.3 bridge regulator, FT232HL revision C, 12 MHz crystal, optional DNP EEPROM, SN74AXC4T774 JTAG isolation and J102 target-side service header |
+| USB child sheet | J101 JAE USB-C, DNP CC resistors (the power sheet's TUSB320 presents Rd), data/CC ESD arrays, AP2112K-3.3 bridge regulator, FT232HL revision C, 12 MHz crystal, optional DNP EEPROM, SN74AXC4T774 JTAG isolation and J102 target-side service header |
 | Symbol library | Editable native KiCad symbols, numbered from the checked pin maps |
 | Footprint library | Sanni female-socket and SummerCart64 N64 edge references; local USB component footprints including the reused JAE receptacle geometry |
 | Pin maps | [N64](interfaces/n64-pin-map.csv), [SNES](interfaces/snes-pin-map.csv) and [USB circuit nets](interfaces/usb-programmer-net-map.csv) |
-| Validation | Exported netlist, ERC report, independent cartridge-interface checks and 64 USB static checks |
+| FPGA, power, A/V sheets | See the page list above; authored by [add_fpga_sheet.py](tools/add_fpga_sheet.py), [add_power_sheet.py](tools/add_power_sheet.py) and [add_av_clock_sheet.py](tools/add_av_clock_sheet.py) (deterministic, refuse to overwrite without `--force`), checked by [verify_fpga_sheet.py](tools/verify_fpga_sheet.py), [verify_power_sheet.py](tools/verify_power_sheet.py) and [verify_av_clock_sheet.py](tools/verify_av_clock_sheet.py) |
+| Validation | Exported netlist, ERC report, per-sheet checks (interface 30, USB 69, cartridge 20, FPGA 13, power 23, A/V 30) and the [root connectivity check](tools/verify_root_connectivity.py) (4 checks over 141 contract names) |
 
-`GND` is the only net shared across the cartridge interfaces and USB boundary. `HOST_3V3`, `HOST_12V`, `SNES_5V_CART`, `USB_VBUS`, `USB_3V3` and `TARGET_VREF` are distinct. USB power currently supplies the bridge block only. The future FPGA programming rail must supply `TARGET_VREF`; it is not a USB target-power output. SNES and N64 resets, data, CIC and audio signals remain separate, awaiting their circuitry. `_N` in net names denotes active low; the cartridge symbols retain the source maps' slash notation.
+`GND` is the only net that directly crosses the USB/host-connector boundary. `HOST_3V3`, `HOST_12V`, `SNES_5V_CART`, `USB_VBUS`, `USB_3V3` and `TARGET_VREF` are distinct nets. USB_VBUS also feeds the power sheet's default-off USB input (U302, enabled only when the TUSB320 U301 reports at least 1.5 A and USB_3V3 is present); `TARGET_VREF` comes from FPGA_3V3 through R414 on the FPGA sheet and is not a USB target-power output. The N64 edge reaches the FPGA only through the host-gated bus switches; N64_AUDIO_L/R and the reserved edge contacts stay unconnected. `_N` in net names denotes active low; the cartridge symbols retain the source maps' slash notation.
 
 Connector pins deliberately have the ordinary passive connector type. The CSV and [electrical notes](../../docs/design/snes-interface-notes.md), rather than these pin types, define endpoint direction and special handling. ERC cannot establish drive ownership, voltage tolerance or timing at these pending interfaces.
 
-The USB bridge uses MPSSE JTAG with ACBUS6 controlling the translator's pulled-up, default-disabled `/OE`. The documented host command must include `--status-pin 14`. Its target JTAG nets are not yet connected to a selected FPGA or configuration storage. The [programming architecture](../../docs/design/usb-programming-architecture.md) records blank-EEPROM startup, power isolation, persistent-loading requirements and the remaining tests. [Connector and crystal notes](../../docs/design/usb-connector-mechanics.md) record the source geometry and provisional 11 pF crystal load capacitors.
+The USB bridge uses MPSSE JTAG with ACBUS6 controlling the translator's pulled-up, default-disabled `/OE`. The documented host command must include `--status-pin 14`. Its target JTAG nets now reach the ECP5's dedicated JTAG balls on the FPGA sheet (round 3); the configuration flash is loaded through the FPGA. The [programming architecture](../../docs/design/usb-programming-architecture.md) records blank-EEPROM startup, power isolation, persistent-loading requirements and the remaining tests. [Connector and crystal notes](../../docs/design/usb-connector-mechanics.md) record the source geometry and provisional 11 pF crystal load capacitors.
 
 ## Reused geometry and its limits
 
@@ -30,11 +39,11 @@ See [THIRD_PARTY.md](THIRD_PARTY.md), [cartridge provenance](libraries/provenanc
 
 ## Validation and reproducibility
 
-KiCad 10.0.6 exports the two-sheet schematic to XML and PDF. Both PDF sheets were rendered and visually inspected. The saved ERC report contains **zero errors** and 37 warnings (32 `isolated_pin_label` at interfaces still waiting for the FPGA sheet, 5 `pin_to_pin`); `verify_cart_interface.py` passes 20/20 checks plus its negative test. The USB sheet has no ERC violations. These warnings remain visible; the schematic is incomplete and is not an ERC-clean release. Rerun checks as actual circuitry is added.
+KiCad 10.0.6 exports the six-page schematic to XML and PDF. The round-3 PDF was **not** visually inspected (no rasteriser on this machine); earlier two-sheet exports were. The saved ERC report contains **zero errors** and 10 warnings: 5 `isolated_pin_label` on the reserved N64 edge labels (N64_AUDIO_L/R, N64_KEY1/KEY2_RESERVED, N64_VIDEO_SYNC_RESERVED) and 5 `pin_to_pin` (cartridge U206 unused B4-B8 on the flagged GND). On the integrated root: `verify_cart_interface.py` 20/20 (negative 6/6), `verify_power_sheet.py` 23/23 (negative 11/11), `verify_av_clock_sheet.py` 30/30 (negative 12/12), `verify_fpga_sheet.py` **12/13** (negative 10/10; the failing check is `efuse_fault_n`, a 5V_PRE divider on ball K4, an open owner decision in [system-integration.md](../../docs/design/system-integration.md)), `verify_root_connectivity.py` 4/4 (negative 4/4). The schematic is incomplete and is not an ERC-clean release. Rerun checks as circuitry changes.
 
 The [independent validation script](tools/verify_interfaces.py) checks the exported connector pin/net assignments against the separately researched maps, rejects accidental cross-domain connections, and compares both footprints against the original downloaded sources. The corresponding [result](validation/interface-check.json) and [review](validation/interface-review.md) record the result and remaining limitations.
 
-The saved reports record **30 cartridge-interface checks passed and 64 USB checks passed, with zero failed checks**. The [USB validator](tools/verify_usb_programmer.py) independently exports the schematic and compares it with fixed manufacturer pin tables, checking all USB component pins, rail separation, CC/data/ESD connections, bridge support, JTAG directions and disabled startup. See its [result](validation/usb-check.json) and [review](validation/usb-review.md). These are static checks; no USB enumeration, clock measurement, suspend-current measurement, programming, cold boot, electrical protection or compatibility test has been performed on SN 64 hardware.
+The saved reports record **30 cartridge-interface checks passed and 69 USB checks passed, with zero failed checks** (the USB set now also checks the DNP CC resistors and the CC/VBUS/USB_3V3/JTAG/TARGET_VREF exports). The [USB validator](tools/verify_usb_programmer.py) independently exports the schematic and compares it with fixed manufacturer pin tables, checking all USB component pins, rail separation, CC/data/ESD connections, bridge support, JTAG directions and disabled startup. See its [result](validation/usb-check.json) and [review](validation/usb-review.md). These are static checks; no USB enumeration, clock measurement, suspend-current measurement, programming, cold boot, electrical protection or compatibility test has been performed on SN 64 hardware.
 
 To regenerate review files after editing, run these from this directory with KiCad's CLI on PATH:
 
@@ -42,6 +51,19 @@ To regenerate review files after editing, run these from this directory with KiC
 kicad-cli sch export netlist --format kicadxml -o validation/sn64.xml sn64.kicad_sch
 kicad-cli sch export pdf -o exports/sn64-interface-draft.pdf sn64.kicad_sch
 kicad-cli sch erc --format json --output validation/erc.json --exit-code-violations sn64.kicad_sch
+```
+
+The per-sheet and root checks, from the repository root with KiCad's Python (each also takes `--negative-test`, except the interface and USB validators):
+
+```powershell
+$py = 'C:\Program Files\KiCad\10.0\bin\python.exe'; $cli = 'C:\Program Files\KiCad\10.0\bin\kicad-cli.exe'
+& $py hardware/sn64/tools/verify_interfaces.py --source-root . --kicad-cli $cli
+& $py hardware/sn64/tools/verify_usb_programmer.py --kicad-cli $cli
+& $py hardware/sn64/tools/verify_cart_interface.py --kicad-cli $cli
+& $py hardware/sn64/tools/verify_fpga_sheet.py --kicad-cli $cli --lattice-csv <ECP5U-85 pinout CSV> --datasheets <dir>
+& $py hardware/sn64/tools/verify_power_sheet.py --kicad-cli $cli
+& $py hardware/sn64/tools/verify_av_clock_sheet.py --project hardware/sn64 --kicad-cli $cli
+& $py hardware/sn64/tools/verify_root_connectivity.py --kicad-cli $cli
 ```
 
 The initial authoring script, [create_interface_draft.py](tools/create_interface_draft.py), uses KiCad's Python and downloaded upstream sources. It refuses to replace an existing schematic unless explicitly passed `--force`. Once circuit editing begins, edit the native KiCad files; do not regenerate the initial sheet over the circuit work.

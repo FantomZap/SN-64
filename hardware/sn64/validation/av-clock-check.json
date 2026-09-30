@@ -1,0 +1,655 @@
+{
+  "status": "pass",
+  "scope": "static schematic/netlist check of the clock, HDMI and cartridge-audio child sheet only",
+  "generated_at_utc": "2026-09-29T23:58:04.759848+00:00",
+  "project_checked": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\hardware\\sn64",
+  "checks_passed": 30,
+  "checks_failed": 0,
+  "inputs": {
+    "sn64.kicad_sch": "4fbc588ad545ea6d34c095103af83c9238bc3e5f922bc91e2abdb4711719b5b0",
+    "av-clock.kicad_sch": "66c40c96bddd5d0a8fa40f0638624a2bd0bd515b502e62d219734b05addf6bfa",
+    "libraries/SN64_AV.kicad_sym": "486554125953dafa652818d7161acb74f836f4d90ec81f17d1d887b42877a874",
+    "fpga/rtl/sn64_clock_init.sv": "91fb34debe542498378203c234b6137a0a51a495d04bd294e7cb32ecc0f2f8cd"
+  },
+  "erc_violations_by_type": {
+    "warning:isolated_pin_label": 5,
+    "warning:pin_to_pin": 5
+  },
+  "checks": [
+    {
+      "check": "sheet_attached_to_root",
+      "passed": true,
+      "detail": "av-clock.kicad_sch must be a sheet of sn64.kicad_sch (run on the validation copy until integration)"
+    },
+    {
+      "check": "fresh_netlist_export",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "erc_zero_errors",
+      "passed": true,
+      "detail": {
+        "report_written": true,
+        "violations_by_type": {
+          "warning:isolated_pin_label": 5,
+          "warning:pin_to_pin": 5
+        }
+      }
+    },
+    {
+      "check": "erc_no_violations_on_this_sheet",
+      "passed": true,
+      "detail": {}
+    },
+    {
+      "check": "expected_parts_present",
+      "passed": true,
+      "detail": {
+        "Si5351": [
+          "U701"
+        ],
+        "TPD12S016": [
+          "U702"
+        ],
+        "PCM1808": [
+          "U703"
+        ],
+        "HDMI_A": [
+          "J701"
+        ],
+        "crystal": [
+          "Y701"
+        ],
+        "oscillators": [
+          "X701",
+          "X702"
+        ]
+      }
+    },
+    {
+      "check": "si5351_pins_match_table_20",
+      "passed": true,
+      "detail": {
+        "mismatch_pin:(netlist,datasheet)": {},
+        "extra_pins": []
+      }
+    },
+    {
+      "check": "tpd12s016_pins_match_datasheet",
+      "passed": true,
+      "detail": {
+        "mismatch_pin:(netlist,datasheet)": {},
+        "extra_pins": []
+      }
+    },
+    {
+      "check": "pcm1808_pins_match_datasheet",
+      "passed": true,
+      "detail": {
+        "mismatch_pin:(netlist,datasheet)": {},
+        "extra_pins": []
+      }
+    },
+    {
+      "check": "hdmi_connector_pin_numbering",
+      "passed": true,
+      "detail": {
+        "mismatch_pin:(netlist,datasheet)": {},
+        "extra_pins": []
+      }
+    },
+    {
+      "check": "si5351_supplies_and_ground",
+      "passed": true,
+      "detail": {
+        "VDD": "FPGA_3V3",
+        "VDDO": "FPGA_3V3",
+        "GND": "GND"
+      }
+    },
+    {
+      "check": "crystal_on_XA_XB_only",
+      "passed": true,
+      "detail": {
+        "XA": [
+          [
+            "U701",
+            "2"
+          ],
+          [
+            "Y701",
+            "1"
+          ]
+        ],
+        "XB": [
+          [
+            "U701",
+            "3"
+          ],
+          [
+            "Y701",
+            "3"
+          ]
+        ],
+        "crystal_gnd": [
+          "GND",
+          "GND"
+        ],
+        "rule": "Si5351-B 7.4: internal load capacitance; nothing else on XA/XB"
+      }
+    },
+    {
+      "check": "crystal_meets_si5351_table_8",
+      "passed": true,
+      "detail": {
+        "frequency_MHz": 25.0,
+        "CL_pF": 10.0,
+        "LCSC": "C70582",
+        "MPN": "X322525MMB4SI"
+      }
+    },
+    {
+      "check": "crystal_CL_matches_register_183",
+      "passed": true,
+      "detail": {
+        "rtl": "fpga\\rtl\\sn64_clock_init.sv",
+        "register_183": "0xD2",
+        "XTAL_CL_pF": 10.0,
+        "reserved_bits_5_0_ok": true,
+        "crystal_CL_pF": 10.0
+      }
+    },
+    {
+      "check": "si_i2c_pullups_to_FPGA_3V3",
+      "passed": true,
+      "detail": {
+        "si_scl": [
+          [
+            "R701",
+            "4.7k"
+          ]
+        ],
+        "si_sda": [
+          [
+            "R702",
+            "4.7k"
+          ]
+        ],
+        "SCL_net": "si_scl",
+        "SDA_net": "si_sda",
+        "rule": "pull-up to VDD, >= 1 k (Table 20), <= 10 k for 400 kHz"
+      }
+    },
+    {
+      "check": "si5351_clk_outputs_to_contract_labels",
+      "passed": true,
+      "detail": {
+        "CLK0": {
+          "to": "si_clk0",
+          "series": [
+            [
+              "R703",
+              "0R"
+            ]
+          ]
+        },
+        "CLK1": {
+          "to": "si_clk1",
+          "series": [
+            [
+              "R704",
+              "0R"
+            ]
+          ]
+        },
+        "CLK2": {
+          "to": "si_clk2",
+          "series": [
+            [
+              "R705",
+              "0R"
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "check": "osc_25MHz_drives_osc_25",
+      "passed": true,
+      "detail": {
+        "X701": {
+          "EN": "FPGA_3V3",
+          "GND": "GND",
+          "OUT": "OSC25_SRC",
+          "VDD": "FPGA_3V3"
+        }
+      }
+    },
+    {
+      "check": "contract_labels_present",
+      "passed": true,
+      "detail": {
+        "missing": [],
+        "unexpected": []
+      }
+    },
+    {
+      "check": "sheet_pins_match_child_hierarchical_labels",
+      "passed": true,
+      "detail": {
+        "only_in_root": [],
+        "only_in_child": []
+      }
+    },
+    {
+      "check": "snes_audio_labels_reach_socket",
+      "passed": true,
+      "detail": {
+        "SNES_AUDIO_L_IN": [
+          [
+            "J2",
+            "31"
+          ],
+          [
+            "R711",
+            "1"
+          ],
+          [
+            "R712",
+            "1"
+          ],
+          [
+            "TP201",
+            "1"
+          ]
+        ],
+        "SNES_AUDIO_R_IN": [
+          [
+            "J2",
+            "62"
+          ],
+          [
+            "R714",
+            "1"
+          ],
+          [
+            "R715",
+            "1"
+          ],
+          [
+            "TP202",
+            "1"
+          ]
+        ]
+      }
+    },
+    {
+      "check": "tmds_pairs_complete_22nF_to_connector_and_esd",
+      "passed": true,
+      "detail": {
+        "hdmi_d0_p": {
+          "series_cap": [
+            "C708",
+            "22nF"
+          ],
+          "connector_side": "HDMI_J_D0_P",
+          "expected_connector_pin": "D0+",
+          "expected_tpd_pin": "D0+",
+          "ok": true
+        },
+        "hdmi_d0_n": {
+          "series_cap": [
+            "C709",
+            "22nF"
+          ],
+          "connector_side": "HDMI_J_D0_N",
+          "expected_connector_pin": "D0-",
+          "expected_tpd_pin": "D0-",
+          "ok": true
+        },
+        "hdmi_d1_p": {
+          "series_cap": [
+            "C706",
+            "22nF"
+          ],
+          "connector_side": "HDMI_J_D1_P",
+          "expected_connector_pin": "D1+",
+          "expected_tpd_pin": "D1+",
+          "ok": true
+        },
+        "hdmi_d1_n": {
+          "series_cap": [
+            "C707",
+            "22nF"
+          ],
+          "connector_side": "HDMI_J_D1_N",
+          "expected_connector_pin": "D1-",
+          "expected_tpd_pin": "D1-",
+          "ok": true
+        },
+        "hdmi_d2_p": {
+          "series_cap": [
+            "C704",
+            "22nF"
+          ],
+          "connector_side": "HDMI_J_D2_P",
+          "expected_connector_pin": "D2+",
+          "expected_tpd_pin": "D2+",
+          "ok": true
+        },
+        "hdmi_d2_n": {
+          "series_cap": [
+            "C705",
+            "22nF"
+          ],
+          "connector_side": "HDMI_J_D2_N",
+          "expected_connector_pin": "D2-",
+          "expected_tpd_pin": "D2-",
+          "ok": true
+        },
+        "hdmi_ck_p": {
+          "series_cap": [
+            "C710",
+            "22nF"
+          ],
+          "connector_side": "HDMI_J_CK_P",
+          "expected_connector_pin": "CK+",
+          "expected_tpd_pin": "CLK+",
+          "ok": true
+        },
+        "hdmi_ck_n": {
+          "series_cap": [
+            "C711",
+            "22nF"
+          ],
+          "connector_side": "HDMI_J_CK_N",
+          "expected_connector_pin": "CK-",
+          "expected_tpd_pin": "CLK-",
+          "ok": true
+        }
+      }
+    },
+    {
+      "check": "hdmi_connector_pins",
+      "passed": true,
+      "detail": {
+        "shields_gnd": true,
+        "+5V_only_from_TPD12S016_5V_OUT_55mA_limit": true,
+        "HPD": "HDMI_HPD_B",
+        "SCL": "HDMI_SCL_B",
+        "SDA": "HDMI_SDA_B",
+        "CEC": "HDMI_CEC_B",
+        "UTILITY": "unconnected-(J701-UTILITY-Pad14)"
+      }
+    },
+    {
+      "check": "tpd12s016_configuration",
+      "passed": true,
+      "detail": {
+        "VCCA": "FPGA_3V3",
+        "VCC5V": "5V_PRE",
+        "LS_OE": "FPGA_3V3",
+        "CT_HPD": "FPGA_3V3",
+        "HPD_A": "hdmi_hpd",
+        "SCL_A": "hdmi_scl",
+        "SDA_A": "hdmi_sda",
+        "CEC_A": "HDMI_CEC_A",
+        "external_ddc_pullups (must be none, 7.3.15)": []
+      }
+    },
+    {
+      "check": "adc_straps_i2s_master_fs_32kHz",
+      "passed": true,
+      "detail": {
+        "MD1": "H",
+        "MD0": "L",
+        "FMT": "L",
+        "mode": "master",
+        "ratio_fs": 384,
+        "format": "I2S 24-bit",
+        "SCKI_source": "X702",
+        "SCKI_Hz": 12288000.0,
+        "fs_Hz": 32000.0,
+        "oscillator_on_3V3_enabled": true,
+        "rule": "SLES177B Table 2 (MD1,MD0), Table 3 (FMT); fs = SCKI / ratio must be 32 kHz"
+      }
+    },
+    {
+      "check": "adc_i2s_outputs_to_contract",
+      "passed": true,
+      "detail": {
+        "BCK": "adc_bck",
+        "LRCK": "adc_lrck",
+        "DOUT": "adc_dout"
+      }
+    },
+    {
+      "check": "adc_supplies_and_reference",
+      "passed": true,
+      "detail": {
+        "VCC": "ADC_VCC_5V",
+        "VCC_filter_from_5V_PRE": [
+          "FB701"
+        ],
+        "VCC_caps": [
+          "100nF",
+          "10uF"
+        ],
+        "VREF_caps": [
+          "100nF",
+          "10uF"
+        ],
+        "VDD": "FPGA_3V3",
+        "VDD_rail_caps": [
+          "100nF",
+          "100nF",
+          "100nF",
+          "100nF",
+          "100nF",
+          "100nF",
+          "100nF",
+          "100nF",
+          "100nF",
+          "100nF",
+          "100nF",
+          "100nF",
+          "100nF",
+          "100nF",
+          "100nF 16V X7R",
+          "100nF 16V X7R",
+          "100nF 16V X7R",
+          "100nF 16V X7R",
+          "100nF 16V X7R",
+          "100nF 16V X7R",
+          "100nF 16V X7R",
+          "100nF 16V X7R",
+          "100nF 16V X7R",
+          "100nF 16V X7R",
+          "100nF 16V X7R",
+          "100nF 16V X7R",
+          "100nF 16V X7R",
+          "100nF 16V X7R",
+          "100nF 16V X7R",
+          "100nF 16V X7R",
+          "100nF 16V X7R",
+          "100nF 16V X7R",
+          "100nF 16V X7R",
+          "100nF 16V X7R",
+          "100nF 16V X7R",
+          "100nF 16V X7R",
+          "100nF 16V X7R",
+          "100nF 16V X7R",
+          "10uF",
+          "10uF 10V X5R",
+          "10uF 10V X5R",
+          "10uF 10V X5R",
+          "10uF 10V X5R",
+          "10uF 10V X5R",
+          "10uF 10V X5R",
+          "10uF 10V X5R",
+          "1uF 10V",
+          "22uF 10V",
+          "22uF 10V"
+        ],
+        "rule": "SLES177B Figure 26 notes 2/3: 0.1 uF + 10 uF"
+      }
+    },
+    {
+      "check": "cartridge_audio_input_network",
+      "passed": true,
+      "detail": {
+        "L": {
+          "input_net": "/SNES_AUDIO_L_IN",
+          "R_load": [
+            "R711",
+            200.0
+          ],
+          "R_top": [
+            "R712",
+            4700.0
+          ],
+          "R_bot": [
+            "R713",
+            5100.0
+          ],
+          "C_aa": [
+            "C722",
+            1e-09
+          ],
+          "C_couple": [
+            "C723",
+            1e-06
+          ],
+          "to_pin": "ADC_VINL",
+          "gain": 0.5,
+          "cart_max_Vpp_at_ADC": 2.5,
+          "ADC_full_scale_Vpp_at_4V75": 2.85,
+          "headroom_dB": 1.14,
+          "input_impedance_ohm": 195.8,
+          "console_load_ohm": 196.1,
+          "anti_alias_pole_kHz": 67.7,
+          "high_pass_Hz": 2.55,
+          "passband_loss_16kHz_dB": -0.236,
+          "ok": true
+        },
+        "R": {
+          "input_net": "/SNES_AUDIO_R_IN",
+          "R_load": [
+            "R714",
+            200.0
+          ],
+          "R_top": [
+            "R715",
+            4700.0
+          ],
+          "R_bot": [
+            "R716",
+            5100.0
+          ],
+          "C_aa": [
+            "C724",
+            1e-09
+          ],
+          "C_couple": [
+            "C725",
+            1e-06
+          ],
+          "to_pin": "ADC_VINR",
+          "gain": 0.5,
+          "cart_max_Vpp_at_ADC": 2.5,
+          "ADC_full_scale_Vpp_at_4V75": 2.85,
+          "headroom_dB": 1.14,
+          "input_impedance_ohm": 195.8,
+          "console_load_ohm": 196.1,
+          "anti_alias_pole_kHz": 67.7,
+          "high_pass_Hz": 2.55,
+          "passband_loss_16kHz_dB": -0.236,
+          "ok": true
+        }
+      }
+    },
+    {
+      "check": "no_5V_on_FPGA_labels",
+      "passed": true,
+      "detail": {
+        "fpga_labels_checked": 20,
+        "dc_paths_to_5V_nets": [],
+        "drivers_not_referenced_to_FPGA_3V3": [],
+        "unexpected_members": [],
+        "five_volt_nets": [
+          "5V_PRE",
+          "ADC_VCC_5V",
+          "HDMI_5V",
+          "HDMI_CEC_B",
+          "HDMI_HPD_B",
+          "HDMI_J_CK_N",
+          "HDMI_J_CK_P",
+          "HDMI_J_D0_N",
+          "HDMI_J_D0_P",
+          "HDMI_J_D1_N",
+          "HDMI_J_D1_P",
+          "HDMI_J_D2_N",
+          "HDMI_J_D2_P",
+          "HDMI_SCL_B",
+          "HDMI_SDA_B",
+          "SNES_AUDIO_L_IN",
+          "SNES_AUDIO_R_IN",
+          "unconnected-(J701-UTILITY-Pad14)"
+        ]
+      }
+    },
+    {
+      "check": "one_100nF_per_supply_pin",
+      "passed": true,
+      "detail": {
+        "supply_pins": {
+          "FPGA_3V3": 6,
+          "5V_PRE": 1,
+          "ADC_VCC_5V": 1
+        },
+        "100nF_caps": {
+          "FT_VPHY": 1,
+          "FT_VPLL": 1,
+          "USB_3V3": 7,
+          "FT_1V8A": 1,
+          "FT_1V8CORE": 1,
+          "TARGET_VREF": 1,
+          "SNES_5V_CART": 9,
+          "INTERFACE_3V3": 22,
+          "VAUX_5V": 1,
+          "FPGA_3V3": 14,
+          "5V_PRE": 1,
+          "HDMI_5V": 1,
+          "ADC_VCC_5V": 1,
+          "ADC_VREF": 1
+        }
+      }
+    },
+    {
+      "check": "every_part_has_footprint",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "check": "active_parts_have_LCSC_numbers",
+      "passed": true,
+      "detail": {
+        "U701": "C504891",
+        "U702": "C201665",
+        "U703": "C55513",
+        "J701": "C427307",
+        "Y701": "C70582",
+        "X701": "C712741",
+        "X702": "C712747",
+        "FB701": "C1002"
+      }
+    }
+  ],
+  "limitations": [
+    "Static connectivity only: no signal-integrity, jitter, TMDS eye, HDMI compliance, audio or hardware test was performed.",
+    "Since the round-3 integration the sheet is attached to the real root: FPGA-side pins reach ECP5 balls on the FPGA sheet and FPGA_3V3/5V_PRE come from the power sheet (#FLG701/#FLG702 removed; #FLG703 on ADC_VCC_5V stays).",
+    "Provisional values: 0 R series resistors, 200 R console-equivalent load (OpenSFC value), X7R 1 uF coupling, J701/X701/X702 footprints.",
+    "PCM1808 input impedance is a typical value (60 k); the gain check uses it."
+  ]
+}

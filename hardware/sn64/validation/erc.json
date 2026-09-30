@@ -1,7 +1,7 @@
 {
     "$schema": "https://schemas.kicad.org/erc.v1.json",
     "coordinate_units": "mm",
-    "date": "2026-09-29T18:14:49",
+    "date": "2026-09-29T19:57:55",
     "ignored_checks": [
         {
             "description": "Global label only appears once in the schematic",
@@ -34,222 +34,12 @@
                     "description": "Label connected to only one pin",
                     "items": [
                         {
-                            "description": "Label 'N64_AD15'",
-                            "pos": {
-                                "x": 0.4572,
-                                "y": 0.762
-                            },
-                            "uuid": "8697cc40-422a-5831-b5a6-14e6b68024c4"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Label 'N64_AD14'",
-                            "pos": {
-                                "x": 0.4572,
-                                "y": 0.8128
-                            },
-                            "uuid": "761e211f-9478-5188-a21c-fb763b1b97d4"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Label 'N64_AD13'",
-                            "pos": {
-                                "x": 0.4572,
-                                "y": 0.8636
-                            },
-                            "uuid": "3321df71-5a02-540a-bed4-1e53af8c6901"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Label 'N64_AD12'",
-                            "pos": {
-                                "x": 0.4572,
-                                "y": 0.9652
-                            },
-                            "uuid": "b55e72cf-afb1-50b3-b056-3cccdc347e99"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Label 'N64_WRITE_N'",
-                            "pos": {
-                                "x": 0.4572,
-                                "y": 1.016
-                            },
-                            "uuid": "1f4598f6-5ec8-55e5-b195-b3a0741064f4"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Label 'N64_READ_N'",
-                            "pos": {
-                                "x": 0.4572,
-                                "y": 1.1176
-                            },
-                            "uuid": "ba73bb3c-bf0b-52f0-bd0f-2e4ed6e00a61"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Label 'N64_AD11'",
-                            "pos": {
-                                "x": 0.4572,
-                                "y": 1.1684
-                            },
-                            "uuid": "3db9c349-cf23-5911-a9b7-0cafe0209f10"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Label 'N64_AD10'",
-                            "pos": {
-                                "x": 0.4572,
-                                "y": 1.2192
-                            },
-                            "uuid": "bfd2d94a-553f-5298-bfbf-94deffa7acda"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
                             "description": "Label 'N64_KEY1_RESERVED'",
                             "pos": {
                                 "x": 0.4572,
                                 "y": 1.3208
                             },
                             "uuid": "d59d6cec-5985-5092-a64f-272ff816ba11"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Label 'N64_AD9'",
-                            "pos": {
-                                "x": 0.4572,
-                                "y": 1.3716
-                            },
-                            "uuid": "0e9ac819-5a29-5424-9fd0-d47d88ddbde0"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Label 'N64_AD8'",
-                            "pos": {
-                                "x": 0.4572,
-                                "y": 1.4224
-                            },
-                            "uuid": "252851bd-aefa-5a63-86f8-112349d92339"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Label 'N64_CIC_DATA'",
-                            "pos": {
-                                "x": 0.4572,
-                                "y": 1.524
-                            },
-                            "uuid": "190004f8-cf0d-5a0c-8ef8-41ca6edfc73b"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Label 'N64_PIF_CLK'",
-                            "pos": {
-                                "x": 0.4572,
-                                "y": 1.5748
-                            },
-                            "uuid": "8d9dad02-73e3-583f-ae21-fd5d66fb054b"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Label 'N64_RESET_N'",
-                            "pos": {
-                                "x": 0.4572,
-                                "y": 1.6256
-                            },
-                            "uuid": "0bd4a89d-5937-5d68-9a48-f1374d60d899"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Label 'N64_JOYBUS'",
-                            "pos": {
-                                "x": 0.4572,
-                                "y": 1.6764
-                            },
-                            "uuid": "e960bdb0-7f21-5ca5-b393-c5dd1c31b264"
                         }
                     ],
                     "severity": "warning",
@@ -274,207 +64,12 @@
                     "description": "Label connected to only one pin",
                     "items": [
                         {
-                            "description": "Label 'N64_AD0'",
-                            "pos": {
-                                "x": 1.5748,
-                                "y": 0.762
-                            },
-                            "uuid": "d31bb888-9ae4-5777-884e-fc628e107612"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Label 'N64_AD1'",
-                            "pos": {
-                                "x": 1.5748,
-                                "y": 0.8128
-                            },
-                            "uuid": "b3d25beb-7e3b-5717-9942-44325263ac2d"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Label 'N64_AD2'",
-                            "pos": {
-                                "x": 1.5748,
-                                "y": 0.8636
-                            },
-                            "uuid": "de8df34e-2e26-5276-8881-c1212b5af807"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Label 'N64_AD3'",
-                            "pos": {
-                                "x": 1.5748,
-                                "y": 0.9652
-                            },
-                            "uuid": "40c7d3e0-e7c2-58ec-b805-ae78dcc6de4b"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Label 'N64_ALE_L'",
-                            "pos": {
-                                "x": 1.5748,
-                                "y": 1.016
-                            },
-                            "uuid": "6ac90835-141d-59ec-a558-86c42b161450"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Label 'N64_ALE_H'",
-                            "pos": {
-                                "x": 1.5748,
-                                "y": 1.1176
-                            },
-                            "uuid": "dc88b07e-47af-5307-97de-d9ad4b6c7267"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Label 'N64_AD4'",
-                            "pos": {
-                                "x": 1.5748,
-                                "y": 1.1684
-                            },
-                            "uuid": "8b2def83-34dd-5e48-9be0-9075f695ad21"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Label 'N64_AD5'",
-                            "pos": {
-                                "x": 1.5748,
-                                "y": 1.2192
-                            },
-                            "uuid": "3c255745-9a1d-5de1-94a1-8cf07721373f"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
                             "description": "Label 'N64_KEY2_RESERVED'",
                             "pos": {
                                 "x": 1.5748,
                                 "y": 1.3208
                             },
                             "uuid": "0ca215ab-d0dd-57d6-aa51-1a0ef3cdba1f"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Label 'N64_AD6'",
-                            "pos": {
-                                "x": 1.5748,
-                                "y": 1.3716
-                            },
-                            "uuid": "b2a5cd65-60d0-5929-b9db-9c047e01708e"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Label 'N64_AD7'",
-                            "pos": {
-                                "x": 1.5748,
-                                "y": 1.4224
-                            },
-                            "uuid": "e655d4d5-31fe-5ae4-8cfb-422208b96106"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Label 'N64_CIC_CLK'",
-                            "pos": {
-                                "x": 1.5748,
-                                "y": 1.524
-                            },
-                            "uuid": "157f2d9a-0b8c-554f-9ade-8fb665d3e653"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Label 'N64_INT_N'",
-                            "pos": {
-                                "x": 1.5748,
-                                "y": 1.5748
-                            },
-                            "uuid": "ef114da1-c03d-5c03-b0d1-24dc451bfcd5"
-                        }
-                    ],
-                    "severity": "warning",
-                    "type": "isolated_pin_label"
-                },
-                {
-                    "description": "Label connected to only one pin",
-                    "items": [
-                        {
-                            "description": "Label 'N64_NMI_N'",
-                            "pos": {
-                                "x": 1.5748,
-                                "y": 1.6256
-                            },
-                            "uuid": "ffd1abe5-b0d9-58b1-9b53-4109832a96ca"
                         }
                     ],
                     "severity": "warning",
@@ -637,6 +232,21 @@
                     "type": "pin_to_pin"
                 }
             ]
+        },
+        {
+            "path": "/FPGA/",
+            "uuid_path": "/e2505a21-9627-547b-aef4-ab0d2c57bd10/a995a8e7-a3e0-5400-992c-5952de135875",
+            "violations": []
+        },
+        {
+            "path": "/Power/",
+            "uuid_path": "/e2505a21-9627-547b-aef4-ab0d2c57bd10/4c37b7d7-17a3-5df8-bbfc-6c34ee2cc3b6",
+            "violations": []
+        },
+        {
+            "path": "/AV clock and cartridge audio/",
+            "uuid_path": "/e2505a21-9627-547b-aef4-ab0d2c57bd10/715ce1bb-ed86-5290-8214-6700790d09d0",
+            "violations": []
         }
     ],
     "source": "sn64.kicad_sch"

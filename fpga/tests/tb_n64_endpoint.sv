@@ -16,6 +16,7 @@ module tb_n64_endpoint;
     reg rom_we=0; reg [11:0] rom_waddr=0; reg [15:0] rom_wdata=0;
     wire [15:0] j1,j2,seq; wire [7:0] sx,sy; wire run;
     reg [15:0] status=16'hA5C3;
+    reg [15:0] region_info=16'h7E02, region_source=16'h0016;   // arbitrary patterns; the RTL passes them through
     wire rst_ev, nmi_ev;
 
     sn64_n64_endpoint #(.ROM_ADDR_BITS(12)) dut(.clk(clk),.reset(reset),.cic_cpu_clk(clk),
@@ -24,6 +25,7 @@ module tb_n64_endpoint;
         .rom_we(rom_we),.rom_waddr(rom_waddr),.rom_wdata(rom_wdata),
         .joy1_buttons(j1),.joy2_buttons(j2),.joy1_stick_x(sx),.joy1_stick_y(sy),
         .run_request(run),.soft_reset(),.region_mode(),.mailbox_seq(seq),.fault_flags(16'h0000),.status_flags(status),.build_id(16'h0102),
+        .region_info(region_info),.region_source(region_source),
         .n64_cic_clk(1'b1),.n64_cic_dq(),.n64_si_clk(1'b0),.cic_region(1'b0),.cic_invalid_region(),.cic_step(),
         .host_reset_event(rst_ev),.host_nmi_event(nmi_ev));
 
@@ -93,11 +95,26 @@ module tb_n64_endpoint;
         // 5) Read back what was written
         pi_addr(32'h1FFF_0010); pi_read(d0); pi_read(d1); pi_read(d2); pi_read(d3); pi_end;
         if (d0!==16'hB0B1 || d1!==16'h0C0D || d2!==16'h7F80 || d3!==16'h0001) $fatal(1,"Mailbox readback wrong: %h %h %h %h",d0,d1,d2,d3);
+        // 5b) REGION_INFO (0x1A) and REGION_SOURCE (0x1C): read as the bootstrap does,
+        //     i.e. the 32-bit pairs at 0x18 {COMMIT reads 0, REGION_INFO} and 0x1C {REGION_SOURCE, 0x1E = 0}.
+        pi_addr(32'h1FFF_0018); pi_read(d0); pi_read(d1); pi_read(d2); pi_read(d3); pi_end;
+        if (d0!==16'h0000 || d1!==16'h7E02 || d2!==16'h0016 || d3!==16'h0000)
+            $fatal(1,"REGION_INFO/REGION_SOURCE read wrong: %h %h %h %h",d0,d1,d2,d3);
+        // The words follow their inputs (they are live mailbox inputs, not latched in the endpoint).
+        region_info=16'h8B31; region_source=16'h0005; repeat(2) @(negedge clk);
+        pi_addr(32'h1FFF_001A); pi_read(d1); pi_read(d2); pi_end;
+        if (d1!==16'h8B31 || d2!==16'h0005) $fatal(1,"REGION words did not follow their inputs: %h %h",d1,d2);
+        // 5c) The bootstrap's COMMIT is a 32-bit write {0x18 = 1, 0x1A = 0}: SEQ +1 exactly, 0x1A stays read-only.
+        pi_addr(32'h1FFF_0018); pi_write(16'h0001); pi_write(16'h0000); pi_write(16'hFFFF); pi_end;
+        repeat(4) @(negedge clk);
+        if (seq!==16'd2) $fatal(1,"COMMIT pair write: SEQ=%0d expected 2",seq);
+        pi_addr(32'h1FFF_001A); pi_read(d1); pi_read(d2); pi_end;
+        if (d1!==16'h8B31 || d2!==16'h0005) $fatal(1,"write to read-only REGION words changed them: %h %h",d1,d2);
         // 6) Host reset drops the run request and produces an event on release
         n64_reset=0; repeat(6) @(negedge clk);
         if (run!==1'b0) $fatal(1,"run_request survived host reset");
         n64_reset=1; repeat(4) @(negedge clk);
-        $display("PASS: N64 endpoint ROM burst/offset reads, mailbox read/write/readback, run_request cleared by host reset (%0d clocks)",cycles);
+        $display("PASS: N64 endpoint ROM burst/offset reads, mailbox read/write/readback, REGION_INFO/REGION_SOURCE at 0x1A/0x1C read-only, COMMIT pair +1, run_request cleared by host reset (%0d clocks)",cycles);
         $finish;
     end
 endmodule

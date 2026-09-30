@@ -1,28 +1,59 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Self-checking testbench for fpga/rtl/sn64_av_out.sv.
 //
-// A SNES-timing model (1364 master clocks x 262 lines, 4-clock dots, X_OUT =
-// {dot, DOT_CLK}, HDE on dots 19..274, VDE on lines 1..224 or 1..239) drives a
-// known test pattern and ~32 kHz stereo audio into the DUT. The testbench
-// deserialises the DUT's serial TMDS outputs using the TMDS clock channel for
-// word alignment, then decodes control tokens, video (8b/10b) and data islands
-// (TERC4 + BCH ECC) and checks:
+// A SNES-timing model (4-clock dots, X_OUT = {dot, DOT_CLK}, HDE on dots
+// 19..274, VDE on lines 1..224 or 1..239) drives a known test pattern and
+// ~32 kHz stereo audio into the DUT. The testbench deserialises the DUT's
+// serial TMDS outputs using the TMDS clock channel for word alignment, then
+// decodes control tokens, video (8b/10b) and data islands (TERC4 + BCH ECC)
+// and checks:
 //   - every active pixel of every steady-state frame against the pattern,
 //     including the black border and the 256/512 half-dot handling
 //   - frame sequence (no dropped, repeated or torn SNES frames)
-//   - hsync width, line period, vsync width, lines per frame, 720x480 active area
-//   - data-island structure, packet ECC, InfoFrame presence, ACR N/CTS, and
-//     audio sample continuity (every SNES sample recovered, in order)
+//   - hsync width, line period, vsync width, lines per frame, active area
+//   - data-island structure, packet ECC, InfoFrame presence, AVI InfoFrame
+//     VIC / picture aspect / checksum, ACR N/CTS, and audio sample continuity
+//     (every SNES sample recovered, in order)
+//   - frame lock: after the start-up lock and one overscan change, every
+//     lock event is within +-2 pixels and needs no re-phase
 //
-// Time base: abstract ticks. 390 ticks = 1 SNES master clock and 310 ticks = 1
-// pixel clock, giving the exact 39/31 ratio of the intended PLL chain.
+// Regions:
+//   default          NTSC: 1364 master clocks x 262 lines, pixel = master x 39/31,
+//                    858 x 524 raster, VIC 2 (the recorded NTSC decision)
+//   SN64_TB_PAL      PAL:  1360 master clocks x 312 lines (the SNESTang core's
+//                    measured PAL line and frame), pixel = master x 108/85,
+//                    864 x 624 raster, VIC 17, picture aspect 4:3
+//   SN64_TB_ASYNC_27M NTSC timing with an independent 27.000 MHz pixel clock
+//
+// Time base: abstract ticks. NTSC: 390 ticks = 1 SNES master clock and 310
+// ticks = 1 pixel clock (39/31). PAL: 216 and 170 ticks (108/85).
 `timescale 1ns/1ps
 module tb_av_out;
     localparam int N_FRAMES = 9;
     localparam int WARMUP = 1;       // HDMI frame 0 contains the initial lock acquisition
-    localparam int H_TOTAL = 858, V_TOTAL = 524;
+    localparam int H_ACTIVE = 720;
     localparam [14:0] PAT_XOR = 15'h2A55;
 
+`ifdef SN64_TB_PAL
+    localparam bit PAL = 1;
+    localparam int H_TOTAL = 864, V_TOTAL = 624, V_ACTIVE = 576;
+    localparam int HS_W = 64, VS_LINES = 5, V_CENTER = 288;
+    localparam int SNES_LINE = 1360, SNES_LINES = 312;
+    localparam int EXP_VIC = 17;
+    localparam [1:0] EXP_ASPECT = 2'b01;          // 4:3
+    // pixel = master x 108/85
+    localparam int MH = 108, PH = 85, XH = 17, SO = 8;
+    // CTS = pixel clocks per 32 samples = (108/85) x 32 x 21477273/32000 = 27288.99
+    localparam int CTS_LO = 27287, CTS_HI = 27291;
+    localparam bit ASYNC = 0;
+    localparam string CLOCKING = "PAL, pixel = master*108/85";
+`else
+    localparam bit PAL = 0;
+    localparam int H_TOTAL = 858, V_TOTAL = 524, V_ACTIVE = 480;
+    localparam int HS_W = 62, VS_LINES = 6, V_CENTER = 240;
+    localparam int SNES_LINE = 1364, SNES_LINES = 262;
+    localparam int EXP_VIC = 2;
+    localparam [1:0] EXP_ASPECT = 2'b00;          // NTSC AVI InfoFrame unchanged: no data (VIC 2 implies 4:3)
 `ifdef SN64_TB_ASYNC_27M
     // Clock plan fallback: pixel clock 27.000 MHz from its own reference.
     // 27 / 21.4772727 = 44/35, so the raster drifts ~339 pixels per SNES frame
@@ -30,11 +61,14 @@ module tb_av_out;
     localparam int MH = 220, PH = 175, XH = 35, SO = 17;
     localparam int CTS_LO = 26998, CTS_HI = 27002;
     localparam bit ASYNC = 1;
+    localparam string CLOCKING = "async 27.000 MHz";
 `else
     // Intended clocking: pixel clock = master * 39/31 from the master clock.
     localparam int MH = 195, PH = 155, XH = 31, SO = 15;
     localparam int CTS_LO = 27018, CTS_HI = 27021;
     localparam bit ASYNC = 0;
+    localparam string CLOCKING = "pixel = master*39/31";
+`endif
 `endif
     reg clk_snes = 0, clk_pixel = 0, clk_x5 = 0, clk_samp = 0;
     initial forever #MH clk_snes = ~clk_snes;
@@ -76,7 +110,8 @@ module tb_av_out;
             video_x <= {8'(d - 19), dotclk};
             video_y <= {1'b0, 8'(v - 1)};
             rgb <= pat({8'(d - 19), dotclk}, 8'(v - 1), 3'(frame));
-            // audio: DDA at 32000 / 21477273 per master clock
+            // audio: DDA at 32000 / 21477273 per master clock (a fixed ratio to the
+            // master in both regions, like the core's CEGen)
             audio_ready <= 1'b0;
             dda = dda + 32000;
             if (dda >= 21477273) begin
@@ -87,10 +122,10 @@ module tb_av_out;
                 samples_sent++;
             end
             h++;
-            if (h == 1364) begin
+            if (h == SNES_LINE) begin
                 h = 0;
                 v++;
-                if (v == 262) begin
+                if (v == SNES_LINES) begin
                     v = 0;
                     frame++;
                     if (frame == N_FRAMES) sim_done = 1;
@@ -102,15 +137,15 @@ module tb_av_out;
     // ---------------- DUT ----------------
     wire [2:0] tmds;
     wire tmds_clock;
-    wire locked;
+    wire locked, mode_pal;
     wire signed [19:0] lock_error;
     wire [7:0] rephase_count;
     sn64_av_out dut (
         .clk_snes(clk_snes), .rst_snes_n(rst_snes_n), .rgb(rgb), .hde(hde), .vde(vde),
         .video_x(video_x), .video_y(video_y), .audio_left(audio_left), .audio_right(audio_right),
-        .audio_ready(audio_ready), .clk_pixel(clk_pixel), .clk_pixel_x5(clk_x5),
+        .audio_ready(audio_ready), .pal(PAL), .clk_pixel(clk_pixel), .clk_pixel_x5(clk_x5),
         .rst_pixel_n(rst_pixel_n), .tmds(tmds), .tmds_clock(tmds_clock),
-        .locked(locked), .lock_error(lock_error), .rephase_count(rephase_count));
+        .locked(locked), .lock_error(lock_error), .rephase_count(rephase_count), .mode_pal(mode_pal));
 
     // ---------------- deserialiser ----------------
     reg [9:0] sr0 = 0, sr1 = 0, sr2 = 0;
@@ -170,7 +205,7 @@ module tb_av_out;
     reg hs_act_q = 0, vs_act_q = 0;
     longint last_hs_edge = -1, hs_start = 0, vs_start = 0;
     int guard_len = 0, run_len = 0, isl_len = 0;
-    reg [23:0] line_px [0:719];
+    reg [23:0] line_px [0:H_ACTIVE-1];
 
     // per-frame accumulators
     int hframe = -1;                // HDMI frame index (vsync count)
@@ -187,6 +222,8 @@ module tb_av_out;
     int acr_n = -1, acr_cts_min = 1 << 30, acr_cts_max = 0, acr_count = 0;
     int hsync_width_errors = 0, vsync_width_errors = 0, run_errors = 0;
     int frame_count_errors = 0, island_len_errors = 0, infoframe_errors = 0;
+    int avi_checked = 0, avi_errors = 0, avi_vic = -1, avi_aspect = -1;
+    int warmup_cut_runs = 0;
     int last_audio_l = -1;
     int steady_lock_samples = 0, steady_lock_bad = 0;
     reg [31:0] hdr_bits;
@@ -204,16 +241,25 @@ module tb_av_out;
         bit any_pic, any_border;
         y = runs_in_frame;
         runs_in_frame++;
-        if (run_len != 720) begin run_errors++; report_error($sformatf("active run %0d pixels", run_len)); end
+        // The start-up lock (first event after reset) re-phases at whatever line the
+        // free-running raster is on, so it may cut one active run in the warm-up
+        // frame; that is counted and reported, not failed. Every later run must be exact.
+        if (run_len != H_ACTIVE) begin
+            if (hframe >= WARMUP) begin run_errors++; report_error($sformatf("active run %0d pixels", run_len)); end
+            else begin
+                warmup_cut_runs++;
+                $display("note: warm-up frame %0d: active run of %0d pixels cut by the start-up lock", hframe, run_len);
+            end
+        end
         if (hframe < WARMUP || transition) return;
         any_pic = 0; any_border = 0;
-        for (int x = 0; x < 720; x++) begin
+        for (int x = 0; x < H_ACTIVE; x++) begin
             if (line_px[x] != 0) begin
                 if (x >= 104 && x < 616) any_pic = 1; else any_border = 1;
             end
         end
         if (!identified) begin
-            if (!any_pic && !any_border) begin pixels_checked += 720; return; end
+            if (!any_pic && !any_border) begin pixels_checked += H_ACTIVE; return; end
             // first picture line: k = 0, px = 0 carries the frame number
             p15 = {line_px[104][7:3], line_px[104][15:11], line_px[104][23:19]} ^ PAT_XOR;
             f_seen = p15[14:12];
@@ -224,10 +270,10 @@ module tb_av_out;
             vis_disp = (f_real == 0) ? 224 : vis_sched(f_real - 1);
             transition = (f_real != 0) && vis_sched(f_real) != vis_sched(f_real - 1);
             if (transition) return;
-            if (v_off_seen != 240 - vis_disp)
-                report_error($sformatf("picture starts on line %0d, expected %0d", v_off_seen, 240 - vis_disp));
+            if (v_off_seen != V_CENTER - vis_disp)
+                report_error($sformatf("picture starts on line %0d, expected %0d", v_off_seen, V_CENTER - vis_disp));
         end
-        for (int x = 0; x < 720; x++) begin
+        for (int x = 0; x < H_ACTIVE; x++) begin
             kk = (y - v_off_seen) / 2;
             pic = (x >= 104 && x < 616 && y >= v_off_seen && (y - v_off_seen) < 2 * vis_disp);
             if (pic) begin
@@ -247,7 +293,7 @@ module tb_av_out;
         int rp;
         rp = rephase_count;
         if (hframe >= WARMUP) begin
-            if (runs_in_frame != 480) begin frame_count_errors++; report_error($sformatf("%0d active lines", runs_in_frame)); end
+            if (runs_in_frame != V_ACTIVE) begin frame_count_errors++; report_error($sformatf("%0d active lines", runs_in_frame)); end
             if (rp == rephase_at_start && lines_in_frame != V_TOTAL) begin
                 frame_count_errors++; report_error($sformatf("%0d lines in frame", lines_in_frame));
             end
@@ -271,6 +317,24 @@ module tb_av_out;
         pkt_acr = 0; pkt_aud = 0; pkt_avi = 0; pkt_aif = 0; pkt_spd = 0; pkt_null = 0;
         identified = 0; transition = 0;
         rephase_at_start = rp;
+    endtask
+
+    // AVI InfoFrame (type 0x82): PB0 checksum over HB0-HB2 and PB0-PB27,
+    // PB2[5:4] picture aspect (M1M0), PB4[6:0] VIC.
+    task automatic check_avi();
+        reg [7:0] sum, pb2, pb4;
+        sum = hdr_bits[7:0] + hdr_bits[15:8] + hdr_bits[23:16];
+        for (int k = 0; k < 4; k++)
+            for (int j = 0; j < 7; j++) sum = sum + sub_bits[k][8*j +: 8];
+        pb2 = sub_bits[0][23:16];
+        pb4 = sub_bits[0][39:32];
+        avi_vic = pb4[6:0];
+        avi_aspect = pb2[5:4];
+        avi_checked++;
+        if (sum != 8'd0) begin avi_errors++; report_error($sformatf("AVI InfoFrame checksum %02h", sum)); end
+        if (hdr_bits[23:8] != 16'h0D02) begin avi_errors++; report_error($sformatf("AVI InfoFrame version/length %04h", hdr_bits[23:8])); end
+        if (pb4[6:0] != 7'(EXP_VIC)) begin avi_errors++; report_error($sformatf("AVI VIC %0d, expected %0d", pb4[6:0], EXP_VIC)); end
+        if (pb2[5:4] != EXP_ASPECT) begin avi_errors++; report_error($sformatf("AVI picture aspect %0d, expected %0d", pb2[5:4], EXP_ASPECT)); end
     endtask
 
     task automatic finish_packet();
@@ -315,7 +379,7 @@ module tb_av_out;
                     end
                 end
             end
-            8'h82: pkt_avi++;
+            8'h82: begin pkt_avi++; if (hframe >= WARMUP) check_avi(); end
             8'h83: pkt_spd++;
             8'h84: pkt_aif++;
             default: begin protocol_errors++; report_error($sformatf("packet type %02h", ptype)); end
@@ -341,7 +405,7 @@ module tb_av_out;
             state = S_CTRL;
             {vs, hs} = c0;
         end else if (state == S_VID) begin
-            if (run_len < 720) line_px[run_len] = {tmds_dec8(w2), tmds_dec8(w1), tmds_dec8(w0)};
+            if (run_len < H_ACTIVE) line_px[run_len] = {tmds_dec8(w2), tmds_dec8(w1), tmds_dec8(w0)};
             run_len++;
         end else if (vg && (state == S_CTRL || state == S_VG)) begin
             if (state == S_CTRL) guard_len = 0;
@@ -384,7 +448,7 @@ module tb_av_out;
             vs_start = sym;
         end
         if (!vs_act && vs_act_q && hframe >= WARMUP && rephase_count == rephase_at_start) begin
-            if (sym - vs_start != 6 * H_TOTAL) begin
+            if (sym - vs_start != VS_LINES * H_TOTAL) begin
                 vsync_width_errors++; report_error($sformatf("vsync width %0d", sym - vs_start));
             end
         end
@@ -396,7 +460,7 @@ module tb_av_out;
             lines_in_frame++;
         end
         if (!hs_act && hs_act_q && hframe >= WARMUP) begin
-            if (sym - hs_start != 62) begin hsync_width_errors++; report_error($sformatf("hsync width %0d", sym - hs_start)); end
+            if (sym - hs_start != HS_W) begin hsync_width_errors++; report_error($sformatf("hsync width %0d", sym - hs_start)); end
         end
         hs_act_q = hs_act;
         vs_act_q = vs_act;
@@ -421,29 +485,33 @@ module tb_av_out;
         rst_pixel_n = 1;
         @(posedge clk_snes);
         rst_snes_n = 1;
+        repeat (4) @(posedge clk_pixel);
+        if (mode_pal !== PAL) report_error($sformatf("raster mode %0d, expected %0d", mode_pal, PAL));
         wait (sim_done);
         repeat (2000) @(posedge clk_pixel);
         $display("summary: HDMI frames %0d, pixel-checked frames %0d, pixels %0d, pixel errors %0d",
                  hframe, frames_checked, pixels_checked, pixel_errors);
         $display("summary: hsync-width errors %0d, vsync-width errors %0d, active-run errors %0d, frame-shape errors %0d, frame-sequence errors %0d",
                  hsync_width_errors, vsync_width_errors, run_errors, frame_count_errors, frame_seq_errors);
-        $display("summary: protocol errors %0d, island-length errors %0d, ECC errors %0d, InfoFrame errors %0d",
-                 protocol_errors, island_len_errors, ecc_errors, infoframe_errors);
+        $display("summary: protocol errors %0d, island-length errors %0d, ECC errors %0d, InfoFrame errors %0d, AVI InfoFrames checked %0d (VIC %0d, aspect %0d, errors %0d)",
+                 protocol_errors, island_len_errors, ecc_errors, infoframe_errors, avi_checked, avi_vic, avi_aspect, avi_errors);
         $display("summary: audio sent %0d, recovered %0d, audio errors %0d; ACR N=%0d CTS %0d..%0d over %0d packets",
                  samples_sent, audio_rx, audio_errors, acr_n, acr_cts_min, acr_cts_max, acr_count);
-        $display("summary: locked=%0d lock_error=%0d rephase_count=%0d steady events=%0d (out of tolerance %0d)",
-                 locked, lock_error, rephase_count, steady_lock_samples, steady_lock_bad);
+        $display("summary: locked=%0d lock_error=%0d rephase_count=%0d steady events=%0d (out of tolerance %0d), warm-up runs cut by the start-up lock %0d",
+                 locked, lock_error, rephase_count, steady_lock_samples, steady_lock_bad, warmup_cut_runs);
         if (frames_checked < 4) report_error($sformatf("only %0d frames fully checked", frames_checked));
+        if (avi_checked < 4) report_error($sformatf("only %0d AVI InfoFrames checked", avi_checked));
         if (audio_rx < samples_sent - 40) report_error("audio samples lost");
         if (acr_n != 4096 || acr_cts_min < CTS_LO || acr_cts_max > CTS_HI) report_error("ACR N/CTS out of range");
         if (!ASYNC && (!locked || rephase_count != 2 || steady_lock_bad != 0 || steady_lock_samples < 3))
-            report_error("frame lock not steady");
+            report_error($sformatf("frame lock not steady (last lock_error %0d, %0d re-phases, %0d of %0d steady events out of tolerance)",
+                                   lock_error, rephase_count, steady_lock_bad, steady_lock_samples));
         if (ASYNC && (!locked || rephase_count < N_FRAMES - 1))
             report_error("asynchronous clocks: expected tracking with a re-phase every frame");
         if (errors == 0)
-            $display("PASS: av-out (%s) %0d frames, %0d pixels exact, 720x480 in 858x524, hsync 62, vsync 6 lines, %0d audio samples in order, ACR CTS %0d..%0d, 0 ECC errors, %0d re-phases",
-                     ASYNC ? "async 27.000 MHz" : "pixel = master*39/31",
-                     frames_checked, pixels_checked, audio_rx, acr_cts_min, acr_cts_max, rephase_count);
+            $display("PASS: av-out (%s) %0d frames, %0d pixels exact, %0dx%0d in %0dx%0d, hsync %0d, vsync %0d lines, VIC %0d aspect %0d, %0d audio samples in order, ACR CTS %0d..%0d, 0 ECC errors, %0d re-phases",
+                     CLOCKING, frames_checked, pixels_checked, H_ACTIVE, V_ACTIVE, H_TOTAL, V_TOTAL, HS_W, VS_LINES,
+                     avi_vic, avi_aspect, audio_rx, acr_cts_min, acr_cts_max, rephase_count);
         else begin
             $display("FAIL: av-out %0d errors", errors);
             $fatal(1, "av-out checks failed");

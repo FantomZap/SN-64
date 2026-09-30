@@ -16,7 +16,9 @@
 //   0x08  {FAULT,        reserved}      read   (FAULT = fault_code << 8)
 //   0x10  {JOY1_BUTTONS, JOY2_BUTTONS}  write (and read back)
 //   0x14  {JOY1_STICK,   CONTROL}       write (and read back)
-//   0x18  {COMMIT,       unused 0x1A}   write; the RTL ignores 0x1A
+//   0x18  {COMMIT,       REGION_INFO}   write COMMIT (0x1A is read-only, the write is ignored);
+//                                        read: COMMIT reads 0, low half = REGION_INFO
+//   0x1C  {REGION_SOURCE, reserved}     read
 #ifndef SN64_MAILBOX_H
 #define SN64_MAILBOX_H
 
@@ -31,6 +33,8 @@
 #define SN64_REG_JOY1_JOY2       0x10u
 #define SN64_REG_STICK_CONTROL   0x14u
 #define SN64_REG_COMMIT          0x18u
+#define SN64_REG_COMMIT_REGION   0x18u         // read: low half = REGION_INFO (0x1A)
+#define SN64_REG_REGION_SOURCE   0x1Cu         // read: high half = REGION_SOURCE (0x1C)
 
 #define SN64_MAGIC               0x534Eu       // "SN"
 #define SN64_CONTROL_RUN_REQUEST 0x0001u       // CONTROL bit 0: cartridge power and run
@@ -81,5 +85,25 @@ static const sn64_status_bit_t sn64_status_bits[] = {
     { SN64_STATUS_CLOCK_ERROR,   "CLOCK CHIP ERROR"  },
 };
 #define SN64_STATUS_BIT_COUNT (sizeof(sn64_status_bits) / sizeof(sn64_status_bits[0]))
+
+// REGION_INFO (0x1A): ROM-header probe result, snapshot taken when the SNES
+// clock started (live until the first decision). Layout from sn64_top.sv.
+#define SN64_RINFO_COUNTRY_MASK   0x00FFu  // raw country byte ($FFD9)
+#define SN64_RINFO_REJECT_SHIFT   8        // bits 11:8 reject {unstable, checksum, map, country}
+#define SN64_RINFO_REJECT_MASK    0x0F00u
+#define SN64_RINFO_DONE           0x1000u  // probe finished
+#define SN64_RINFO_VALID          0x2000u  // header passed every check
+#define SN64_RINFO_PAL            0x4000u  // header country implies PAL
+#define SN64_RINFO_ABORTED        0x8000u  // permission lost mid-probe
+
+// REGION_SOURCE (0x1C): how the region of the last cartridge start was decided.
+#define SN64_RSRC_SOURCE_MASK     0x0003u  // 0 forced (menu), 1 key CIC, 2 ROM header, 3 NTSC default
+#define SN64_RSRC_DECIDED         0x0004u  // fields describe the last cartridge start
+#define SN64_RSRC_TIMEOUT         0x0008u  // region timeout expired before the decision
+#define SN64_RSRC_PAL             0x0010u  // decided region is PAL
+
+static const char *const sn64_region_source_names[4] = {
+    "menu (forced)", "key CIC", "ROM header", "default",
+};
 
 #endif

@@ -375,7 +375,7 @@ def main():
         ('R201', '2.2k', RAIL5, 'CTL_OE_N_5V'), ('R202', '2.2k', RAIL5, 'CIC_OE_N_5V'),
         ('R203', '1k', RAIL5, 'DATA_OE_N_5V'), ('R204', '1k', RAIL5, 'DATA_DIR_5V'),
         ('R205', '100k', RAIL5, 'RESET_GATE_5V'),
-        ('R206', '10k', RAIL3, 'ctl_oe_n'), ('R207', '10k', RAIL3, 'cic_oe_n'), ('R208', '10k', RAIL3, 'data_oe_n'),
+        ('R206', '4.7k', RAIL3, 'ctl_oe_n'), ('R207', '4.7k', RAIL3, 'cic_oe_n'), ('R208', '4.7k', RAIL3, 'data_oe_n'),
         ('R209', '10k', 'data_dir', 'GND'), ('R210', '10k', 'cart_reset_pull_n', 'GND'),
         ('R211', '10k', RAIL5, 'SNES_IRQ_N'), ('R212', '10k', RAIL5, 'SNES_RESET_N'),
         ('R213', '10k', RAIL5, 'SNES_EXPAND')]
@@ -462,7 +462,7 @@ def main():
         txt('HIERARCHICAL PORTS - CARTRIDGE SIDE (root J2 net labels)', 543.56, 317.5, 1.524),
         txt('PENDING PORTS - FPGA SIDE (bridge port names) + DEFAULT-OFF RAILS FROM FUTURE POWER SHEET', 690.88, 317.5, 1.524),
         txt('DRAFT 0.3.1-cart: schematic circuit candidate only. No PCB, SI simulation, power sequencing test, ESD part or cartridge test has been performed.\n'
-            'SNES_5V_CART and INTERFACE_3V3 are hierarchical inputs from the (future) power sheet; #FLG201/#FLG202 mark them externally supplied for ERC only.\n'
+            'SNES_5V_CART and INTERFACE_3V3 are hierarchical inputs from the power sheet; #FLG201/#FLG202 are kept because the power-sheet switch outputs are passive pins (ERC only).\n'
             'Open: socket ESD array selection, final damping/pull values (CIC pull-down value to confirm against a real key CIC).\n'
             'Sources: TI SCAS375K (SN74LVC4245A), SCAS414AG (SN74LVC244A), SCES296AG (SN74LVC1G07), SCES295AB (SN74LVC1G06), SCES515N (SN74LVC1T45).\n'
             'See docs/design/cart-interface-schematic.md.',

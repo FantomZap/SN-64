@@ -1,0 +1,57 @@
+{
+  "status": "pass",
+  "generated_at_utc": "2026-09-30T00:00:56.377636+00:00",
+  "scope": "root hierarchy connectivity: hierarchical labels, sheet pins, root labels and the shared net-name contract",
+  "tool": "hardware/sn64/tools/verify_root_connectivity.py",
+  "checks_passed": 4,
+  "checks_failed": 0,
+  "inputs": {
+    "sn64.kicad_sch": "4fbc588ad545ea6d34c095103af83c9238bc3e5f922bc91e2abdb4711719b5b0",
+    "usb-programmer.kicad_sch": "b8cfd904b2ea9a024f47461d22f97630a7414379b5f59f308514e877f118861d",
+    "cart-interface.kicad_sch": "71f79297ebf20618138eb1d05044cdcc1c3e719a6b62d1dfb639b74a56693e1c",
+    "fpga.kicad_sch": "0a2c5c6b651acf6349636239c4eb994d2c3bba8bcb526bd7f8e938f781867e75",
+    "power.kicad_sch": "14d5328907a943e9cbbbecc31dc1b685f4714dc595a91a176ed44d8a1d50d2c1",
+    "av-clock.kicad_sch": "66c40c96bddd5d0a8fa40f0638624a2bd0bd515b502e62d219734b05addf6bfa"
+  },
+  "checks": [
+    {
+      "check": "hierarchical_labels_match_sheet_pins",
+      "passed": true,
+      "detail": {
+        "usb-programmer.kicad_sch": 10,
+        "cart-interface.kicad_sch": 50,
+        "fpga.kicad_sch": 92,
+        "power.kicad_sch": 21,
+        "av-clock.kicad_sch": 25
+      }
+    },
+    {
+      "check": "every_sheet_pin_labelled_at_root",
+      "passed": true,
+      "detail": {
+        "pending": [],
+        "wrong_name": []
+      }
+    },
+    {
+      "check": "every_sheet_pin_has_a_partner",
+      "passed": true,
+      "detail": {
+        "no_partner": []
+      }
+    },
+    {
+      "check": "contract_nets_connected_on_both_ends",
+      "passed": true,
+      "detail": {
+        "checked": 141,
+        "problems": {},
+        "cartridge_contract_names": 63
+      }
+    }
+  ],
+  "limitations": [
+    "Static connectivity only: no electrical, level, timing or layout claim.",
+    "N64_AUDIO_L/R and HOST_12V are expected on the edge connector only (reserved / unused)."
+  ]
+}

@@ -10,10 +10,25 @@
 // blanking. The packet, ECC and TMDS encoders are the vendored hdl-util modules
 // under fpga/vendor/hdl-util-hdmi/src, used unmodified.
 //
+// Two raster modes, selected by `pal` (static: sn64_av_out changes it only
+// while the pixel domain is in reset):
+//   pal = 0: CEA-861 VIC 2 (720x480p) timing with 524 instead of 525 lines
+//   pal = 1: CEA-861 VIC 17 (720x576p50, 4:3) timing with 624 instead of 625 lines
+// Horizontal active width (720) is the same in both, so the data-island slot
+// positions are shared. VIC 17 source timing: hdl-util hdmi.sv lines 152-162
+// and Linux drivers/gpu/drm/drm_edid.c (v6.10) lines 837-841: 27.000 MHz,
+// H 720/732/796/864, V 576/581/586/625, negative syncs, 4:3.
+//
+// AVI InfoFrame: packet_picker carries the NTSC AVI InfoFrame (VIC 2, as
+// before). In PAL mode the AVI packet (type 0x82) is replaced, byte for byte,
+// by a second vendored auxiliary_video_information_info_frame instance with
+// VIC 17 and picture aspect 4:3, so the vendored files stay unmodified.
+//
 // Timing convention (same as hdl-util): rgb presented in clock t belongs to the
 // position that cx/cy held in clock t-1. Symbols appear on tmds[] two clocks later.
 module sn64_av_hdmi_tx #(
     parameter int H_ACTIVE = 720,
+    // NTSC raster (pal = 0)
     parameter int V_ACTIVE = 480,
     parameter int H_TOTAL = 858,
     parameter int V_TOTAL = 524,
@@ -21,9 +36,19 @@ module sn64_av_hdmi_tx #(
     parameter int HSYNC_SIZE = 62,
     parameter int VSYNC_START = 9,    // front porch, lines after V_ACTIVE
     parameter int VSYNC_SIZE = 6,
-    parameter bit SYNC_INVERT = 1'b1, // 480p: negative sync polarity
     parameter int VIDEO_ID_CODE = 2,  // CEA-861 VIC 2: 720x480p, 4:3
-    parameter real VIDEO_RATE = 27.0198e6,
+    // PAL raster (pal = 1)
+    parameter int PAL_V_ACTIVE = 576,
+    parameter int PAL_H_TOTAL = 864,
+    parameter int PAL_V_TOTAL = 624,
+    parameter int PAL_HSYNC_START = 12,
+    parameter int PAL_HSYNC_SIZE = 64,
+    parameter int PAL_VSYNC_START = 5,
+    parameter int PAL_VSYNC_SIZE = 5,
+    parameter int PAL_VIDEO_ID_CODE = 17,        // CEA-861 VIC 17: 720x576p50, 4:3
+    parameter bit [1:0] PAL_PICTURE_ASPECT = 2'b01, // AVI M1M0: 01 = 4:3
+    parameter bit SYNC_INVERT = 1'b1, // 480p and 576p: negative sync polarity
+    parameter real VIDEO_RATE = 27.0198e6, // only sizes the ACR CTS counter (15 bits for 27.02 and 27.04 MHz)
     parameter int AUDIO_RATE = 32000,
     parameter int AUDIO_BIT_WIDTH = 16,
     parameter bit DVI_OUTPUT = 1'b0,
@@ -32,6 +57,7 @@ module sn64_av_hdmi_tx #(
 ) (
     input  wire clk_pixel,
     input  wire reset,
+    input  wire pal,                        // raster mode; change only while reset is asserted
     input  wire [10:0] cx,
     input  wire [9:0]  cy,
     input  wire [23:0] rgb,                 // {R8, G8, B8}
@@ -39,31 +65,37 @@ module sn64_av_hdmi_tx #(
     input  wire [AUDIO_BIT_WIDTH-1:0] audio_left, audio_right,
     output logic [9:0] tmds [2:0]
 );
-    localparam int H_HS0 = H_ACTIVE + HSYNC_START;
-    localparam int H_HS1 = H_ACTIVE + HSYNC_START + HSYNC_SIZE;
-    localparam int V_VS0 = V_ACTIVE + VSYNC_START;
-    localparam int V_VS1 = V_ACTIVE + VSYNC_START + VSYNC_SIZE;
+    // Runtime raster values (two constant sets, one mux each).
+    wire [10:0] h_total = pal ? 11'(PAL_H_TOTAL) : 11'(H_TOTAL);
+    wire [9:0]  v_active = pal ? 10'(PAL_V_ACTIVE) : 10'(V_ACTIVE);
+    wire [9:0]  v_total = pal ? 10'(PAL_V_TOTAL) : 10'(V_TOTAL);
+    wire [10:0] h_hs0 = pal ? 11'(H_ACTIVE + PAL_HSYNC_START) : 11'(H_ACTIVE + HSYNC_START);
+    wire [10:0] h_hs1 = pal ? 11'(H_ACTIVE + PAL_HSYNC_START + PAL_HSYNC_SIZE)
+                            : 11'(H_ACTIVE + HSYNC_START + HSYNC_SIZE);
+    wire [9:0]  v_vs0 = pal ? 10'(PAL_V_ACTIVE + PAL_VSYNC_START) : 10'(V_ACTIVE + VSYNC_START);
+    wire [9:0]  v_vs1 = pal ? 10'(PAL_V_ACTIVE + PAL_VSYNC_START + PAL_VSYNC_SIZE)
+                            : 10'(V_ACTIVE + VSYNC_START + VSYNC_SIZE);
 
     logic hsync, vsync;
     always_comb begin
-        hsync = SYNC_INVERT ^ (cx >= H_HS0 && cx < H_HS1);
+        hsync = SYNC_INVERT ^ (cx >= h_hs0 && cx < h_hs1);
 `ifdef SN64_AV_FAULT_SYNC
         // Fault injection for the negative test: one short hsync pulse on line 100.
-        if (cy == 10'd100 && cx == 11'(H_HS1 - 1)) hsync = SYNC_INVERT;
+        if (cy == 10'd100 && cx == h_hs1 - 11'd1) hsync = SYNC_INVERT;
 `endif
         // vsync edges coincide with the hsync leading edge (as in hdl-util)
-        if (cy == V_VS0 - 1)
-            vsync = SYNC_INVERT ^ (cx >= H_HS0);
-        else if (cy == V_VS1 - 1)
-            vsync = SYNC_INVERT ^ (cx < H_HS0);
+        if (cy == v_vs0 - 10'd1)
+            vsync = SYNC_INVERT ^ (cx >= h_hs0);
+        else if (cy == v_vs1 - 10'd1)
+            vsync = SYNC_INVERT ^ (cx < h_hs0);
         else
-            vsync = SYNC_INVERT ^ (cy >= V_VS0 && cy < V_VS1);
+            vsync = SYNC_INVERT ^ (cy >= v_vs0 && cy < v_vs1);
     end
 
     logic video_data_period;
     always_ff @(posedge clk_pixel)
         if (reset) video_data_period <= 1'b0;
-        else video_data_period <= cx < H_ACTIVE && cy < V_ACTIVE;
+        else video_data_period <= cx < 11'(H_ACTIVE) && cy < v_active;
 
     logic [2:0] mode;
     logic [23:0] video_data;
@@ -78,13 +110,17 @@ module sn64_av_hdmi_tx #(
                     video_guard <= 1'b0;
                     video_preamble <= 1'b0;
                 end else begin
-                    video_guard <= cx >= H_TOTAL - 2 && cx < H_TOTAL && (cy == V_TOTAL - 1 || cy < V_ACTIVE - 1);
-                    video_preamble <= cx >= H_TOTAL - 10 && cx < H_TOTAL - 2 && (cy == V_TOTAL - 1 || cy < V_ACTIVE - 1);
+                    video_guard <= cx >= h_total - 11'd2 && cx < h_total &&
+                                   (cy == v_total - 10'd1 || cy < v_active - 10'd1);
+                    video_preamble <= cx >= h_total - 11'd10 && cx < h_total - 11'd2 &&
+                                      (cy == v_total - 10'd1 || cy < v_active - 10'd1);
                 end
             end
 
-            // Section 5.2.3.1: packets that fit in horizontal blanking.
-            localparam int MAX_PACKETS = (H_TOTAL - H_ACTIVE - 2 - 8 - 4 - 2 - 2 - 8 - 4) / 32;
+            // Section 5.2.3.1: packets that fit in horizontal blanking; the
+            // narrower blanking of the two modes sets the count (3 for both).
+            localparam int BLANK_MIN = (H_TOTAL < PAL_H_TOTAL ? H_TOTAL : PAL_H_TOTAL) - H_ACTIVE;
+            localparam int MAX_PACKETS = (BLANK_MIN - 2 - 8 - 4 - 2 - 2 - 8 - 4) / 32;
             localparam int NUM_PACKETS = MAX_PACKETS > 18 ? 18 : MAX_PACKETS;
             localparam int DI_START = H_ACTIVE + 14;
             localparam int DI_END = H_ACTIVE + 14 + NUM_PACKETS * 32;
@@ -107,10 +143,12 @@ module sn64_av_hdmi_tx #(
                 end
             end
 
-            logic [23:0] header;
+            logic [23:0] header, picked_header, avi_pal_header;
             logic [55:0] sub [3:0];
+            logic [55:0] picked_sub [3:0];
+            logic [55:0] avi_pal_sub [3:0];
             logic video_field_end;
-            assign video_field_end = cx == H_ACTIVE - 1 && cy == V_ACTIVE - 1;
+            assign video_field_end = cx == 11'(H_ACTIVE - 1) && cy == v_active - 10'd1;
             logic [4:0] packet_pixel_counter;
             logic [AUDIO_BIT_WIDTH-1:0] audio_sample_word [1:0];
             assign audio_sample_word[0] = audio_left;
@@ -129,7 +167,21 @@ module sn64_av_hdmi_tx #(
                 .clk_pixel(clk_pixel), .clk_audio(clk_audio), .reset(reset),
                 .video_field_end(video_field_end), .packet_enable(packet_enable),
                 .packet_pixel_counter(packet_pixel_counter),
-                .audio_sample_word(audio_sample_word), .header(header), .sub(sub));
+                .audio_sample_word(audio_sample_word), .header(picked_header), .sub(picked_sub));
+
+            // PAL AVI InfoFrame (VIC 17, 4:3), substituted for the picker's AVI packet.
+            auxiliary_video_information_info_frame #(
+                .VIDEO_ID_CODE(PAL_VIDEO_ID_CODE),
+                .IT_CONTENT(1'b1),
+                .PICTURE_ASPECT_RATIO(PAL_PICTURE_ASPECT)
+            ) avi_pal (.header(avi_pal_header), .sub(avi_pal_sub));
+
+            wire use_pal_avi = pal && picked_header[7:0] == 8'h82;
+            assign header = use_pal_avi ? avi_pal_header : picked_header;
+            assign sub[0] = use_pal_avi ? avi_pal_sub[0] : picked_sub[0];
+            assign sub[1] = use_pal_avi ? avi_pal_sub[1] : picked_sub[1];
+            assign sub[2] = use_pal_avi ? avi_pal_sub[2] : picked_sub[2];
+            assign sub[3] = use_pal_avi ? avi_pal_sub[3] : picked_sub[3];
 
             logic [8:0] packet_data;
             packet_assembler packet_assembler (

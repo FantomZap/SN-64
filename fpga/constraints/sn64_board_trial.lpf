@@ -4,7 +4,7 @@
 FREQUENCY PORT "osc_25" 25 MHZ;
 FREQUENCY PORT "si_clk0" 21.477272 MHZ;
 FREQUENCY PORT "si_clk1" 21.28137 MHZ;
-FREQUENCY PORT "si_clk2" 27.0198 MHZ;
+FREQUENCY PORT "si_clk2" 27.0399 MHZ;
 # SNES master after the DCSC: the faster (NTSC) of the two selectable clocks.
 FREQUENCY NET "clk_snes" 21.477272 MHZ;
 # ULX3S 25 MHz oscillator input (a primary-clock-capable pin).

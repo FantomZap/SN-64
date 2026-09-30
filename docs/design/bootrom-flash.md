@@ -150,6 +150,6 @@ verilator_bin --binary --timing --build-jobs 4 -Wno-fatal --top-module tb_bootro
 
 1. `sn64_top`: pass `ROM_FROM_FLASH`/`FLASH_OFFSET` through and add the `flash_cs_n` and `flash_dq[3:0]` top-level ports. `flash_sck` stays unused with `USRMCLK`. Then switch the default to flash once the board wrapper exists.
 2. `evaluate.py`: build and run `tb_bootrom_flash` plus the three fault runs. Whole-design synthesis with the flash option needs `read_verilog -lib +/ecp5/cells_bb.v` before `read_slang` and the two new source files.
-3. Board wrapper and constraints: bank-8 pins, I/O standard, QE-bit production step, `ABh` wake-up if needed, confirm TN02039 items above.
+3. Board wrapper and constraints: done in round 3. Flash part **W25Q128JVSIQ** (LCSC C97521): QE factory-fixed to 1, EBh with 2 mode + 4 dummy clocks, tCLQV 6 ns. MASTER_SPI_PORT defaults to DISABLE, so CS/D0-D3 are GPIO in user mode (TN-02039 Table 7.1). The bank-8 pins are in `fpga/constraints/sn64_board.lpf`. Still open: `ABh` wake-up need and the remaining TN-02039 items above.
 4. Hardware checks: measure the real PI DOM1 waveform (ALE_H→ALE_L interval, LAT start point), the USRMCLK output delay and the flash round trip on the prototype.
 5. Optional speed-ups if the first-word margin proves too small on hardware: continuous-read mode (skips the 8-clock command) or a faster SCK. Both need an SN64-owned controller instead of the unmodified `memory_flash`.

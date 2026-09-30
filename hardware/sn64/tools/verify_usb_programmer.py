@@ -167,8 +167,33 @@ def main():
         check('six_power_domains_distinct', len(set(rails.values())) == 6, rails)
 
         values = {r: c.findtext('value', '') for r, c in components.items()}
-        check('independent_CC_5k1_resistors', values['R101'] == values['R102'] == '5.1k 1%',
-              {r: values[r] for r in ['R101', 'R102']})
+        # Round-3 integration: the power sheet's TUSB320 (U301) presents Rd on CC1/CC2 (TI SLLSEN9F 7.4.3,
+        # dead-battery Rd included), so R101/R102 stay in the design with their value but are DNP.
+        check('CC_5k1_Rd_DNP_TUSB320_provides_Rd', values['R101'] == values['R102'] == '5.1k 1%'
+              and all(any(p.get('name') == 'dnp' for p in components[r].findall('property')) for r in ['R101', 'R102']),
+              {r: {'value': values[r], 'dnp': any(p.get('name') == 'dnp' for p in components[r].findall('property'))}
+               for r in ['R101', 'R102']})
+        check('CC_exported_to_TUSB320', nodes[('J101', 'A5')][0] == nodes[('U301', '1')][0]
+              and nodes[('J101', 'B5')][0] == nodes[('U301', '2')][0],
+              {'CC1': [nodes[('J101', 'A5')][0], nodes[('U301', '1')][0]],
+               'CC2': [nodes[('J101', 'B5')][0], nodes[('U301', '2')][0]]})
+        check('USB_VBUS_exported_to_power_sheet',
+              nodes[('J101', 'A4')][0] == nodes[('U302', '5')][0] == nodes[('R301', '1')][0],
+              {'J101.A4': nodes[('J101', 'A4')][0], 'U302.5': nodes[('U302', '5')][0], 'R301.1': nodes[('R301', '1')][0]})
+        check('USB_3V3_powers_TUSB320', nodes[('U103', '5')][0] == nodes[('U301', '12')][0],
+              {'U103.5': nodes[('U103', '5')][0], 'U301.12': nodes[('U301', '12')][0]})
+        # Service header J102 (VTREF, GND, TCK, TDI, TDO, TMS) reaches the ECP5 dedicated JTAG balls
+        # (Lattice ECP5U-85 pinout: TCK T5, TDI R5, TDO V4, TMS U5; FPGA sheet U401).
+        jtag = {'TCK': (('J102', '3'), ('U401', 'T5')), 'TDI': (('J102', '4'), ('U401', 'R5')),
+                'TDO': (('J102', '5'), ('U401', 'V4')), 'TMS': (('J102', '6'), ('U401', 'U5'))}
+        check('JTAG_exported_to_ECP5_dedicated_balls',
+              all(a in nodes and b in nodes and nodes[a][0] == nodes[b][0] for a, b in jtag.values()),
+              {k: [nodes.get(a, ('missing',))[0], nodes.get(b, ('missing',))[0]] for k, (a, b) in jtag.items()})
+        check('TARGET_VREF_from_FPGA_3V3_through_R414',
+              {nodes[('R414', '1')][0], nodes[('R414', '2')][0]} == {nodes[('U105', '15')][0], nodes[('U401', 'F9')][0]}
+              and nodes[('U105', '15')][0] != nodes[('U401', 'F9')][0],
+              {'R414': [nodes[('R414', '1')][0], nodes[('R414', '2')][0]], 'U105.15': nodes[('U105', '15')][0],
+               'VCCIO0 ball F9': nodes[('U401', 'F9')][0]})
         check('OE_has_10k_pullup_to_USB_3V3', values['R105'] == '10k', values['R105'])
         check('REF_and_reset_resistors', values['R103'] == '12k 1%' and values['R104'] == '12k',
               {'REF': values['R103'], 'RESET': values['R104']})
@@ -210,12 +235,12 @@ def main():
     limitations = [
         'This checks schematic connectivity against fixed pin tables; it does not prove physical routing, signal integrity, protection performance or USB compliance.',
         'Crystal startup, effective load capacitance and frequency accuracy require layout and prototype measurements. The 11 pF values are explicitly provisional.',
-        'The USB supply powers the bridge only. The actual FPGA/flash power, pin allocation and persistent-loading algorithm remain unimplemented.',
+        'USB_VBUS also feeds the power sheet default-off target input (U302), enabled only when the TUSB320 (U301) reports >=1.5 A and USB_3V3 is present; USB_3V3 also powers U301. JTAG reaches the ECP5 dedicated balls and TARGET_VREF comes from FPGA_3V3 through R414 (FPGA sheet). The persistent-loading algorithm remains unimplemented.',
         'A fitted EEPROM must preserve the safe ACBUS6 startup contract. Host loading must use the documented --status-pin 14 option.',
         'Target-off leakage, USB/target power sequencing, abnormal process termination/reset, inrush, thermal margin, suspend current and cold-boot persistence require bench tests.',
         'ESD array pin connectivity is checked; this is not a short-to-VBUS/USB-PD protection claim. USB and target supplies have no direct schematic connection to host power.',
     ]
-    inputs = ['sn64.kicad_sch', 'usb-programmer.kicad_sch', 'libraries/SN64_USB.kicad_sym']
+    inputs = ['sn64.kicad_sch', 'usb-programmer.kicad_sch', 'libraries/SN64_USB.kicad_sym', 'power.kicad_sch', 'fpga.kicad_sch']
     result = {'status': 'pass' if not failed else 'fail', 'generated_at_utc': datetime.now(timezone.utc).isoformat(),
               'scope': 'independent USB programmer static connectivity review', 'kicad': pcbnew.Version(),
               'checks_passed': len(checks) - len(failed), 'checks_failed': len(failed),
@@ -225,7 +250,7 @@ def main():
     (validation / 'usb-check.json').write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8')
     lines = ['# Independent USB programmer review', '',
              f"**{result['status'].upper()}**: {result['checks_passed']} checks passed; {len(failed)} failed.", '',
-             'Checked a fresh KiCad export against hand-authored manufacturer pin assignments, not the generated CSV or builder script. The checker covers separate CC resistors; DP/DM and ESD pairs; FT232HL supplies, crystal and EEPROM; AXC pin directions and default-disabled /OE; target-side service header; library pad sets; and host/USB rail separation.', '']
+             'Checked a fresh KiCad export against hand-authored manufacturer pin assignments, not the generated CSV or builder script. The checker covers DNP CC resistors (TUSB320 Rd on the power sheet) and the CC/VBUS/USB_3V3/JTAG/TARGET_VREF exports; DP/DM and ESD pairs; FT232HL supplies, crystal and EEPROM; AXC pin directions and default-disabled /OE; target-side service header; library pad sets; and host/USB rail separation.', '']
     if failed:
         lines += ['Failures:', ''] + [f"- {c['check']}: {c['detail']}" for c in failed] + ['']
     lines += ['Limits:', ''] + ['- ' + x for x in limitations] + ['',

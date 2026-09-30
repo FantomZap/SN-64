@@ -1,6 +1,6 @@
 # Digital A/V output: implementation and evidence
 
-Implemented 2026-09-29. This is the first version of the independent digital video and audio output required by SN64-07-01. It sends the SNES core's picture and sound out as HDMI 720×480p with embedded 32 kHz audio. It passes a simulation that decodes the serial TMDS output bit by bit. **It has not been shown on a display and has not run on hardware.**
+Implemented 2026-09-29. This is the first version of the independent digital video and audio output required by SN64-07-01. It sends the SNES core's picture and sound out as HDMI with embedded 32 kHz audio: 720×480p for NTSC, and 720×576p50 for PAL (added the same day, see [PAL 576p50](#pal-576p50-2026-09-29)). It passes a simulation that decodes the serial TMDS output bit by bit. **It has not been shown on a display and has not run on hardware.**
 
 ## Plain-language summary
 
@@ -10,15 +10,17 @@ Each SNES line is copied into a small four-line store as it is drawn. The HDMI s
 
 Once per frame the block checks that the HDMI side is still in step. If it is not (at start-up, after a change of picture height, or if the board clocks the HDMI side from a separate crystal), it corrects the HDMI timing during the blank lines below the picture. Sound samples are sent at the rate the core produces them, and the TV is told that rate, so no audio is dropped or repeated.
 
+A PAL SNES draws 50 pictures a second with 312 lines each. For PAL the same block sends 720×576 at 50 Hz: each of the 312 SNES lines becomes two of the 624 HDMI lines. The clock chip is set, before the SNES clock starts, to a pixel clock made from the PAL master clock at an exact ratio, so PAL is locked in the same way.
+
 ## Files
 
 | File | Role |
 |---|---|
-| [fpga/rtl/sn64_av_out.sv](../../fpga/rtl/sn64_av_out.sv) | Top level: SNES-side capture, 4-line ring buffer, frame-locked HDMI raster, audio clock-domain crossing, status |
-| [fpga/rtl/sn64_av_hdmi_tx.sv](../../fpga/rtl/sn64_av_hdmi_tx.sv) | HDMI period scheduler (video, control, data islands) for an externally supplied raster; instantiates the vendored packet and TMDS modules |
+| [fpga/rtl/sn64_av_out.sv](../../fpga/rtl/sn64_av_out.sv) | Top level: SNES-side capture, 4-line ring buffer, frame-locked HDMI raster (NTSC 858×524 or PAL 864×624, chosen by `pal` during reset), audio clock-domain crossing, status |
+| [fpga/rtl/sn64_av_hdmi_tx.sv](../../fpga/rtl/sn64_av_hdmi_tx.sv) | HDMI period scheduler (video, control, data islands) for an externally supplied raster, in either mode; instantiates the vendored packet and TMDS modules, plus a second vendored AVI InfoFrame for VIC 17 |
 | [fpga/rtl/sn64_av_serializer.sv](../../fpga/rtl/sn64_av_serializer.sv) | 10:1 serializer on ECP5 `ODDRX1F` (three data lanes plus TMDS clock); behavioural DDR model under `VERILATOR` |
 | [fpga/vendor/hdl-util-hdmi/](../../fpga/vendor/hdl-util-hdmi/provenance.json) | Vendored hdl-util/hdmi packet, ECC, InfoFrame, audio and TMDS encoder modules, with MIT and Apache-2.0 licence texts |
-| [fpga/tests/tb_av_out.sv](../../fpga/tests/tb_av_out.sv) | SNES timing and pattern model, serial TMDS deserializer and full HDMI decoder, self-checking |
+| [fpga/tests/tb_av_out.sv](../../fpga/tests/tb_av_out.sv) | SNES timing and pattern model (NTSC, or PAL with `SN64_TB_PAL`), serial TMDS deserializer and full HDMI decoder including AVI InfoFrame VIC/aspect/checksum, self-checking |
 
 ## What is reused
 
@@ -54,7 +56,7 @@ The lock depends on the HDMI raster having exactly the SNES frame period. The ra
 
 ## Output format and clocking
 
-- **Mode.** CEA-861 VIC 2 (720×480p, 4:3) timing with **V total 524 instead of 525**, so the frame is exactly two HDMI lines per SNES line (262 × 2). Horizontal: 720 active, 16 front porch, 62 sync, 60 back porch, 858 total. Vertical: 480 active, 9 front porch, 6 sync, 29 back porch. Syncs are negative. The AVI InfoFrame declares VIC 2 with IT content and full-range RGB.
+- **Mode (NTSC; PAL is in [PAL 576p50](#pal-576p50-2026-09-29)).** CEA-861 VIC 2 (720×480p, 4:3) timing with **V total 524 instead of 525**, so the frame is exactly two HDMI lines per SNES line (262 × 2). Horizontal: 720 active, 16 front porch, 62 sync, 60 back porch, 858 total. Vertical: 480 active, 9 front porch, 6 sync, 29 back porch. Syncs are negative. The AVI InfoFrame declares VIC 2 with IT content and full-range RGB.
 - **Pixel clock = master × 39/31 = 27.0198 MHz.** That is +0.073 % from 27.000 MHz, inside HDMI's ±0.5 % pixel-clock tolerance. At this ratio 1364 master clocks = 2 × 858 pixels exactly, and the frame rate is 60.0988 Hz.
 - **Why 720×480 rather than 640×480.** 858/682 = 39/31 needs only the prime 31 in a PLL reference divider. 640×480 (800 total) needs 400/341 = 400/(11·31) and so three cascaded PLLs.
 - **PLL chain.** Checked with `ecppll` from the pinned OSS CAD Suite; it enforces PFD ≥ 3.125 MHz and VCO 400–800 MHz. The master clock is only an input and is never modified.
@@ -69,7 +71,8 @@ The lock depends on the HDMI raster having exactly the SNES frame period. The ra
 1. **SNES side.** On each VDE rise it starts counting HDE rises. At the HDE rise of SNES line 250 it toggles an event. It also latches the visible-line count (224 or 239) at each VDE fall.
 2. **Pixel side.** It synchronises the toggle (2 flip-flops plus edge detect) and compares its raster position with the expected one. The expected row is `v_off + 495` (511 for 224-line frames, 496 for 239), which is the back porch after vsync, so a correction never crosses vsync.
 3. **Correction.** If the error exceeds `LOCK_TOL` (2 px), the raster is re-phased. This happens only when both the old and the new column are inside the horizontal active span of a blanking line, never inside a data island, preamble or guard band. `rephase_count` counts corrections; `locked` means the last error was under `LOCK_WINDOW` (1024 px).
-4. **Placement.** The picture is 512 wide at x = 104..615. Vertically it starts at `v_off = 240 − visible_lines`, so 224-line frames occupy 16..463 and 239-line frames occupy 1..478. `v_off` comes from the previous frame's line count, because the core does not export its overscan bit (`V224_MODE` is unconnected in `sn64_console_candidate.sv`). The first frame after an overscan change is therefore placed with the old offset, and a 224→239 change re-phases by 15 lines once.
+4. **Placement.** The picture is 512 wide at x = 104..615. Vertically it starts at `v_off = 240 − visible_lines`, so 224-line frames occupy 16..463 and 239-line frames occupy 1..478 (PAL: `v_off = 288 − visible_lines`, see below). `v_off` comes from the previous frame's line count, because the core does not export its overscan bit (`V224_MODE` is unconnected in `sn64_console_candidate.sv`). The first frame after an overscan change is therefore placed with the old offset, and a 224→239 change re-phases by 15 lines once. A visible-line count outside 212..240 is treated as 224. The earlier bound, 200..240, allowed lock targets beyond the last raster line for 200–211-line frames; the core only produces 224 or 239.
+5. **Start-up.** The first event after reset re-phases the raster from wherever it was running. That can be in an active line, so up to one active line of the first HDMI frame may be cut short, before any sink could have locked. The bench counts and reports this ("warm-up runs cut by the start-up lock") instead of failing. The PAL run shows one such line in HDMI frame 0; every later correction happens in the back porch.
 
 ### Hi-res (512-wide) handling
 
@@ -122,6 +125,13 @@ Results (real output, 2026-09-29):
 | `build/verilator-av-out-pixfault` | `SN64_AV_FAULT_PIXEL` (flips one bit of pixel 300,200) | `FAIL: av-out 4 errors`, exit code 1, e.g. `pixel (300,200) got 845239 expected 8c5239` |
 | `build/verilator-av-out-syncfault` | `SN64_AV_FAULT_SYNC` (hsync one clock short on line 100) | `FAIL: av-out 8 errors`, exit code 1, e.g. `hsync width 61` |
 
+Rerun after the PAL change (2026-09-29, `build/pal-hdmi/av-*`, same flags). The four builds above give the same results; their PASS lines now also report `VIC 2 aspect 0`. The bench now decodes every AVI InfoFrame (checksum, version/length, VIC, picture aspect). Two builds are new:
+
+| Build | Define | Result |
+|---|---|---|
+| `build/pal-hdmi/av-pal` | `SN64_TB_PAL` (SNES 1360 × 312, pixel = master × 108/85) | `PASS: av-out (PAL, pixel = master*108/85) 6 frames, 2567520 pixels exact, 720x576 in 864x624, hsync 64, vsync 5 lines, VIC 17 aspect 1, 5688 audio samples in order, ACR CTS 27288..27290, 0 ECC errors, 2 re-phases` (7 steady-state lock events all at 0 error; one warm-up line cut by the start-up lock) |
+| `build/pal-hdmi/av-pal-lines-fault` | `SN64_TB_PAL` + `SN64_AV_FAULT_PAL_LINES` (raster 625 lines, the CEA count) | `FAIL: av-out 1 errors`, exit code 1: `frame lock not steady (last lock_error -864, 9 re-phases, 7 of 7 steady events out of tolerance)` |
+
 Limits of this evidence:
 
 - The video source is a model of the core's output timing, not the real PPU. The alignment of `X_OUT` and `Y_OUT` with `HDE` in the real core is assumed from reading `ppu.v`, not simulated.
@@ -135,6 +145,8 @@ Limits of this evidence:
 
 **1,437 LUT4, 972 TRELLIS_FF, 2 DP16KD, 1 MULT18X18D, 4 ODDRX1F** (plus 291 CCU2C, 179 PFUMX, 19 L6MUX21). The MULT18X18D is the constant multiply `sync_y × 858`; it could be replaced with shifts and adds if multipliers run short. With the core this is 141 of 208 DP16KD, leaving 67.
 
+With both raster modes (2026-09-29): **1,475 LUT4, 982 TRELLIS_FF, 2 DP16KD, 1 MULT18X18D, 4 ODDRX1F** (plus 309 CCU2C, 174 PFUMX, 17 L6MUX21). The flow was `plugin -i slang; scratchpad -set abc9.xaiger 1; read_slang -DSN64_SYNTH …; synth_ecp5`, the same as `route_top.py`, with the log in `build/pal-hdmi/synth-av-out.log`. PAL therefore costs about 38 LUT4 and 10 flip-flops. The multiplier is now `sync_y × h_total` with `h_total` 858 or 864. `sn64_clock_init` alone is 327 LUT4 and 157 FF (344 LUT4 with `PAL_LINE_MCLK = 1364`).
+
 A trial `nextpnr-ecp5 --85k --package CABGA381` placed the block alone, with placeholder serial pins (ULX3S GPDI sites in `build/av-out/av-out-fmax.lpf`, not the SN64 pinout) and other I/O unconstrained. It reported:
 
 - clk_pixel 64.17 MHz (needs 27.02)
@@ -147,15 +159,77 @@ The clocks entered as independent ports, so cross-domain paths, including pixel�
 
 1. **Clocking decision.** Adopt the master-derived PLL chain (and update the clock plan), or accept per-frame re-phasing with an independent 27 MHz. Measure PLL-cascade jitter and TMDS eye on hardware either way.
 2. **Integration.** Instantiate `sn64_av_out` with the real core (`sn64_console_candidate` outputs `rgb/hde/vde/video_x/video_y/audio_*`). Run a core-driven frame through the decoder with a PPU test program to confirm the `X_OUT` and `HDE` alignment and the audio rate.
-3. **PAL.** 312-line frames need a 576p-class raster (624 lines) and a different clock ratio; not implemented (the raster would re-phase by 100 lines per frame).
+3. **PAL.** Implemented in simulation: 864×624 raster, VIC 17, pixel = PAL master × 108/85 from PLLB, CLK2 retargeted before the SNES clock starts ([PAL 576p50](#pal-576p50-2026-09-29), [clock plan](clock-plan.md#pal-hdmi-576p50-pixel-clock-2026-09-29)). Still open: display acceptance of 624 lines at 50.154 Hz, and the PAL interlace field (313 lines) is not handled beyond re-phasing.
 4. **Interlace.** 263/262-line fields re-phase by two lines on alternate fields, and odd fields are not offset (plain bob). A field-offset option is open.
 5. **Horizontal aspect.** Optional 2.5× (640 px) or CRT-exact 2.52× scaling instead of 2× (512 px).
 6. **Board path.** HDMI connector, TMDS I/O standard and coupling, HPD/DDC/EDID, CEC, 5 V supply and ESD; SN64-17-04 transmitter selection.
-7. **Cartridge audio.** Digitise and mix cartridge L/R (pins 31/32) into the HDMI stream.
+7. **Cartridge audio: done** ([cart-audio-implementation.md](cart-audio-implementation.md)). `sn64_av_out`'s audio port is now fed from `sn64_audio_mix` (a 1-clock `audio_ready` pulse one clk_snes after the core's SND_RDY, values stable); the port contract is unchanged. The pinned core's real audio rate is 32,179.96 Hz (NTSC) / 31,886.43 Hz (PAL), not 32 kHz, which matters for channel status and ACR.
 8. **Display compatibility.** Test several TVs, monitors and capture devices for acceptance of 858×524 at 27.0198 MHz and, if the fallback is used, the per-frame short line.
-9. **Core quirk (for the core owner).** In `fpga/vendor/snestang/src/ppu.v` lines 256–263, the long-dot condition `H_CNT == 323 && H_CNT == 327` can never be true, and the short-line branch selects the same 4-clock dot as the default. From reading the code, every NTSC line is therefore 341 × 4 = 1364 master clocks, and the lock relies on that. If that is ever fixed to match hardware (alternate frames one dot shorter), the lock re-phases by about 5 px on those frames, still inside the back porch.
+9. **Core quirk (for the core owner). Corrected 2026-09-29 by measurement.**
+   - In `fpga/vendor/snestang/src/ppu.v` lines 256–263, the long-dot condition `H_CNT == 323 && H_CNT == 327` can never be true, and the short-line branch selects the same 4-clock dot as the default.
+   - The earlier reading here ("341 × 4 = 1364") was wrong. `DOT_NUM` is 340 (`ppu_defines.vh:3`), so every line is **340 × 4 = 1360** master clocks, in both regions.
+   - A scratch bench on the real core measured 356,320 master clocks per NTSC frame and 424,320 per PAL frame, and every line 1360 ([clock plan](clock-plan.md#the-snes-pal-frame-in-the-core-measured)).
+   - The NTSC 39/31 decision assumes 1364-clock lines. With the core as it is, the NTSC raster is 1,318.5 px early per frame. The whole-system trial shows −1,328 px per frame (including testbench rounding), one re-phase every frame and `av_locked` = 0.
+   - The PAL ratio (108/85) was derived from the measured 1360. The clock plan lists the two ways to make NTSC consistent; the decision is the owner's.
 
 
 ## Integration note (2026-09-29)
 
 Integrated into [sn64_top.sv](../../fpga/rtl/sn64_top.sv): the SNES core's RGB, HDE/VDE, `video_x`/`video_y` and audio feed `sn64_av_out`; the top level's outputs are now the three TMDS lanes, the TMDS clock and `av_locked`. Clocking decision: the pixel clock comes from the Si5351's CLK2 on the same PLL as the NTSC master (exactly master × 39/31), not a chained ECP5 PLL pair; see the [clock plan](clock-plan.md). The whole-system simulation passes with this block included.
+
+## PAL 576p50 (2026-09-29)
+
+**Status:** simulated only. Unit bench, fault build, and a whole-system trial with the integration edits applied to scratch copies of the top level. Not run on a display or on hardware.
+
+### Mode selection
+
+`sn64_av_out` has a new input `pal` and a new status output `mode_pal`. Each domain synchronises `pal` and takes it only while it is in reset:
+
+- the pixel domain, for the raster;
+- the SNES domain, for the lock-event line.
+
+The top level holds the pixel domain in reset until the Si5351 CLK2 is programmed for the region (`pixel_clock_ready` from [sn64_clock_init](../../fpga/rtl/sn64_clock_init.sv)) and feeds `pal` from `pixel_region_pal`, so the raster always matches the pixel clock. `sn64_av_hdmi_tx` has the same `pal` input; both rasters are constants selected by one mux each.
+
+### PAL raster
+
+CEA-861 VIC 17 timing with 624 lines instead of 625 (sources and derivation in the [clock plan](clock-plan.md#pal-hdmi-576p50-pixel-clock-2026-09-29)):
+
+- **Horizontal:** 720 active, 12 front porch, 64 sync, 68 back porch, 864 total.
+- **Vertical:** 576 active, 5 front porch, 5 sync, 38 back porch, 624 total.
+- **Sync polarity:** negative.
+- **Pixel clock:** PAL master × 108/85 = 27.0398584 MHz, so 2 × 864 pixels are exactly one 1360-clock SNES line and the HDMI frame is the SNES frame (50.154058 Hz).
+
+### Placement and lock
+
+- **Placement:** the picture stays 512 wide at x = 104..615. Vertically `v_off = 288 − visible lines`, so 224-line frames occupy lines 64..511 and 239-line frames occupy 49..526.
+- **Lock event:** the HDE rise of SNES line 276 (`PAL_SYNC_LINE`). The expected raster line is `2 × 275 − 3 + v_off`: 611 for 224 lines and 596 for 239. Both are in the vertical back porch (lines 586..623, after vsync on 581..585). A correction therefore never crosses vsync or touches active video. `LEAD_LINES` (3), `SYNC_X` (100), `LOCK_TOL` and the 4-line ring are unchanged, because the geometry of two HDMI lines per SNES line is the same.
+- **Counter widths:** the raster position counter is 20 bits (864 × 624 = 539,136 > 2^19). `v_off` is 7 bits and the "no event" timeout is 21 bits.
+
+### InfoFrames and audio
+
+- **AVI InfoFrame:** VIC 17 with picture aspect 4:3 (M1M0 = 01) and IT content. `packet_picker` stays vendored and unmodified. In PAL mode its AVI packet (type 0x82) is replaced by a second instance of the vendored `auxiliary_video_information_info_frame` with those parameters. The NTSC AVI InfoFrame is unchanged (VIC 2, aspect "no data"; VIC 2 itself is the 4:3 format).
+- **Audio:** N = 4096 as before. CTS is measured, so it follows the PAL pixel clock (27,288.8 with the bench's audio model). The data-island slots are identical in both modes (3 packets per line, same horizontal active width).
+
+### Evidence
+
+- **Unit bench:** `SN64_TB_PAL` passes. `SN64_TB_PAL` + `SN64_AV_FAULT_PAL_LINES` fails (see Verification). The four NTSC builds are unchanged.
+- **Whole-system trial** (`build/pal-hdmi/system-final`, integration edits applied to copies of the current `sn64_top.sv` / `tb_system.sv`). The trial bench models the Si5351 register image, derives the pixel clock from CLK2's programmed source (PAL: master/pixel = 108/85 exactly), runs the SNES clock at the region's frequency, and fails if the Si5351 is accessed while the SNES clock runs or if the SNES clock starts before CLK2 matches the region.
+
+  | Run | HDMI line |
+  |---|---|
+  | default (NTSC) | `raster 858x524 VIC 2, 4 lock events, lock errors 61313 -1327 -1328 -1328 px, 3 re-phases, locked 0` |
+  | `+pal_header` | `raster 864x624 VIC 17 frame-locked, 4 lock events, lock errors -23864 0 0 0 px, 1 re-phases, locked 1, Si5351 writes 59` |
+  | `+pal_key +ntsc_header` | `raster 864x624 VIC 17 frame-locked, … lock errors -23864 0 0 0 px, 1 re-phases, locked 1` |
+  | `+ntsc_key +pal_header` | `raster 858x524 VIC 2, … lock errors -188782 -1328 -1328 -1327 px, 3 re-phases, locked 0` |
+
+  - All four end in `PASS: system power-on: …` with STATUS 545f / 54df / 34df / 345f.
+  - The `+corrupt_key` negative run still fails with `region 0, expected 1`.
+  - A trial top without the `pixel_clock_ready` gate on `snes_clk_run` fails `+pal_header` with `SNES clock started before the pixel clock was programmed for the region`.
+  - The NTSC lock errors are the measured core-line-length finding (clock plan). They are reported by the trial bench, not failed on.
+
+### Limits
+
+- The unit bench's SNES model is a timing model of the core's output, not the PPU.
+- No display has seen the 624-line, 50.154 Hz raster.
+- PAL interlace (313-line fields) is not handled beyond per-frame re-phasing.
+- The DDR primitive is modelled.

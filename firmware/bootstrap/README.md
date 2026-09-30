@@ -9,7 +9,7 @@ The small program an N64 or M64 boots from the SN64 cartridge. It shows the SN64
 | Path | What |
 |---|---|
 | `src/main.c` | Menu, controller loop, mailbox access (libdragon `display`, `graphics`, `joypad`, `io_read`/`io_write`) |
-| `src/sn64_mailbox.h` | Register map at `0x1FFF_0000`, the 32-bit register pairing, and the provisional STATUS bit layout |
+| `src/sn64_mailbox.h` | Register map at `0x1FFF_0000`, the 32-bit register pairing, and the provisional STATUS bit layout, REGION_INFO/REGION_SOURCE layouts |
 | `src/sn64_mapping.[ch]` | N64 to SNES mapping table and function (pure C, host-testable) |
 | `rom.mk` | libdragon ROM build (runs inside the output directory) |
 | `Makefile` | Entry point: `rom`, `check`, `words`, `test`, `test-negative`, `clean` |
@@ -47,7 +47,7 @@ Build outputs stay under `build/n64-bootstrap/`. Do not commit ROM binaries.
 
 - The ROM image needs **`ROM_ADDR_BITS = 16`** (64 Ki words = 128 KiB) with the default aPLib compression (`N64_ROM_ELFCOMPRESS=2`). It is 114,688 bytes. With libdragon's default LZ4 it is 147,456 bytes and needs 17. The endpoint's current default of 12 (8 KiB) is too small; the converter rejects the image for it.
 - Word image: `word[i] = rom[2i] << 8 | rom[2i+1]`. Line *i* of the `.mem` file is `rom_waddr` *i*, with zero padding up to `2**ROM_ADDR_BITS`.
-- Mailbox registers are accessed only as 32-bit pairs: `{MAGIC,VERSION}`, `{STATUS,SEQ}`, `{JOY1,JOY2}`, `{JOY1_STICK,CONTROL}`, and `{COMMIT,-}`. The bootstrap never writes unless MAGIC reads `0x534E`.
+- Mailbox registers are accessed only as 32-bit pairs: `{MAGIC,VERSION}`, `{STATUS,SEQ}`, `{JOY1,JOY2}`, `{JOY1_STICK,CONTROL}`, `{COMMIT,REGION_INFO}` (COMMIT written, REGION_INFO read) and `{REGION_SOURCE,-}` (read). The bootstrap never writes unless MAGIC reads `0x534E`.
 - SNES button image: bit 0 = B, then Y, Select, Start, Up, Down, Left, Right, A, X, L, R (bit 11). **1 = pressed.** Bits 15:12 are 0.
 
 ## Controls

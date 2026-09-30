@@ -124,6 +124,8 @@ Options, not yet decided:
 2. Serve the window from the configuration SPI flash or a small PSRAM. The libdragon IPL3 reads the ROM only while booting, so latency matters much less than for a game.
 3. Keep BRAM and accept the EBR cost.
 
+2026-09-29: the menu shows the region and its source (main screen) and the ROM-header probe result (status screen) from REGION_INFO/REGION_SOURCE; the status-screen rows no longer overlap. Rebuilt: 114,688 bytes, SHA-256 `64d2b2a334117546a0610f3bdcafecb0809441a011f79f9d5dae5f49a72904b5`, CIC-6102 OK, co-simulation PASS.
+
 ## Still open
 
 1. **Run it:** first in an emulator (ares, optional), then on an original N64 and on an M64 with the endpoint and CIC on real hardware. Measure boot time and PI timing.

@@ -3,7 +3,8 @@
 //
 // Adds the clock infrastructure around sn64_top (docs/design/clock-plan.md):
 //   * EHXPLLL "host":  25 MHz oscillator -> 62.5 MHz (REF 2, FB 5, OP 10; VCO 625 MHz)
-//   * EHXPLLL "tmds":  Si5351 CLK2 27.0198 MHz -> 135.099 MHz (REF 1, FB 5, OP 4; VCO 540.4 MHz)
+//   * EHXPLLL "tmds":  Si5351 CLK2 27.0198 MHz (NTSC) / 27.0399 MHz (PAL) -> 135.099 / 135.199 MHz
+//     (REF 1, FB 5, OP 4; VCO 540.4 / 540.8 MHz; docs/design/clock-plan.md "PAL HDMI")
 //   * DCSC (DCSMODE "NEG", glitchless): SEL 01 = Si5351 CLK0 (NTSC), 10 = CLK1
 //     (PAL), 00 = output held low. One primitive both picks the region clock and
 //     starts/stops the SNES domain (Lattice FPGA-TN-02200 1.3, Table 10.2 and
@@ -12,31 +13,32 @@
 //   * Bootstrap ROM from the configuration flash (ROM_FROM_FLASH = 1, USRMCLK).
 //   * SNES CIC data pads with per-pin SN74LVC1T45 direction control.
 // PLL parameters were produced by ecppll (OSS CAD Suite 20260928).
-// Pin locations and I/O standards belong in the board constraint file, which
-// needs the FPGA sheet of the schematic; fpga/constraints/sn64_trial.lpf is a
-// feasibility stand-in.
+// Pin locations and I/O standards: fpga/constraints/sn64_board.lpf, generated
+// with the FPGA schematic sheet (hardware/sn64/fpga.kicad_sch,
+// docs/design/fpga-schematic.md) and checked against this port list by
+// hardware/sn64/tools/verify_fpga_sheet.py. fpga/constraints/sn64_board_trial.lpf
+// is the older feasibility pinout (pre-round-3 port names).
 module sn64_board_top (
     input  wire        osc_25,            // 25 MHz oscillator
     input  wire        si_clk0, si_clk1,  // Si5351 NTSC / PAL SNES masters
-    input  wire        si_clk2,           // Si5351 HDMI pixel clock (27.0198 MHz)
+    input  wire        si_clk2,           // Si5351 HDMI pixel clock (27.0198 MHz NTSC, 27.0399 MHz PAL; clock-plan.md)
     input  wire        board_reset_n,     // supervisor / configuration done
 
     input  wire        n64_reset_n, n64_nmi_n, n64_alel, n64_aleh, n64_read_n, n64_write_n,
     inout  wire [15:0] n64_ad,
     input  wire        n64_cic_clk, n64_si_clk,
     inout  wire        n64_cic_dq,
-    output wire        si_scl_oe, si_sda_oe,
-    input  wire        si_sda_in,
+    inout  wire        n64_si_dq, n64_int_n,            // JOYBUS / cartridge /INT: reserved, released (hardware/sn64 FPGA sheet)
+    inout  wire        si_scl, si_sda,                  // Si5351 I2C, open drain on the pads
     input  wire        host_3v3_ok, fpga_rails_ok, cart_5v_ok, iface_rail_ok, efuse_fault_n, overtemp,
     output wire        cart_5v_enable, iface_rail_enable,
     output wire [23:0] cart_address,
     output wire [7:0]  cart_pa,
     output wire        cart_rd_n, cart_wr_n, cart_prd_n, cart_pwr_n,
     output wire        cart_romsel_n, cart_wramsel_n, cart_refresh, cart_phi2, cart_sysclk,
-    output wire [7:0]  cart_data_out,
-    input  wire [7:0]  cart_data_in,
-    input  wire        cart_irq_n, cart_reset_n_sense,
-    output wire        cart_reset_pull, ctl_oe_n, data_oe_n, data_dir,
+    inout  wire [7:0]  cart_data,                       // B side of U207; driven only while data_dir = 1
+    input  wire        cart_irq_n, cart_reset_n_sense, expand_sense,
+    output wire        cart_reset_pull_n, ctl_oe_n, data_oe_n, data_dir,   // cart_reset_pull_n: 1 = release (cart sheet U214)
     output wire        snes_cic_oe_n, snes_cic_clk, snes_cic_slave_reset,
     inout  wire        cic_data0, cic_data1,            // A side of the SN74LVC1T45s (U215/U216)
     output wire        cic_data0_dir, cic_data1_dir,    // 1 = drive the cartridge (A->B)
@@ -44,6 +46,9 @@ module sn64_board_top (
     inout  wire [3:0]  flash_dq,
     output wire [2:0]  hdmi_tmds,
     output wire        hdmi_tmds_clock,
+    input  wire        hdmi_hpd,                        // reserved (A/V sheet delivers a 3.3 V-safe level)
+    inout  wire        hdmi_scl, hdmi_sda,              // reserved DDC, released
+    input  wire        adc_bck, adc_lrck, adc_dout,     // cartridge-audio ADC (I2S master) -> sn64_top
     output wire        led_status
 );
     // ---------------- Host PLL: 25 -> 62.5 MHz ----------------
@@ -98,6 +103,21 @@ module sn64_board_top (
     // only after the Si5351 is programmed, so it gates the HDMI domain only.
     wire por_n = board_reset_n & host_locked;
 
+    // ---------------- Pad adapters for the FPGA schematic sheet ----------------
+    wire si_scl_oe, si_sda_oe, si_sda_in;                // 1 = pull low (sn64_clock_init)
+    assign si_scl = si_scl_oe ? 1'b0 : 1'bz;
+    assign si_sda = si_sda_oe ? 1'b0 : 1'bz;
+    assign si_sda_in = si_sda;
+    wire [7:0] cart_data_out, cart_data_in;
+    assign cart_data = data_dir ? cart_data_out : 8'bz;  // FPGA drives only when U207 points B->A
+    assign cart_data_in = cart_data;
+    wire cart_reset_pull;                                 // sn64_top: 1 = hold socket /RESET
+    assign cart_reset_pull_n = !cart_reset_pull;
+    assign n64_si_dq = 1'bz;                              // no SI/EEPROM function yet
+    assign n64_int_n = 1'bz;                              // no cartridge interrupt yet
+    assign hdmi_scl = 1'bz;
+    assign hdmi_sda = 1'bz;
+
     wire [15:0] status_word;
     sn64_top #(.ROM_FROM_FLASH(1), .FLASH_USE_USRMCLK(1)) top (
         .clk_25(osc_25), .clk_host(clk_host), .clk_snes(clk_snes), .clk_pixel(si_clk2), .clk_pixel_x5(clk_pixel_x5),
@@ -119,6 +139,7 @@ module sn64_board_top (
         .snes_cic_oe_n(snes_cic_oe_n), .snes_cic_clk(snes_cic_clk), .snes_cic_slave_reset(snes_cic_slave_reset),
         .snes_cic_data0_o(d0_o), .snes_cic_data0_oe(d0_oe), .snes_cic_data0_i(cic_data0),
         .snes_cic_data1_o(d1_o), .snes_cic_data1_oe(d1_oe), .snes_cic_data1_i(cic_data1),
+        .adc_bck(adc_bck), .adc_lrck(adc_lrck), .adc_dout(adc_dout),
         .hdmi_tmds(hdmi_tmds), .hdmi_tmds_clock(hdmi_tmds_clock), .av_locked(), .status_word(status_word));
 
     // Status LED: steady when the SNES clock runs, off otherwise (a

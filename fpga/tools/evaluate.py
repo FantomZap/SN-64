@@ -135,6 +135,14 @@ def main():
         if n64_pass is None:
             raise RuntimeError('N64 endpoint test exited without its acceptance marker')
         report['simulation']['n64_endpoint'] = n64_pass
+        # Fault injection: REGION_INFO and REGION_SOURCE swapped in the register decode must be caught.
+        n64_fault_obj = obj / 'n64-endpoint-region-swap'
+        run('n64-region-swap-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+            '+define+SN64_FAULT_REGION_SWAP', '--top-module', 'tb_n64_endpoint',
+            '--Mdir', str(n64_fault_obj).replace('\\', '/')] + n64_sources)
+        run('n64-endpoint-region-swap', [str(n64_fault_obj / ('Vtb_n64_endpoint.exe' if os.name == 'nt' else 'Vtb_n64_endpoint'))],
+            'REGION_INFO/REGION_SOURCE read wrong')
+        report['simulation']['injected_n64_endpoint_fault'] = 'Rejected: swapped REGION_INFO/REGION_SOURCE decode is detected'
         # Bootstrap ROM window from the configuration flash: SummerCart64 memory_flash (unmodified) + QSPI flash model.
         flash_sources = n64_common + ['fpga/vendor/summercart64/fw/rtl/memory/memory_flash.sv',
                                       'fpga/rtl/sn64_bootrom_flash.sv', 'fpga/tests/tb_bootrom_flash.sv']
@@ -191,7 +199,15 @@ def main():
             raise RuntimeError('Clock init test exited without its acceptance marker')
         report['simulation']['clock_init'] = clk_pass
         run('clock-init-no-ack', [str(clk_exe), '+wrong_addr'], 'master reported i2c_error on NACK')
-        report['simulation']['injected_clock_fault'] = 'Rejected: a non-responding Si5351 is reported as i2c_error'
+        # Fault build: the CLK2 retarget sequence keeps writing after the SNES clock starts; must be caught.
+        clk_f_obj = obj / 'clock-init-ignore-stop'
+        run('clock-init-ignore-stop-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
+            '+define+SN64_FAULT_CLK_IGNORE_STOP', '--top-module', 'tb_clock_init', '--Mdir', str(clk_f_obj).replace('\\', '/'),
+            'fpga/rtl/sn64_clock_init.sv', 'fpga/tests/tb_clock_init.sv'])
+        run('clock-init-ignore-stop', [str(clk_f_obj / ('Vtb_clock_init.exe' if os.name == 'nt' else 'Vtb_clock_init'))],
+            'Si5351 written while the SNES clock runs')
+        report['simulation']['injected_clock_fault'] = ('Rejected: a non-responding Si5351 is reported as i2c_error, and a CLK2 '
+                                                        'retarget that keeps writing after the SNES clock starts is detected')
         # Clock-domain crossing word transfer
         cdc_obj = obj / 'cdc'
         run('cdc-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
@@ -201,28 +217,31 @@ def main():
         if cdc_pass is None:
             raise RuntimeError('CDC test exited without its acceptance marker')
         report['simulation']['cdc'] = cdc_pass
-        # Digital A/V output (HDMI 720x480p + 32 kHz audio); the bench decodes the serial TMDS lanes.
+        # Digital A/V output (HDMI 720x480p or 720x576p50 + 32 kHz audio); the bench decodes the serial TMDS lanes.
         hdmi_vendor = sorted(str(p.relative_to(ROOT)).replace('\\', '/')
                              for p in (ROOT / 'fpga/vendor/hdl-util-hdmi/src').glob('*.sv'))
         av_sources = hdmi_vendor + ['fpga/rtl/sn64_av_hdmi_tx.sv', 'fpga/rtl/sn64_av_serializer.sv',
                                     'fpga/rtl/sn64_av_out.sv', 'fpga/tests/tb_av_out.sv']
         av_flags = ['--binary', '--timing', '--build-jobs', '4', '-Wno-fatal', '-Wno-lint', '-Wno-style',
                     '-Wno-TIMESCALEMOD', '--top-module', 'tb_av_out']
-        for av_label, av_define, av_expect in (
-                ('av-out', None, None),
-                ('av-out-async', '+define+SN64_TB_ASYNC_27M', None),
-                ('av-out-pixel-fault', '+define+SN64_AV_FAULT_PIXEL', 'got 845239 expected 8c5239'),
-                ('av-out-sync-fault', '+define+SN64_AV_FAULT_SYNC', 'hsync width 61')):
+        for av_label, av_defines, av_expect in (
+                ('av-out', [], None),
+                ('av-out-async', ['+define+SN64_TB_ASYNC_27M'], None),
+                ('av-out-pixel-fault', ['+define+SN64_AV_FAULT_PIXEL'], 'got 845239 expected 8c5239'),
+                ('av-out-sync-fault', ['+define+SN64_AV_FAULT_SYNC'], 'hsync width 61'),
+                ('av-out-pal', ['+define+SN64_TB_PAL'], None),
+                ('av-out-pal-lines-fault', ['+define+SN64_TB_PAL', '+define+SN64_AV_FAULT_PAL_LINES'], 'frame lock not steady')):
             av_obj = obj / av_label
             run(av_label + '-build', [verilator] + av_flags + ['--Mdir', str(av_obj).replace('\\', '/')]
-                + ([av_define] if av_define else []) + av_sources)
+                + av_defines + av_sources)
             av_body = run(av_label, [str(av_obj / ('Vtb_av_out.exe' if os.name == 'nt' else 'Vtb_av_out'))], av_expect)
             if av_expect is None:
                 av_pass = next((line for line in av_body.splitlines() if line.startswith('PASS:')), None)
                 if av_pass is None:
                     raise RuntimeError(f'{av_label} exited without its acceptance marker')
                 report['simulation'][av_label.replace('-', '_')] = av_pass
-        report['simulation']['injected_av_faults'] = 'Rejected: one flipped pixel bit and one short hsync are both detected from the decoded TMDS'
+        report['simulation']['injected_av_faults'] = ('Rejected: one flipped pixel bit, one short hsync and a PAL raster of 625 '
+                                                      'instead of 624 lines are all detected from the decoded TMDS')
         # Whole-system power-on: N64 host, Si5351, rails, cartridge, SNES core, all blocks in sn64_top.
         if (ROOT / 'build/cic/cic-build.json').exists():
             sys_sources = ['-Ibuild/generated/snestang/src', '-Ibuild/generated/snestang/src/spc700',
@@ -233,7 +252,8 @@ def main():
                            'fpga/rtl/sn64_snes_cic_lock.sv', 'fpga/vendor/snestang-controller/src/controller_adapter.sv',
                            'fpga/rtl/sn64_snes_joypad.sv'] + hdmi_vendor + [
                            'fpga/rtl/sn64_av_hdmi_tx.sv', 'fpga/rtl/sn64_av_serializer.sv', 'fpga/rtl/sn64_av_out.sv',
-                           'fpga/rtl/sn64_header_probe.sv', 'fpga/rtl/sn64_top.sv', 'fpga/tests/tb_system.sv']
+                           'fpga/rtl/sn64_header_probe.sv', 'fpga/rtl/sn64_i2s_rx.sv', 'fpga/rtl/sn64_audio_mix.sv',
+                           'fpga/rtl/sn64_top.sv', 'fpga/tests/tb_system.sv']
             sys_obj = obj / 'system'
             run('system-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
                 '-Wno-lint', '-Wno-style', '-Wno-TIMESCALEMOD',
@@ -248,7 +268,61 @@ def main():
             sys_pal_pass = next((line for line in sys_pal_body.splitlines() if line.startswith('PASS:')), None)
             if sys_pal_pass is None or 'STATUS=54df' not in sys_pal_pass:   # STATUS bit 7 = region PAL
                 raise RuntimeError('System PAL-header test did not start in PAL')
+            if 'HDMI: raster 864x624 VIC 17 frame-locked' not in sys_pal_body:
+                raise RuntimeError('System PAL-header test: HDMI not in the frame-locked PAL raster')
             report['simulation']['system_pal_header'] = sys_pal_pass
+            # Key CIC in the cartridge: a passing key decides the region and wins over a contradicting ROM header.
+            sys_exe = str(sys_obj / ('Vtb_system.exe' if os.name == 'nt' else 'Vtb_system'))
+            for key_label, key_args, key_expect in (
+                    ('system-pal-key', ['+pal_key', '+ntsc_header'], ('PAL via key CIC', 'STATUS=34df')),
+                    ('system-ntsc-key', ['+ntsc_key', '+pal_header'], ('NTSC via key CIC', 'STATUS=345f'))):
+                key_body = run(key_label, [sys_exe] + key_args)
+                key_pass = next((line for line in key_body.splitlines() if line.startswith('PASS:')), None)
+                if key_pass is None or any(x not in key_pass for x in key_expect):
+                    raise RuntimeError(f'{key_label}: the key CIC did not decide the region as expected')
+                if 'PAL via' in key_expect[0] and 'HDMI: raster 864x624 VIC 17 frame-locked' not in key_body:
+                    raise RuntimeError(f'{key_label}: HDMI not in the frame-locked PAL raster')
+                report['simulation'][key_label.replace('-', '_')] = key_pass
+            # Negative: a key that fails the exchange must not decide the region (the NTSC header does).
+            run('system-pal-key-corrupted', [sys_exe, '+pal_key', '+ntsc_header', '+corrupt_key'],
+                'region 0, expected 1 (key CIC > ROM header')
+            report['simulation']['injected_system_key_fault'] = ('Rejected: with one corrupted key bit the region falls '
+                                                                 'back to the NTSC header and the key-wins check fails')
+        # Cartridge audio: I2S receiver (62.5 MHz oversampling) + elastic buffer + saturating mix, against an
+        # asynchronous I2S master at +/-500 ppm and at the pinned SNESTang DSP rate; four fault builds must fail.
+        aud_src = ['fpga/rtl/sn64_cdc.sv', 'fpga/rtl/sn64_i2s_rx.sv', 'fpga/rtl/sn64_audio_mix.sv', 'fpga/tests/tb_audio_mix.sv']
+        aud_exe_name = 'Vtb_audio_mix.exe' if os.name == 'nt' else 'Vtb_audio_mix'
+        for tag, define in (('', None), ('-swap-lr', 'SN64_FAULT_AUDIO_SWAP_LR'), ('-no-signext', 'SN64_FAULT_AUDIO_NO_SIGNEXT'),
+                            ('-wrap', 'SN64_FAULT_AUDIO_WRAP'), ('-late-sample', 'SN64_FAULT_I2S_LATE_SAMPLE')):
+            a_obj = obj / ('audio-mix' + tag)
+            run('audio-mix' + tag + '-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal']
+                + (['+define+' + define] if define else []) + ['--top-module', 'tb_audio_mix',
+                '--Mdir', str(a_obj).replace('\\', '/')] + aud_src)
+            if define:
+                run('audio-mix' + tag, [str(a_obj / aud_exe_name), '+adc_ppm=0', '+snes_rate=32180'], 'FAIL: tb_audio_mix')
+                continue
+            for a_label, a_args in (('audio-mix-adc-plus500ppm', ['+adc_ppm=500']),
+                                    ('audio-mix-adc-minus500ppm-duty35', ['+adc_ppm=-500', '+duty=35']),
+                                    ('audio-mix-snestang-rate', ['+adc_ppm=0', '+snes_rate=32180'])):
+                a_body = run(a_label, [str(a_obj / aud_exe_name)] + a_args)
+                a_pass = next((line for line in a_body.splitlines() if line.startswith('PASS:')), None)
+                if a_pass is None:
+                    raise RuntimeError(f'{a_label} exited without its acceptance marker')
+                report['simulation'][a_label.replace('-', '_')] = a_pass
+        report['simulation']['injected_audio_faults'] = ('Rejected: swapped L/R, missing sign extension, wrap-around instead '
+                                                         'of saturation and I2S data sampled after the BCK edge are all detected')
+        # Same bench under a four-state simulator (Icarus, from the same OSS CAD Suite) so its no-X check means something.
+        iverilog, vvp = shutil.which('iverilog'), shutil.which('vvp')
+        if iverilog and vvp:
+            iv_out = obj / 'audio-mix-iverilog.vvp'
+            run('audio-mix-iverilog-build', [iverilog, '-g2012', '-o', str(iv_out), '-s', 'tb_audio_mix'] + aud_src)
+            iv_body = run('audio-mix-iverilog-4state', [vvp, '-n', str(iv_out), '+adc_ppm=0', '+snes_rate=32180'])
+            iv_pass = next((line for line in iv_body.splitlines() if line.startswith('PASS:')), None)
+            if iv_pass is None:
+                raise RuntimeError('audio-mix-iverilog-4state exited without its acceptance marker')
+            report['simulation']['audio_mix_iverilog_4state'] = iv_pass
+        else:
+            report['simulation']['audio_mix_iverilog_4state'] = 'SKIPPED: iverilog/vvp not on PATH'
         # Controller path: mailbox button images -> emulated standard SNES pads, alone and on the core.
         pad_sources = ['fpga/vendor/snestang-controller/src/controller_adapter.sv',
                        'fpga/rtl/sn64_snes_joypad.sv', 'fpga/tests/tb_snes_joypad.sv']
@@ -327,8 +401,11 @@ def main():
                     raise RuntimeError('CIC pad test exited without its acceptance marker')
                 report['simulation']['cic_pad'] = c_pass
         report['simulation']['injected_cic_pad_fault'] = 'Rejected: pad drive and DIR switching together is detected as contention'
-        report['simulation']['limit'] = ('Same master clock in all runs; PAL clocks/video and PPU/APU not qualified; '
-                                         'bridge bus model is behavioural (no analog levels or translator delays)')
+        report['simulation']['limit'] = ('tb_system PAL runs use a PAL-rate master and a pixel clock at exactly master x 108/85 '
+                                         '(simulation time units, not the real frequencies); NTSC HDMI frame lock is reported, '
+                                         'not checked (the core lines are 1360 master clocks, the 39/31 ratio assumes 1364); '
+                                         'PPU/APU not qualified; bridge bus model is behavioural (no analog levels or '
+                                         'translator delays)')
 
     if args.mode in ('synth', 'all'):
         run('yosys-version', [shutil.which('yosys'), '-V'])

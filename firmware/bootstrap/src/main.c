@@ -44,6 +44,7 @@ typedef struct {
     bool     present;
     uint16_t magic, version, status, seq;
     uint16_t rb_joy1, rb_joy2, rb_stick, rb_control;
+    uint16_t region_info, region_source;
 } mailbox_t;
 
 static mailbox_t  mbox;
@@ -88,12 +89,16 @@ static void mailbox_read(void)
     uint32_t ss = io_read(SN64_MBOX_BASE + SN64_REG_STATUS_SEQ);
     uint32_t jj = io_read(SN64_MBOX_BASE + SN64_REG_JOY1_JOY2);
     uint32_t sc = io_read(SN64_MBOX_BASE + SN64_REG_STICK_CONTROL);
+    uint32_t cr = io_read(SN64_MBOX_BASE + SN64_REG_COMMIT_REGION);   // {COMMIT reads 0, REGION_INFO}
+    uint32_t rs = io_read(SN64_MBOX_BASE + SN64_REG_REGION_SOURCE);   // {REGION_SOURCE, reserved}
     mbox.status     = (uint16_t)(ss >> 16);
     mbox.seq        = (uint16_t)ss;
     mbox.rb_joy1    = (uint16_t)(jj >> 16);
     mbox.rb_joy2    = (uint16_t)jj;
     mbox.rb_stick   = (uint16_t)(sc >> 16);
     mbox.rb_control = (uint16_t)sc;
+    mbox.region_info   = (uint16_t)cr;
+    mbox.region_source = (uint16_t)(rs >> 16);
 }
 
 // One complete controller update per frame, then COMMIT (SEQ increments).
@@ -150,6 +155,34 @@ static void menu_input(joypad_buttons_t pressed)
     if (pressed.a)      menu_select((item_t)cursor);
 }
 
+// ---- region telemetry text
+
+// "PAL via key CIC", "NTSC via ROM header", ... or "not decided yet".
+static void region_text(char *buf, size_t n)
+{
+    if (!(mbox.region_source & SN64_RSRC_DECIDED)) {
+        snprintf(buf, n, "not decided yet");
+        return;
+    }
+    snprintf(buf, n, "%s via %s%s", (mbox.region_source & SN64_RSRC_PAL) ? "PAL" : "NTSC",
+             sn64_region_source_names[mbox.region_source & SN64_RSRC_SOURCE_MASK],
+             (mbox.region_source & SN64_RSRC_TIMEOUT) ? " (timeout)" : "");
+}
+
+// ROM header probe: "valid, ctry 02" or "invalid, rej 0110" (+ " aborted").
+static void header_text(char *buf, size_t n)
+{
+    uint16_t ri = mbox.region_info;
+    if (!(ri & SN64_RINFO_DONE)) {
+        snprintf(buf, n, "not probed");
+        return;
+    }
+    unsigned rej = (ri & SN64_RINFO_REJECT_MASK) >> SN64_RINFO_REJECT_SHIFT;
+    snprintf(buf, n, "%s ctry %02X rej %u%u%u%u%s", (ri & SN64_RINFO_VALID) ? "ok" : "bad",
+             ri & SN64_RINFO_COUNTRY_MASK, (rej >> 3) & 1, (rej >> 2) & 1, (rej >> 1) & 1, rej & 1,
+             (ri & SN64_RINFO_ABORTED) ? " abort" : "");
+}
+
 // ---- drawing (8x8 font, 320x240 => 40 columns)
 
 static uint32_t col_text, col_dim, col_hi, col_warn, col_bg;
@@ -188,6 +221,11 @@ static void draw_main(surface_t *d)
     }
     line(d, 4, col_text, "Cartridge: %s%s", run_request ? "run requested" : "off",
          (mbox.status & SN64_STATUS_BUS_PERMIT) ? ", permitted" : "");
+    if (mbox.present) {
+        char rt[40];
+        region_text(rt, sizeof(rt));
+        line(d, 5, col_text, "Region: %s", rt);
+    }
     for (int i = 0; i < ITEM_COUNT; i++)
         line(d, 6 + i, i == cursor ? col_hi : col_text, "%c %s", i == cursor ? '>' : ' ', item_names[i]);
     line(d, 12, col_warn, "%s", message);
@@ -221,12 +259,17 @@ static void draw_status(surface_t *d)
     for (unsigned i = 0; i < SN64_STATUS_BIT_COUNT; i++)
         line(d, 3 + (int)i, (mbox.status & sn64_status_bits[i].mask) ? col_hi : col_dim, "[%c] %s",
              (mbox.status & sn64_status_bits[i].mask) ? 'x' : ' ', sn64_status_bits[i].name);
-    line(d, 12, col_text, "Sequencer: %s",
-         seq_state_names[(mbox.status & SN64_STATUS_SEQ_STATE_MASK) >> SN64_STATUS_SEQ_STATE_SHIFT]);
-    line(d, 13, col_text, "SEQ %u", mbox.seq);
-    line(d, 15, col_dim, "Readback:");
-    line(d, 16, col_text, "JOY1 %04X JOY2 %04X", mbox.rb_joy1, mbox.rb_joy2);
-    line(d, 17, col_text, "STICK %04X CONTROL %04X", mbox.rb_stick, mbox.rb_control);
+    // Rows 3..14 hold the 12 STATUS bits; the rest starts below them.
+    char rt[40], ht[40];
+    region_text(rt, sizeof(rt));
+    header_text(ht, sizeof(ht));
+    line(d, 15, col_text, "Sequencer: %s  SEQ %u",
+         seq_state_names[(mbox.status & SN64_STATUS_SEQ_STATE_MASK) >> SN64_STATUS_SEQ_STATE_SHIFT], mbox.seq);
+    line(d, 16, col_text, "Region: %s", rt);
+    line(d, 17, col_text, "Header: %s", ht);
+    line(d, 18, col_dim, "RINFO %04X RSRC %04X", mbox.region_info, mbox.region_source);
+    line(d, 19, col_text, "JOY1 %04X JOY2 %04X", mbox.rb_joy1, mbox.rb_joy2);
+    line(d, 20, col_text, "STICK %04X CONTROL %04X", mbox.rb_stick, mbox.rb_control);
     line(d, 22, col_dim, "B: back");
 }
 
