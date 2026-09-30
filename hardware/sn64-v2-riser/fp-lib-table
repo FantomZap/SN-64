@@ -1,3 +1,0 @@
-(fp_lib_table (version 7)
-  (lib (name "SN64")(type "KiCad")(uri "${KIPRJMOD}/libraries/SN64.pretty")(options "")(descr ""))
-)

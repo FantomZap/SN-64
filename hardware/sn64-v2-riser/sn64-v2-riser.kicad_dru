@@ -1,4 +1,0 @@
-(version 1)
-(rule "N64 edge fingers reach the board edge (SummerCart64 geometry)"
-    (condition "A.memberOfFootprint('J1') || B.memberOfFootprint('J1')")
-    (constraint edge_clearance (min 0mm)))
