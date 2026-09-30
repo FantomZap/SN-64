@@ -26,8 +26,8 @@ flowchart TB
   CORE --> AV[Video / digital audio buffering and output]
   SLOT --> ANALOG[Cartridge L/R analog audio input and conversion]
   ANALOG --> AV
-  AV --> OUT[Independent digital A/V]
-  AV -. supported interface still unresolved .-> M64[M64 single-HDMI integration]
+  AV --> OUT[Frame and audio window over the cartridge bus]
+  OUT --> HOSTOUT[Console output: M64 HDMI, N64 AV jack]
 ```
 
 The arrows describe the intended system, not completed circuitry. The current block status is:
@@ -44,7 +44,7 @@ The arrows describe the intended system, not completed circuitry. The current bl
 
 The host bootstrap will supply controller state and configuration while the FPGA runs SNES timing. Its proposed control protocol must retain buttons and analog axes, a version/build identity, stale-input handling, reset/fault status and update compatibility. No multitap is selected. Deferred virtual mouse support still needs an update path and justified capacity; lightgun support remains undecided. No throughput or latency acceptance is inferred from the block diagram.
 
-Independent digital A/V is the initial validation path. M64 single-HDMI remains a required full-target dependency on a supported integration mechanism. The standard N64 connector and M64's reserved contacts do not establish an available digital video transport. Keep reserved signals isolated until their use is demonstrated.
+The SNES picture and sound go to the console as frame data over the cartridge bus (PI domain 2) and the boot program shows them on the console's own output: the M64's HDMI, an original N64's AV jack ([console-video-path.md](design/console-video-path.md)). The board has no video output of its own (its HDMI port was removed on 2026-09-29). M64's reserved contacts stay isolated.
 
 ## Core reuse comparison
 

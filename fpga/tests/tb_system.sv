@@ -16,7 +16,7 @@
 //   +corrupt_key                negative run: one key bit flipped in round 1; the bench still
 //                               expects the key's region, so it must FAIL (the header decides)
 // Every run also drives the cartridge-audio ADC lines with an I2S master
-// (constant L/R words) and checks that the audio reaching sn64_av_out is
+// (constant L/R words) and checks that the audio reaching the frame window is
 // sat16(core DSP sample + ADC word) once the mixer is primed, and that the
 // N64 reads REGION_INFO / REGION_SOURCE (0x1A / 0x1C) matching the decision.
 //
@@ -28,34 +28,16 @@
 // Invariants every clock: no socket drive before permission, the SNES clock
 // never starts before cartridge power, the region never changes while the
 // SNES clock runs, /RESET is held until the clock runs, the Si5351 is never
-// accessed while the SNES clock runs, and Si5351 CLK2/MS2 match the region
-// when the SNES clock starts.
-// Clocks: the SNES master follows region_pal (CLK0 NTSC / CLK1 PAL) and the
-// HDMI pixel clock follows the CLK2 source the FPGA programmed into the
-// Si5351 model (PLLA NTSC 39/31, PLLB PAL 108/85; docs/design/clock-plan.md,
-// "PAL HDMI"). HDMI frame lock is checked in both regions: the core has
-// hardware-length lines (long dots restored in prepare_core.py).
+// accessed while the SNES clock runs, and Si5351 CLK2 is powered down with
+// its output disabled when the SNES clock starts (no pixel clock: the picture
+// goes to the console through the frame window, docs/design/console-video-path.md).
+// Clocks: the SNES master follows region_pal (CLK0 NTSC / CLK1 PAL); the core
+// has hardware-length lines (long dots restored in prepare_core.py).
 module tb_system;
     // ---------------- Clocks ----------------
     reg clk_25=0, clk_host=0, clk_snes=0;
     always #20 clk_25 = ~clk_25;                  // 25 MHz
     always #8  clk_host = ~clk_host;              // 62.5 MHz
-    reg clk_pixel=0, clk_pixel_x5=0;
-    // HDMI clocks follow what the FPGA programmed into the Si5351 model below:
-    // CLK2 from PLLA (reg 18 = 0x0F): 27.0198 MHz; from PLLB (0x2F): PAL pixel.
-    // clk_pixel is clk_pixel_x5 / 5 (the ECP5 PLL x5 is locked to CLK2).
-    // Exact ratios (fs precision): NTSC master 374660u, x5 59561u (pixel 297805u),
-    // u = 62 fs, so pixel/master = 74932/59561; PAL master 2160v, x5 341v, v = 11 ps,
-    // so pixel/master = 432/341 (21.52 / 27.08 MHz and 21.04 / 26.66 MHz in simulation).
-    wire si_clk2_pal;
-    // verilator lint_off ZERODLY
-    always #(si_clk2_pal ? 3.751 : 3.692782) clk_pixel_x5 = ~clk_pixel_x5;  // 5x TMDS
-    // verilator lint_on ZERODLY
-    integer x5_edges = 0;
-    always @(posedge clk_pixel_x5 or negedge clk_pixel_x5) begin
-        if (x5_edges == 4) begin x5_edges = 0; clk_pixel = ~clk_pixel; end   // 27.0198 MHz (Si5351 CLK2) in NTSC
-        else x5_edges = x5_edges + 1;
-    end
     wire snes_clk_run;
     // verilator lint_off ZERODLY
     always #(dut.region_pal ? 23.76 : 23.22892) clk_snes = snes_clk_run ? ~clk_snes : 1'b0;   // Si5351 CLK1 (PAL) / CLK0 (NTSC) master, gated by the board
@@ -75,7 +57,6 @@ module tb_system;
     integer status_reads=0; reg [7:0] shift, tx; integer bitc=0; reg in_frame=0, addressed=0, is_read=0, have_reg=0, ack_phase=0, send_phase=0;
     reg [7:0] si_regs [0:255]; reg [7:0] si_ptr = 0; integer si_writes = 0;
     initial for (integer i = 0; i < 256; i++) si_regs[i] = 8'h00;
-    assign si_clk2_pal = si_regs[18] == 8'h2F;
     always @(negedge sda) if (scl) begin
         in_frame=1; bitc=0; addressed=0; have_reg=0; slave_low=0; ack_phase=0; send_phase=0;
         if (snes_clk_run) $fatal(1,"Si5351 accessed while the SNES clock runs");
@@ -278,8 +259,8 @@ module tb_system;
             j++;
         end
     end
-    // Audio reaching sn64_av_out: SNES DSP sample alone while the mixer primes,
-    // then sat16(DSP + ADC word) on every sample.
+    // Audio reaching the frame window: SNES DSP sample alone while the mixer
+    // primes, then sat16(DSP + ADC word) on every sample.
     function automatic logic [15:0] sat_add(input logic [15:0] a, input logic [15:0] b);
         int v;
         v = $signed(a) + $signed(b);
@@ -297,7 +278,7 @@ module tb_system;
                 audio_priming++;
             else begin
                 audio_bad++;
-                if (audio_bad <= 5) $display("audio at sn64_av_out wrong: %h/%h, DSP %h/%h, active %0d",
+                if (audio_bad <= 5) $display("audio at the frame window wrong: %h/%h, DSP %h/%h, active %0d",
                                              dut.mix_audio_left, dut.mix_audio_right, dut.audio_mix.snes_left, dut.audio_mix.snes_right, dut.cart_audio_active);
             end
         end
@@ -312,7 +293,7 @@ module tb_system;
     // 78/84-cycle iterations each). No-key runs still decide at key_fail (~1.7 ms).
     sn64_top #(.BUILD_ID(16'h5A01), .ROM_ADDR_BITS(4), .REGION_TIMEOUT_MS(20), .SEQ_RESET_HOLD_MS(1),
                .SEQ_RAIL_TIMEOUT_MS(2), .CIC_LOCK_T_PWRUP(200)) dut (
-        .clk_25(clk_25), .clk_host(clk_host), .clk_snes(clk_snes), .clk_pixel(clk_pixel), .clk_pixel_x5(clk_pixel_x5), .hdmi_clock_ok(1'b1), .por_n(por_n),
+        .clk_25(clk_25), .clk_host(clk_host), .clk_snes(clk_snes), .por_n(por_n),
         .n64_reset_n(n64_reset_n), .n64_nmi_n(1'b1), .n64_alel(alel), .n64_aleh(aleh), .n64_read_n(rd_n), .n64_write_n(wr_n),
         .n64_ad(ad), .n64_cic_clk(1'b1), .n64_si_clk(1'b0), .n64_cic_dq(n64_cic_dq),
         .rom_we(1'b0), .rom_waddr(4'd0), .rom_wdata(16'd0),
@@ -327,7 +308,6 @@ module tb_system;
         .snes_cic_data0_o(d0o), .snes_cic_data0_oe(d0oe), .snes_cic_data0_i(line0),
         .snes_cic_data1_o(d1o), .snes_cic_data1_oe(d1oe), .snes_cic_data1_i(line1),
         .adc_bck(adc_bck), .adc_lrck(adc_lrck), .adc_dout(adc_dout),
-        .hdmi_tmds(), .hdmi_tmds_clock(), .av_locked(),
         .status_word(status_word));
 
     // ---------------- Invariants ----------------
@@ -339,29 +319,18 @@ module tb_system;
         if (snes_clk_run && !(cart_5v_ok && iface_rail_ok)) $fatal(1,"SNES clock running without cartridge power");
         if (snes_clk_run && !run_seen) begin
             run_seen=1; pal_at_start=region_pal;
-            // HDMI pixel clock retargeted before the SNES clock starts: MS2 and CLK2
-            // control for the region (clock-plan.md, PAL HDMI), CLK2 on the master's PLL.
-            if (!dut.pixel_clock_ready || dut.pixel_region_pal !== region_pal)
-                $fatal(1,"SNES clock started before the pixel clock was programmed for the region");
-            // PAL MS2 = 31 + 31/54 (59 = 36, 62 = C9, 65 = 1A); NTSC MS2 = 31 + 14887/18733 (58 = 49, 59 = 2D, 64 = 34, 65 = BF)
-            if (region_pal ? (si_regs[18] !== 8'h2F || si_regs[59] !== 8'h36 || si_regs[62] !== 8'hC9 || si_regs[65] !== 8'h1A)
-                           : (si_regs[18] !== 8'h0F || si_regs[58] !== 8'h49 || si_regs[59] !== 8'h2D || si_regs[64] !== 8'h34 || si_regs[65] !== 8'hBF))
-                $fatal(1,"Si5351 CLK2/MS2 not programmed for %s at SNES clock start (reg18=%h)", region_pal ? "PAL" : "NTSC", si_regs[18]);
+            // Si5351 image at SNES clock start: CLK0 (NTSC, PLLA) and CLK1 (PAL, PLLB) on,
+            // CLK2 powered down and disabled (register 3 = 0xFC), MS2 never written.
+            if (si_regs[16] !== 8'h4F || si_regs[17] !== 8'h6F || si_regs[18] !== 8'h80 || si_regs[3] !== 8'hFC)
+                $fatal(1,"Si5351 clock controls wrong at SNES clock start (16=%h 17=%h 18=%h 3=%h)", si_regs[16], si_regs[17], si_regs[18], si_regs[3]);
+            if (si_regs[58] !== 8'h00 || si_regs[61] !== 8'h00 || si_regs[62] !== 8'h00)
+                $fatal(1,"Si5351 MultiSynth 2 programmed (no pixel clock exists)");
         end
         if (snes_clk_run && region_pal !== pal_at_start) $fatal(1,"region changed while the SNES clock runs");
         if (!snes_clk_run && !cart_reset_pull && cart_5v_ok) $fatal(1,"cartridge /RESET released before the SNES clock runs");
     end
     reg cart_drive_d=0;
     always @(negedge clk_snes) if (cart_drive && !data_oe_n && data_dir) $fatal(1,"CONTENTION on D0-D7 at %h", a);
-
-    // ---------------- HDMI frame lock (sn64_av_out) ----------------
-    integer av_events = 0; integer av_err [0:15];
-    always @(posedge clk_pixel) if (dut.av.ev_pulse) begin
-        @(posedge clk_pixel);                        // lock_error updates on the next clock
-        if (av_events < 16) av_err[av_events] = dut.av.lock_error;
-        av_events = av_events + 1;
-    end
-    function automatic bit av_small(input integer e); return e <= 8 && e >= -8; endfunction   // sn64_av_out LOCK_TOL
 
     // ---------------- N64 PI tasks ----------------
     task pi_addr(input [31:0] x); begin
@@ -467,26 +436,10 @@ module tb_system;
         if (f2[3] !== region_pal) $fatal(1,"VIDEO_MODE pal bit %0d does not match the region", f2[3]);
         pi_addr(32'h0800_0000); pi_read(f1); pi_read(f2); pi_end;
         if (f1[0] !== 1'b1 || f2[0] !== 1'b1) $fatal(1,"frame pixels lack the RGBA5551 alpha bit: %h %h", f1, f2);
-        // Cartridge audio reached the HDMI block mixed with the DSP samples.
-        $display("audio at sn64_av_out: %0d priming (DSP only), %0d mixed with the ADC words, %0d wrong; slips ovf %0d unf %0d; ADC frame errors %0d",
-                 audio_priming, audio_mixed, audio_bad, dut.audio_ovf_slips, dut.audio_unf_slips, dut.adc_frame_errors_h);
+        // Cartridge audio reached the frame window mixed with the DSP samples.
+        $display("audio at the frame window: %0d priming (DSP only), %0d mixed with the ADC words, %0d wrong; slips ovf %0d unf %0d; ADC frame errors %0d; Si5351 writes %0d",
+                 audio_priming, audio_mixed, audio_bad, dut.audio_ovf_slips, dut.audio_unf_slips, dut.adc_frame_errors_h, si_writes);
         if (audio_bad != 0 || audio_mixed < 100) $fatal(1,"cartridge audio path: %0d wrong samples, only %0d mixed", audio_bad, audio_mixed);
-        // HDMI raster: mode from the region, frame lock over at least four SNES frames.
-        fork
-            wait (av_events >= 4);
-            #100_000_000;
-        join_any
-        disable fork;
-        if (dut.av.mode_pal !== region_pal) $fatal(1,"HDMI raster mode %0d does not match the region", dut.av.mode_pal);
-        if (av_events < 4) $fatal(1,"HDMI: only %0d lock events", av_events);
-        // Both regions: the raster must frame-lock to the SNES frame (one start-up
-        // re-phase, then every event within LOCK_TOL). NTSC events alternate by ~5 px
-        // (the V=240 short line every other frame) around a fixed mean.
-        if (!dut.av_locked || dut.av.rephase_count != 1 || !av_small(av_err[1]) || !av_small(av_err[2]) || !av_small(av_err[3]))
-            $fatal(1,"HDMI %s raster not frame-locked to the SNES frame (lock errors %0d %0d %0d, %0d re-phases)",
-                   region_pal ? "PAL" : "NTSC", av_err[1], av_err[2], av_err[3], dut.av.rephase_count);
-        $display("HDMI: raster %s frame-locked, %0d lock events, lock errors %0d %0d %0d %0d px, %0d re-phases, locked %0d, Si5351 writes %0d",
-                 region_pal ? "864x624 VIC 17" : "858x524 VIC 2", av_events, av_err[0], av_err[1], av_err[2], av_err[3], dut.av.rephase_count, dut.av_locked, si_writes);
         $display("PASS: system power-on: N64 mailbox, ordered cartridge power, Si5351 lock, region decided before the SNES clock (%s via %s), reset release, SNES program from cartridge, controller image via auto-joypad, cartridge audio mixed (%0d samples), STATUS=%h REGION_INFO=%h REGION_SOURCE=%h",
                  exp_region_s, exp_src_s, audio_mixed, d0, d1, d2);
         $finish;

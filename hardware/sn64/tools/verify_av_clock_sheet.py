@@ -1,4 +1,4 @@
-"""Independent static check of the clock / HDMI / cartridge-audio child sheet.
+"""Independent static check of the clock / cartridge-audio child sheet.
 
 Exports a fresh KiCad netlist and ERC report of a project that has
 av-clock.kicad_sch attached to its root, and checks them against tables kept
@@ -8,13 +8,12 @@ HERE (datasheet pinouts, the shared net-name contract, the Si5351 register
   * Si5351A-B-GT pins match Skyworks Si5351-B Rev 1.3 Table 20; VDD/VDDO on
     FPGA_3V3; the crystal sits alone on XA/XB (internal load caps, sec. 7.4),
     meets Table 8, and its load capacitance equals XTAL_CL in register 183;
-  * si_scl/si_sda pulled up to FPGA_3V3 (>= 1 k, Table 20); CLK0/1/2 reach
-    si_clk0/1/2 through a series element; the 25 MHz oscillator drives osc_25;
+  * si_scl/si_sda pulled up to FPGA_3V3 (>= 1 k, Table 20); CLK0/1 reach
+    si_clk0/1 through a series element; CLK2 is left open (the RTL powers it
+    down: no pixel clock, the picture goes to the console over the cartridge
+    bus); the 25 MHz oscillator drives osc_25;
   * every contract label is a hierarchical port and a matching root sheet pin;
-  * all four TMDS pairs are complete: hdmi_<lane>_p/n -> 22 nF series capacitor
-    (ULX3S gpdi.sch) -> the same lane's +/- connector pin and TPD12S016 ESD pin;
-  * the connector's +5V comes only from the TPD12S016 current-limited 5V_OUT,
-    DDC/HPD/CEC go through its B side, shields/GND to GND;
+  * no HDMI part remains on the sheet (draft 0.2-av);
   * PCM1808 straps decode (TI SLES177B Tables 2/3) to I2S master at a ratio
     whose oscillator gives fs = 32 kHz exactly, outputs on adc_bck/lrck/dout;
   * cartridge audio: L -> VINL, R -> VINR through the documented network; the
@@ -29,8 +28,8 @@ Usage (KiCad's python):
   python verify_av_clock_sheet.py --project build/av-clock/proj --negative-test   # each mutation must FAIL
 
 Writes hardware/sn64/validation/av-clock-check.json unless --output is given.
-Static schematic check only: no SI, jitter, HDMI compliance, audio or
-hardware behavior is proven.
+Static schematic check only: no SI, jitter, audio or hardware behavior is
+proven.
 """
 from __future__ import annotations
 
@@ -58,11 +57,7 @@ AUTHOR_NS = uuid.UUID('7c1e3a90-5b2d-4f61-9e0a-2d4b6a8c1f37')
 # ---- independent datasheet tables -------------------------------------------
 SI5351A_MSOP10 = {'1': 'VDD', '2': 'XA', '3': 'XB', '4': 'SCL', '5': 'SDA', '6': 'CLK2', '7': 'VDDO', '8': 'GND',
                   '9': 'CLK1', '10': 'CLK0'}                     # Si5351-B Rev 1.3 Table 20
-TPD12S016_PW = {'1': 'CEC_A', '2': 'SCL_A', '3': 'SDA_A', '4': 'HPD_A', '5': 'LS_OE', '6': 'GND', '7': 'CEC_B',
-                '8': 'SCL_B', '9': 'SDA_B', '10': 'HPD_B', '11': 'VCC5V', '12': 'CT_HPD', '13': '5V_OUT', '14': 'GND',
-                '15': 'CLK-', '16': 'CLK+', '17': 'D0-', '18': 'D0+', '19': 'GND', '20': 'D1-', '21': 'D1+',
-                '22': 'D2-', '23': 'D2+', '24': 'VCCA'}          # SLLSE96F section 5, PW column
-PCM1808_PW = {'1': 'VREF', '2': 'AGND', '3': 'VCC', '4': 'VDD', '5': 'DGND', '6': 'SCKI', '7': 'LRCK', '8': 'BCK',
+PCM1808_PW ={'1': 'VREF', '2': 'AGND', '3': 'VCC', '4': 'VDD', '5': 'DGND', '6': 'SCKI', '7': 'LRCK', '8': 'BCK',
               '9': 'DOUT', '10': 'MD0', '11': 'MD1', '12': 'FMT', '13': 'VINL', '14': 'VINR'}   # SLES177B section 5
 PCM1808_MODE = {('L', 'L'): ('slave', None), ('L', 'H'): ('master', 512), ('H', 'L'): ('master', 384),
                 ('H', 'H'): ('master', 256)}                     # Table 2, key (MD1, MD0)
@@ -72,23 +67,17 @@ PCM1808_RIN = 60e3                    # input impedance, typical (6.5)
 PCM1808_AA_MHZ = 1.3                  # internal anti-alias -3 dB (6.5)
 OSC_CJO05 = {'1': 'EN', '2': 'GND', '3': 'OUT', '4': 'VDD'}      # JSCJ CJO05 pin connection table
 CRYSTAL_3225 = {'1': 'X', '3': 'X', '2': 'GND', '4': 'GND'}      # YXC YSX321SL top-view connection
-HDMI_A = {'1': 'D2+', '2': 'D2S', '3': 'D2-', '4': 'D1+', '5': 'D1S', '6': 'D1-', '7': 'D0+', '8': 'D0S', '9': 'D0-',
-          '10': 'CK+', '11': 'CKS', '12': 'CK-', '13': 'CEC', '14': 'UTILITY', '15': 'SCL', '16': 'SDA', '17': 'GND',
-          '18': '+5V', '19': 'HPD'}
-SI5351_XTAL = {'f_mhz': (25.0, 27.0), 'cl_pf': (6.0, 12.0)}      # Table 8
+HDMI_PARTS = ('HDMI_A', 'TPD12S016PW')                             # must be absent since draft 0.2-av
+SI5351_XTAL ={'f_mhz': (25.0, 27.0), 'cl_pf': (6.0, 12.0)}      # Table 8
 XTAL_CL_BITS = {1: 6.0, 2: 8.0, 3: 10.0}                         # AN619 register 183 bits 7:6
 
 # ---- shared net-name contract ------------------------------------------------
 RAIL3, RAIL5, GND = 'FPGA_3V3', '5V_PRE', 'GND'
 ROOT_LABELLED = {'GND', 'SNES_AUDIO_L_IN', 'SNES_AUDIO_R_IN'}
 FPGA_REFS = {'U401'}   # the ECP5 on the FPGA sheet, attached at the round-3 integration
-FPGA_LABELS = (['osc_25', 'si_clk0', 'si_clk1', 'si_clk2', 'si_scl', 'si_sda']
-               + [f'hdmi_{lane}_{pol}' for lane in ('d0', 'd1', 'd2', 'ck') for pol in ('p', 'n')]
-               + ['hdmi_hpd', 'hdmi_scl', 'hdmi_sda', 'adc_bck', 'adc_lrck', 'adc_dout'])
+FPGA_LABELS = ['osc_25', 'si_clk0', 'si_clk1', 'si_scl', 'si_sda', 'adc_bck', 'adc_lrck', 'adc_dout']
 CONTRACT = sorted(ROOT_LABELLED | {RAIL3, RAIL5} | set(FPGA_LABELS))
-TMDS = {'d0': ('D0+', 'D0-'), 'd1': ('D1+', 'D1-'), 'd2': ('D2+', 'D2-'), 'ck': ('CK+', 'CK-')}
-TPD_LANE = {'d0': ('D0+', 'D0-'), 'd1': ('D1+', 'D1-'), 'd2': ('D2+', 'D2-'), 'ck': ('CLK+', 'CLK-')}
-CART_MAX_VPP = 5.0          # largest swing a cartridge powered only from +5 V can present (derived)
+CART_MAX_VPP =5.0          # largest swing a cartridge powered only from +5 V can present (derived)
 VCC_MIN = 4.75              # provisional 5 V window, docs/design/power-architecture.md
 CONSOLE_LOAD_OHMS = 1 / (1 / 200 + 1 / 10e3)    # OpenSFC R95/R96 200 R || 10 k summing input (1 uF coupled)
 
@@ -203,13 +192,16 @@ def run_checks(project: Path, cli: Path, rtl: Path):
     def is_rail(net, rail):
         return base(net) == rail
 
-    si, tpd, adc = by_part('Si5351A-B-GT'), by_part('TPD12S016PW'), by_part('PCM1808PW')
-    hdmi, xtal, oscs = by_part('HDMI_A'), by_part('Crystal_GND24'), by_part('ASE-xxxMHz')
-    check('expected_parts_present', len(si) == 1 and len(tpd) == 1 and len(adc) == 1 and len(hdmi) == 1 and len(xtal) == 1
-          and len(oscs) == 2, {'Si5351': si, 'TPD12S016': tpd, 'PCM1808': adc, 'HDMI_A': hdmi, 'crystal': xtal, 'oscillators': oscs})
-    if not (si and tpd and adc and hdmi and xtal and len(oscs) == 2):
+    si, adc = by_part('Si5351A-B-GT'), by_part('PCM1808PW')
+    xtal, oscs = by_part('Crystal_GND24'), by_part('ASE-xxxMHz')
+    check('expected_parts_present', len(si) == 1 and len(adc) == 1 and len(xtal) == 1 and len(oscs) == 2,
+          {'Si5351': si, 'PCM1808': adc, 'crystal': xtal, 'oscillators': oscs})
+    hdmi_left = {p: by_part(p) for p in HDMI_PARTS}
+    hdmi_left = {p: r for p, r in hdmi_left.items() if r}
+    check('no_hdmi_parts_on_sheet', not hdmi_left, hdmi_left or 'no HDMI connector or TPD12S016 (draft 0.2-av)')
+    if not (si and adc and xtal and len(oscs) == 2):
         return checks, {'erc': summary}
-    U_SI, U_TPD, U_ADC, J, Y = si[0], tpd[0], adc[0], hdmi[0], xtal[0]
+    U_SI, U_ADC, Y = si[0], adc[0], xtal[0]
 
     def pin_identity(ref, table):
         seen = {m['pin']: m['name'] for net in nodes.values() for m in net if m['ref'] == ref}
@@ -217,12 +209,10 @@ def run_checks(project: Path, cli: Path, rtl: Path):
         extra = sorted(set(seen) - set(table))
         return not bad and not extra, {'mismatch_pin:(netlist,datasheet)': bad, 'extra_pins': extra}
 
-    for ref, table, title in [(U_SI, SI5351A_MSOP10, 'si5351_pins_match_table_20'), (U_TPD, TPD12S016_PW, 'tpd12s016_pins_match_datasheet'),
+    for ref, table, title in [(U_SI, SI5351A_MSOP10, 'si5351_pins_match_table_20'),
                               (U_ADC, PCM1808_PW, 'pcm1808_pins_match_datasheet')]:
         ok, d = pin_identity(ref, table)
         check(title, ok, d)
-    hdmi_ok, hdmi_d = pin_identity(J, {**HDMI_A, 'SH': 'SH'})
-    check('hdmi_connector_pin_numbering', hdmi_ok, hdmi_d)
 
     # ---- Si5351 and crystal --------------------------------------------------------
     sp = {name: pnet(U_SI, p) for p, name in SI5351A_MSOP10.items()}
@@ -268,11 +258,19 @@ def run_checks(project: Path, cli: Path, rtl: Path):
         ok = len(hits) == 1 and (value_si(hits[0][1]) or 0) <= max_ohms
         return ok, hits
     clk_detail, clk_ok = {}, True
-    for out, label in (('CLK0', 'si_clk0'), ('CLK1', 'si_clk1'), ('CLK2', 'si_clk2')):
+    for out, label in (('CLK0', 'si_clk0'), ('CLK1', 'si_clk1')):
         ok, hits = series_to(sp[out], label)
         clk_ok &= ok
         clk_detail[out] = {'to': label, 'series': hits}
     check('si5351_clk_outputs_to_contract_labels', clk_ok, clk_detail)
+    # CLK2: nothing on the pin (the RTL leaves it powered down and disabled; a KiCad no-connect marker
+    # exports as a single-node "unconnected-..." net).
+    clk2_others = [(m['ref'], m['pin']) for m in members(sp['CLK2']) if m['ref'] != U_SI]
+    m183 = re.search(r"8'd3\s*,\s*8'h([0-9A-Fa-f]{2})", rtl_text)
+    oe_regs = [int(x, 16) for x in re.findall(r"8'd3\s*,\s*8'h([0-9A-Fa-f]{2})", rtl_text)]
+    check('si5351_clk2_open_and_disabled_in_rtl', not clk2_others and oe_regs and (oe_regs[-1] & 0x04) == 0x04,
+          {'CLK2_net': base(sp['CLK2']), 'other_members': clk2_others,
+           'register_3_writes': [f'0x{v:02X}' for v in oe_regs], 'rule': 'last register-3 write must keep OEB2 = 1 (disabled)'})
 
     osc = {}
     for r in oscs:
@@ -303,46 +301,6 @@ def run_checks(project: Path, cli: Path, rtl: Path):
     rootlab = {n: [m for m in members('/' + n)] for n in ('SNES_AUDIO_L_IN', 'SNES_AUDIO_R_IN')}
     check('snes_audio_labels_reach_socket', all(any(m['ref'] == 'J2' for m in v) for v in rootlab.values()),
           {k: [(m['ref'], m['pin']) for m in v] for k, v in rootlab.items()})
-
-    # ---- HDMI --------------------------------------------------------------------------
-    jp = {name: pnet(J, p) for p, name in HDMI_A.items()}
-    tp = {name: pnet(U_TPD, p) for p, name in TPD12S016_PW.items()}
-    tmds_detail, tmds_ok, used_caps = {}, True, set()
-    for lane, (jplus, jminus) in TMDS.items():
-        for pol, jname, tname in (('p', jplus, TPD_LANE[lane][0]), ('n', jminus, TPD_LANE[lane][1])):
-            label = f'hdmi_{lane}_{pol}'
-            fnet = named(label)
-            fnet = fnet if isinstance(fnet, str) else None
-            # Round-3 integration: the FPGA sheet puts one ECP5 ball (U401) on each contract label.
-            mem = [m for m in members(fnet) if m['ref'] not in FPGA_REFS]
-            balls = [m for m in members(fnet) if m['ref'] in FPGA_REFS]
-            caps = [m['ref'] for m in mem if m['ref'] in capacitors]
-            ok = fnet is not None and len(mem) == 1 and len(caps) == 1 and len(balls) <= 1
-            cnet = other(caps[0], fnet) if ok else None
-            ok = ok and cnet == jp[jname] and cnet == tp[tname] and abs((value_si(comps[caps[0]]['value']) or 0) - 22e-9) < 1e-12
-            ok = ok and caps[0] not in used_caps
-            if caps:
-                used_caps.add(caps[0])
-            tmds_ok &= ok
-            tmds_detail[label] = {'series_cap': caps and (caps[0], comps[caps[0]]['value']), 'connector_side': base(cnet),
-                                  'expected_connector_pin': jname, 'expected_tpd_pin': tname, 'ok': ok}
-    check('tmds_pairs_complete_22nF_to_connector_and_esd', tmds_ok, tmds_detail)
-    sh_ok = all(is_rail(jp[s], GND) for s in ('D2S', 'D1S', 'D0S', 'CKS', 'GND')) and is_rail(pnet(J, 'SH'), GND)
-    fiveout_ok = (jp['+5V'] == tp['5V_OUT'] and not is_rail(jp['+5V'], RAIL5)
-                  and not any(m['ref'] != U_TPD and m['type'].startswith('power_out') for m in members(jp['+5V'])))
-    check('hdmi_connector_pins', sh_ok and fiveout_ok and jp['HPD'] == tp['HPD_B'] and jp['SCL'] == tp['SCL_B']
-          and jp['SDA'] == tp['SDA_B'] and jp['CEC'] == tp['CEC_B'],
-          {'shields_gnd': sh_ok, '+5V_only_from_TPD12S016_5V_OUT_55mA_limit': fiveout_ok,
-           'HPD': base(jp['HPD']), 'SCL': base(jp['SCL']), 'SDA': base(jp['SDA']), 'CEC': base(jp['CEC']),
-           'UTILITY': base(jp['UTILITY'])})
-    ddc_pullups = [(r, base(n)) for n in (named('hdmi_scl'), named('hdmi_sda'), tp['SCL_B'], tp['SDA_B']) if isinstance(n, str)
-                   for r in parts_on(n, resistors)]
-    check('tpd12s016_configuration', is_rail(tp['VCCA'], RAIL3) and is_rail(tp['VCC5V'], RAIL5) and is_rail(tp['LS_OE'], RAIL3)
-          and is_rail(tp['CT_HPD'], RAIL3) and base(tp['HPD_A']) == 'hdmi_hpd' and base(tp['SCL_A']) == 'hdmi_scl'
-          and base(tp['SDA_A']) == 'hdmi_sda' and all(is_rail(pnet(U_TPD, p), GND) for p in ('6', '14', '19'))
-          and not ddc_pullups,
-          {k: base(tp[k]) for k in ('VCCA', 'VCC5V', 'LS_OE', 'CT_HPD', 'HPD_A', 'SCL_A', 'SDA_A', 'CEC_A')}
-          | {'external_ddc_pullups (must be none, 7.3.15)': ddc_pullups})
 
     # ---- PCM1808 -----------------------------------------------------------------------
     ap_ = {name: pnet(U_ADC, p) for p, name in PCM1808_PW.items()}
@@ -435,8 +393,6 @@ def run_checks(project: Path, cli: Path, rtl: Path):
         n = named(label)
         fpga_nets[label] = n if isinstance(n, str) else None
     five = {n for n in nodes if base(n) in (RAIL5,)}
-    five |= {n for n in nodes if any(m['ref'] == J for m in members(n)) and not is_rail(n, GND)}
-    five |= {tp[k] for k in ('SCL_B', 'SDA_B', 'HPD_B', 'CEC_B', '5V_OUT', 'VCC5V')}
     five |= {ap_['VCC'], '/SNES_AUDIO_L_IN', '/SNES_AUDIO_R_IN'}
     five.discard(None)
     leaks = []
@@ -460,11 +416,10 @@ def run_checks(project: Path, cli: Path, rtl: Path):
                     frontier.append(o)
     # Every active pin on an FPGA label net (directly or via one series resistor) must belong to a
     # device whose I/O reference is FPGA_3V3, and must be the expected pin.
-    io_ref = {U_SI: ('VDDO', sp['VDDO']), U_TPD: ('VCCA', tp['VCCA']), U_ADC: ('VDD', ap_['VDD'])}
+    io_ref = {U_SI: ('VDDO', sp['VDDO']), U_ADC: ('VDD', ap_['VDD'])}
     for r in oscs:
         io_ref[r] = ('VDD', osc[r]['nets']['VDD'])
-    allowed = {U_SI: {'SCL', 'SDA', 'CLK0', 'CLK1', 'CLK2'}, U_TPD: {'SCL_A', 'SDA_A', 'HPD_A'},
-               U_ADC: {'BCK', 'LRCK', 'DOUT'}, **{r: {'OUT'} for r in oscs}}
+    allowed = {U_SI: {'SCL', 'SDA', 'CLK0', 'CLK1'}, U_ADC: {'BCK', 'LRCK', 'DOUT'}, **{r: {'OUT'} for r in oscs}}
     bad_ref, unexpected = [], []
     for label, start in fpga_nets.items():
         if start is None:
@@ -488,7 +443,7 @@ def run_checks(project: Path, cli: Path, rtl: Path):
 
     # ---- decoupling, footprints, sourcing ------------------------------------------------------
     supply_pins = {}
-    for ref in [U_SI, U_TPD, U_ADC] + oscs:
+    for ref in [U_SI, U_ADC] + oscs:
         for m in [m for net in nodes.values() for m in net if m['ref'] == ref and m['type'].startswith('power_in')
                   and m['name'] not in ('GND', 'AGND', 'DGND')]:
             n = pnet(ref, m['pin'])
@@ -504,8 +459,8 @@ def run_checks(project: Path, cli: Path, rtl: Path):
     sheet_refs = [r for r, c in comps.items() if c['sheetfile'] == SHEET and not r.startswith('#')]
     missing_fp = sorted(r for r in sheet_refs if not comps[r]['footprint'])
     check('every_part_has_footprint', sheet_refs and not missing_fp, missing_fp)
-    no_lcsc = sorted(r for r in [U_SI, U_TPD, U_ADC, J, Y] + oscs + beads if not comps[r]['fields'].get('LCSC'))
-    check('active_parts_have_LCSC_numbers', not no_lcsc, {r: comps[r]['fields'].get('LCSC') for r in [U_SI, U_TPD, U_ADC, J, Y] + oscs + beads})
+    no_lcsc = sorted(r for r in [U_SI, U_ADC, Y] + oscs + beads if not comps[r]['fields'].get('LCSC'))
+    check('active_parts_have_LCSC_numbers', not no_lcsc, {r: comps[r]['fields'].get('LCSC') for r in [U_SI, U_ADC, Y] + oscs + beads})
     return checks, {'erc': summary, 'audio': audio}
 
 
@@ -555,12 +510,9 @@ def main():
             ('MD1 strap to GND (PCM1808 becomes I2S slave)', [('label', 'R708:2', 'GND')], ['adc_straps_i2s_master_fs_32kHz']),
             ('FMT strap to FPGA_3V3 (left-justified instead of I2S)', [('label', 'R710:2', 'FPGA_3V3')],
              ['adc_straps_i2s_master_fs_32kHz']),
-            ('hdmi_d1_n coupling cap lands on connector D1+ (broken pair)', [('label', 'C707:2', 'HDMI_J_D1_P')],
-             ['tmds_pairs_complete_22nF_to_connector_and_esd']),
-            ('TPD12S016 VCCA on 5V_PRE (HPD/DDC A side at 5 V)', [('label', 'U702:24', '5V_PRE')],
-             ['no_5V_on_FPGA_labels', 'tpd12s016_configuration']),
-            ('HDMI +5V pin straight from 5V_PRE (bypasses the 55 mA limit)', [('label', 'J701:18', '5V_PRE')],
-             ['hdmi_connector_pins']),
+            ('Si5351 CLK2 wired to the si_clk1 label (pixel-clock output brought back)',
+             [('text', '(no_connect (at 92.71 96.52)', '(label "si_clk1" (at 92.71 96.52 0) (effects (font (size 1.27 1.27)) (justify left bottom))')],
+             ['si5351_clk2_open_and_disabled_in_rtl']),
             ('Cartridge audio L/R swapped at the ADC', [('label', 'C723:2', 'ADC_VINR'), ('label', 'C725:2', 'ADC_VINL')],
              ['cartridge_audio_input_network']),
             ('R713 divider bottom open (gain 0.93: 5 Vp-p overdrives the ADC)', [('label', 'R713:2', 'R713_OPEN')],
@@ -590,7 +542,7 @@ def main():
     failed = [c for c in checks if not c['passed']]
     result = {
         'status': 'pass' if not failed else 'fail',
-        'scope': 'static schematic/netlist check of the clock, HDMI and cartridge-audio child sheet only',
+        'scope': 'static schematic/netlist check of the clock and cartridge-audio child sheet only (draft 0.2-av, no HDMI)',
         'generated_at_utc': datetime.now(timezone.utc).isoformat(),
         'project_checked': str(project),
         'checks_passed': len(checks) - len(failed), 'checks_failed': len(failed),
@@ -599,11 +551,11 @@ def main():
         'erc_violations_by_type': extra.get('erc', {}),
         'checks': checks,
         'limitations': [
-            'Static connectivity only: no signal-integrity, jitter, TMDS eye, HDMI compliance, audio or hardware test was performed.',
+            'Static connectivity only: no signal-integrity, jitter, audio or hardware test was performed.',
             'Since the round-3 integration the sheet is attached to the real root: FPGA-side pins reach ECP5 balls on the FPGA '
             'sheet and FPGA_3V3/5V_PRE come from the power sheet (#FLG701/#FLG702 removed; #FLG703 on ADC_VCC_5V stays).',
             'Provisional values: 0 R series resistors, 200 R console-equivalent load (OpenSFC value), X7R 1 uF coupling, '
-            'J701/X701/X702 footprints.',
+            'X701/X702 footprints.',
             'PCM1808 input impedance is a typical value (60 k); the gain check uses it.',
         ]}
     out = a.output or HERE.parents[1] / 'validation' / 'av-clock-check.json'

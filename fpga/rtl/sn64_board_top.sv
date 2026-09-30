@@ -3,8 +3,6 @@
 //
 // Adds the clock infrastructure around sn64_top (docs/design/clock-plan.md):
 //   * EHXPLLL "host":  25 MHz oscillator -> 62.5 MHz (REF 2, FB 5, OP 10; VCO 625 MHz)
-//   * EHXPLLL "tmds":  Si5351 CLK2 27.0198 MHz (NTSC) / 27.0399 MHz (PAL) -> 135.099 / 135.199 MHz
-//     (REF 1, FB 5, OP 4; VCO 540.4 / 540.8 MHz; docs/design/clock-plan.md "PAL HDMI")
 //   * DCSC (DCSMODE "NEG", glitchless): SEL 01 = Si5351 CLK0 (NTSC), 10 = CLK1
 //     (PAL), 00 = output held low. One primitive both picks the region clock and
 //     starts/stops the SNES domain (Lattice FPGA-TN-02200 1.3, Table 10.2 and
@@ -12,6 +10,9 @@
 //     programmed, and snes_clk_run rises only after that).
 //   * Bootstrap ROM from the configuration flash (ROM_FROM_FLASH = 1, USRMCLK).
 //   * SNES CIC data pads with per-pin SN74LVC1T45 direction control.
+// The SNES picture and sound reach the console through the N64 endpoint's
+// frame window, see docs/design/console-video-path.md, so the board has no
+// video output of its own.
 // PLL parameters were produced by ecppll (OSS CAD Suite 20260928).
 // Pin locations and I/O standards: fpga/constraints/sn64_board.lpf, generated
 // with the FPGA schematic sheet (hardware/sn64/fpga.kicad_sch,
@@ -21,7 +22,6 @@
 module sn64_board_top (
     input  wire        osc_25,            // 25 MHz oscillator
     input  wire        si_clk0, si_clk1,  // Si5351 NTSC / PAL SNES masters
-    input  wire        si_clk2,           // Si5351 HDMI pixel clock (27.0198 MHz NTSC, 27.0399 MHz PAL; clock-plan.md)
     input  wire        board_reset_n,     // supervisor / configuration done
 
     input  wire        n64_reset_n, n64_nmi_n, n64_alel, n64_aleh, n64_read_n, n64_write_n,
@@ -44,10 +44,6 @@ module sn64_board_top (
     output wire        cic_data0_dir, cic_data1_dir,    // 1 = drive the cartridge (A->B)
     output wire        flash_cs_n,                      // configuration flash CSSPIN (MCLK via USRMCLK)
     inout  wire [3:0]  flash_dq,
-    output wire [2:0]  hdmi_tmds,
-    output wire        hdmi_tmds_clock,
-    input  wire        hdmi_hpd,                        // reserved (A/V sheet delivers a 3.3 V-safe level)
-    inout  wire        hdmi_scl, hdmi_sda,              // reserved DDC, released
     input  wire        adc_bck, adc_lrck, adc_dout,     // cartridge-audio ADC (I2S master) -> sn64_top
     output wire        led_status
 );
@@ -63,19 +59,6 @@ module sn64_board_top (
         .RST(1'b0), .STDBY(1'b0), .CLKI(osc_25), .CLKOP(clk_host), .CLKFB(clk_host), .CLKINTFB(),
         .PHASESEL0(1'b0), .PHASESEL1(1'b0), .PHASEDIR(1'b1), .PHASESTEP(1'b1), .PHASELOADREG(1'b1),
         .PLLWAKESYNC(1'b0), .ENCLKOP(1'b0), .LOCK(host_locked));
-
-    // ---------------- TMDS PLL: pixel x5 ----------------
-    wire clk_pixel_x5, tmds_locked;
-    (* FREQUENCY_PIN_CLKI="27.0198", FREQUENCY_PIN_CLKOP="135.099", ICP_CURRENT="12", LPF_RESISTOR="8", MFG_ENABLE_FILTEROPAMP="1", MFG_GMCREF_SEL="2" *)
-    EHXPLLL #(
-        .PLLRST_ENA("DISABLED"), .INTFB_WAKE("DISABLED"), .STDBY_ENABLE("DISABLED"), .DPHASE_SOURCE("DISABLED"),
-        .OUTDIVIDER_MUXA("DIVA"), .OUTDIVIDER_MUXB("DIVB"), .OUTDIVIDER_MUXC("DIVC"), .OUTDIVIDER_MUXD("DIVD"),
-        .CLKI_DIV(1), .CLKOP_ENABLE("ENABLED"), .CLKOP_DIV(4), .CLKOP_CPHASE(2), .CLKOP_FPHASE(0),
-        .FEEDBK_PATH("CLKOP"), .CLKFB_DIV(5)
-    ) pll_tmds (
-        .RST(1'b0), .STDBY(1'b0), .CLKI(si_clk2), .CLKOP(clk_pixel_x5), .CLKFB(clk_pixel_x5), .CLKINTFB(),
-        .PHASESEL0(1'b0), .PHASESEL1(1'b0), .PHASEDIR(1'b1), .PHASESTEP(1'b1), .PHASELOADREG(1'b1),
-        .PLLWAKESYNC(1'b0), .ENCLKOP(1'b0), .LOCK(tmds_locked));
 
     // ---------------- SNES master: region select, then run gate ----------------
     // SEL is registered so both bits change on one clk_25 edge. region_pal is
@@ -99,8 +82,7 @@ module sn64_board_top (
     assign cic_data0 = d0_pad_oe ? d0_o : 1'bz;
     assign cic_data1 = d1_pad_oe ? d1_o : 1'bz;
 
-    // Power-on reset: board supervisor and host PLL lock. The TMDS PLL locks
-    // only after the Si5351 is programmed, so it gates the HDMI domain only.
+    // Power-on reset: board supervisor and host PLL lock.
     wire por_n = board_reset_n & host_locked;
 
     // ---------------- Pad adapters for the FPGA schematic sheet ----------------
@@ -115,13 +97,10 @@ module sn64_board_top (
     assign cart_reset_pull_n = !cart_reset_pull;
     assign n64_si_dq = 1'bz;                              // no SI/EEPROM function yet
     assign n64_int_n = 1'bz;                              // no cartridge interrupt yet
-    assign hdmi_scl = 1'bz;
-    assign hdmi_sda = 1'bz;
 
     wire [15:0] status_word;
     sn64_top #(.ROM_ADDR_BITS(17), .ROM_FROM_FLASH(1), .FLASH_USE_USRMCLK(1)) top (   // 256 KiB flash ROM window: headroom for the boot program
-        .clk_25(osc_25), .clk_host(clk_host), .clk_snes(clk_snes), .clk_pixel(si_clk2), .clk_pixel_x5(clk_pixel_x5),
-        .hdmi_clock_ok(tmds_locked), .por_n(por_n),
+        .clk_25(osc_25), .clk_host(clk_host), .clk_snes(clk_snes), .por_n(por_n),
         .n64_reset_n(n64_reset_n), .n64_nmi_n(n64_nmi_n), .n64_alel(n64_alel), .n64_aleh(n64_aleh),
         .n64_read_n(n64_read_n), .n64_write_n(n64_write_n), .n64_ad(n64_ad),
         .n64_cic_clk(n64_cic_clk), .n64_si_clk(n64_si_clk), .n64_cic_dq(n64_cic_dq),
@@ -139,8 +118,7 @@ module sn64_board_top (
         .snes_cic_oe_n(snes_cic_oe_n), .snes_cic_clk(snes_cic_clk), .snes_cic_slave_reset(snes_cic_slave_reset),
         .snes_cic_data0_o(d0_o), .snes_cic_data0_oe(d0_oe), .snes_cic_data0_i(cic_data0),
         .snes_cic_data1_o(d1_o), .snes_cic_data1_oe(d1_oe), .snes_cic_data1_i(cic_data1),
-        .adc_bck(adc_bck), .adc_lrck(adc_lrck), .adc_dout(adc_dout),
-        .hdmi_tmds(hdmi_tmds), .hdmi_tmds_clock(hdmi_tmds_clock), .av_locked(), .status_word(status_word));
+        .adc_bck(adc_bck), .adc_lrck(adc_lrck), .adc_dout(adc_dout), .status_word(status_word));
 
     // Status LED: steady when the SNES clock runs, off otherwise (a
     // placeholder for the board's indicator scheme).

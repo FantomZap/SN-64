@@ -137,7 +137,7 @@ BLOCKS = {
     ('n64if', 'top'):        (-20.0, -14.0, 30.0, -3.0),
     ('n64if', 'bottom'):     (-12.0, -16.0, 30.0, -3.0),
     ('fpga_support', 'top'): (-30.0, -52.0, 30.0, -43.0),
-    ('fpga_support', 'bottom'): (-30.0, -55.0, 30.0, -44.0),
+    ('fpga_support', 'bottom'): (-34.0, -56.0, 34.0, -43.0),
     ('cart', 'top'):         (-41.0, -64.5, 47.0, -51.0),
     ('cart', 'bottom'):      (-41.0, -66.0, 47.0, -45.0),
     ('power', 'top'):        (-49.0, -40.0, -13.0, -3.0),
@@ -159,7 +159,6 @@ FIXED = {
     'J2': (-39.0, -67.0, 90),        # 2x40 right-angle header along the top edge, pins pointing up (pad centroid at x = 0)
     'U401': (0.0, -32.0, 0),         # FPGA, centred
     'J101': (-47.5, -52.0, 90),      # USB-C on the left edge below the top-left screw hole, receptacle facing out
-    'J701': (46.0, -38.0, 270),      # HDMI on the right edge
 }
 
 
@@ -327,7 +326,7 @@ def main():
     outline(board)
     # shell mounting holes (SummerCart64: 2.5 mm at +-47.5, 7.25 above the tip)
     # Shell screw holes, 2.5 mm like SummerCart64: its two at (+-47.5, 3.25) plus four more because this
-    # board is taller and carries the socket, HDMI and USB insertion loads: mid-height and top corners.
+    # board is taller and carries the socket and USB insertion loads: mid-height and top corners.
     holes = []
     for i, (x, y) in enumerate(((-47.5, 3.25), (47.5, 3.25), (-47.5, -16.0), (47.5, -16.0), (-47.5, -66.0), (47.5, -66.0)), start=1):
         h = load_footprint('MountingHole:MountingHole_2.5mm')
@@ -390,9 +389,6 @@ def main():
     (constraint edge_clearance (min 0mm)))
 (rule "USB-C receptacle sits on the board edge"
     (condition "A.memberOfFootprint('J101') || B.memberOfFootprint('J101')")
-    (constraint edge_clearance (min 0mm)))
-(rule "HDMI receptacle overhangs the board edge"
-    (condition "A.memberOfFootprint('J701') || B.memberOfFootprint('J701')")
     (constraint edge_clearance (min 0mm)))
 ''', encoding='utf-8', newline='\n')
     print(f'wrote {a.out}: {len(fps)} footprints, {len(nets)} nets; blocks:', {k: len(v) for k, v in blocks.items()})

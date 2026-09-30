@@ -1,15 +1,15 @@
 {
   "status": "pass",
-  "scope": "static schematic/netlist check of the clock, HDMI and cartridge-audio child sheet only",
-  "generated_at_utc": "2026-09-30T00:51:35.191436+00:00",
+  "scope": "static schematic/netlist check of the clock and cartridge-audio child sheet only (draft 0.2-av, no HDMI)",
+  "generated_at_utc": "2026-09-30T03:28:46.568174+00:00",
   "project_checked": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\hardware\\sn64",
-  "checks_passed": 30,
+  "checks_passed": 27,
   "checks_failed": 0,
   "inputs": {
-    "sn64.kicad_sch": "e6b8db9ae8891be85ceba04973537c6430c2831e07c6bc8b80b56fd22d0e800a",
-    "av-clock.kicad_sch": "66c40c96bddd5d0a8fa40f0638624a2bd0bd515b502e62d219734b05addf6bfa",
-    "libraries/SN64_AV.kicad_sym": "486554125953dafa652818d7161acb74f836f4d90ec81f17d1d887b42877a874",
-    "fpga/rtl/sn64_clock_init.sv": "3a99d3dab2e864348778f65c6fe9e9cc25720e212a86dab001565c965075c9fc"
+    "sn64.kicad_sch": "fa5de621014b6b892738ffcbc6112dd277cf53b2069a8200c4aba570e7584959",
+    "av-clock.kicad_sch": "dc0e9e8a21a89763b4266bf26e4109a17531545543a51b905003ef49cd00a634",
+    "libraries/SN64_AV.kicad_sym": "ba6d499b1d8f0dd69c08b59d50b4fce6bd33c1684729ff72d0aa65af0cb6f945",
+    "fpga/rtl/sn64_clock_init.sv": "ef20ae75c9425c2ad6019de13ee281d47052e5854b1e0b76a60726aead693eb9"
   },
   "erc_violations_by_type": {
     "warning:isolated_pin_label": 5,
@@ -49,14 +49,8 @@
         "Si5351": [
           "U701"
         ],
-        "TPD12S016": [
-          "U702"
-        ],
         "PCM1808": [
           "U703"
-        ],
-        "HDMI_A": [
-          "J701"
         ],
         "crystal": [
           "Y701"
@@ -68,6 +62,11 @@
       }
     },
     {
+      "check": "no_hdmi_parts_on_sheet",
+      "passed": true,
+      "detail": "no HDMI connector or TPD12S016 (draft 0.2-av)"
+    },
+    {
       "check": "si5351_pins_match_table_20",
       "passed": true,
       "detail": {
@@ -76,23 +75,7 @@
       }
     },
     {
-      "check": "tpd12s016_pins_match_datasheet",
-      "passed": true,
-      "detail": {
-        "mismatch_pin:(netlist,datasheet)": {},
-        "extra_pins": []
-      }
-    },
-    {
       "check": "pcm1808_pins_match_datasheet",
-      "passed": true,
-      "detail": {
-        "mismatch_pin:(netlist,datasheet)": {},
-        "extra_pins": []
-      }
-    },
-    {
-      "check": "hdmi_connector_pin_numbering",
       "passed": true,
       "detail": {
         "mismatch_pin:(netlist,datasheet)": {},
@@ -202,16 +185,20 @@
               "0R"
             ]
           ]
-        },
-        "CLK2": {
-          "to": "si_clk2",
-          "series": [
-            [
-              "R705",
-              "0R"
-            ]
-          ]
         }
+      }
+    },
+    {
+      "check": "si5351_clk2_open_and_disabled_in_rtl",
+      "passed": true,
+      "detail": {
+        "CLK2_net": "unconnected-(U701-CLK2-Pad6)",
+        "other_members": [],
+        "register_3_writes": [
+          "0xFF",
+          "0xFC"
+        ],
+        "rule": "last register-3 write must keep OEB2 = 1 (disabled)"
       }
     },
     {
@@ -285,120 +272,6 @@
       }
     },
     {
-      "check": "tmds_pairs_complete_22nF_to_connector_and_esd",
-      "passed": true,
-      "detail": {
-        "hdmi_d0_p": {
-          "series_cap": [
-            "C708",
-            "22nF"
-          ],
-          "connector_side": "HDMI_J_D0_P",
-          "expected_connector_pin": "D0+",
-          "expected_tpd_pin": "D0+",
-          "ok": true
-        },
-        "hdmi_d0_n": {
-          "series_cap": [
-            "C709",
-            "22nF"
-          ],
-          "connector_side": "HDMI_J_D0_N",
-          "expected_connector_pin": "D0-",
-          "expected_tpd_pin": "D0-",
-          "ok": true
-        },
-        "hdmi_d1_p": {
-          "series_cap": [
-            "C706",
-            "22nF"
-          ],
-          "connector_side": "HDMI_J_D1_P",
-          "expected_connector_pin": "D1+",
-          "expected_tpd_pin": "D1+",
-          "ok": true
-        },
-        "hdmi_d1_n": {
-          "series_cap": [
-            "C707",
-            "22nF"
-          ],
-          "connector_side": "HDMI_J_D1_N",
-          "expected_connector_pin": "D1-",
-          "expected_tpd_pin": "D1-",
-          "ok": true
-        },
-        "hdmi_d2_p": {
-          "series_cap": [
-            "C704",
-            "22nF"
-          ],
-          "connector_side": "HDMI_J_D2_P",
-          "expected_connector_pin": "D2+",
-          "expected_tpd_pin": "D2+",
-          "ok": true
-        },
-        "hdmi_d2_n": {
-          "series_cap": [
-            "C705",
-            "22nF"
-          ],
-          "connector_side": "HDMI_J_D2_N",
-          "expected_connector_pin": "D2-",
-          "expected_tpd_pin": "D2-",
-          "ok": true
-        },
-        "hdmi_ck_p": {
-          "series_cap": [
-            "C710",
-            "22nF"
-          ],
-          "connector_side": "HDMI_J_CK_P",
-          "expected_connector_pin": "CK+",
-          "expected_tpd_pin": "CLK+",
-          "ok": true
-        },
-        "hdmi_ck_n": {
-          "series_cap": [
-            "C711",
-            "22nF"
-          ],
-          "connector_side": "HDMI_J_CK_N",
-          "expected_connector_pin": "CK-",
-          "expected_tpd_pin": "CLK-",
-          "ok": true
-        }
-      }
-    },
-    {
-      "check": "hdmi_connector_pins",
-      "passed": true,
-      "detail": {
-        "shields_gnd": true,
-        "+5V_only_from_TPD12S016_5V_OUT_55mA_limit": true,
-        "HPD": "HDMI_HPD_B",
-        "SCL": "HDMI_SCL_B",
-        "SDA": "HDMI_SDA_B",
-        "CEC": "HDMI_CEC_B",
-        "UTILITY": "unconnected-(J701-UTILITY-Pad14)"
-      }
-    },
-    {
-      "check": "tpd12s016_configuration",
-      "passed": true,
-      "detail": {
-        "VCCA": "FPGA_3V3",
-        "VCC5V": "5V_PRE",
-        "LS_OE": "FPGA_3V3",
-        "CT_HPD": "FPGA_3V3",
-        "HPD_A": "hdmi_hpd",
-        "SCL_A": "hdmi_scl",
-        "SDA_A": "hdmi_sda",
-        "CEC_A": "HDMI_CEC_A",
-        "external_ddc_pullups (must be none, 7.3.15)": []
-      }
-    },
-    {
       "check": "adc_straps_i2s_master_fs_32kHz",
       "passed": true,
       "detail": {
@@ -442,7 +315,6 @@
         ],
         "VDD": "FPGA_3V3",
         "VDD_rail_caps": [
-          "100nF",
           "100nF",
           "100nF",
           "100nF",
@@ -573,29 +445,15 @@
       "check": "no_5V_on_FPGA_labels",
       "passed": true,
       "detail": {
-        "fpga_labels_checked": 20,
+        "fpga_labels_checked": 8,
         "dc_paths_to_5V_nets": [],
         "drivers_not_referenced_to_FPGA_3V3": [],
         "unexpected_members": [],
         "five_volt_nets": [
           "5V_PRE",
           "ADC_VCC_5V",
-          "HDMI_5V",
-          "HDMI_CEC_B",
-          "HDMI_HPD_B",
-          "HDMI_J_CK_N",
-          "HDMI_J_CK_P",
-          "HDMI_J_D0_N",
-          "HDMI_J_D0_P",
-          "HDMI_J_D1_N",
-          "HDMI_J_D1_P",
-          "HDMI_J_D2_N",
-          "HDMI_J_D2_P",
-          "HDMI_SCL_B",
-          "HDMI_SDA_B",
           "SNES_AUDIO_L_IN",
-          "SNES_AUDIO_R_IN",
-          "unconnected-(J701-UTILITY-Pad14)"
+          "SNES_AUDIO_R_IN"
         ]
       }
     },
@@ -604,8 +462,7 @@
       "passed": true,
       "detail": {
         "supply_pins": {
-          "FPGA_3V3": 6,
-          "5V_PRE": 1,
+          "FPGA_3V3": 5,
           "ADC_VCC_5V": 1
         },
         "100nF_caps": {
@@ -618,9 +475,7 @@
           "SNES_5V_CART": 9,
           "INTERFACE_3V3": 22,
           "VAUX_5V": 1,
-          "FPGA_3V3": 14,
-          "5V_PRE": 1,
-          "HDMI_5V": 1,
+          "FPGA_3V3": 13,
           "ADC_VCC_5V": 1,
           "ADC_VREF": 1
         }
@@ -636,9 +491,7 @@
       "passed": true,
       "detail": {
         "U701": "C504891",
-        "U702": "C201665",
         "U703": "C55513",
-        "J701": "C427307",
         "Y701": "C70582",
         "X701": "C712741",
         "X702": "C712747",
@@ -647,9 +500,9 @@
     }
   ],
   "limitations": [
-    "Static connectivity only: no signal-integrity, jitter, TMDS eye, HDMI compliance, audio or hardware test was performed.",
+    "Static connectivity only: no signal-integrity, jitter, audio or hardware test was performed.",
     "Since the round-3 integration the sheet is attached to the real root: FPGA-side pins reach ECP5 balls on the FPGA sheet and FPGA_3V3/5V_PRE come from the power sheet (#FLG701/#FLG702 removed; #FLG703 on ADC_VCC_5V stays).",
-    "Provisional values: 0 R series resistors, 200 R console-equivalent load (OpenSFC value), X7R 1 uF coupling, J701/X701/X702 footprints.",
+    "Provisional values: 0 R series resistors, 200 R console-equivalent load (OpenSFC value), X7R 1 uF coupling, X701/X702 footprints.",
     "PCM1808 input impedance is a typical value (60 k); the gain check uses it."
   ]
 }

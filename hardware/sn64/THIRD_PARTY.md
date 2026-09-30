@@ -43,14 +43,12 @@ The KiCad library copies use **CC-BY-SA 4.0 with the KiCad library exception**. 
 
 `SN64_USB:SN74AXC4T774PW` is newly drawn from the factual 16-pin PW pinout in [Texas Instruments' SN74AXC4T774 datasheet](https://www.ti.com/lit/ds/symlink/sn74axc4t774.pdf), revision C. It does not copy manufacturer artwork or an existing TI library symbol. Datasheets and the distributor-hosted JAE drawing are research references; no license for redistributing manufacturer CAD or documents is inferred from access to them. These asset-specific notices do not assign a blanket license to unrelated project material.
 
-## ULX3S HDMI (GPDI) TMDS coupling
-- Upstream: [emard/ulx3s](https://github.com/emard/ulx3s), sheet [`gpdi.sch`](https://github.com/emard/ulx3s/blob/6a92cec6b177191c5b0f80e260013a1f8ec147dd/gpdi.sch), commit `6a92cec6b177191c5b0f80e260013a1f8ec147dd`, SHA-256 `2ff8d987b7f167ec0c0f7396bb11f8040d79a0289ab2d4a73ebde4b0f5b1164d`.
-- Reused as a circuit fact only in `av-clock.kicad_sch`: one 22 nF series capacitor per TMDS line (ULX3S C38-C45) between the FPGA's single-ended LVCMOS33D pins and the connector, and the connector part 10029449-111RLF. No ULX3S symbols, layout, artwork or silkscreen are imported.
-- License: MIT-style with an additional logo condition (LICENSE.md SHA-256 `cdaaa3f0c2d1dbb538844077fd7a1d9d43c890d0745b20d8aa0717b583d6af9f`). Retain the notice if layout or artwork is ever adapted.
+## ULX3S HDMI (GPDI) TMDS coupling (no longer used)
+- The 0.1-av A/V sheet reused one circuit fact from [emard/ulx3s](https://github.com/emard/ulx3s) `gpdi.sch` at commit `6a92cec6b177191c5b0f80e260013a1f8ec147dd` (one 22 nF series capacitor per TMDS line). The HDMI section was removed on 2026-09-29; nothing from that sheet remains in the project.
 - OpenSFC SHVC-CPU-01 (R95/R96 200 ohm cartridge-audio load) and sd2snes Rev F (CS4344 output network) are cited as level/impedance evidence only; nothing is copied.
 
 ## Other round-3 reuse (facts only, no files copied)
-- FPGA sheet: ULX3S `6a92cec6` flash pull values and HDMI ball pairs; SummerCart64 `a1e7996d` N64 pad treatment (no series resistors).
+- FPGA sheet: ULX3S `6a92cec6` flash pull values (the HDMI ball pairs were dropped in rev 0.5-fpga); SummerCart64 `a1e7996d` N64 pad treatment (no series resistors).
 - Power sheet: the TLV62569 FPGA-rail stages follow the ULX3S rev 1.0.8 `power.sch` topology at commit `6a92cec` (MIT; no files copied).
 
 ## OpenSFC cartridge-slot geometry (socket board)

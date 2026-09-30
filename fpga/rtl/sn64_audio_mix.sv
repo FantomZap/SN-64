@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // SN64 cartridge-audio mixer: elastic buffer + saturating mix into the SNES
-// DSP sample stream that feeds HDMI (sn64_av_out).
+// DSP sample stream that feeds the N64 endpoint's audio ring (sn64_frame_window,
+// docs/design/console-video-path.md).
 //
 // Rates. The SNES side produces one stereo sample per `snes_ready` pulse at
 // the core's DSP rate (clk_snes domain). The cartridge ADC delivers one

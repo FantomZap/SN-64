@@ -30,8 +30,6 @@ module sn64_top #(
     parameter        CIC_LOCK_T_PWRUP = 49605      // lock start-up wait (instruction cycles)
 ) (
     input  wire        clk_25, clk_host, clk_snes,
-    input  wire        clk_pixel, clk_pixel_x5,        // HDMI: Si5351 CLK2 (NTSC master x 39/31 = 27.0198 MHz or PAL master x 108/85 = 27.0399 MHz) and ECP5 PLL x5
-    input  wire        hdmi_clock_ok,                  // TMDS PLL locked (it locks only after the Si5351 is programmed)
     input  wire        por_n,                      // board power-on reset / FPGA configured
 
     // ---------------- N64 / M64 cartridge edge ----------------
@@ -80,11 +78,6 @@ module sn64_top #(
 
     // ---------------- Cartridge-audio ADC (I2S master, asynchronous) ----------------
     input  wire        adc_bck, adc_lrck, adc_dout,   // 64 fs bit clock, word select, data (docs/design/cart-audio-implementation.md)
-
-    // ---------------- HDMI output (720x480p or 720x576p50, 32 kHz audio) ----------------
-    output wire [2:0]  hdmi_tmds,                   // serial TMDS data lanes (single-ended view; board adds differential I/O)
-    output wire        hdmi_tmds_clock,
-    output wire        av_locked,
 
     // ---------------- Diagnostics ----------------
     output wire [15:0] status_word
@@ -144,7 +137,6 @@ module sn64_top #(
     // Si5351 start-up and region latch (clk_25)
     // =====================================================================
     wire clocks_ready, i2c_error;
-    wire pixel_clock_ready, pixel_region_pal;    // Si5351 CLK2 programmed for region_pal (HDMI raster mode)
     wire cic_region_valid, cic_region_pal, cic_key_ok, cic_key_fail;
     wire det_valid, det_pal;                     // combined key CIC / ROM header / NTSC-default result
     sn64_clock_init #(.CLK_HZ(CLK25_HZ)) clock_init (
@@ -152,8 +144,7 @@ module sn64_top #(
         .scl_oe(si_scl_oe), .sda_oe(si_sda_oe), .sda_in(si_sda_in),
         .region_mode(region_mode_25), .detected_valid(det_valid), .detected_pal(det_pal),
         .snes_clock_stopped(!snes_clk_run), .region_pal(region_pal), .region_change_pending(),
-        .clocks_ready(clocks_ready), .i2c_error(i2c_error),
-        .pixel_clock_ready(pixel_clock_ready), .pixel_region_pal(pixel_region_pal));
+        .clocks_ready(clocks_ready), .i2c_error(i2c_error));
 
     // =====================================================================
     // Power sequencer (clk_25)
@@ -238,9 +229,7 @@ module sn64_top #(
         end else begin
             if (seq_state == 4'd3 && !snes_clk_run) begin
                 region_timer <= region_timer + 1;
-                // pixel_clock_ready: Si5351 CLK2 already retargeted for the latched
-                // region (MS2 is only rewritten while the SNES clock is stopped).
-                if (clocks_ready && region_decided && pixel_clock_ready) begin
+                if (clocks_ready && region_decided) begin
                     snes_clk_run <= 1'b1;
                     rgn_decided <= 1'b1; rgn_src <= region_src; rgn_timeout <= region_timeout;
                     rgn_pal <= rgn_wanted_pal; rgn_hdr <= hdr_word;
@@ -307,17 +296,13 @@ module sn64_top #(
         .ctl_oe_n(ctl_oe_n), .data_oe_n(data_oe_n), .data_dir(data_dir), .probe_owns(hdr_owns));
 
     // =====================================================================
-    // HDMI output: SNES picture line-doubled to 720x480p (NTSC) or 720x576p50
-    // (PAL), audio as 32 kHz HDMI audio (docs/design/av-output-implementation.md).
-    // The pixel clock comes from the same Si5351 PLL as the running SNES master
-    // (PLLA for NTSC, PLLB for PAL), so the raster is frequency-locked to the
-    // SNES frame.
-    // =====================================================================
     // Cartridge audio (docs/design/cart-audio-implementation.md): the ADC's
     // I2S lines are oversampled by clk_host (always on, 30x BCK); each stereo
     // frame crosses to clk_snes through the mixer's toggle synchroniser and
-    // elastic buffer and is added (saturating) to the core's DSP samples.
-    // sn64_av_out's audio contract is unchanged.
+    // elastic buffer and is added (saturating) to the core's DSP samples. The
+    // mixed stream feeds the endpoint's frame window (audio ring the console
+    // reads over the cartridge bus, docs/design/console-video-path.md).
+    // =====================================================================
     wire signed [23:0] adc_left_h, adc_right_h;
     wire adc_tog_h, adc_locked_h; wire [15:0] adc_frame_errors_h;
     sn64_i2s_rx adc_rx (.clk(clk_host), .rst_n(rsthost_n), .bck(adc_bck), .lrck(adc_lrck), .dout(adc_dout),
@@ -329,21 +314,6 @@ module sn64_top #(
         .snes_left(snes_audio_left), .snes_right(snes_audio_right), .snes_ready(snes_audio_ready),
         .mix_left(mix_audio_left), .mix_right(mix_audio_right), .mix_ready(mix_audio_ready),
         .overflow_slips(audio_ovf_slips), .underflow_slips(audio_unf_slips), .cart_active(cart_audio_active), .fill());
-
-    // The HDMI pixel domain stays in reset until CLK2 is programmed for the
-    // latched region (pixel_clock_ready drops as soon as a new region is
-    // latched, before MS2 is rewritten); av takes its raster mode (858x524
-    // VIC 2 or 864x624 VIC 17) from pixel_region_pal while in reset.
-    wire rst_pixel_n;
-    sn64_sync_bit #(1'b0) s_rst_pix (.clk(clk_pixel), .d(por_n & pixel_clock_ready & hdmi_clock_ok), .q(rst_pixel_n));
-    sn64_av_out av (
-        .clk_snes(clk_snes), .rst_snes_n(core_reset_n),
-        .rgb(snes_rgb), .hde(snes_hde), .vde(snes_vde), .video_x(snes_video_x), .video_y(snes_video_y),
-        .audio_left(mix_audio_left), .audio_right(mix_audio_right), .audio_ready(mix_audio_ready),
-        .pal(pixel_region_pal),
-        .clk_pixel(clk_pixel), .clk_pixel_x5(clk_pixel_x5), .rst_pixel_n(rst_pixel_n),
-        .tmds(hdmi_tmds), .tmds_clock(hdmi_tmds_clock),
-        .locked(av_locked), .lock_error(), .rephase_count(), .mode_pal());
 
     // Socket /RESET: open-drain pull owned by the power sequencer (held in
     // every state except RUN, and during a soft reset) or whenever the bus is

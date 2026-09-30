@@ -4,6 +4,8 @@ Drafted 2026-09-29, schematic rev `0.4-fpga`. This is the first real pin assignm
 
 **Round-3 integration (2026-09-29):** the sheet is now attached to the real root (page 4) and every pending pin is wired by name to the power, clock/A-V and USB sheets ([system-integration.md](system-integration.md#schematic-integration-round-3-2026-09-29)). Changes made there: (1) every reference designator moved from 3xx to 4xx (the power sheet already used U301-U307, R301-R319, C301-C340, TP301-TP308 and #FLG301-#FLG304); this document uses the new numbers. (2) #FLG401-#FLG403 were removed because the power sheet originates FPGA_1V1/2V5/3V3; #FLG404 stays. (3) `si_clk2` is constrained at 27.0399 MHz (PAL pixel clock, the faster region). On the integrated root the verifier passes 12/13: `no_5V_12V_or_VBUS_net_reaches_any_FPGA_ball` fails on `efuse_fault_n` (ball K4), which the power sheet derives from a 5V_PRE divider; that is an open owner decision. The "Integration still to do" list below is historical except where noted there.
 
+**Rev 0.5-fpga (later on 2026-09-29):** the HDMI pins (TMDS pairs A16/B16, A14/C14, A12/A13, A17/B18; HPD/DDC E13, D15, E15) and `si_clk2` (F2) were removed, because the picture goes to the console over the cartridge bus ([console-video-path.md](console-video-path.md)). Bank 1 is spare, F2/E2 are open, 113 ports remain, and the LPF/CSV are regenerated from the same table. Passages below that mention HDMI describe rev 0.4.
+
 ## Plain-language summary
 
 The FPGA chip has 381 balls on its underside. Every one is now decided:
@@ -11,9 +13,8 @@ The FPGA chip has 381 balls on its underside. Every one is now decided:
 - The 113 ground, 20 core-power, 4 auxiliary-power and 18 I/O-power balls go to their supplies, with the decoupling capacitors Lattice's checklist asks for.
 - The 10 "reserved" balls stay unconnected, as Lattice requires.
 - The configuration pins make the FPGA load itself from the flash chip at power-up.
-- The 121 signals the FPGA design uses each have a ball, on the side of the chip facing the part they talk to:
+- The 113 signals the FPGA design uses each have a ball, on the side of the chip facing the part they talk to:
   - the N64 bus on the top-left bank,
-  - HDMI on the top-right bank,
   - the SNES cartridge on the two right-hand banks,
   - clocks, power control and the audio ADC on the left,
   - the flash on the bottom (configuration) bank.
@@ -96,7 +97,6 @@ The Value field is `LFE5U-85F-6BG381C`, per the task. A field records the stocke
 
 - the cartridge translators' B side (SN74LVC4245A VCCB = `INTERFACE_3V3`),
 - the N64 PI (3.3 V host),
-- HDMI LVCMOS33D (the ULX3S arrangement),
 - bank 8 flash (TN-02038 §7: "The flash voltage should match the VCCIO8 voltage"),
 - JTAG (DS-02012: "VCCIO8 is used for configuration and JTAG").
 
@@ -105,11 +105,11 @@ TN-02038 §3.6 also says "Connect unused VCCIO pins to a power rail. Do not leav
 | Bank | Side (DS-02012 §2.14) | Used for |
 |---|---|---|
 | 0 | top, hot-socket capable | N64 PI AD0–15, ALE, /RD, /WR, /RESET, /NMI, CIC, SI clock/data, /INT (27 of 27 balls) |
-| 1 | top | HDMI 4 × LVCMOS33D pairs (ULX3S balls A16/B16, A14/C14, A12/A13, A17/B18), HPD, DDC |
+| 1 | top | spare since rev 0.5 (was HDMI) |
 | 2 | right | cart_address[0..23], cart_pa[0..7] |
 | 3 | right | cart_data, strobes, SYSTEM_CLK, CIC, OE/DIR controls, sense inputs |
 | 6 | left | osc_25, si_clk0, ADC I2S, power-control inputs/outputs |
-| 7 | left | si_clk1, si_clk2, Si5351 I2C, status LED |
+| 7 | left | si_clk1, Si5351 I2C, status LED |
 | 8 | bottom, configuration | flash CS/D0–D3 (MCLK is the dedicated CCLK ball U3) |
 
 **Power-up order.** DS-02012 §3.5: "it is required to ramp VCCIO8 above VIH of the external SPI Flash, before at least one of the other two supplies (VCC and/or VCCAUX) is ramped to VPORUP voltage level. If the system cannot meet this… then the system must keep either PROGRAMN or INITN pin LOW during power up".
@@ -159,35 +159,23 @@ TN-02200 §8.3: "A dedicated PCLK clock pin must always be used to route an exte
 
 TN-02038 §10 note: "For single-ended I/Os, use only PCLKT pins as primary CLK pads."
 
-`osc_25` and `si_clk2` each drive logic directly (the housekeeping and pixel domains) as well as a PLL. `si_clk0` and `si_clk1` feed the DCSC. All four therefore sit on PCLKT balls:
+`osc_25` drives logic directly (the housekeeping domain) as well as the host PLL. `si_clk0` and `si_clk1` feed the DCSC. All three therefore sit on PCLKT balls:
 
 | Port | Ball | Function | Feeds |
 |---|---|---|---|
 | osc_25 | G2 | PCLKT6_1 | housekeeping logic; host PLL CLKI through the primary clock network |
 | si_clk0 | H2 | PCLKT6_0 | DCSC CLK0 (NTSC) |
 | si_clk1 | G3 | PCLKT7_1 | DCSC CLK1 (PAL) |
-| si_clk2 | F2 | PCLKT7_0 | pixel logic; TMDS PLL CLKI through the primary clock network |
 
-The complement balls F1, G1, F3 and E2 are left unused to keep neighbours quiet.
+The complement balls F1, G1 and F3 are left unused to keep neighbours quiet; F2 and E2 (PCLKT7_0 and its complement) are open since rev 0.5.
 
 **Which PLL each input reaches.** The dedicated GPLL input pins (A4/A5 ULC, A6/B6 ULC, C18/D17 URC, A19/B20 URC, P3/P4 LLC, U16/T17 LRC) each reach only their corner PLL (TN-02200 §7.1). They cannot also feed logic through a PCLK path. A PCLK input reaches any PLL through the primary network. In the routed run nextpnr placed `pll_tmds` at EHXPLL_UL and `pll_host` at EHXPLL_LL, fed from G2 and F2 over the global network.
 
 TN-02200 §18.3.1 calls the dedicated pin "the recommended source for the PLL" because of its low-skew path. Using PCLK is the documented alternative. PLL input jitter through the primary network is a prototype measurement.
 
-## HDMI
+## HDMI (removed in rev 0.5-fpga)
 
-These are the ULX3S GPDI balls in bank 1, all top-bank PIO A/B pairs:
-
-| Channel | True (A) | Complement (B) |
-|---|---|---|
-| hdmi_tmds[0] | A16 | B16 |
-| hdmi_tmds[1] | A14 | C14 |
-| hdmi_tmds[2] | A12 | A13 |
-| hdmi_tmds_clock | A17 | B18 |
-
-LVCMOS33D is an emulated differential output available "in pairs around all banks" (TN-02038 §12; TN-02032 Table 3.2). The LPF locates the true ball and nextpnr drives the complement. The sheet labels are `hdmi_d0_p`/`hdmi_d0_n` … `hdmi_ck_p`/`hdmi_ck_n`.
-
-`hdmi_hpd` (E13), `hdmi_scl` (D15) and `hdmi_sda` (E15) are 3.3 V balls. The A/V sheet must deliver HPD and DDC at 3.3 V-safe levels; HDMI's own DDC and HPD are 5 V.
+Rev 0.4 used bank-1 LVCMOS33D pairs A16/B16, A14/C14, A12/A13 and A17/B18 for TMDS and E13/D15/E15 for HPD/DDC. They are unassigned since the video path moved to the console ([console-video-path.md](console-video-path.md)).
 
 ## N64 edge interface and host isolation
 
@@ -287,7 +275,7 @@ Run from the repository root with KiCad's Python:
 - N64 AD0 wired straight to the FPGA
 - two LPF sites swapped
 - `osc_25` moved to a non-clock ball in the CSV
-- `si_clk2` moved off its PCLKT ball in the LPF
+- `si_clk1` moved off its PCLKT ball in the LPF
 - the `cart_address0` ball label renamed, so it no longer reaches U201
 
 **Against the unmodified `fpga/rtl/sn64_board_top.sv`, the checker fails the port-agreement check.** It lists exactly the ports the board-top edit changes (`si_*_oe`/`si_sda_in`, `cart_data_out`/`in`, `cart_reset_pull`, and the new ports). This is expected until that edit is applied.
@@ -323,7 +311,7 @@ Cross-domain paths are synchronised by design and are not timed. There is no I/O
    - `fpga_rails_ok` valid only when all three FPGA rails are in range,
    - its own default-off pull-downs on the `cart_5v_enable`/`iface_rail_enable` inputs. The FPGA pins only weakly pull down while unconfigured.
    - Regulators accurate to within 3 % (TN-02038 §2.2).
-4. **A/V sheet obligations:** `hdmi_hpd`, `hdmi_scl` and `hdmi_sda` must reach the FPGA as 3.3 V signals (level shifter or clamp), and `hdmi_d*_p/n` need the A/V sheet's series/termination network.
+4. **A/V sheet obligations:** none since rev 0.5 (the HDMI pins are gone).
 
 ## Integration still to do
 

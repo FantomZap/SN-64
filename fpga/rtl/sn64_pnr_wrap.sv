@@ -2,13 +2,11 @@
 // Place-and-route feasibility wrapper for sn64_top (not the board top level).
 //
 // Keeps every real board interface as a pin, ties off the simulation-only
-// bootstrap load port, and XOR-reduces the SNES video/audio and status
-// outputs are now consumed by the integrated HDMI block; the status word is
-// XOR-reduced into one pin. Used only to measure resources and
-// internal timing before the board wrapper (PLLs, DCS, A/V, pin constraints)
-// exists; pin locations are left to the placer.
+// bootstrap load port; the status word is XOR-reduced into one pin. Used only
+// to measure resources and internal timing before the board wrapper (PLLs,
+// DCS, pin constraints) exists; pin locations are left to the placer.
 module sn64_pnr_wrap (
-    input  wire        clk_25, clk_host, clk_snes, clk_pixel, clk_pixel_x5, por_n,
+    input  wire        clk_25, clk_host, clk_snes, por_n,
     input  wire        adc_bck, adc_lrck, adc_dout,
     input  wire        n64_reset_n, n64_nmi_n, n64_alel, n64_aleh, n64_read_n, n64_write_n,
     inout  wire [15:0] n64_ad,
@@ -32,14 +30,12 @@ module sn64_pnr_wrap (
     input  wire        snes_cic_data0_i,
     output wire        snes_cic_data1_o, snes_cic_data1_oe,
     input  wire        snes_cic_data1_i,
-    output wire [2:0]  hdmi_tmds,
-    output wire        hdmi_tmds_clock, av_locked,
     output reg         status_keep
 );
     wire [15:0] st;
     sn64_top #(.ROM_ADDR_BITS(16)) top (
         .adc_bck(adc_bck), .adc_lrck(adc_lrck), .adc_dout(adc_dout),
-        .clk_25(clk_25), .clk_host(clk_host), .clk_snes(clk_snes), .clk_pixel(clk_pixel), .clk_pixel_x5(clk_pixel_x5), .hdmi_clock_ok(1'b1), .por_n(por_n),
+        .clk_25(clk_25), .clk_host(clk_host), .clk_snes(clk_snes), .por_n(por_n),
         .n64_reset_n(n64_reset_n), .n64_nmi_n(n64_nmi_n), .n64_alel(n64_alel), .n64_aleh(n64_aleh),
         .n64_read_n(n64_read_n), .n64_write_n(n64_write_n), .n64_ad(n64_ad),
         .n64_cic_clk(n64_cic_clk), .n64_si_clk(n64_si_clk), .n64_cic_dq(n64_cic_dq),
@@ -56,6 +52,6 @@ module sn64_pnr_wrap (
         .snes_cic_oe_n(snes_cic_oe_n), .snes_cic_clk(snes_cic_clk), .snes_cic_slave_reset(snes_cic_slave_reset),
         .snes_cic_data0_o(snes_cic_data0_o), .snes_cic_data0_oe(snes_cic_data0_oe), .snes_cic_data0_i(snes_cic_data0_i),
         .snes_cic_data1_o(snes_cic_data1_o), .snes_cic_data1_oe(snes_cic_data1_oe), .snes_cic_data1_i(snes_cic_data1_i),
-        .hdmi_tmds(hdmi_tmds), .hdmi_tmds_clock(hdmi_tmds_clock), .av_locked(av_locked), .status_word(st));
+        .status_word(st));
     always @(posedge clk_25) status_keep <= ^st;
 endmodule

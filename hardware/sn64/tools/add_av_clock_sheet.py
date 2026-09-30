@@ -1,8 +1,13 @@
-"""Author the clock, HDMI and cartridge-audio child sheet (av-clock.kicad_sch).
+"""Author the clock and cartridge-audio child sheet (av-clock.kicad_sch).
+
+Draft 0.2-av: the HDMI output of 0.1-av (J701, TPD12S016, TMDS coupling,
+Si5351 CLK2) is gone. The SNES picture and sound go to the console over the
+cartridge bus (docs/design/console-video-path.md); the board has no video
+output of its own.
 
 One-time draft authoring utility in the style of add_cart_interface.py. It
-writes av-clock.kicad_sch, the project-local SN64_AV symbol library (the two
-parts KiCad does not ship: TI TPD12S016 and TI PCM1808) and av-provenance.json.
+writes av-clock.kicad_sch, the project-local SN64_AV symbol library (the one
+part KiCad does not ship: TI PCM1808) and av-provenance.json.
 
 It does NOT touch the real root sheet or sym-lib-table. Attaching the sheet to
 a root is an integration step: pass --attach-root <root.kicad_sch> (used on a
@@ -109,24 +114,9 @@ def txt(s, x, y, size=1.27):
 # ---------------------------------------------------------------------------
 # PIN TABLES (drawn symbols). Checked independently by
 # tools/verify_av_clock_sheet.py against its own copy of these tables.
-#   TI TPD12S016, SLLSE96F (Oct 2015), Section 5, PW package pin functions
 #   TI PCM1808,   SLES177B (Aug 2015),  Section 5, PW package pin functions
 # (number, name, electrical type, x, y, angle)
 # ---------------------------------------------------------------------------
-TPD12S016_PINS = [
-    ('1', 'CEC_A', 'bidirectional', -17.78, 12.7, 0), ('2', 'SCL_A', 'bidirectional', -17.78, 10.16, 0),
-    ('3', 'SDA_A', 'bidirectional', -17.78, 7.62, 0), ('4', 'HPD_A', 'output', -17.78, 5.08, 0),
-    ('5', 'LS_OE', 'input', -17.78, 0, 0), ('12', 'CT_HPD', 'input', -17.78, -2.54, 0),
-    ('7', 'CEC_B', 'bidirectional', 17.78, 12.7, 180), ('8', 'SCL_B', 'bidirectional', 17.78, 10.16, 180),
-    ('9', 'SDA_B', 'bidirectional', 17.78, 7.62, 180), ('10', 'HPD_B', 'input', 17.78, 5.08, 180),
-    ('13', '5V_OUT', 'power_out', 17.78, 0, 180),
-    ('23', 'D2+', 'passive', 17.78, -2.54, 180), ('22', 'D2-', 'passive', 17.78, -5.08, 180),
-    ('21', 'D1+', 'passive', 17.78, -7.62, 180), ('20', 'D1-', 'passive', 17.78, -10.16, 180),
-    ('18', 'D0+', 'passive', 17.78, -12.7, 180), ('17', 'D0-', 'passive', 17.78, -15.24, 180),
-    ('16', 'CLK+', 'passive', 17.78, -17.78, 180), ('15', 'CLK-', 'passive', 17.78, -20.32, 180),
-    ('24', 'VCCA', 'power_in', -2.54, 20.32, 270), ('11', 'VCC5V', 'power_in', 2.54, 20.32, 270),
-    ('6', 'GND', 'power_in', -2.54, -27.94, 90), ('14', 'GND', 'power_in', 0, -27.94, 90),
-    ('19', 'GND', 'power_in', 2.54, -27.94, 90)]
 PCM1808_PINS = [
     ('13', 'VINL', 'input', -17.78, 7.62, 0), ('14', 'VINR', 'input', -17.78, 5.08, 0),
     ('1', 'VREF', 'passive', -17.78, 0, 0), ('6', 'SCKI', 'input', -17.78, -5.08, 0),
@@ -156,17 +146,14 @@ def own_symbol(name, value, pins, descr, datasheet, footprint, top, bottom):
 # ---------------------------------------------------------------------------
 RAIL3, RAIL5, GND = 'FPGA_3V3', '5V_PRE', 'GND'
 ROOT_PORTS = [(GND, 'passive'), ('SNES_AUDIO_L_IN', 'passive'), ('SNES_AUDIO_R_IN', 'passive')]
-PENDING_PORTS = ([(RAIL3, 'input'), (RAIL5, 'input'),
-                  ('osc_25', 'output'), ('si_clk0', 'output'), ('si_clk1', 'output'), ('si_clk2', 'output'),
-                  ('si_scl', 'input'), ('si_sda', 'bidirectional')]
-                 + [(f'hdmi_{lane}_{pol}', 'input') for lane in ('d0', 'd1', 'd2', 'ck') for pol in ('p', 'n')]
-                 + [('hdmi_hpd', 'output'), ('hdmi_scl', 'input'), ('hdmi_sda', 'bidirectional'),
-                    ('adc_bck', 'output'), ('adc_lrck', 'output'), ('adc_dout', 'output')])
+PENDING_PORTS = [(RAIL3, 'input'), (RAIL5, 'input'),
+                 ('osc_25', 'output'), ('si_clk0', 'output'), ('si_clk1', 'output'),
+                 ('si_scl', 'input'), ('si_sda', 'bidirectional'),
+                 ('adc_bck', 'output'), ('adc_lrck', 'output'), ('adc_dout', 'output')]
 
 # LCSC parts (JLC stock snapshot 2026-09-29, pcbparts jlc_get_part)
 LCSC = {'Si5351A-B-GTR': 'C504891', 'X322525MMB4SI': 'C70582', 'CJO05-250003320B30': 'C712741',
-        'CJO05-122883320B30': 'C712747', 'TPD12S016PWR': 'C201665', 'PCM1808PWR': 'C55513',
-        '10029449-111RLF': 'C427307', 'GZ1608D601TF': 'C1002'}
+        'CJO05-122883320B30': 'C712747', 'PCM1808PWR': 'C55513', 'GZ1608D601TF': 'C1002'}
 
 
 def main():
@@ -223,12 +210,7 @@ def main():
         libs[lib_id] = s
         return s
 
-    TI = {'tpd12s016': 'https://www.ti.com/lit/ds/symlink/tpd12s016.pdf',
-          'pcm1808': 'https://www.ti.com/lit/ds/symlink/pcm1808.pdf'}
-    libs[LIB + ':TPD12S016PW'] = own_symbol(
-        'TPD12S016PW', 'TPD12S016PWR', TPD12S016_PINS,
-        'HDMI companion: 12-channel ESD, DDC/CEC level shifting, HPD buffer, 55 mA current-limited 5 V load switch',
-        TI['tpd12s016'], 'Package_SO:TSSOP-24_4.4x7.8mm_P0.65mm', 15.24, -22.86)
+    TI = {'pcm1808': 'https://www.ti.com/lit/ds/symlink/pcm1808.pdf'}
     libs[LIB + ':PCM1808PW'] = own_symbol(
         'PCM1808PW', 'PCM1808PWR', PCM1808_PINS,
         'Stereo 24-bit audio ADC, single-ended 0.6 VCC Vp-p input, I2S/LJ, master or slave',
@@ -304,7 +286,7 @@ def main():
     # 7.4 (internal CL; no external load caps), 7.6 (50 ohm driver, 0 ohm optional
     # series resistor), Figure 5 (SCL/SDA pull-ups to VDD, >1k, 4.7k shown).
     place('U701', 'Oscillator:Si5351A-B-GT', 'Si5351A-B-GTR', 80.01, 91.44,
-          {'1': RAIL3, '2': 'SI_XA', '3': 'SI_XB', '4': 'si_scl', '5': 'si_sda', '6': 'SI_CLK2_SRC',
+          {'1': RAIL3, '2': 'SI_XA', '3': 'SI_XB', '4': 'si_scl', '5': 'si_sda', '6': None,   # CLK2 powered down, open
            '7': RAIL3, '8': GND, '9': 'SI_CLK1_SRC', '10': 'SI_CLK0_SRC'},
           'Package_SO:MSOP-10_3x3mm_P0.5mm',
           fields={'Datasheet': 'https://www.skyworksinc.com/-/media/Skyworks/SL/documents/public/data-sheets/Si5351-B.pdf',
@@ -320,7 +302,6 @@ def main():
     res('R702', '4.7k', RAIL3, 'si_sda', 45.72, 127.0)
     res('R703', '0R', 'SI_CLK0_SRC', 'si_clk0', 60.96, 127.0)
     res('R704', '0R', 'SI_CLK1_SRC', 'si_clk1', 76.2, 127.0)
-    res('R705', '0R', 'SI_CLK2_SRC', 'si_clk2', 91.44, 127.0)
     cap('C701', '100nF', RAIL3, GND, 106.68, 127.0)
     cap('C702', '100nF', RAIL3, GND, 121.92, 127.0)
     # 25 MHz FPGA housekeeping oscillator, JSCJ CJO05-250003320B30 spec rev1.0:
@@ -332,40 +313,7 @@ def main():
     res('R706', '0R', 'OSC25_SRC', 'osc_25', 152.4, 127.0)
     cap('C703', '100nF', RAIL3, GND, 167.64, 127.0)
 
-    # ======================= HDMI ===========================================
-    # TMDS: ULX3S gpdi.sch @6a92cec: each FPGA LVCMOS33D pseudo-differential
-    # output reaches the connector through a 22 nF series capacitor (C38-C45),
-    # nothing else. TPD12S016 ESD pins sit on the connector side (datasheet:
-    # connect to controller and connector directly).
-    tmds = [('d2', 'D2', '1', '3', '23', '22'), ('d1', 'D1', '4', '6', '21', '20'),
-            ('d0', 'D0', '7', '9', '18', '17'), ('ck', 'CK', '10', '12', '16', '15')]
-    k = 0
-    for lane, up, jp, jn, tp, tn in tmds:
-        for pol, jpin in (('p', jp), ('n', jn)):
-            cap(f'C{704 + k}', '22nF', f'hdmi_{lane}_{pol}', f'HDMI_J_{up}_{pol.upper()}', 30.48 + 15.24 * k, 218.44,
-                fields={'Reference_design': f'ULX3S gpdi.sch C{38 + k} (22nF series TMDS coupling)'})
-            k += 1
-    place('U702', LIB + ':TPD12S016PW', 'TPD12S016PWR', 91.44, 284.48,
-          {'1': 'HDMI_CEC_A', '2': 'hdmi_scl', '3': 'hdmi_sda', '4': 'hdmi_hpd', '5': RAIL3, '12': RAIL3,
-           '7': 'HDMI_CEC_B', '8': 'HDMI_SCL_B', '9': 'HDMI_SDA_B', '10': 'HDMI_HPD_B', '13': 'HDMI_5V',
-           '23': 'HDMI_J_D2_P', '22': 'HDMI_J_D2_N', '21': 'HDMI_J_D1_P', '20': 'HDMI_J_D1_N',
-           '18': 'HDMI_J_D0_P', '17': 'HDMI_J_D0_N', '16': 'HDMI_J_CK_P', '15': 'HDMI_J_CK_N',
-           '24': RAIL3, '11': RAIL5, '6': GND, '14': GND, '19': GND},
-          'Package_SO:TSSOP-24_4.4x7.8mm_P0.65mm',
-          fields={'Datasheet': TI['tpd12s016'], 'LCSC': LCSC['TPD12S016PWR'], 'MPN': 'TPD12S016PWR'})
-    place('J701', 'Connector:HDMI_A', 'HDMI_A 10029449-111RLF', 187.96, 284.48,
-          {'1': 'HDMI_J_D2_P', '2': GND, '3': 'HDMI_J_D2_N', '4': 'HDMI_J_D1_P', '5': GND, '6': 'HDMI_J_D1_N',
-           '7': 'HDMI_J_D0_P', '8': GND, '9': 'HDMI_J_D0_N', '10': 'HDMI_J_CK_P', '11': GND, '12': 'HDMI_J_CK_N',
-           '13': 'HDMI_CEC_B', '14': None, '15': 'HDMI_SCL_B', '16': 'HDMI_SDA_B', '17': GND, '18': 'HDMI_5V',
-           '19': 'HDMI_HPD_B', 'SH': GND},
-          'Connector_Video:HDMI_A_Amphenol_10029449-x01xLF_Horizontal',
-          fields={'LCSC': LCSC['10029449-111RLF'], 'MPN': '10029449-111RLF',
-                  'Datasheet': 'https://www.lcsc.com/datasheet/lcsc_datasheet_2304140030_Amphenol-ICC-10029449-111RLF_C427307.pdf',
-                  'Footprint_status': 'PROVISIONAL: drawing 10029449 rev Y lists -001/-101/-002 variants, not -111RLF'})
-    cap('C712', '100nF', RAIL3, GND, 30.48, 345.44)
-    cap('C713', '100nF', RAIL5, GND, 45.72, 345.44)
-    cap('C714', '100nF', 'HDMI_5V', GND, 60.96, 345.44)
-    place('TP701', 'Connector:TestPoint', 'CEC_A', 76.2, 345.44, {'1': 'HDMI_CEC_A'}, 'TestPoint:TestPoint_Pad_D1.0mm')
+    # (0.1-av had the HDMI output here: C704-C714, U702 TPD12S016, J701, TP701. Removed in 0.2-av.)
 
     # ======================= CARTRIDGE AUDIO ADC ============================
     # PCM1808 SLES177B: Table 2 (MD1 H, MD0 L = master 384 fs), Table 3 (FMT L =
@@ -433,30 +381,24 @@ def main():
         port(name, shape, 297.18 + 60.96 * col, 294.64 + 5.08 * row)
 
     notes = [
-        txt('SN 64 - CLOCKS, HDMI OUTPUT AND CARTRIDGE AUDIO ADC (DRAFT 0.1-av)', 20.32, 15.24, 2.54),
+        txt('SN 64 - CLOCKS AND CARTRIDGE AUDIO ADC (DRAFT 0.2-av)', 20.32, 15.24, 2.54),
         txt('CLOCKS (docs/design/clock-plan.md). U701 Si5351A-B-GT (Skyworks Si5351-B Rev 1.3): CLK0 = NTSC master 21.4772727 MHz, '
-            'CLK1 = PAL master 21.28137 MHz, CLK2 = HDMI pixel 27.0197947 MHz;\n'
+            'CLK1 = PAL master 21.28137 MHz; CLK2 powered down and disabled (register 3 = 0xFC), pin 6 open;\n'
             'programmed at power-on by fpga/rtl/sn64_clock_init.sv over si_scl/si_sda (I2C address 0x60, 400 kHz). '
             'VDD and VDDO both FPGA_3V3 (sec. 7.2: VDDO with or before VDD). One 100 nF per supply pin (sec. 7.1).\n'
             'Y701 25 MHz crystal, CL 10 pF: matches register 183 XTAL_CL = 11b (0xD2) in sn64_clock_init.sv (AN619 Rev 0.8). '
             'Internal load capacitance only; no external load caps (sec. 7.4).\n'
             'Crystal (YXC YSX321SL datasheet): ESR <= 50 R, drive level up to 200 uW, C0 <= 3 pF; Si5351 Table 8 needs ESR <= 150 R, '
             'max drive level >= 100 uW, CL 6-12 pF.\n'
-            'R701/R702 4.7k pull-ups to VDD (Figure 5; >= 1k per Table 20). R703-R705 0R: Si5351 drives 50 R (Table 5, ZO) into a 50 R trace; '
+            'R701/R702 4.7k pull-ups to VDD (Figure 5; >= 1k per Table 20). R703/R704 0R: Si5351 drives 50 R (Table 5, ZO) into a 50 R trace; '
             'sec. 7.6 shows an optional 0 R series resistor (EMI).\n'
             'X701 25 MHz 3.3 V CMOS oscillator (FPGA housekeeping, osc_25): pin 1 enable tied high (run), R706 0R optional damping. '
             'Footprint pads differ slightly from the CJO05 suggested layout: PROVISIONAL.',
             20.32, 22.86),
-        txt('HDMI (docs/design/av-output-implementation.md): 720x480p, ECP5 LVCMOS33D pseudo-differential outputs. TMDS network reused from '
-            'ULX3S gpdi.sch @6a92cec (MIT + logo condition, hardware/sn64/THIRD_PARTY.md):\n'
-            'each TMDS line = 22 nF series capacitor (ULX3S C38-C45), no series resistor. U702 TPD12S016 (TI SLLSE96F) on the connector side: '
-            'TMDS ESD, DDC/CEC level shift (A = FPGA_3V3, B = 5V_OUT),\n'
-            'HPD buffer (HPD_A referenced to VCCA = 3.3 V), and the HDMI +5V pin from its 55 mA current-limited load switch '
-            '(VCC5V = 5V_PRE). LS_OE and CT_HPD tied to VCCA = fully on (Table 1).\n'
-            'No external DDC/CEC/HPD pull-ups (sec. 7.3.15). A-side VIL max 0.082 x VCCA (0.27 V at 3.3 V): the FPGA DDC master must pull '
-            'hard low - check at bring-up. CEC_A has no FPGA pin in the contract: TP701 only.\n'
-            'UTILITY/HEC (pin 14) not connected. J701 Amphenol 10029449-111RLF (LCSC C427307, as ULX3S v1.8.1+); '
-            'footprint 10029449-x01xLF PROVISIONAL until the -111RLF drawing is checked.',
+        txt('VIDEO AND AUDIO TO THE CONSOLE (docs/design/console-video-path.md): the SNES picture and sound reach the N64/M64 over the '
+            'cartridge bus (N64 endpoint frame window) and are shown on the console\'s own output (N64 AV jack, M64 HDMI).\n'
+            'This board has no video output of its own. The HDMI section of draft 0.1-av (J701 type-A, U702 TPD12S016, 22 nF TMDS '
+            'coupling, Si5351 CLK2 pixel clock) was removed in 0.2-av.',
             20.32, 170.18),
         txt('CARTRIDGE AUDIO (SNES socket pins 31 AUDIO_L_IN / 62 AUDIO_R_IN). U703 PCM1808 (TI SLES177B) in I2S MASTER mode, 384 fs: '
             'MD1 = H (R708 to VDD), MD0 = L, FMT = L (I2S 24-bit).\n'
@@ -473,14 +415,14 @@ def main():
             297.18, 22.86),
         txt('HIERARCHICAL PORTS (shared net-name contract; GND/SNES_AUDIO_* are root labels, the rest pending on the FPGA/power sheets)',
             297.18, 287.02, 1.524),
-        txt('DRAFT 0.1-av: schematic circuit candidate only. No PCB, SI simulation, HDMI compliance or audio measurement has been performed.\n'
+        txt('DRAFT 0.2-av: schematic circuit candidate only. No PCB, SI simulation or audio measurement has been performed.\n'
             'FPGA_3V3 and 5V_PRE are hierarchical inputs from the power sheet (ERC origins there: #FLG304 and the TPS63070 VOUT).\n'
             'Provisional: 0R series values, 200 R console-equivalent load (OpenSFC value, verify on SHVC-CPU-01), X7R 1 uF coupling, footprints of '
-            'J701/X701/X702.\nSources and SHA-256 of every datasheet: libraries/av-provenance.json. See docs/design/av-clock-schematic.md.',
+            'X701/X702.\nSources and SHA-256 of every datasheet: libraries/av-provenance.json. See docs/design/av-clock-schematic.md.',
             20.32, 381.0)]
 
     contents = (f'(kicad_sch (version 20250114) (generator "sn64_av_clock_authoring") (uuid {q(page_uuid)}) (paper "A2") '
-                f'(title_block (title "SN 64 - clocks, HDMI and cartridge audio") (date "2026-09-29") (rev "0.1-av") (company "SN 64") '
+                f'(title_block (title "SN 64 - clocks and cartridge audio") (date "2026-09-29") (rev "0.2-av") (company "SN 64") '
                 f'(comment 1 "DESIGN DRAFT - NOT FOR MANUFACTURE"))\n(lib_symbols\n'
                 + '\n'.join(dump(s) for s in libs.values()) + ')\n' + '\n'.join(parts + notes)
                 + f'\n(sheet_instances (path {q("/" + root_uuid + "/" + sheet_uuid)} (page {q(PAGE)}))) (embedded_fonts no))')
@@ -497,7 +439,6 @@ def main():
                          'Skyworks Si5351A/B/C-B Rev 1.3 (Aug 27 2021)'),
         'AN619.pdf': ('https://www.skyworksinc.com/-/media/Skyworks/SL/documents/public/application-notes/AN619.pdf',
                       'Skyworks AN619 Rev 0.8 (Sep 23 2021), register 183'),
-        'tpd12s016.pdf': (TI['tpd12s016'], 'TI SLLSE96F, revised October 2015'),
         'pcm1808.pdf': (TI['pcm1808'], 'TI SLES177B, revised August 2015'),
         'CS4344-45-48_F2.pdf': ('https://statics.cirrus.com/pubs/proDatasheet/CS4344-45-48_F2.pdf',
                                 'Cirrus DS613F2 (sd2snes cartridge-audio DAC level reference)'),
@@ -505,12 +446,6 @@ def main():
         'CJO05-122883320B30_C712747.pdf': (OSC12_DS, 'JSCJ spec rev1.1 (2024-12-02)'),
         'X322525MMB4SI_C70582.pdf': ('https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2403291504_YXC-Crystal-Oscillators-X322525MMB4SI_C70582.pdf',
                                      'YXC YSX321SL crystal unit sheet'),
-        '10029449-111RLF_C427307.pdf': ('https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2304140030_Amphenol-ICC-10029449-111RLF_C427307.pdf',
-                                        'Amphenol FCI drawing 10029449 rev Y (2023-01-12)'),
-        'ulx3s-gpdi.sch': ('https://raw.githubusercontent.com/emard/ulx3s/6a92cec6b177191c5b0f80e260013a1f8ec147dd/gpdi.sch',
-                           'ULX3S gpdi.sch at the pinned commit 6a92cec6b177191c5b0f80e260013a1f8ec147dd'),
-        'ulx3s-LICENSE.md': ('https://raw.githubusercontent.com/emard/ulx3s/6a92cec6b177191c5b0f80e260013a1f8ec147dd/LICENSE.md',
-                             'ULX3S LICENSE.md at the pinned commit'),
     }
     sources = {}
     for name, (url, rev) in ds_files.items():
@@ -521,13 +456,10 @@ def main():
     std = sorted({key for key in libs if not key.startswith(LIB + ':')})
     provenance = {
         'schema_version': 1, 'recorded_date': '2026-09-29',
-        'scope': 'Clock/HDMI/cartridge-audio child-sheet symbols and component evidence; schematic draft only.',
+        'scope': 'Clock/cartridge-audio child-sheet symbols and component evidence; schematic draft only. '
+                 'Draft 0.2-av: HDMI output removed (video and audio go to the console over the cartridge bus).',
         'tool_version': 'KiCad 10.0.6',
         'drawn_symbols': {
-            'TPD12S016PW': {'library': f'libraries/{LIB}.kicad_sym', 'source': sources['tpd12s016.pdf'],
-                            'source_section': 'Section 5 Pin Configuration and Functions, PW (24-pin TSSOP) column',
-                            'pins': {p[0]: p[1] for p in TPD12S016_PINS},
-                            'footprint': 'Package_SO:TSSOP-24_4.4x7.8mm_P0.65mm (installed KiCad library)'},
             'PCM1808PW': {'library': f'libraries/{LIB}.kicad_sym', 'source': sources['pcm1808.pdf'],
                           'source_section': 'Section 5 Pin Configuration and Functions (14-pin TSSOP PW)',
                           'pins': {p[0]: p[1] for p in PCM1808_PINS},
@@ -549,27 +481,17 @@ def main():
                                  'suggested pads 25 MHz rev1.0: 1.3 x 1.2 mm, gaps 0.9/0.5; 12.288 MHz rev1.1: 1.4 x 1.2 mm, gaps 0.8/0.5',
             'kicad_ase_footprint_pads': 'Oscillator_SMD_Abracon_ASE-4Pin_3.2x2.5mm: 1.3 x 1.1 mm pads at +/-1.05, +/-0.825 (gaps 0.8/0.55)',
             'kicad_crystal_3225_pads': 'Crystal_SMD_3225-4Pin_3.2x2.5mm: 1.4 x 1.2 mm pads at +/-1.1, +/-0.85 (gaps 0.8/0.5) = YXC suggested layout',
-            'tpd12s016': 'LS_OE/CT_HPD active-high, referenced to VCCA; H/H = fully on (Table 1); 55 mA current-limited 5V_OUT; '
-                         'no external DDC/CEC/HPD pull-ups needed (7.3.15); D/CLK abs max 6 V; VCCA 1.1-3.6 V; VCC5V 4.5-5.5 V; '
-                         'SCL_A/SDA_A VIL max 0.082 x VCCA',
-            'pcm1808': 'MD1/MD0: LL slave, LH master 512 fs, HL master 384 fs, HH master 256 fs (Table 2); FMT L = I2S 24-bit, '
+            'pcm1808':'MD1/MD0: LL slave, LH master 512 fs, HL master 384 fs, HH master 256 fs (Table 2); FMT L = I2S 24-bit, '
                        'H = left-justified 24-bit (Table 3); 32 kHz x 384 = 12.288 MHz (Table 1); input 0.6 VCC Vp-p, 60 k, '
                        'VREF 0.5 VCC, internal anti-alias -3 dB 1.3 MHz (6.5); straps 10 k to VDD/GND (8.2.2.1); '
                        'master mode BCK = 64 fs (7.3.5.1.1); VCC 4.5-5.5 V, VDD 2.7-3.6 V',
-            'ulx3s_gpdi_tmds': 'FPDI_D0+..FPDI_CLK- -> 22 nF (C38..C45, 0603) -> GPDI connector pins; note "SINGLE ENDED - NOT '
-                               'DIFFERENTIAL"; HPD via 549 R + 3.6 V zener, DDC via PCA9306, +5V direct (not reused: TPD12S016 '
-                               'replaces them)',
-            'hdmi_type_a_pins': 'KiCad Connector:HDMI_A symbol numbering and ULX3S gpdi.sch connector order agree: 1 D2+, 2 D2 shield, '
-                                '3 D2-, 4 D1+, 5 D1S, 6 D1-, 7 D0+, 8 D0S, 9 D0-, 10 CK+, 11 CKS, 12 CK-, 13 CEC, 14 UTILITY, 15 SCL, '
-                                '16 SDA, 17 GND, 18 +5V, 19 HPD',
             'opensfc_cart_audio_load': 'OpenSFC SHVC-CPU-01 Rev A @6574450: P1.31 SL.IN / P1.62 SR.IN each: R96/R95 200 to GND, '
                                        '1 uF (C28/C25) to 10 k (R62/R55) into the LM358 inverting summer (24 k feedback, +9 V)',
             'sd2snes_revf_cart_audio_source': 'sd2snes Rev F @cf7e21d: CS4344 (VA = +3.3VDAC) AOUT -> 3.3 uF -> 10 k to AGND -> '
                                               '470 R -> J101.31/62 with 10 nF to AGND',
             'cs4344_full_scale': 'Full scale output 0.60/0.65/0.70 x VA Vpp (min/typ/max), ZOUT 100 ohm (DS613F2)'},
         'licenses': 'KiCad library content: CC-BY-SA-4.0 with the KiCad library exception. Drawn symbols: SN64 project content; '
-                    'pin data are facts from the cited TI datasheets. ULX3S TMDS coupling network reused as a circuit idea '
-                    '(22 nF series capacitor per line); no ULX3S layout or artwork imported.'}
+                    'pin data are facts from the cited TI datasheet.'}
     save(proj / 'libraries' / 'av-provenance.json', json.dumps(provenance, indent=2))
 
     if a.attach_root:
@@ -614,7 +536,7 @@ def attach(root_path, root_uuid, sheet_uuid, allports):
         if not any(isinstance(e, list) and e and e[0] == 'lib' and get(e, 'name')[1] == LIB for e in table):
             table.append(['lib', ['name', Quoted(LIB)], ['type', Quoted('KiCad')],
                           ['uri', Quoted('${KIPRJMOD}/libraries/' + LIB + '.kicad_sym')], ['options', Quoted('')],
-                          ['descr', Quoted('Clock/HDMI/cartridge-audio draft; see libraries/av-provenance.json')]])
+                          ['descr', Quoted('Clock/cartridge-audio draft; see libraries/av-provenance.json')]])
             save(table_path, dump(table))
     print('Attached sheet symbol to', root_path)
 

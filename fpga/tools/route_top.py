@@ -1,7 +1,7 @@
 """Synthesise and place-and-route the whole SN64 design (feasibility run).
 
 --top board (default): fpga/rtl/sn64_board_top.sv, the real top level with the
-ECP5 PLLs, the DCSC NTSC/PAL clock select, the bootstrap ROM in the
+ECP5 host PLL, the DCSC NTSC/PAL clock select, the bootstrap ROM in the
 configuration flash and the CIC pads; constraints fpga/constraints/
 sn64_board.lpf, the board pinout generated with the FPGA schematic sheet
 (hardware/sn64/tools/add_fpga_sheet.py). The older feasibility pinout
@@ -41,14 +41,12 @@ def main():
     out = ROOT / (args.out or f'build/route-{args.top}')
     out.mkdir(parents=True, exist_ok=True)
     serv = rel((ROOT / 'fpga/vendor/summercart64/fw/rtl/serv').glob('*.v'))
-    hdmi = rel((ROOT / 'fpga/vendor/hdl-util-hdmi/src').glob('*.sv'))
     files = (['-f', 'build/core-sources.f', 'fpga/rtl/sn64_console_candidate.sv', 'fpga/rtl/sn64_cart_bridge.sv',
               'fpga/rtl/sn64_console_with_bridge.sv', 'fpga/vendor/summercart64/fw/rtl/memory/mem_bus.sv',
               'fpga/rtl/sn64_n64_reg_bus.sv', 'fpga/vendor/summercart64/fw/rtl/n64/n64_scb.sv',
               'fpga/vendor/summercart64/fw/rtl/n64/n64_pi_fifo.sv', 'fpga/vendor/summercart64/fw/rtl/n64/n64_pi.sv',
-              'build/generated/summercart64/n64_cic.sv', 'fpga/rtl/sn64_n64_endpoint.sv'] + serv + hdmi +
-             ['fpga/rtl/sn64_av_hdmi_tx.sv', 'fpga/rtl/sn64_av_serializer.sv', 'fpga/rtl/sn64_av_out.sv',
-              'fpga/rtl/sn64_cdc.sv', 'fpga/rtl/sn64_clock_init.sv', 'fpga/rtl/sn64_power_sequencer.sv',
+              'build/generated/summercart64/n64_cic.sv', 'fpga/rtl/sn64_n64_endpoint.sv'] + serv +
+             ['fpga/rtl/sn64_cdc.sv', 'fpga/rtl/sn64_clock_init.sv', 'fpga/rtl/sn64_power_sequencer.sv',
               'fpga/rtl/sn64_snes_cic_lock.sv', 'fpga/vendor/snestang-controller/src/controller_adapter.sv',
               'fpga/rtl/sn64_snes_joypad.sv', 'fpga/rtl/sn64_header_probe.sv', 'fpga/rtl/sn64_frame_window.sv',
               'fpga/vendor/summercart64/fw/rtl/memory/memory_flash.sv', 'fpga/rtl/sn64_bootrom_flash.sv',
@@ -62,10 +60,10 @@ def main():
     # The ECP5 primitive library goes through slang itself so primitive
     # parameters (EHXPLLL dividers, DCSMODE) are checked; its modules carry the
     # blackbox attribute. VERILATOR selects the SNES core's inferred-memory
-    # branch; SN64_SYNTH selects the ECP5 primitives in the HDMI serializer.
+    # branch.
     cells_bb = (Path(shutil.which('yosys')).resolve().parent.parent / 'share/yosys/ecp5/cells_bb.v').as_posix()
     script = ('plugin -i slang; scratchpad -set abc9.xaiger 1; '
-              f'read_slang --top {top} -DVERILATOR -DSN64_SYNTH '
+              f'read_slang --top {top} -DVERILATOR '
               '-Ibuild/generated/snestang/src -Ibuild/generated/snestang/src/spc700 '
               '-Ibuild/generated/snestang/src/65C816 ' + cells_bb + ' ' + ' '.join(files) +
               f'; synth_ecp5 -top {top} -json {netlist.as_posix()}; stat')

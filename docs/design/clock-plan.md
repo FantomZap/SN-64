@@ -1,6 +1,8 @@
 # Clock plan
 
-Decision record, 2026-09-29. Selects the clock sources for the SNES master clock (both regions), the N64 CIC soft CPU and the HDMI output. Parts are candidates checked for stock at JLCPCB/LCSC on this date, not a frozen BOM; jitter and phase-noise effects still need measurement on the prototype.
+Decision record, 2026-09-29. Selects the clock sources for the SNES master clock (both regions) and the N64 CIC soft CPU. Parts are candidates checked for stock at JLCPCB/LCSC on this date, not a frozen BOM; jitter and phase-noise effects still need measurement on the prototype.
+
+**Later on 2026-09-29: the HDMI output and its Si5351 CLK2 pixel clock were removed.** Video and audio go to the console over the cartridge bus ([console-video-path.md](console-video-path.md)). CLK2 stays powered down with its output disabled (register 3 = 0xFC) and `sn64_clock_init` writes nothing after start-up; one ECP5 PLL remains (host 62.5 MHz). The "HDMI pixel clock" and "PAL HDMI" sections below are kept as the record of that work and no longer describe the design.
 
 ## Requirements
 
@@ -9,7 +11,6 @@ Decision record, 2026-09-29. Selects the clock sources for the SNES master clock
 | SNES master, NTSC | 21.4772727 MHz (6 × 3.579545) | Drives the CPU/PPU/APU timing, and reaches the cartridge on SYSTEM_CLK (pin 1). Enhancement chips such as Super FX clock from it. Real consoles use a ±50 ppm-class crystal. |
 | SNES master, PAL | 21.28137 MHz | Same, for PAL timing (spec keeps PAL in scope). |
 | CIC soft CPU and N64 endpoint | 62.5 MHz | SummerCart64's rate; the SERV core is too slow at 21.477 MHz (see [CIC notes](n64-cic-implementation.md)). |
-| HDMI 480p | 27.0198 MHz pixel (NTSC master × 39/31), 135.1 MHz TMDS (5×) | The [A/V block](av-output-implementation.md) line-doubles each SNES line into exactly two HDMI lines, so the raster must be frequency-locked to the SNES frame (858 × 524 at 60.0988 Hz). |
 
 ## Why the FPGA PLL alone cannot make the SNES clocks
 
@@ -23,7 +24,7 @@ ECP5 PLL dividers are limited to 1–128 with a 400–800 MHz VCO. A search over
 25 MHz crystal ────────> Si5351A
                             ├─ CLK0: 21.4772727 MHz (NTSC SNES master) ─┐
                             ├─ CLK1: 21.28137   MHz (PAL SNES master)  ─┴─> FPGA global clock input → SNES core, bridge, SYSTEM_CLK
-                            └─ CLK2: 27.0197947 MHz (HDMI pixel = NTSC master × 39/31, same PLLA) ──> ECP5 PLL B ×5 → 135.1 MHz TMDS
+                            └─ CLK2: powered down, output disabled, pin left open (was the HDMI pixel clock)
 ```
 
 - The Si5351A variant has a crystal input only (XA/XB), so it gets its own 25 MHz crystal (10 pF load, register 183) rather than the FPGA's oscillator; the Si5351C would accept an external clock but is poorly stocked.
@@ -56,15 +57,15 @@ ECP5 PLL dividers are limited to 1–128 with a 400–800 MHz VCO. A search over
 
 SEL is `{run & pal, run & !pal}` registered on the 25 MHz clock, so both bits change on one edge. Because `region_pal` is frozen while the SNES clock runs, the only transitions are 00 -> 01 or 00 -> 10 at start and back to 00 at stop; a direct NTSC <-> PAL switch never happens. Source: the guide PDF, SHA-256 `69843f2d6bf92bc19ea1f383b3c7fb0fcb9f1a2077efbce6d238c1c3f2496069` (kept under `build/datasheets/`, untracked).
 
-The host clock (25 -> 62.5 MHz: CLKI_DIV 2, CLKFB_DIV 5, CLKOP_DIV 10, VCO 625 MHz) and the TMDS bit clock (27.0198 -> 135.099 MHz: CLKI_DIV 1, CLKFB_DIV 5, CLKOP_DIV 4, VCO 540.4 MHz) come from two EHXPLLL instances with parameters produced by `ecppll`. Both ratios are exact. The TMDS PLL locks only after the Si5351 is programmed; its LOCK holds the HDMI domain in reset (`hdmi_clock_ok`) and does not affect the rest of the design.
+The host clock (25 -> 62.5 MHz: CLKI_DIV 2, CLKFB_DIV 5, CLKOP_DIV 10, VCO 625 MHz) comes from one EHXPLLL instance with parameters produced by `ecppll`; the ratio is exact. (The second, TMDS PLL was removed with the HDMI output.)
 
-## HDMI pixel clock (decision 2026-09-29)
+## Retired: HDMI pixel clock (decision 2026-09-29, removed later that day)
 
 The [A/V block](av-output-implementation.md) needs its pixel clock frequency-locked to the SNES frame (each SNES line becomes exactly two HDMI lines, with a 4-line buffer instead of a frame buffer). Its author proposed two chained ECP5 PLLs from the SNES master (PFD 3.46 MHz, close to the 3.125 MHz minimum). Instead, the Si5351's otherwise unused CLK2 generates the pixel clock from the **same PLLA** as the NTSC master with a fractional output divider of 31 + 31/39: 859.0909 MHz / 31.7948718 = **27.0197947 MHz = master × 39/31 exactly**. Both outputs therefore share one oscillator and one PLL, so the raster cannot drift against the SNES frame, and the ECP5 only needs one PLL (×5, PFD 27 MHz) for the TMDS bit clock. Fractional multisynth outputs have somewhat more jitter than integer ones (Si5351A datasheet); measure the TMDS eye on the prototype. PAL HDMI uses its own ratio from PLLB; see [PAL HDMI](#pal-hdmi-576p50-pixel-clock-2026-09-29) below. The independent-27 MHz fallback also passes the A/V bench with one re-phase per frame.
 
 `sn64_clock_init` programs MS2 (registers 58–65: P1 = 3557, P2 = 29, P3 = 39), CLK2 control 0x0F and enables outputs 0–2; its bench verifies every register.
 
-## PAL HDMI (576p50) pixel clock (2026-09-29)
+## Retired: PAL HDMI (576p50) pixel clock (2026-09-29, removed later that day)
 
 Status: implemented and simulated (unit benches and a whole-system trial). **Not run on hardware or shown on a display.** The NTSC decision above is unchanged.
 

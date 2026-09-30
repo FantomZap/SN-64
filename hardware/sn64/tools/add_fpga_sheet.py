@@ -50,7 +50,7 @@ NS = uuid.UUID('8f0c8a0e-5b1e-4c55-9a8e-0f64a5e0c301')
 CART_NS = uuid.UUID('5d0f7c52-1c1e-4d8a-9a57-3c3c8b1f6a40')   # add_cart_interface.py
 SHEET_FILE = 'fpga.kicad_sch'
 SHEET_NAME = 'FPGA'
-REV = '0.4-fpga'
+REV = '0.5-fpga'      # 0.5: HDMI pins removed (console video path)
 
 
 def uid(s):
@@ -120,8 +120,8 @@ def txt(s, x, y, size=1.27):
 
 # ---------------------------------------------------------------------------
 # Rails and bank plan. Every VCCIO bank is 3.3 V (LVCMOS33 everywhere): the
-# cartridge translators' B side, the N64 PI behind the bus switches, HDMI
-# LVCMOS33D, the configuration flash (bank 8) and JTAG (VCCIO8) are all 3.3 V.
+# cartridge translators' B side, the N64 PI behind the bus switches, the
+# configuration flash (bank 8) and JTAG (VCCIO8) are all 3.3 V.
 # ---------------------------------------------------------------------------
 GND, V11, V25, V33 = 'GND', 'FPGA_1V1', 'FPGA_2V5', 'FPGA_3V3'
 VAUX = 'FPGA_VCCAUX'          # VCCAUX after the TN-02038 Figure 3.1 ferrite bead
@@ -201,19 +201,11 @@ OTHER = [  # port, ball, iotype, attrs, net == exported label, group, note
     ('osc_25', 'G2', 'LVCMOS33', 'PULLMODE=NONE', 'osc_25', 'clock', 'PCLKT6_1: primary clock pin; housekeeping + host PLL CLKI via primary clock'),
     ('si_clk0', 'H2', 'LVCMOS33', 'PULLMODE=NONE', 'si_clk0', 'clock', 'PCLKT6_0: DCSC CLK0 (NTSC)'),
     ('si_clk1', 'G3', 'LVCMOS33', 'PULLMODE=NONE', 'si_clk1', 'clock', 'PCLKT7_1: DCSC CLK1 (PAL)'),
-    ('si_clk2', 'F2', 'LVCMOS33', 'PULLMODE=NONE', 'si_clk2', 'clock', 'PCLKT7_0: pixel clock + TMDS PLL CLKI via primary clock'),
     ('si_scl', 'E4', 'LVCMOS33', 'PULLMODE=UP', 'si_scl', 'clock', 'open drain (board-top edit); bus pull-ups on clock sheet'),
     ('si_sda', 'F4', 'LVCMOS33', 'PULLMODE=UP', 'si_sda', 'clock', 'open drain (board-top edit)'),
     ('adc_bck', 'J4', 'LVCMOS33', 'PULLMODE=DOWN', 'adc_bck', 'av', 'GR_PCLK6_0; ADC is I2S master (reserved port)'),
     ('adc_lrck', 'J3', 'LVCMOS33', 'PULLMODE=DOWN', 'adc_lrck', 'av', 'GR_PCLK6_1 (reserved port)'),
     ('adc_dout', 'K3', 'LVCMOS33', 'PULLMODE=DOWN', 'adc_dout', 'av', 'reserved port'),
-    ('hdmi_tmds[0]', 'A16', 'LVCMOS33D', 'DRIVE=4', 'hdmi_d0_p', 'av', 'PT110A true; complement B16 = hdmi_d0_n'),
-    ('hdmi_tmds[1]', 'A14', 'LVCMOS33D', 'DRIVE=4', 'hdmi_d1_p', 'av', 'PT83A true; complement C14 = hdmi_d1_n'),
-    ('hdmi_tmds[2]', 'A12', 'LVCMOS33D', 'DRIVE=4', 'hdmi_d2_p', 'av', 'PT76A true; complement A13 = hdmi_d2_n'),
-    ('hdmi_tmds_clock', 'A17', 'LVCMOS33D', 'DRIVE=4', 'hdmi_ck_p', 'av', 'PT116A true; complement B18 = hdmi_ck_n'),
-    ('hdmi_hpd', 'E13', 'LVCMOS33', 'PULLMODE=DOWN', 'hdmi_hpd', 'av', 'reserved port; A/V sheet must deliver <= 3.3 V'),
-    ('hdmi_scl', 'D15', 'LVCMOS33', 'PULLMODE=UP', 'hdmi_scl', 'av', 'reserved port; 3.3 V side of the A/V sheet DDC shifter'),
-    ('hdmi_sda', 'E15', 'LVCMOS33', 'PULLMODE=UP', 'hdmi_sda', 'av', 'reserved port; 3.3 V side of the A/V sheet DDC shifter'),
     ('host_3v3_ok', 'K2', 'LVCMOS33', 'PULLMODE=DOWN', 'host_3v3_ok', 'power', 'floating = not ok'),
     ('fpga_rails_ok', 'J1', 'LVCMOS33', 'PULLMODE=DOWN', 'fpga_rails_ok', 'power', 'also holds PROGRAMN low via U407'),
     ('cart_5v_ok', 'H1', 'LVCMOS33', 'PULLMODE=DOWN', 'cart_5v_ok', 'power', 'floating = not ok'),
@@ -234,14 +226,16 @@ LOCAL_ONLY = {'flash_cs_n', 'flash_dq0', 'flash_dq1', 'flash_dq2', 'flash_dq3', 
 for port, ball, iot, attrs, net, group, note in OTHER:
     PINMAP.append(dict(port=port, ball=ball, iotype=iot, attrs=attrs, net=net,
                        label='' if net in LOCAL_ONLY else net, group=group, note=note))
-# LVCMOS33D complements: ball -> net (not LPF ports; nextpnr drives them from the true pad)
-DIFF_COMP = {'B16': 'hdmi_d0_n', 'C14': 'hdmi_d1_n', 'A13': 'hdmi_d2_n', 'B18': 'hdmi_ck_n'}
+# LVCMOS33D complements: ball -> net (not LPF ports; nextpnr drives them from the true pad).
+# Empty since rev 0.5-fpga: the HDMI TMDS pairs (A16/B16, A14/C14, A12/A13, A17/B18) are gone; the
+# picture goes to the console over the cartridge bus (docs/design/console-video-path.md).
+DIFF_COMP = {}
 # Dedicated configuration / JTAG balls (Lattice pinout: bank 8 / "40")
 DEDICATED = {'U3': 'fpga_mclk', 'U4': GND, 'T4': 'fpga_cfg1', 'R4': GND, 'W3': 'fpga_programn',
              'V3': 'fpga_initn', 'Y3': 'fpga_done', 'T5': 'jtag_tck', 'R5': 'jtag_tdi', 'V4': 'jtag_tdo',
              'U5': 'jtag_tms'}
 FREQ = [('PORT', 'osc_25', '25'), ('PORT', 'si_clk0', '21.477272'), ('PORT', 'si_clk1', '21.28137'),
-        ('PORT', 'si_clk2', '27.0399'), ('NET', 'clk_snes', '21.477272')]
+        ('NET', 'clk_snes', '21.477272')]
 
 # N64 bus switches: SN74CB3Q3384A (TI SCDS114E Figure 3-1). (A pin, B pin) per channel.
 CB3Q_CH = [('3', '2'), ('4', '5'), ('7', '6'), ('8', '9'), ('11', '10'),
@@ -260,11 +254,11 @@ def hier_ports():
         seen.add(p['label'])
         shape = 'bidirectional'
         base = p['port'].split('[')[0]
-        if base in ('osc_25', 'si_clk0', 'si_clk1', 'si_clk2', 'adc_bck', 'adc_lrck', 'adc_dout', 'hdmi_hpd',
+        if base in ('osc_25', 'si_clk0', 'si_clk1', 'adc_bck', 'adc_lrck', 'adc_dout',
                     'host_3v3_ok', 'fpga_rails_ok', 'cart_5v_ok', 'iface_rail_ok', 'efuse_fault_n', 'overtemp',
                     'board_reset_n', 'cart_irq_n', 'cart_reset_n_sense', 'expand_sense'):
             shape = 'input'
-        elif base in ('cart_data', 'cic_data0', 'cic_data1', 'si_sda', 'si_scl', 'hdmi_scl', 'hdmi_sda'):
+        elif base in ('cart_data', 'cic_data0', 'cic_data1', 'si_sda', 'si_scl'):
             shape = 'bidirectional'
         else:
             shape = 'output'
@@ -285,7 +279,7 @@ def lpf_text():
       '# checked by hardware/sn64/tools/verify_fpga_sheet.py. Do not edit by hand.\n'
       '# Port names follow sn64_board_top AFTER the integration edit listed in\n'
       '# docs/design/fpga-schematic.md (cart_data inout, si_scl/si_sda open drain,\n'
-      '# cart_reset_pull_n, expand_sense, n64_si_dq, n64_int_n, hdmi_hpd/scl/sda, adc_*).\n'
+      '# cart_reset_pull_n, expand_sense, n64_si_dq, n64_int_n, adc_*). No HDMI pins since rev 0.5-fpga.\n'
       '# Every bank VCCIO = 3.3 V (FPGA_3V3). Balls: Lattice ECP5U-85 pinout CSV rev 1.0.\n'
       '# DRAFT: schematic-level pinout, no PCB escape routing or SI review yet.\n')
     w('SYSCONFIG CONFIG_IOVOLTAGE=3.3 COMPRESS_CONFIG=ON;\n')
@@ -568,8 +562,9 @@ def main():
         txt('SN64 FPGA - LFE5U-85F CABGA381, CONFIGURATION FLASH, JTAG, N64 HOST ISOLATION', 20.32, 17.78, 2.54),
         txt('Rails: VCC = FPGA_1V1 (1.1 V, DS-02012 Table 3.2), VCCAUX = FPGA_2V5 through FB401 (TN-02038 Figure 3.1), '
             'every VCCIO0/1/2/3/6/7/8 = FPGA_3V3.\n'
-            'Bank plan: 0 = N64 PI/CIC/SI behind the bus switches (top bank, hot-socket capable), 1 = HDMI LVCMOS33D + DDC/HPD, '
-            '2+3 = cartridge translators B side, 6+7 = clocks, Si5351 I2C, ADC, power control, LED, 8 = configuration flash.\n'
+            'Bank plan: 0 = N64 PI/CIC/SI behind the bus switches (top bank, hot-socket capable), 1 = spare (HDMI removed in 0.5-fpga: '
+            'video goes to the console over the cartridge bus), 2+3 = cartridge translators B side, 6+7 = clocks, Si5351 I2C, ADC, '
+            'power control, LED, 8 = configuration flash.\n'
             'GND: all 113 GND balls (the LFE5U pinout lists the SERDES-supply positions as GND). RESERVED (10 balls): not connected '
             '(DS-02012 4.1). Unused user I/O: open (tri-state + weak pull-down after configuration, TN-02039 4.5).',
             20.32, 25.4),

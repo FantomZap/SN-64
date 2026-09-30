@@ -63,7 +63,7 @@
         },
         "VCCIO": {
           "net": "/FPGA_3V3",
-          "100nF": 38,
+          "100nF": 37,
           ">=10uF": 10,
           "required": [
             18,
@@ -210,10 +210,14 @@
         }
       }
     },
+    "no_hdmi_ports_in_lpf_or_board_top": {
+      "pass": true,
+      "detail": "no HDMI/TMDS/DDC/si_clk2 ports (rev 0.5-fpga: video goes to the console over the cartridge bus)"
+    },
     "every_board_top_port_ball_matches_lpf_csv_netlist": {
       "pass": true,
       "detail": {
-        "ports": 121,
+        "ports": 113,
         "mismatches": [],
         "lpf_locates_without_port": [],
         "duplicate_balls": [],
@@ -237,11 +241,6 @@
             "PORT",
             "si_clk1",
             21.28137
-          ],
-          [
-            "PORT",
-            "si_clk2",
-            27.0399
           ]
         ],
         "clock_pins_on_PCLKT": {
@@ -256,10 +255,6 @@
           "si_clk1": [
             "G3",
             "PCLKT7_1"
-          ],
-          "si_clk2": [
-            "F2",
-            "PCLKT7_0"
           ]
         },
         "dedicated_balls_in_lpf": [],
@@ -314,7 +309,7 @@
         "tables": 381,
         "symbol_pins": 381,
         "unused_io_connected": [],
-        "user_io_assigned": 125,
+        "user_io_assigned": 113,
         "user_io_total": 205
       }
     },
@@ -345,5 +340,107 @@
     "TN-02038.pdf": "7b32b411d44a9b585972ea43583c9000fdb596f5322e4c9c5f3182591c44feae",
     "TN-02039.pdf": "6931b2a1733b3530dfe6f8b661f56f6744b0c08b0fa731193dec6fa9d00a341b",
     "W25Q128JV.pdf": "809f066e62bcde10b12c2202daf05f4776929ad7dc5f9d3b5131cdcc84502bc1"
+  },
+  "negative_test": {
+    "result": "pass",
+    "mutations": {
+      "bank 6 VCCIO (L6/L7/M6) moved to FPGA_1V1": {
+        "required_failures": [
+          "every_power_ball_on_its_rail"
+        ],
+        "failed_checks": [
+          "every_power_ball_on_its_rail"
+        ],
+        "detected": true
+      },
+      "CFG0 strapped high (U4 on the CFG1 pull-up net)": {
+        "required_failures": [
+          "config_straps_master_spi_010_and_pullups"
+        ],
+        "failed_checks": [
+          "config_straps_master_spi_010_and_pullups"
+        ],
+        "detected": true
+      },
+      "flash IO2 pull-up removed (R408 pin 2 re-netted)": {
+        "required_failures": [
+          "config_flash_wired_to_bank8_sysconfig_balls"
+        ],
+        "failed_checks": [
+          "config_flash_wired_to_bank8_sysconfig_balls"
+        ],
+        "detected": true
+      },
+      "TCK pull-down moved to FPGA_3V3 (R413)": {
+        "required_failures": [
+          "jtag_balls_labels_pulls_and_target_vref"
+        ],
+        "failed_checks": [
+          "jtag_balls_labels_pulls_and_target_vref"
+        ],
+        "detected": true
+      },
+      "cartridge 5 V on an FPGA ball (T18)": {
+        "required_failures": [
+          "no_5V_12V_or_VBUS_net_reaches_any_FPGA_ball",
+          "every_board_top_port_ball_matches_lpf_csv_netlist"
+        ],
+        "failed_checks": [
+          "cartridge_balls_reach_cartridge_sheet_ICs",
+          "every_board_top_port_ball_matches_lpf_csv_netlist",
+          "no_5V_12V_or_VBUS_net_reaches_any_FPGA_ball"
+        ],
+        "detected": true
+      },
+      "N64 AD0 wired straight to the FPGA (switch bypassed)": {
+        "required_failures": [
+          "n64_edge_reaches_fpga_only_through_host_gated_bus_switches"
+        ],
+        "failed_checks": [
+          "every_board_top_port_ball_matches_lpf_csv_netlist",
+          "n64_edge_reaches_fpga_only_through_host_gated_bus_switches"
+        ],
+        "detected": true
+      },
+      "LPF: n64_ad[0] and n64_ad[1] balls swapped": {
+        "required_failures": [
+          "every_board_top_port_ball_matches_lpf_csv_netlist"
+        ],
+        "failed_checks": [
+          "every_board_top_port_ball_matches_lpf_csv_netlist"
+        ],
+        "detected": true
+      },
+      "CSV: osc_25 moved to a non-clock ball": {
+        "required_failures": [
+          "every_board_top_port_ball_matches_lpf_csv_netlist"
+        ],
+        "failed_checks": [
+          "all_381_balls_accounted_unused_io_open",
+          "every_board_top_port_ball_matches_lpf_csv_netlist"
+        ],
+        "detected": true
+      },
+      "LPF: si_clk1 moved off its PCLKT ball": {
+        "required_failures": [
+          "every_board_top_port_ball_matches_lpf_csv_netlist"
+        ],
+        "failed_checks": [
+          "every_board_top_port_ball_matches_lpf_csv_netlist"
+        ],
+        "detected": true
+      },
+      "cart_address0 ball label renamed (no longer reaches U201)": {
+        "required_failures": [
+          "cartridge_balls_reach_cartridge_sheet_ICs",
+          "every_board_top_port_ball_matches_lpf_csv_netlist"
+        ],
+        "failed_checks": [
+          "cartridge_balls_reach_cartridge_sheet_ICs",
+          "every_board_top_port_ball_matches_lpf_csv_netlist"
+        ],
+        "detected": true
+      }
+    }
   }
 }

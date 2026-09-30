@@ -13,7 +13,6 @@ This is the point where the separate pieces become one design. The system test p
 | Housekeeping | 25 MHz oscillator | [Si5351 start-up and region latch](clock-plan.md), [power sequencer](power-sequencer-implementation.md), [SNES CIC lock](snes-cic-implementation.md) (CIC_CLK = 25 MHz / 8 = 3.125 MHz) |
 | Host | 62.5 MHz from an ECP5 PLL, always on | [N64 endpoint](n64-endpoint-implementation.md) (PI bus, mailbox, bootstrap ROM window) and the [N64 CIC](n64-cic-implementation.md) soft CPU, cartridge-audio I2S receiver ([cart audio](cart-audio-implementation.md)) |
 | SNES | Si5351 NTSC or PAL master, started once per cartridge power-up | SNES core, [cartridge bridge](cartridge-bridge-implementation.md), [controller emulation](controller-path-implementation.md), cartridge-audio elastic buffer and mixer |
-| HDMI pixel | Si5351 CLK2 (NTSC master x 39/31 = 27.0198 MHz, PAL master x 108/85 = 27.0399 MHz) and ECP5 PLL x5 | [HDMI and audio output](av-output-implementation.md) (720x480p VIC 2 or 720x576p50 VIC 17), held in reset until CLK2 is programmed for the latched region |
 
 The N64 endpoint must run from an always-on clock: the N64 boots the menu before the SNES clock exists. Crossings use [sn64_cdc.sv](../../fpga/rtl/sn64_cdc.sv): two-flop synchronisers for levels and a toggle-handshake word transfer for the controller images, status and fault words and the mailbox CONTROL bits. The word transfer is tested for torn values across unrelated clocks ([tb_cdc.sv](../../fpga/tests/tb_cdc.sv)).
 
@@ -23,7 +22,7 @@ The N64 endpoint must run from an always-on clock: the N64 boots the menu before
 2. The N64 boots the bootstrap from the ROM window, checks MAGIC and writes CONTROL.run_request.
 3. The power sequencer holds cartridge /RESET, enables 5 V, then the interface rail.
 4. The SNES CIC lock starts on its own clock, and the [ROM-header probe](header-region-probe.md) reads `$00:FFC0-$00:FFDF` while the cartridge is still held in /RESET. The region is decided in priority order: forced mode, a passing key's type, a valid ROM header, NTSC default (also after the 300 ms timeout).
-5. `snes_clk_run` starts the SNES master at that region's frequency. It never changes while it runs; see the [clock plan](clock-plan.md). It starts only after `sn64_clock_init` has retargeted Si5351 CLK2 (MS2 + register 18) for the latched region (`pixel_clock_ready`); the HDMI pixel domain is held in reset until then.
+5. `snes_clk_run` starts the SNES master at that region's frequency. It never changes while it runs; see the [clock plan](clock-plan.md).
 6. After 1 ms of running clock the sequencer releases /RESET and grants bus permission; the core leaves reset.
 
 Socket /RESET is owned by the sequencer and the bus permission only. A soft reset (CONTROL bit 1) holds /RESET without removing cartridge power. Dropping run_request, a host reset or a fault shuts the cartridge down and stops the SNES clock.
@@ -34,18 +33,18 @@ Socket /RESET is owned by the sequencer and the bus permission only. A soft rese
 
 Result (round-3 integration run, 2026-09-29, `evaluate.py --mode sim`): **PASS** in all four positive runs.
 
-| Run | Region / source | STATUS | REGION_INFO / SOURCE | Mixed audio samples | HDMI |
-|---|---|---|---|---:|---|
-| default (no key, no header) | NTSC default | `0x545F` | `0x1600` / `0x0007` | 2,108 | 858x524 VIC 2, lock reported only (re-phases every frame, -1,328 px) |
-| +pal_header | PAL via ROM header | `0x54DF` | `0x7002` / `0x0016` | 2,466 | 864x624 VIC 17 frame-locked (lock errors 0 0 0 px after one start-up re-phase) |
-| +pal_key +ntsc_header | PAL via key CIC | `0x34DF` | `0x3001` / `0x0015` | 2,466 | 864x624 VIC 17 frame-locked (0 0 0 px) |
-| +ntsc_key +pal_header | NTSC via key CIC | `0x345F` | `0x7002` / `0x0005` | 2,108 | 858x524 VIC 2, lock reported only |
+| Run | Region / source | STATUS | REGION_INFO / SOURCE | Mixed audio samples |
+|---|---|---|---|---:|
+| default (no key, no header) | NTSC default | `0x545F` | `0x1600` / `0x0007` | 2,108 |
+| +pal_header | PAL via ROM header | `0x54DF` | `0x7002` / `0x0016` | 2,466 |
+| +pal_key +ntsc_header | PAL via key CIC | `0x34DF` | `0x3001` / `0x0015` | 2,466 |
+| +ntsc_key +pal_header | NTSC via key CIC | `0x345F` | `0x7002` / `0x0005` | 2,108 |
 
 With +corrupt_key (one key bit flipped in round 1) the header decides and the run fails as required. The bench uses REGION_TIMEOUT_MS = 20 because the key's first round, including its table update, ends about 9.1 ms after the interface rail.
 
 Finding fixed: the bridge pulled socket /RESET while the core was in reset, and the core reset followed the socket /RESET level, so neither could leave reset. Only the sequencer and bus permission now drive /RESET.
 
-Limits: the PAL runs use a PAL-rate master and a pixel clock at exactly master x 108/85 in simulation time units, not the real frequencies; NTSC HDMI frame lock is reported, not checked (open decision 9); no N64 CIC exchange (covered by its own bench), behavioural rails, cartridge and ADC, representative PI timing.
+Limits: the runs use simulation-time master clocks (NTSC and PAL rates), not the real Si5351 outputs; the console video path is checked against a PI host model, not a console; no N64 CIC exchange (covered by its own bench), behavioural rails, cartridge and ADC, representative PI timing.
 
 ## Whole-design synthesis
 
@@ -57,20 +56,20 @@ A first full place-and-route used [sn64_pnr_wrap.sv](../../fpga/rtl/sn64_pnr_wra
 Status 2026-09-29 (round-3 integration):
 
 1. **Bootstrap ROM storage: resolved.** The ROM window is served from the FPGA configuration flash ([bootrom-flash.md](bootrom-flash.md), SummerCart64 `memory_flash.sv` unmodified, `ROM_FROM_FLASH=1` in the board top). This frees 64 DP16KD. Flash part selected on the FPGA sheet: W25Q128JVSIQ (QE factory-fixed 1, EBh 2 mode + 4 dummy clocks, tCLQV 6 ns; [fpga-schematic.md](fpga-schematic.md)); the MASTER_SPI_PORT default is DISABLE, so CSSPIN/D0-D3 are GPIO in user mode (TN-02039 Table 7.1). Still open: the programmer offset, the menu rule that PI DOM1 LAT stays at the header's 0x40, and the USRMCLK/board round trip against the 30 ns budget (about 24 ns left after tCLQV).
-2. **Board wrapper and real pinout: done** ([sn64_board_top.sv](../../fpga/rtl/sn64_board_top.sv), [sn64_board.lpf](../../fpga/constraints/sn64_board.lpf), [fpga-schematic.md](fpga-schematic.md)). The board top now has the pad adapters the schematic needs (cart_data one inout pad per bit, open-drain si_scl/si_sda, cart_reset_pull_n, expand_sense, reserved n64_si_dq/n64_int_n/hdmi_hpd/hdmi_scl/hdmi_sda, adc_*). Routed with the real LPF below. Still open: board-level I/O timing (cartridge setup/hold, N64 PI, flash), the -8BG381I alternate at speed 8.
-3. **A/V output:** HDMI 720x480p (NTSC) and **PAL 720x576p50** (864x624, VIC 17, pixel = PAL master x 108/85 from PLLB) simulated, see [clock-plan.md "PAL HDMI"](clock-plan.md). **Cartridge analog audio implemented** ([cart-audio-implementation.md](cart-audio-implementation.md)). Board path drawn in [av-clock-schematic.md](av-clock-schematic.md) (PCM1808 I2S master, 32 kHz; TPD12S016 HDMI companion) and attached to the root. Open: NTSC frame lock (decision 9) and the DSP sample rate (decision 8).
+2. **Board wrapper and real pinout: done** ([sn64_board_top.sv](../../fpga/rtl/sn64_board_top.sv), [sn64_board.lpf](../../fpga/constraints/sn64_board.lpf), [fpga-schematic.md](fpga-schematic.md)). The board top now has the pad adapters the schematic needs (cart_data one inout pad per bit, open-drain si_scl/si_sda, cart_reset_pull_n, expand_sense, reserved n64_si_dq/n64_int_n, adc_*). Routed with the real LPF below. Still open: board-level I/O timing (cartridge setup/hold, N64 PI, flash), the -8BG381I alternate at speed 8.
+3. **A/V output: the console video path** ([console-video-path.md](console-video-path.md), frame/audio window over the cartridge bus, simulated 42/42). The board's own HDMI output (720x480p/576p50, TPD12S016 companion, Si5351 CLK2) was removed on 2026-09-29. **Cartridge analog audio implemented** ([cart-audio-implementation.md](cart-audio-implementation.md)) and mixed into the audio ring.
 4. **ROM header region fallback: implemented** ([header-region-probe.md](header-region-probe.md)), tested alone and in `tb_system` with an EU header (PAL) and without a header (NTSC).
 5. **Place-and-route:** the board top routes on the real pinout; see below.
 6. **CIC data pin circuit: resolved.** Schematic rev 0.3.1 gives each CIC data pin its own SN74LVC1T45 with a dedicated DIR pin and pull-downs ([cart-interface-schematic.md](cart-interface-schematic.md)). [sn64_cic_pad.sv](../../fpga/rtl/sn64_cic_pad.sv) sequences DIR against the pad drive; [tb_cic_pad.sv](../../fpga/tests/tb_cic_pad.sv) checks it against a translator model, and a fault build that switches both together is rejected.
 7. **Header telemetry: done.** REGION_INFO (0x1A) and REGION_SOURCE (0x1C) in the mailbox, shown by the menu ([header-region-probe.md](header-region-probe.md#telemetry)).
 8. **SNES DSP sample rate: resolved.** `prepare_core.py` restores the original 409600 with a region-correct CE divider (MiSTer behaviour): 32,000 Hz in both regions ([cart-audio-implementation.md](cart-audio-implementation.md)).
-9. **NTSC HDMI frame lock: resolved.** Root cause was a SNESTang translation bug (long dots never taken, 1360-clock lines); the generated core now has hardware-length 1364-clock lines, NTSC MS2 = 31 + 14887/18733 locks one HDMI frame to the mean SNES frame, PAL MS2 = 31 + 31/54; `tb_system` checks frame lock in both regions ([clock-plan.md](clock-plan.md)).
+9. **NTSC HDMI frame lock: resolved.** Root cause was a SNESTang translation bug (long dots never taken, 1360-clock lines); the generated core now has hardware-length 1364-clock lines, NTSC MS2 = 31 + 14887/18733 locks one HDMI frame to the mean SNES frame, PAL MS2 = 31 + 31/54; `tb_system` checks frame lock in both regions ([clock-plan.md](clock-plan.md)). (The HDMI raster is gone since the removal; the 1364-clock line fix stays.)
 10. **efuse_fault_n: resolved.** Pulled up to FPGA_3V3 like every other monitor output (the 5V_PRE divider would back-drive a non-hot-socket bank); `verify_fpga_sheet` 13/13.
 11. **Cartridge enable pull-ups: resolved.** R206-R208 changed to 4.7k (ECP5 configuration-time pull-down up to 150 uA, DS-02012 Table 3.7).
 12. **FPGA-sheet regulator input: accepted.** The FPGA bucks take 5V_PRE because a buck cannot make 3.3 V from the host's 3.3 V input ([power-schematic.md](power-schematic.md)).
-13. **Console video path (primary A/V, owner decision 2026-09-29): to implement.** Frame and audio window for the N64 over the cartridge bus (PI domain 2, fast timing) plus the boot program's display loop; the board's own HDMI becomes the secondary validation output. Design and numbers in [console-video-path.md](console-video-path.md).
+13. **Console video path (primary A/V, owner decision 2026-09-29): implemented and simulated** ([console-video-path.md](console-video-path.md)); the board's own HDMI was removed the same day (see "HDMI output removed" below).
 
-## Place-and-route with HDMI (2026-09-29)
+## Place-and-route with HDMI (2026-09-29, superseded: HDMI removed)
 
 Reproduce with `python fpga/tools/route_top.py` (OSS CAD Suite on PATH; writes `build/route-top/summary.json`). Synthesis loads the ECP5 cell library and defines `VERILATOR` (core memory branch) and `SN64_SYNTH` (real ODDRX1F in the HDMI serializer). The trial constraints [fpga/constraints/sn64_trial.lpf](../../fpga/constraints/sn64_trial.lpf) set all five clock frequencies and borrow the ULX3S HDMI pins (same 85F CABGA381 package) because DDR outputs need fixed PIOs; every other pin is placer-chosen.
 
@@ -116,7 +115,7 @@ Resources: 36,503 TRELLIS_COMB (43 %), 13,627 FF (16 %), 143 of 208 DP16KD, 20 M
 
 ## Schematic integration (round 3, 2026-09-29)
 
-The root [sn64.kicad_sch](../../hardware/sn64/sn64.kicad_sch) (rev `0.4-r3`, now A2) holds all five child sheets: USB-C programmer (page 2), SNES cartridge interface (3), FPGA (4), Power (5), clock/HDMI/cartridge audio (6). Every sheet pin carries a same-name root label, so the shared net-name contract is wired by name; no root no-connect remains on a sheet pin. The cartridge sheet's FPGA-side pins lost their no-connect markers; the USB sheet now exports USB_VBUS, USB_3V3, USB_CC1/CC2, jtag_tck/tms/tdi/tdo and TARGET_VREF (its local JTAG labels were renamed to the contract's lower case), and R101/R102 are DNP because the power sheet's TUSB320 (U301) presents Rd. The sheets were attached with the agents' own attach scripts, then the power and A/V blocks were moved right of the FPGA sheet (the agents' positions overlapped). The integration script is kept as untracked evidence in `build/r3-integ/tools/integrate_root.py`.
+The root [sn64.kicad_sch](../../hardware/sn64/sn64.kicad_sch) (rev `0.4-r3`, now A2) holds all five child sheets: USB-C programmer (page 2), SNES cartridge interface (3), FPGA (4), Power (5), clock/cartridge audio (6). Every sheet pin carries a same-name root label, so the shared net-name contract is wired by name; no root no-connect remains on a sheet pin. The cartridge sheet's FPGA-side pins lost their no-connect markers; the USB sheet now exports USB_VBUS, USB_3V3, USB_CC1/CC2, jtag_tck/tms/tdi/tdo and TARGET_VREF (its local JTAG labels were renamed to the contract's lower case), and R101/R102 are DNP because the power sheet's TUSB320 (U301) presents Rd. The sheets were attached with the agents' own attach scripts, then the power and A/V blocks were moved right of the FPGA sheet (the agents' positions overlapped). The integration script is kept as untracked evidence in `build/r3-integ/tools/integrate_root.py`.
 
 Integration fixes (each found by ERC or a validator on the integrated root):
 
@@ -139,3 +138,21 @@ Checks on the integrated real root (KiCad 10.0.6):
 
 The PDF export ([sn64-interface-draft.pdf](../../hardware/sn64/exports/sn64-interface-draft.pdf)) was regenerated; it was **not visually inspected** (no rasteriser on this machine). A geometric check found no overlapping sheet symbols and no root label running into a sheet body on the A2 page.
 
+
+## HDMI output removed (2026-09-29, later)
+
+Owner decision: the picture and sound go through the console's own output, so the board's own HDMI port is gone rather than kept as a secondary output ([av-output-implementation.md](av-output-implementation.md) lists every removed item). What changed in the integrated design:
+
+- `sn64_top` no longer has the pixel-clock inputs or the TMDS outputs; the audio mixer feeds only the endpoint's frame window. `sn64_clock_init` programs CLK0/CLK1 at start-up and never writes again: CLK2 stays powered down with its output disabled (register 3 = 0xFC), and `snes_clk_run` waits only for `clocks_ready` and the region decision.
+- `sn64_board_top` keeps one EHXPLLL (host 62.5 MHz) and the DCSC; `si_clk2` and `hdmi_*` are gone from the ports, the LPF (regenerated) and the FPGA sheet (rev 0.5-fpga).
+- Simulation: `evaluate.py --mode sim` exit 0, 38 recorded results (the six `av-out*` runs and the CLK2 fault build are gone; the clock-init bench now checks the image with CLK2 off and that no I2C START happens after start-up).
+
+Routed on the real pinout (`route_top.py --top board`, `build/route-board-nohdmi/`, untracked), nextpnr-ecp5 exit 0:
+
+| Clock | Required | Achieved |
+|---|---:|---:|
+| SNES master (after the DCSC) | 21.48 MHz | 26.66 MHz |
+| Host, from PLL | 62.5 MHz | 72.53 MHz |
+| Housekeeping, 25 MHz oscillator | 25 MHz | 57.42 MHz |
+
+Resources: 34,739 TRELLIS_COMB (41 %), 12,841 FF (15 %), **203 of 208 DP16KD** (the frame buffer), 19 MULT18X18D, 1 of 4 EHXPLLL, 1 DCSC, 1 USRMCLK, 113 of 365 I/O. Block RAM is the tight resource: the frame window alone takes 62 blocks. Internal timing only; board-level I/O timing is still open.

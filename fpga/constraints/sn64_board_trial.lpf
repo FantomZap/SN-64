@@ -4,21 +4,11 @@
 FREQUENCY PORT "osc_25" 25 MHZ;
 FREQUENCY PORT "si_clk0" 21.477272 MHZ;
 FREQUENCY PORT "si_clk1" 21.28137 MHZ;
-FREQUENCY PORT "si_clk2" 27.0399 MHZ;
 # SNES master after the DCSC: the faster (NTSC) of the two selectable clocks.
 FREQUENCY NET "clk_snes" 21.477272 MHZ;
 # ULX3S 25 MHz oscillator input (a primary-clock-capable pin).
 LOCATE COMP "osc_25" SITE "G2";
 IOBUF PORT "osc_25" IO_TYPE=LVCMOS33;
-# HDMI (ULX3S GPDI connector), pseudo-differential TMDS.
-LOCATE COMP "hdmi_tmds[0]" SITE "A16";
-LOCATE COMP "hdmi_tmds[1]" SITE "A14";
-LOCATE COMP "hdmi_tmds[2]" SITE "A12";
-LOCATE COMP "hdmi_tmds_clock" SITE "A17";
-IOBUF PORT "hdmi_tmds[0]" IO_TYPE=LVCMOS33D DRIVE=4;
-IOBUF PORT "hdmi_tmds[1]" IO_TYPE=LVCMOS33D DRIVE=4;
-IOBUF PORT "hdmi_tmds[2]" IO_TYPE=LVCMOS33D DRIVE=4;
-IOBUF PORT "hdmi_tmds_clock" IO_TYPE=LVCMOS33D DRIVE=4;
 # Configuration flash as user I/O after configuration (ULX3S sites; MCLK U3 is
 # driven through USRMCLK, so it has no user port).
 LOCATE COMP "flash_cs_n" SITE "R2";

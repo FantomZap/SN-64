@@ -92,19 +92,11 @@ expand_sense,U17,3,LVCMOS33,,expand_sense,expand_sense,cart,U209 1Y3; new board-
 osc_25,G2,6,LVCMOS33,PULLMODE=NONE,osc_25,osc_25,clock,PCLKT6_1: primary clock pin; housekeeping + host PLL CLKI via primary clock
 si_clk0,H2,6,LVCMOS33,PULLMODE=NONE,si_clk0,si_clk0,clock,PCLKT6_0: DCSC CLK0 (NTSC)
 si_clk1,G3,7,LVCMOS33,PULLMODE=NONE,si_clk1,si_clk1,clock,PCLKT7_1: DCSC CLK1 (PAL)
-si_clk2,F2,7,LVCMOS33,PULLMODE=NONE,si_clk2,si_clk2,clock,PCLKT7_0: pixel clock + TMDS PLL CLKI via primary clock
 si_scl,E4,7,LVCMOS33,PULLMODE=UP,si_scl,si_scl,clock,open drain (board-top edit); bus pull-ups on clock sheet
 si_sda,F4,7,LVCMOS33,PULLMODE=UP,si_sda,si_sda,clock,open drain (board-top edit)
 adc_bck,J4,6,LVCMOS33,PULLMODE=DOWN,adc_bck,adc_bck,av,GR_PCLK6_0; ADC is I2S master (reserved port)
 adc_lrck,J3,6,LVCMOS33,PULLMODE=DOWN,adc_lrck,adc_lrck,av,GR_PCLK6_1 (reserved port)
 adc_dout,K3,6,LVCMOS33,PULLMODE=DOWN,adc_dout,adc_dout,av,reserved port
-hdmi_tmds[0],A16,1,LVCMOS33D,DRIVE=4,hdmi_d0_p,hdmi_d0_p,av,PT110A true; complement B16 = hdmi_d0_n
-hdmi_tmds[1],A14,1,LVCMOS33D,DRIVE=4,hdmi_d1_p,hdmi_d1_p,av,PT83A true; complement C14 = hdmi_d1_n
-hdmi_tmds[2],A12,1,LVCMOS33D,DRIVE=4,hdmi_d2_p,hdmi_d2_p,av,PT76A true; complement A13 = hdmi_d2_n
-hdmi_tmds_clock,A17,1,LVCMOS33D,DRIVE=4,hdmi_ck_p,hdmi_ck_p,av,PT116A true; complement B18 = hdmi_ck_n
-hdmi_hpd,E13,1,LVCMOS33,PULLMODE=DOWN,hdmi_hpd,hdmi_hpd,av,reserved port; A/V sheet must deliver <= 3.3 V
-hdmi_scl,D15,1,LVCMOS33,PULLMODE=UP,hdmi_scl,hdmi_scl,av,reserved port; 3.3 V side of the A/V sheet DDC shifter
-hdmi_sda,E15,1,LVCMOS33,PULLMODE=UP,hdmi_sda,hdmi_sda,av,reserved port; 3.3 V side of the A/V sheet DDC shifter
 host_3v3_ok,K2,6,LVCMOS33,PULLMODE=DOWN,host_3v3_ok,host_3v3_ok,power,floating = not ok
 fpga_rails_ok,J1,6,LVCMOS33,PULLMODE=DOWN,fpga_rails_ok,fpga_rails_ok,power,also holds PROGRAMN low via U407
 cart_5v_ok,H1,6,LVCMOS33,PULLMODE=DOWN,cart_5v_ok,cart_5v_ok,power,floating = not ok
@@ -120,10 +112,6 @@ flash_dq[1],V2,8,LVCMOS33,,flash_dq1,,flash,D1/MISO -> DO/IO1 (pin 2)
 flash_dq[2],Y2,8,LVCMOS33,,flash_dq2,,flash,"D2 -> IO2 (pin 3), 10k pull-up"
 flash_dq[3],W1,8,LVCMOS33,,flash_dq3,,flash,"D3 -> IO3 (pin 7), 10k pull-up"
 led_status,B1,7,LVCMOS33,DRIVE=8,led_status,,misc,D401 via R (active high)
-(LVCMOS33D complement),B16,1,LVCMOS33D,,hdmi_d0_n,hdmi_d0_n,av,complement pad of the pair above; driven by nextpnr from the true pad
-(LVCMOS33D complement),C14,1,LVCMOS33D,,hdmi_d1_n,hdmi_d1_n,av,complement pad of the pair above; driven by nextpnr from the true pad
-(LVCMOS33D complement),A13,1,LVCMOS33D,,hdmi_d2_n,hdmi_d2_n,av,complement pad of the pair above; driven by nextpnr from the true pad
-(LVCMOS33D complement),B18,1,LVCMOS33D,,hdmi_ck_n,hdmi_ck_n,av,complement pad of the pair above; driven by nextpnr from the true pad
 (dedicated),U3,8,-,,fpga_mclk,,config,sysCONFIG/JTAG dedicated ball
 (dedicated),U4,8,-,,GND,,config,sysCONFIG/JTAG dedicated ball
 (dedicated),T4,8,-,,fpga_cfg1,,config,sysCONFIG/JTAG dedicated ball

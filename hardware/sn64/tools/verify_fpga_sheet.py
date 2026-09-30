@@ -74,7 +74,8 @@ N64_EDGE = ['N64_AD%d' % i for i in range(16)] + ['N64_ALE_L', 'N64_ALE_H', 'N64
                                                   'N64_PIF_CLK', 'N64_JOYBUS', 'N64_INT_N']
 RAIL_1V1, RAIL_2V5, RAIL_3V3 = 'FPGA_1V1', 'FPGA_2V5', 'FPGA_3V3'
 FORBIDDEN = re.compile(r'(5V|VBUS|12V)')   # rail names (upper case); cart_5v_ok etc. are 3.3 V logic
-CLOCK_PORTS = ['osc_25', 'si_clk0', 'si_clk1', 'si_clk2']
+CLOCK_PORTS = ['osc_25', 'si_clk0', 'si_clk1']
+HDMI_PORTS = ['hdmi_tmds[0]', 'hdmi_tmds[1]', 'hdmi_tmds[2]', 'hdmi_tmds_clock', 'hdmi_hpd', 'hdmi_scl', 'hdmi_sda', 'si_clk2']
 
 
 def short(name):
@@ -353,8 +354,11 @@ def run_checks(proj, kicad_cli, board_top, lpf_path, csv_path, lattice_csv=None,
     balls = [loc[p] for p in loc]
     dup = sorted({b for b in balls if balls.count(b) > 1})
     wanted_freq = {('PORT', 'osc_25', 25.0), ('PORT', 'si_clk0', 21.477272), ('PORT', 'si_clk1', 21.28137),
-                   ('PORT', 'si_clk2', 27.0399), ('NET', 'clk_snes', 21.477272)}
+                   ('NET', 'clk_snes', 21.477272)}
     clk = {p: (loc.get(p), PCLKT.get(loc.get(p))) for p in CLOCK_PORTS}
+    hdmi_left = sorted(p for p in HDMI_PORTS if p in loc or p in {q for q, _ in ports})
+    check('no_hdmi_ports_in_lpf_or_board_top', not hdmi_left,
+          hdmi_left or 'no HDMI/TMDS/DDC/si_clk2 ports (rev 0.5-fpga: video goes to the console over the cartridge bus)')
     config_used = sorted(b for b in balls if b in CONFIG_BALLS.values())
     flash_ok = all(loc.get(p) == b for p, b in [('flash_cs_n', 'R2'), ('flash_dq[0]', 'W2'), ('flash_dq[1]', 'V2'),
                                                  ('flash_dq[2]', 'Y2'), ('flash_dq[3]', 'W1')])
@@ -530,7 +534,7 @@ MUTATIONS = [
      ['every_board_top_port_ball_matches_lpf_csv_netlist']),
     ('CSV: osc_25 moved to a non-clock ball', 'csv', 'ball', 'osc_25', 'F1',
      ['every_board_top_port_ball_matches_lpf_csv_netlist']),
-    ('LPF: si_clk2 moved off its PCLKT ball', 'lpf', 'site', 'si_clk2', 'F3',
+    ('LPF: si_clk1 moved off its PCLKT ball', 'lpf', 'site', 'si_clk1', 'F3',
      ['every_board_top_port_ball_matches_lpf_csv_netlist']),
     ('cart_address0 ball label renamed (no longer reaches U201)', 'sch', 'label', 'U401:C18', 'cart_addr0_typo',
      ['cartridge_balls_reach_cartridge_sheet_ICs', 'every_board_top_port_ball_matches_lpf_csv_netlist']),

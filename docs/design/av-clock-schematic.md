@@ -1,14 +1,15 @@
-# Clock, HDMI and cartridge-audio schematic sheet
+# Clock and cartridge-audio schematic sheet
 
-Draft 0.1-av, 2026-09-29. This is a schematic sheet, [`hardware/sn64/av-clock.kicad_sch`](../../hardware/sn64/av-clock.kicad_sch). It is **not yet attached to the root schematic**; attaching it is an integration edit, listed at the end. It passes a static netlist check and KiCad ERC on a validation copy of the project. **No PCB, signal-integrity simulation, HDMI compliance test, audio measurement or hardware test has been done.**
+**Draft 0.2-av (2026-09-29): the HDMI output is gone.** J701, U702 TPD12S016, the 22 nF TMDS coupling, TP701, R705 and the Si5351 CLK2 pixel clock were removed: the SNES picture and sound go to the console over the cartridge bus ([console-video-path.md](console-video-path.md)), so the board has no video output of its own. Si5351 pin 6 (CLK2) is left open and the RTL keeps the output powered down and disabled. The 0.1-av description of the HDMI block is in git history (commit `a2dcad3`). Everything below describes the sheet as it is now unless marked otherwise.
+
+Draft 0.1-av, 2026-09-29. This is a schematic sheet, [`hardware/sn64/av-clock.kicad_sch`](../../hardware/sn64/av-clock.kicad_sch). It is **not yet attached to the root schematic**; attaching it is an integration edit, listed at the end. It passes a static netlist check and KiCad ERC on a validation copy of the project. **No PCB, signal-integrity simulation, audio measurement or hardware test has been done.**
 
 ## Plain-language summary
 
-This sheet holds four things:
+This sheet holds three things:
 
-- **Clock chip.** It makes the SNES master clock for both regions and the HDMI pixel clock.
+- **Clock chip.** It makes the SNES master clock for both regions.
 - **Housekeeping oscillator.** 25 MHz, for the FPGA.
-- **HDMI connector.** It comes with the small protection/level-shift chip that HDMI needs.
 - **Audio input.** A stereo audio converter digitises the analog sound that some cartridges send back through the SNES socket, such as MSU-1 audio from an FXPAK Pro or sd2snes.
 
 Every part number, pin and value is taken from a downloaded datasheet or a pinned open design. Values still to be tuned on the prototype are marked **provisional**.
@@ -17,9 +18,9 @@ Every part number, pin and value is taken from a downloaded datasheet or a pinne
 
 | File | Role |
 |---|---|
-| `hardware/sn64/av-clock.kicad_sch` | The child sheet: 53 symbols, 25 hierarchical ports. |
+| `hardware/sn64/av-clock.kicad_sch` | The child sheet: 36 symbols, 13 hierarchical ports (0.2-av). |
 | `hardware/sn64/tools/add_av_clock_sheet.py` | Authoring script, same house style as `add_cart_interface.py`: installed KiCad symbols embedded in the sheet, drawn symbols only where KiCad has none, provenance JSON, refuses to overwrite without `--force`. It never edits the real root; `--attach-root` attaches the sheet to a given root (used on the validation copy). |
-| `hardware/sn64/libraries/SN64_AV.kicad_sym` | Drawn symbols for TI **TPD12S016PW** and TI **PCM1808PW**; neither is in the KiCad 10 library. |
+| `hardware/sn64/libraries/SN64_AV.kicad_sym` | Drawn symbol for TI **PCM1808PW**, which is not in the KiCad 10 library. |
 | `hardware/sn64/libraries/av-provenance.json` | Source URL, revision and SHA-256 of every datasheet, pin tables and the facts used. |
 | `hardware/sn64/tools/verify_av_clock_sheet.py` | Independent netlist and ERC check, plus `--negative-test`. |
 | `hardware/sn64/validation/av-clock-check.json` | Result of the last passing check (run on the validation copy). |
@@ -28,38 +29,17 @@ Every part number, pin and value is taken from a downloaded datasheet or a pinne
 
 | Ref | Part | Source and check |
 |---|---|---|
-| U701 | **Si5351A-B-GTR**, MSOP-10, LCSC C504891 | KiCad `Oscillator:Si5351A-B-GT`. Its pins match Skyworks Si5351-B Rev 1.3, Table 20: 1 VDD, 2 XA, 3 XB, 4 SCL, 5 SDA, 6 CLK2, 7 VDDO, 8 GND, 9 CLK1, 10 CLK0. VDD and VDDO both come from `FPGA_3V3`; §7.2 requires VDDO to come up with or before VDD. |
+| U701 | **Si5351A-B-GTR**, MSOP-10, LCSC C504891 | KiCad `Oscillator:Si5351A-B-GT`. Its pins match Skyworks Si5351-B Rev 1.3, Table 20: 1 VDD, 2 XA, 3 XB, 4 SCL, 5 SDA, 6 CLK2, 7 VDDO, 8 GND, 9 CLK1, 10 CLK0. Pin 6 (CLK2) is left open: `sn64_clock_init` keeps CLK2 powered down and its output disabled (register 3 = 0xFC), and the verifier checks both. VDD and VDDO both come from `FPGA_3V3`; §7.2 requires VDDO to come up with or before VDD. |
 | Y701 | 25 MHz crystal, **YXC X322525MMB4SI**, 3225, **CL 10 pF**, LCSC C70582 (34,212 in stock) | Datasheet (YSX321SL family): pins 1 and 3 are the crystal, 2 and 4 are GND; ESR ≤ 50 Ω (16–31 MHz); drive level up to 200 µW; C0 ≤ 3 pF. Si5351 Table 8 needs 25–27 MHz, CL 6–12 pF, ESR ≤ 150 Ω and a crystal rated for ≥ 100 µW. |
 | — | **Load-capacitance cross-check** | `fpga/rtl/sn64_clock_init.sv` writes register 183 = `0xD2`. AN619 Rev 0.8 decodes that as bits 7:6 = `11` (internal CL = 10 pF) and bits 5:0 = `010010b`, the required reserved value. That matches the crystal's 10 pF. Si5351 §7.4: the internal load capacitance is used, so there are no external load capacitors. The verifier reads the register value from the RTL and fails if the two disagree. |
 | R701, R702 | 4.7 kΩ pull-ups from `si_scl`/`si_sda` to `FPGA_3V3` | Si5351 Figure 5 (4.7 k shown), Table 20 (at least 1 kΩ, to VDD). I²C address 0x60, 400 kHz from `sn64_clock_init`. |
-| R703–R705 | **0 Ω** series resistors: CLK0 → `si_clk0` (NTSC 21.4772727 MHz), CLK1 → `si_clk1` (PAL 21.28137 MHz), CLK2 → `si_clk2` (pixel 27.0197947 MHz) | Si5351 Table 5: the output impedance is 50 Ω at 3.3 V VDDO, default high drive. §7.6, Figure 16: a 50 Ω trace with an optional 0 Ω series resistor for EMI. The series termination is therefore the driver itself; the footprint is kept for tuning (**provisional**). |
+| R703, R704 | **0 Ω** series resistors: CLK0 → `si_clk0` (NTSC 21.4772727 MHz), CLK1 → `si_clk1` (PAL 21.28137 MHz) | Si5351 Table 5: the output impedance is 50 Ω at 3.3 V VDDO, default high drive. §7.6, Figure 16: a 50 Ω trace with an optional 0 Ω series resistor for EMI. The series termination is therefore the driver itself; the footprint is kept for tuning (**provisional**). |
 | C701, C702 | 100 nF, one per supply pin | §7.1: 0.1–1.0 µF per supply pin, as close as possible, no vias. |
 | X701, R706, C703 | 25 MHz 3.3 V CMOS oscillator **CJO05-250003320B30**, LCSC C712741 → 0 Ω → `osc_25` | JSCJ spec rev1.0: pin 1 enable (high or open = run; tied to `FPGA_3V3`), 2 GND, 3 output, 4 VDD. The KiCad `Oscillator:ASE-xxxMHz` symbol has the same pin order. **Footprint provisional:** the KiCad ASE footprint's pads (1.3 × 1.1 mm, gaps 0.8/0.55 mm) are close to, but not the same as, the suggested pads (1.3 × 1.2 mm, gaps 0.9/0.5 mm). The crystal footprint matches YXC's suggested layout exactly. |
 
-## HDMI block
+## HDMI block (removed in 0.2-av)
 
-**TMDS network: reused from ULX3S, as the [FPGA board selection](fpga-board-selection.md) pins it.** In [`gpdi.sch`](https://github.com/emard/ulx3s/blob/6a92cec6b177191c5b0f80e260013a1f8ec147dd/gpdi.sch) at commit `6a92cec` (SHA-256 `2ff8d987…4b0f5b1164d`), each FPGA TMDS pin drives its connector pin through a **22 nF series capacitor** (C38–C45, 0603). There is **no series resistor**. The ULX3S sheet carries the note "SINGLE ENDED - NOT DIFFERENTIAL", and the SN64 trial LPF drives these pins as `LVCMOS33D`. The task brief described a "series-resistor network"; the pinned source has capacitors only, and this sheet copies the source: C704–C711 are 22 nF.
-
-| Lane | FPGA labels | Series C | Connector pins (J701) | TPD12S016 ESD pins (U702) |
-|---|---|---|---|---|
-| D2 | `hdmi_d2_p` / `hdmi_d2_n` | C704 / C705 | 1 / 3 | 23 / 22 |
-| D1 | `hdmi_d1_p` / `hdmi_d1_n` | C706 / C707 | 4 / 6 | 21 / 20 |
-| D0 | `hdmi_d0_p` / `hdmi_d0_n` | C708 / C709 | 7 / 9 | 18 / 17 |
-| Clock | `hdmi_ck_p` / `hdmi_ck_n` | C710 / C711 | 10 / 12 | 16 / 15 |
-
-- **U702 TPD12S016PWR** (TSSOP-24, LCSC C201665, 3,497 in stock) is the ESD and level-shift companion. It sits on the connector side of the capacitors (TI SLLSE96F; pin table in the provenance file). It provides:
-  - TMDS ESD, rated 6 V absolute on D/CLK and ±8 kV IEC contact.
-  - DDC and CEC level shifting: A side referenced to VCCA = `FPGA_3V3`, B side to its own `5V_OUT`.
-  - The HPD buffer: `HPD_A` is referenced to VCCA, so `hdmi_hpd` is a 3.3 V signal.
-  - The HDMI **+5V pin (18)**, from its **55 mA current-limited load switch**, with VCC5V = `5V_PRE`. The connector's +5V is not connected to `5V_PRE` directly; the verifier checks this.
-- **Enable pins.** `LS_OE` and `CT_HPD` are tied to VCCA, the "fully on" row of Table 1, so the chip is active whenever `FPGA_3V3` is up. The contract has no FPGA enable pin for it.
-- **Pull-ups.** None are fitted on DDC, CEC or HPD; §7.3.15 says none are needed.
-- **Bring-up caution.** The A-side input low level (VIL) is at most 0.082 × VCCA, about 0.27 V at 3.3 V. The FPGA's open-drain DDC master must pull the line fully to ground. Check this on hardware.
-- **CEC.** There is no FPGA CEC label in the contract. `CEC_A` goes to test point TP701 and has an internal pull-up. The optional integration edit `hdmi_cec` is listed below.
-- **Utility/HEC pin (14).** Not connected.
-- **J701: Amphenol 10029449-111RLF** (LCSC C427307, 1,905 in stock). This is the part ULX3S v1.8.1+ uses, and its sheet carries the same LCSC number. Pin numbering is the standard type-A order: the KiCad `Connector:HDMI_A` symbol and the ULX3S connector wiring agree (1 D2+, 2 D2 shield … 17 GND, 18 +5V, 19 HPD). Shields, GND and the shell go to GND.
-  - **Footprint provisional.** KiCad's `HDMI_A_Amphenol_10029449-x01xLF_Horizontal` names the -001/-101 variants. The drawing LCSC serves (10029449 rev Y) lists -001/-101/-002 and **not -111RLF**. Get Amphenol's -111RLF drawing before layout.
-  - **Mechanical fit** of the side-mounted connector is not checked.
+The 0.1-av sheet carried a type-A HDMI connector (J701), a TPD12S016 companion (U702), ULX3S-style 22 nF TMDS coupling (C704-C711) and the FPGA labels `hdmi_*`. All of it was removed on 2026-09-29; see [console-video-path.md](console-video-path.md) for the path that replaces it.
 
 ## Cartridge audio block
 
@@ -116,12 +96,12 @@ Every part number, pin and value is taken from a downloaded datasheet or a pinne
 - **Two unlocked 32 kHz clocks.**
   - The ADC's 32 kHz comes from its own ±20 ppm oscillator.
   - The SNES S-DSP's 32 kHz comes from the SNES master, which is ±20 ppm from the Si5351 crystal.
-  - The two rates can differ by up to about 40 ppm, about 1.3 samples per second. The FPGA needs a small rate adapter before mixing into the HDMI stream (`sn64_av_out` sends at the core's rate).
+  - The two rates can differ by up to about 40 ppm, about 1.3 samples per second. The FPGA needs a small rate adapter before mixing into the stream the console reads (implemented: `sn64_audio_mix`, [cart-audio-implementation.md](cart-audio-implementation.md)).
 - **Mix ratio.** On a console, the cartridge audio and the S-DSP output are summed with equal 10 kΩ weights. The FPGA needs the S-DSP's analog level at that summing node, which is not yet sourced, to reproduce the console's mix exactly. This is an open calibration item.
 
 ### SNES audio to the N64 edge (`N64_AUDIO_L/R`): not added
 
-- No requirement asks for it. `SN64-07-01` requires an **independent** digital A/V output. `SN64-07-03` (M64 single HDMI) forbids inventing an undocumented M64 interface.
+- No requirement asks for it: the SNES sound reaches the console digitally through the frame window ([console-video-path.md](console-video-path.md)). `SN64-07-03` forbids inventing an undocumented M64 interface.
 - [n64-interface-notes.md](n64-interface-notes.md) and `n64-pin-map.csv` record contacts 24 and 49 as `analog_out_unverified`: "actual support/levels require separate validation; no direct digital FPGA drive in draft".
 - SummerCart64 leaves them unconnected.
 - The contacts stay reserved and isolated on the root, and nothing on this sheet drives them. If a later requirement adds the path, it needs a DAC and a buffer with a level sourced from the N64/M64 audio input, which is not in the evidence.
@@ -131,11 +111,11 @@ Every part number, pin and value is taken from a downloaded datasheet or a pinne
 | Group | Labels |
 |---|---|
 | Root labels | `GND`, `SNES_AUDIO_L_IN`, `SNES_AUDIO_R_IN` |
-| Rails from the power sheet | `FPGA_3V3` (Si5351 VDD/VDDO, both oscillators, TPD12S016 VCCA, PCM1808 VDD, pull-ups/straps), `5V_PRE` (TPD12S016 VCC5V → HDMI +5V; PCM1808 VCC through FB701) |
-| To/from the FPGA sheet | `osc_25`, `si_clk0`, `si_clk1`, `si_clk2`, `si_scl`, `si_sda`, `hdmi_d0_p`, `hdmi_d0_n`, `hdmi_d1_p`, `hdmi_d1_n`, `hdmi_d2_p`, `hdmi_d2_n`, `hdmi_ck_p`, `hdmi_ck_n`, `hdmi_hpd`, `hdmi_scl`, `hdmi_sda`, `adc_bck`, `adc_lrck`, `adc_dout` |
+| Rails from the power sheet | `FPGA_3V3` (Si5351 VDD/VDDO, both oscillators, PCM1808 VDD, pull-ups/straps), `5V_PRE` (PCM1808 VCC through FB701) |
+| To/from the FPGA sheet | `osc_25`, `si_clk0`, `si_clk1`, `si_scl`, `si_sda`, `adc_bck`, `adc_lrck`, `adc_dout` |
 
 - Every FPGA-facing net is driven by a device referenced to `FPGA_3V3`.
-- No 5 V net reaches any of them through a resistor or ferrite. The TMDS lines reach the connector only through 22 nF capacitors.
+- No 5 V net reaches any of them through a resistor or ferrite.
 - Reference designators use the 700 series.
 
 **Load estimates for the power budget** (datasheet maxima unless noted):
@@ -144,27 +124,22 @@ Every part number, pin and value is taken from a downloaded datasheet or a pinne
   - Si5351 IDD 24 mA typical / 38 mA maximum, plus IDDO 2.2 mA typical / 5.6 mA maximum per output.
   - Two oscillators, 10 mA maximum each.
   - PCM1808 IDD 5.9 mA typical / 8 mA maximum at 48 kHz.
-  - TPD12S016 ICCA about 13 µA typical.
 - On `5V_PRE`:
-  - HDMI +5V, up to the 55 mA limit.
-  - TPD12S016 ICC5V about 200 µA typical.
   - PCM1808 ICC 8.6 mA typical / 11 mA maximum.
 
-## Verification (real output, 2026-09-29)
+## Verification (real output, 2026-09-29, draft 0.2-av on the integrated root)
 
-Validation copy: `build/av-clock/proj`. It is a copy of `hardware/sn64` with this sheet attached to the copied root by `add_av_clock_sheet.py --attach-root`; `build/av-clock/regen.sh` rebuilds it.
-
-**ERC** on the copy: **0 errors**. The warning set is identical to the unmodified project: 32 `isolated_pin_label` on the root and 5 `pin_to_pin` on the cartridge sheet, all pre-existing. This sheet has zero violations of its own.
+**ERC** on `hardware/sn64`: **0 errors**; the warning set is the project baseline (5 `isolated_pin_label` on reserved N64 labels, 5 `pin_to_pin` on the cartridge sheet). This sheet has zero violations of its own.
 
 ```
-& 'C:\Program Files\KiCad\10.0\bin\python.exe' hardware/sn64/tools/verify_av_clock_sheet.py --project build/av-clock/proj
-PASS: 30 AV/clock checks; ERC {'warning:isolated_pin_label': 32, 'warning:pin_to_pin': 5}
+& 'C:\Program Files\KiCad\10.0\bin\python.exe' hardware/sn64/tools/verify_av_clock_sheet.py --project hardware/sn64
+PASS: 27 AV/clock checks; ERC {'warning:isolated_pin_label': 5, 'warning:pin_to_pin': 5}
 
-& 'C:\Program Files\KiCad\10.0\bin\python.exe' hardware/sn64/tools/verify_av_clock_sheet.py --project build/av-clock/proj --negative-test
-12 mutations, 12 detected (each mutated copy fails the listed checks); exit 0
+& 'C:\Program Files\KiCad\10.0\bin\python.exe' hardware/sn64/tools/verify_av_clock_sheet.py --project hardware/sn64 --negative-test
+10 mutations, 10 detected (each mutated copy fails the listed checks); exit 0
 ```
 
-**The negative test.** Each mutation must fail. The twelve mutations are:
+**The negative test.** Each mutation must fail. The ten mutations are:
 
 1. The crystal is lifted off XB.
 2. An 8 pF crystal is fitted against register 183's 10 pF.
@@ -172,21 +147,14 @@ PASS: 30 AV/clock checks; ERC {'warning:isolated_pin_label': 32, 'warning:pin_to
 4. The `si_sda` pull-up goes to `5V_PRE`.
 5. MD1 is strapped low (slave mode).
 6. FMT is strapped high (left-justified).
-7. The `hdmi_d1_n` capacitor lands on D1+.
-8. TPD12S016 VCCA goes on `5V_PRE`.
-9. HDMI +5V comes straight from `5V_PRE`.
-10. Audio L/R are swapped at the ADC.
-11. The divider's bottom resistor is open (gain 0.93).
-12. A contract label is renamed.
-
-A directly faulted copy (`build/av-clock/proj-fault`, MD1 strapped to GND) makes the ordinary check return `status: fail`, `adc_straps_i2s_master_fs_32kHz`, exit 1.
+7. Si5351 CLK2 is wired to a clock label (the pixel-clock output brought back).
+8. Audio L/R are swapped at the ADC.
+9. The divider's bottom resistor is open (gain 0.93).
+10. A contract label is renamed.
 
 **Limits.** This is static connectivity and arithmetic against datasheet tables only. It does not show:
 
 - Si5351 jitter or accuracy at `SYSTEM_CLK`.
-- The TMDS eye through 22 nF capacitors and TPD12S016 capacitance at 135 MHz × 10.
-- Sink acceptance.
-- DDC low-level margin.
 - Audio noise, crosstalk or the real cartridge levels.
 
 ## Sources (downloaded to `build/av-clock/datasheets/`, untracked; hashes also in `av-provenance.json`)
@@ -195,32 +163,18 @@ A directly faulted copy (`build/av-clock/proj-fault`, MD1 strapped to GND) makes
 |---|---|
 | Skyworks Si5351-B Rev 1.3 | `f3bc5285fccafa3fcd06e9a7fa6abb67fb43e8c23f6147b14caecc9a4851101f` |
 | Skyworks AN619 Rev 0.8 | `0135b3a37195189e38cbd58ca504460814c691eeb1fdbe275806cfcd4783f36b` |
-| TI TPD12S016 SLLSE96F | `10d63c0775c5a8d9893982de205c02fd9611980ad08de889d7c5324c6afdfd58` |
 | TI PCM1808 SLES177B | `4ac1a7ec0c05ee972ba52ad8ebbd7cc661ce1c4dff59cf33429b684ca0595547` |
 | Cirrus CS4344 DS613F2 | `e4cf72f7136c4c9f47be4683f7a0a36d702b673d446ba8b4d5c74dc37d062c16` |
 | JSCJ CJO05-250003320B30 spec rev1.0 | `e0ed8f76b1afbb40081a66ac7ff67f8bac255912119d6042b4b563505e5df44e` |
 | JSCJ CJO05-122883320B30 spec rev1.1 | `3e2cacb39cce36ff764f848c02785eaa0e46d6cd3f9fcfbb3cd8ab8c3c9c441a` |
 | YXC X322525MMB4SI (YSX321SL) | `7bc18549e407d8e381075b0f5fc696e48cf0fa060aeee67971925f43cfdfbb8b` |
-| Amphenol FCI 10029449 rev Y | `a80c0a2657d1e8131e508dd46b350ff329bb561398fcdf69d11fa32f9cb6fcfe` |
-| ULX3S `gpdi.sch` @6a92cec | `2ff8d987b7f167ec0c0f7396bb11f8040d79a0289ab2d4a73ebde4b0f5b1164d` |
-| ULX3S `LICENSE.md` @6a92cec | `cdaaa3f0c2d1dbb538844077fd7a1d9d43c890d0745b20d8aa0717b583d6af9f`, the same as recorded in fpga-board-selection.md |
 
 ## Open items
 
-1. **J701 footprint.** Get the -111RLF drawing, or select a -101RLF/-001RLF part that KiCad's footprint names. Check the side-opening mechanics.
-2. **X701/X702 footprints.** Use the JSCJ suggested pads, or confirm that the ASE pads are acceptable.
-3. **HDMI bring-up.**
-   - Measure the TMDS eye with 22 nF coupling plus the TPD12S016.
-   - Check the DDC low level from the FPGA (VIL ≤ 0.082 × VCCA).
-   - Test sink acceptance.
-4. **Console load.** Confirm the 200 Ω on a real SHVC-CPU-01. Measure FXPAK Pro, X5/X6 and Super Game Boy output levels into 196 Ω.
-5. **FPGA work.**
-   - An I²S receiver.
-   - A 32 kHz rate adapter.
-   - Mix calibration against the S-DSP level.
-   - Place `si_clk0`/`si_clk1` on primary clock input pins and `si_clk2` where it can feed the TMDS PLL (FPGA sheet).
-6. **Power-sheet checks.** `FPGA_3V3` and `5V_PRE` sequencing (Si5351 §7.2 is satisfied by construction, since VDD and VDDO share one rail). PCM1808 behaviour when VCC is up and VDD is down.
-7. **Optional FPGA-controlled pins.** `hdmi_cec` (TPD12S016 CEC_A) and TPD12S016 `CT_HPD`/`LS_OE` could become FPGA pins, but each needs a contract change.
+1. **X701/X702 footprints.** Use the JSCJ suggested pads, or confirm that the ASE pads are acceptable.
+2. **Console load.** Confirm the 200 Ω on a real SHVC-CPU-01. Measure FXPAK Pro, X5/X6 and Super Game Boy output levels into 196 Ω.
+3. **FPGA work.** Mix calibration against the S-DSP level (the I²S receiver and the 32 kHz rate adapter are implemented).
+4. **Power-sheet checks.** `FPGA_3V3` and `5V_PRE` sequencing (Si5351 §7.2 is satisfied by construction, since VDD and VDDO share one rail). PCM1808 behaviour when VCC is up and VDD is down.
 
 ## Integration edits (not applied by this task)
 
@@ -229,6 +183,5 @@ See the task report for the exact list. In short:
 - Attach the sheet to the root (`--attach-root hardware/sn64/sn64.kicad_sch`).
 - Add `SN64_AV` to `sym-lib-table`.
 - Done (round-3 integration): pending pins connected at the root; `#FLG701`/`#FLG702` removed.
-- Add a `THIRD_PARTY.md` row for the ULX3S TMDS-coupling reuse.
 - Add power-budget rows.
 - Add README, work-log and system-integration entries.

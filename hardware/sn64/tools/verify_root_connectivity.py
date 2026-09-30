@@ -72,9 +72,7 @@ CONTRACT = {
     **{n: {USB, FPGA} for n in ['jtag_tck', 'jtag_tms', 'jtag_tdi', 'jtag_tdo']},
     **{n: {POWER, FPGA} for n in ['cart_5v_enable', 'iface_rail_enable', 'host_3v3_ok', 'fpga_rails_ok',
                                   'cart_5v_ok', 'iface_rail_ok', 'efuse_fault_n', 'overtemp', 'board_reset_n']},
-    **{n: {AV, FPGA} for n in ['osc_25', 'si_clk0', 'si_clk1', 'si_clk2', 'si_scl', 'si_sda',
-                               'hdmi_d0_p', 'hdmi_d0_n', 'hdmi_d1_p', 'hdmi_d1_n', 'hdmi_d2_p', 'hdmi_d2_n',
-                               'hdmi_ck_p', 'hdmi_ck_n', 'hdmi_hpd', 'hdmi_scl', 'hdmi_sda',
+    **{n: {AV, FPGA} for n in ['osc_25', 'si_clk0', 'si_clk1', 'si_scl', 'si_sda',
                                'adc_bck', 'adc_lrck', 'adc_dout']},
     **{n: {ROOT, FPGA} for n in N64_TO_FPGA},
 }

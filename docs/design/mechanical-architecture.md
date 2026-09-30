@@ -18,7 +18,7 @@ A single-board design would need a **right-angle** 62-contact card-edge socket a
 
 ## Decision: two rigid boards (implemented)
 
-- **Main board (upright):** N64 edge (SummerCart64 geometry), FPGA, power, USB-C, HDMI, clocks, audio ADC.
+- **Main board (upright):** N64 edge (SummerCart64 geometry), FPGA, power, USB-C, clocks, audio ADC.
 - **Socket board (horizontal, on top):** a standard vertical SNES socket (candidate NES Repair Shop `snspt043`, see [socket-selection.md](socket-selection.md)), plus the 5 V/3.3 V translators the spec wants close to the socket.
 - **Joint:** a 2x40 2.00 mm pin header pair (right-angle on the main board's top edge, vertical socket on the socket board), carrying the raw 5 V cartridge signals: joint pins 1-62 = socket contacts 1-62 (same names), 63-66 = cartridge 5 V, 67-80 = GND. The translators stay on the main board's top edge, within a few centimetres of the socket, which meets the spec's "close to the top connector". Implemented by `hardware/sn64/tools/split_socket_board.py`: the main root's J2 is now the joint header; `hardware/sn64-socket/` is the socket board project (J1 socket on `SN64:SNES_Slot_Console_7mm`, J2 joint socket, two 100 nF on the 5 V). `tools/verify_socket_joint.py` checks the two netlists pin by pin (9/9, negative 3/3). Open: signal integrity of the 80 mm header at SNES bus edge rates (ground-pin interleave if measurements demand it); the joint must not carry cartridge insertion loads (shell support).
 

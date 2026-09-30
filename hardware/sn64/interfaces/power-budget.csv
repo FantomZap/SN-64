@@ -51,5 +51,3 @@ PWR-L33,load,25 MHz oscillator CJO05-250003320B30 (X701),FPGA_3V3,2.97,3.3,3.63,
 PWR-L34,load,12.288 MHz oscillator CJO05-122883320B30 (X702),FPGA_3V3,2.97,3.3,3.63,,,10,1,datasheet_max_only,15 pF load,https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2009031207_Jiangsu-Changjing-Electronics-Technology-Co---Ltd--CJ005-122883320B30_C712747.pdf
 PWR-L35,load,PCM1808 digital (IDD),FPGA_3V3,2.7,3.3,3.6,,5.9,8,1,datasheet,fs = 48 kHz row (SN64 runs 32 kHz),https://www.ti.com/lit/ds/symlink/pcm1808.pdf
 PWR-L36,load,PCM1808 analog (ICC) via FB701,5V_PRE,4.5,5,5.5,,8.6,11,1,datasheet,fs = 48/96 kHz row,https://www.ti.com/lit/ds/symlink/pcm1808.pdf
-PWR-L37,load,HDMI +5V to sink (TPD12S016 5V_OUT),5V_PRE,,5,,,,55,1,datasheet_limit,Load-switch current limit; sink draw unknown up to the limit,https://www.ti.com/lit/ds/symlink/tpd12s016.pdf
-PWR-L38,load,TPD12S016 quiescent (fully on),5V_PRE,,5,,,0.2,,1,datasheet_typical_only,Table 1 fully-on row; ICCA about 0.013 mA on FPGA_3V3,https://www.ti.com/lit/ds/symlink/tpd12s016.pdf

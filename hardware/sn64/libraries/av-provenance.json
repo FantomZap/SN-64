@@ -1,45 +1,9 @@
 {
   "schema_version": 1,
   "recorded_date": "2026-09-29",
-  "scope": "Clock/HDMI/cartridge-audio child-sheet symbols and component evidence; schematic draft only.",
+  "scope": "Clock/cartridge-audio child-sheet symbols and component evidence; schematic draft only. Draft 0.2-av: HDMI output removed (video and audio go to the console over the cartridge bus).",
   "tool_version": "KiCad 10.0.6",
   "drawn_symbols": {
-    "TPD12S016PW": {
-      "library": "libraries/SN64_AV.kicad_sym",
-      "source": {
-        "url": "https://www.ti.com/lit/ds/symlink/tpd12s016.pdf",
-        "revision": "TI SLLSE96F, revised October 2015",
-        "sha256_of_downloaded_copy": "10d63c0775c5a8d9893982de205c02fd9611980ad08de889d7c5324c6afdfd58"
-      },
-      "source_section": "Section 5 Pin Configuration and Functions, PW (24-pin TSSOP) column",
-      "pins": {
-        "1": "CEC_A",
-        "2": "SCL_A",
-        "3": "SDA_A",
-        "4": "HPD_A",
-        "5": "LS_OE",
-        "12": "CT_HPD",
-        "7": "CEC_B",
-        "8": "SCL_B",
-        "9": "SDA_B",
-        "10": "HPD_B",
-        "13": "5V_OUT",
-        "23": "D2+",
-        "22": "D2-",
-        "21": "D1+",
-        "20": "D1-",
-        "18": "D0+",
-        "17": "D0-",
-        "16": "CLK+",
-        "15": "CLK-",
-        "24": "VCCA",
-        "11": "VCC5V",
-        "6": "GND",
-        "14": "GND",
-        "19": "GND"
-      },
-      "footprint": "Package_SO:TSSOP-24_4.4x7.8mm_P0.65mm (installed KiCad library)"
-    },
     "PCM1808PW": {
       "library": "libraries/SN64_AV.kicad_sym",
       "source": {
@@ -68,8 +32,6 @@
     }
   },
   "installed_kicad_symbols_used_unmodified": [
-    "Connector:HDMI_A",
-    "Connector:TestPoint",
     "Device:C",
     "Device:Crystal_GND24",
     "Device:FerriteBead",
@@ -81,15 +43,12 @@
   "installed_kicad_footprints_referenced": [
     "Capacitor_SMD:C_0603_1608Metric",
     "Capacitor_SMD:C_0805_2012Metric",
-    "Connector_Video:HDMI_A_Amphenol_10029449-x01xLF_Horizontal",
     "Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm",
     "Inductor_SMD:L_0603_1608Metric",
     "Oscillator:Oscillator_SMD_Abracon_ASE-4Pin_3.2x2.5mm",
     "Package_SO:MSOP-10_3x3mm_P0.5mm",
     "Package_SO:TSSOP-14_4.4x5mm_P0.65mm",
-    "Package_SO:TSSOP-24_4.4x7.8mm_P0.65mm",
-    "Resistor_SMD:R_0603_1608Metric",
-    "TestPoint:TestPoint_Pad_D1.0mm"
+    "Resistor_SMD:R_0603_1608Metric"
   ],
   "sources": {
     "Si5351-B.pdf": {
@@ -101,11 +60,6 @@
       "url": "https://www.skyworksinc.com/-/media/Skyworks/SL/documents/public/application-notes/AN619.pdf",
       "revision": "Skyworks AN619 Rev 0.8 (Sep 23 2021), register 183",
       "sha256_of_downloaded_copy": "0135b3a37195189e38cbd58ca504460814c691eeb1fdbe275806cfcd4783f36b"
-    },
-    "tpd12s016.pdf": {
-      "url": "https://www.ti.com/lit/ds/symlink/tpd12s016.pdf",
-      "revision": "TI SLLSE96F, revised October 2015",
-      "sha256_of_downloaded_copy": "10d63c0775c5a8d9893982de205c02fd9611980ad08de889d7c5324c6afdfd58"
     },
     "pcm1808.pdf": {
       "url": "https://www.ti.com/lit/ds/symlink/pcm1808.pdf",
@@ -131,21 +85,6 @@
       "url": "https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2403291504_YXC-Crystal-Oscillators-X322525MMB4SI_C70582.pdf",
       "revision": "YXC YSX321SL crystal unit sheet",
       "sha256_of_downloaded_copy": "7bc18549e407d8e381075b0f5fc696e48cf0fa060aeee67971925f43cfdfbb8b"
-    },
-    "10029449-111RLF_C427307.pdf": {
-      "url": "https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2304140030_Amphenol-ICC-10029449-111RLF_C427307.pdf",
-      "revision": "Amphenol FCI drawing 10029449 rev Y (2023-01-12)",
-      "sha256_of_downloaded_copy": "a80c0a2657d1e8131e508dd46b350ff329bb561398fcdf69d11fa32f9cb6fcfe"
-    },
-    "ulx3s-gpdi.sch": {
-      "url": "https://raw.githubusercontent.com/emard/ulx3s/6a92cec6b177191c5b0f80e260013a1f8ec147dd/gpdi.sch",
-      "revision": "ULX3S gpdi.sch at the pinned commit 6a92cec6b177191c5b0f80e260013a1f8ec147dd",
-      "sha256_of_downloaded_copy": "2ff8d987b7f167ec0c0f7396bb11f8040d79a0289ab2d4a73ebde4b0f5b1164d"
-    },
-    "ulx3s-LICENSE.md": {
-      "url": "https://raw.githubusercontent.com/emard/ulx3s/6a92cec6b177191c5b0f80e260013a1f8ec147dd/LICENSE.md",
-      "revision": "ULX3S LICENSE.md at the pinned commit",
-      "sha256_of_downloaded_copy": "cdaaa3f0c2d1dbb538844077fd7a1d9d43c890d0745b20d8aa0717b583d6af9f"
     }
   },
   "lcsc_parts_2026_09_29": {
@@ -153,9 +92,7 @@
     "X322525MMB4SI": "C70582",
     "CJO05-250003320B30": "C712741",
     "CJO05-122883320B30": "C712747",
-    "TPD12S016PWR": "C201665",
     "PCM1808PWR": "C55513",
-    "10029449-111RLF": "C427307",
     "GZ1608D601TF": "C1002"
   },
   "facts_used": {
@@ -179,13 +116,10 @@
     "cjo05_oscillators": "pin 1 enable/disable (>= 0.7 VDD or open = run), 2 GND, 3 output, 4 VDD; 3.3 V +/-10 %; 15 pF load; suggested pads 25 MHz rev1.0: 1.3 x 1.2 mm, gaps 0.9/0.5; 12.288 MHz rev1.1: 1.4 x 1.2 mm, gaps 0.8/0.5",
     "kicad_ase_footprint_pads": "Oscillator_SMD_Abracon_ASE-4Pin_3.2x2.5mm: 1.3 x 1.1 mm pads at +/-1.05, +/-0.825 (gaps 0.8/0.55)",
     "kicad_crystal_3225_pads": "Crystal_SMD_3225-4Pin_3.2x2.5mm: 1.4 x 1.2 mm pads at +/-1.1, +/-0.85 (gaps 0.8/0.5) = YXC suggested layout",
-    "tpd12s016": "LS_OE/CT_HPD active-high, referenced to VCCA; H/H = fully on (Table 1); 55 mA current-limited 5V_OUT; no external DDC/CEC/HPD pull-ups needed (7.3.15); D/CLK abs max 6 V; VCCA 1.1-3.6 V; VCC5V 4.5-5.5 V; SCL_A/SDA_A VIL max 0.082 x VCCA",
     "pcm1808": "MD1/MD0: LL slave, LH master 512 fs, HL master 384 fs, HH master 256 fs (Table 2); FMT L = I2S 24-bit, H = left-justified 24-bit (Table 3); 32 kHz x 384 = 12.288 MHz (Table 1); input 0.6 VCC Vp-p, 60 k, VREF 0.5 VCC, internal anti-alias -3 dB 1.3 MHz (6.5); straps 10 k to VDD/GND (8.2.2.1); master mode BCK = 64 fs (7.3.5.1.1); VCC 4.5-5.5 V, VDD 2.7-3.6 V",
-    "ulx3s_gpdi_tmds": "FPDI_D0+..FPDI_CLK- -> 22 nF (C38..C45, 0603) -> GPDI connector pins; note \"SINGLE ENDED - NOT DIFFERENTIAL\"; HPD via 549 R + 3.6 V zener, DDC via PCA9306, +5V direct (not reused: TPD12S016 replaces them)",
-    "hdmi_type_a_pins": "KiCad Connector:HDMI_A symbol numbering and ULX3S gpdi.sch connector order agree: 1 D2+, 2 D2 shield, 3 D2-, 4 D1+, 5 D1S, 6 D1-, 7 D0+, 8 D0S, 9 D0-, 10 CK+, 11 CKS, 12 CK-, 13 CEC, 14 UTILITY, 15 SCL, 16 SDA, 17 GND, 18 +5V, 19 HPD",
     "opensfc_cart_audio_load": "OpenSFC SHVC-CPU-01 Rev A @6574450: P1.31 SL.IN / P1.62 SR.IN each: R96/R95 200 to GND, 1 uF (C28/C25) to 10 k (R62/R55) into the LM358 inverting summer (24 k feedback, +9 V)",
     "sd2snes_revf_cart_audio_source": "sd2snes Rev F @cf7e21d: CS4344 (VA = +3.3VDAC) AOUT -> 3.3 uF -> 10 k to AGND -> 470 R -> J101.31/62 with 10 nF to AGND",
     "cs4344_full_scale": "Full scale output 0.60/0.65/0.70 x VA Vpp (min/typ/max), ZOUT 100 ohm (DS613F2)"
   },
-  "licenses": "KiCad library content: CC-BY-SA-4.0 with the KiCad library exception. Drawn symbols: SN64 project content; pin data are facts from the cited TI datasheets. ULX3S TMDS coupling network reused as a circuit idea (22 nF series capacitor per line); no ULX3S layout or artwork imported."
+  "licenses": "KiCad library content: CC-BY-SA-4.0 with the KiCad library exception. Drawn symbols: SN64 project content; pin data are facts from the cited TI datasheet."
 }

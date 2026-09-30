@@ -218,7 +218,7 @@ Run on the unintegrated `hardware/sn64`, the verifier reports `power_sheet_attac
 2. Connect the root labels HOST_3V3, GND, SNES_5V_CART, INTERFACE_3V3, USB_VBUS, USB_3V3, USB_CC1 and USB_CC2.
 3. On the USB sheet, make R101/R102 DNP and export USB_VBUS, USB_3V3, USB_CC1 and USB_CC2.
 4. Label the cart sheet's INTERFACE_3V3 pin.
-5. Connect the FPGA contract pins, and 5V_PRE to the A/V sheet's HDMI +5V, once those sheets exist.
+5. Connect the FPGA contract pins, and 5V_PRE to the A/V sheet (PCM1808 VCC through FB701), once those sheets exist.
 6. Keep the FPGA sheet's PROGRAMN hold from fpga_rails_ok. No extra wiring is needed.
 7. Update verify_usb_programmer.py to match.
 8. Refresh `validation/sn64.xml`.

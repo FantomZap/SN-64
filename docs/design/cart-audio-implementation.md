@@ -1,6 +1,6 @@
-# Cartridge analog audio into HDMI
+# Cartridge analog audio into the console audio stream
 
-Snapshot 2026-09-29. Some SNES cartridges put their own sound on socket pins 31/32: MSU-1 music on the FXPAK Pro, and a few coprocessor boards. This block adds that sound to the SNES core's sound on the HDMI output.
+Snapshot 2026-09-29. Some SNES cartridges put their own sound on socket pins 31/32: MSU-1 music on the FXPAK Pro, and a few coprocessor boards. This block adds that sound to the SNES core's sound before it goes to the console ([console-video-path.md](console-video-path.md)).
 
 **Status: simulated and synthesised only.** It has run in Verilator and also in Icarus, which is four-state and therefore able to see unknown (X) values. Nothing has run on hardware. The ADC part number, its oscillator and the analog front end belong to the clock/A-V schematic sheet and are not chosen here.
 
@@ -8,7 +8,7 @@ Snapshot 2026-09-29. Some SNES cartridges put their own sound on socket pins 31/
 
 A small converter chip (the ADC) on the board turns the cartridge's left and right audio into numbers, 32,000 times a second. It runs on its own crystal and sends those numbers over three wires in the standard I2S format.
 
-The FPGA listens on those wires with a fast clock, about 30 times faster than the ADC's bit clock. It picks out each 24-bit left/right pair. It adds the pair to the SNES core's own sound, and the result goes to HDMI as before.
+The FPGA listens on those wires with a fast clock, about 30 times faster than the ADC's bit clock. It picks out each 24-bit left/right pair. It adds the pair to the SNES core's own sound, and the result goes into the frame window's audio ring, which the console reads over the cartridge bus.
 
 The two sounds are made by different clocks, so one side always runs a tiny bit faster than the other. A short waiting line (8 samples) absorbs the difference. When the line runs completely full or completely empty, one cartridge sample is skipped or played twice. At the ±500 ppm offset tested here that happens about 16 times a second, and each one is a single sample.
 
@@ -27,7 +27,6 @@ If both sounds are loud at the same instant, the sum is clipped at full scale. I
 Both RTL files are original SN64 code, GPL-3.0-or-later. No suitable open I2S-slave-with-elastic-buffer block was found to reuse:
 
 - SNESTang's HDMI audio path resamples through a FIFO. [av-output-implementation.md](av-output-implementation.md) records why that was rejected.
-- The hdl-util/hdmi modules vendored for A/V only transmit.
 
 ## Signal path
 
@@ -40,7 +39,7 @@ Both RTL files are original SN64 code, GPL-3.0-or-later. No suitable open I2S-sl
                                                                                  sn64_av_out (audio port unchanged) ◄┘
 ```
 
-## Board ADC (from the clock/HDMI/audio sheet)
+## Board ADC (from the clock/audio sheet)
 
 - ADC: **PCM1808** in I2S master mode at 384 fs from its own 12.288 MHz oscillator, 24-bit I2S, BCK = 64 fs = 2.048 MHz ([av-clock-schematic.md](av-clock-schematic.md)).
 - TI SLES177B section 6.6 master-mode timing: BCK high/low >= 65 ns; t(CKLR) and t(CKDO), BCK falling edge to LRCK/DOUT valid, -10 to +20 ns; t(LRDO) -10 to +20 ns; rise/fall <= 20 ns.
@@ -101,7 +100,7 @@ The SNESTang default makes the DSP 0.56 % fast. `dsp.vh` keeps the original 4096
 `tb_system` sees this directly on the real core. Its run slips the cartridge stream 2 to 3 times in about 1,000 samples (repeats), as the table predicts.
 
 - **Scope of the finding.** The mixer handles it correctly: it is tested at the SNESTang rate (`+snes_rate=32180`). It is still an audible-quality question for MSU-1 music.
-- **Not changed here.** The DSP rate is a core-configuration decision. It also affects `sn64_av_out`, whose HDMI channel status says 32 kHz. See the open items.
+- **Not changed here.** The DSP rate is a core-configuration decision. See the open items.
 
 **Resolved 2026-09-29.** `fpga/tools/prepare_core.py` now patches the generated core back to the original rate: `ACLK_FREQ = 409600` (the value SNESTang keeps commented out as "original snes frequency") and a CE divider that uses the region's own master clock (`PAL ? 2128137 : 2147727`, as MiSTer `DSP.vhd` line 238 does). The DSP then runs at 4.096 MHz / 128 = **32,000 Hz in both regions**, matching the ADC and the HDMI channel status; the only remaining slips come from crystal tolerance (tens of ppm, a slip every several seconds). The `+snes_rate=32180` bench runs are kept as a stress test of the slip path. The table above records the pinned core's behaviour before the patch. After it, `tb_system` NTSC runs show 0 slips; the PAL runs show about 8 overflow slips per run because the bench's PAL master is 21.04 MHz (chosen for an exact 432/341 pixel ratio), 1.1 % below the real 21.28137 MHz, which makes the simulated DSP 1.1 % slower than the 32 kHz ADC model. That is a bench artefact, not a design rate.
 
@@ -161,12 +160,11 @@ Logs: `build/r3-audio/synth-*.log`, untracked. Not yet in a place-and-route run:
 
 ## Limits and open items
 
-1. **Hardware.** The ADC part, its oscillator, tDO and BCK duty, the analog front end, and the grounding against HDMI and FPGA noise all belong to the clock/A-V sheet. Check them against the sampling table above once chosen.
+1. **Hardware.** The ADC part, its oscillator, tDO and BCK duty, the analog front end, and the grounding against FPGA noise all belong to the clock/A-V sheet. Check them against the sampling table above once chosen.
 2. **SNES DSP rate (decision needed, not made here).** With the pinned `ACLK_FREQ = 411904`, cartridge audio slips every 5.6 ms (NTSC) or 8.8 ms (PAL). Options:
    - restore 409600, the original 32.000 kHz, in the generated core copy, and make the CE input constant region-correct;
    - or choose the ADC oscillator to match the core.
 
-   `sn64_av_out`'s HDMI channel-status rate is affected by the same choice.
 3. **Gain and headroom** are provisional (see above). Consider making `CART_GAIN` a menu setting through the mailbox if cartridges differ.
 4. **Telemetry.** `adc_locked`, `frame_errors` and the slip counters exist in `sn64_top` but are not yet in the mailbox. They are useful for a diagnostics page.
 5. **No glitch filter on BCK.** A noise spike longer than one 16 ns sample would be taken as an edge. The framing check then drops lock until two clean frames arrive. Revisit after board layout.

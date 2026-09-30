@@ -4,14 +4,13 @@
 # checked by hardware/sn64/tools/verify_fpga_sheet.py. Do not edit by hand.
 # Port names follow sn64_board_top AFTER the integration edit listed in
 # docs/design/fpga-schematic.md (cart_data inout, si_scl/si_sda open drain,
-# cart_reset_pull_n, expand_sense, n64_si_dq, n64_int_n, hdmi_hpd/scl/sda, adc_*).
+# cart_reset_pull_n, expand_sense, n64_si_dq, n64_int_n, adc_*). No HDMI pins since rev 0.5-fpga.
 # Every bank VCCIO = 3.3 V (FPGA_3V3). Balls: Lattice ECP5U-85 pinout CSV rev 1.0.
 # DRAFT: schematic-level pinout, no PCB escape routing or SI review yet.
 SYSCONFIG CONFIG_IOVOLTAGE=3.3 COMPRESS_CONFIG=ON;
 FREQUENCY PORT "osc_25" 25 MHZ;
 FREQUENCY PORT "si_clk0" 21.477272 MHZ;
 FREQUENCY PORT "si_clk1" 21.28137 MHZ;
-FREQUENCY PORT "si_clk2" 27.0399 MHZ;
 FREQUENCY NET "clk_snes" 21.477272 MHZ;
 # --- n64 ---
 LOCATE COMP "n64_ad[0]" SITE "E6";
@@ -202,8 +201,6 @@ LOCATE COMP "si_clk0" SITE "H2";
 IOBUF PORT "si_clk0" IO_TYPE=LVCMOS33 PULLMODE=NONE;
 LOCATE COMP "si_clk1" SITE "G3";
 IOBUF PORT "si_clk1" IO_TYPE=LVCMOS33 PULLMODE=NONE;
-LOCATE COMP "si_clk2" SITE "F2";
-IOBUF PORT "si_clk2" IO_TYPE=LVCMOS33 PULLMODE=NONE;
 LOCATE COMP "si_scl" SITE "E4";
 IOBUF PORT "si_scl" IO_TYPE=LVCMOS33 PULLMODE=UP;
 LOCATE COMP "si_sda" SITE "F4";
@@ -215,20 +212,6 @@ LOCATE COMP "adc_lrck" SITE "J3";
 IOBUF PORT "adc_lrck" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
 LOCATE COMP "adc_dout" SITE "K3";
 IOBUF PORT "adc_dout" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "hdmi_tmds[0]" SITE "A16";
-IOBUF PORT "hdmi_tmds[0]" IO_TYPE=LVCMOS33D DRIVE=4;
-LOCATE COMP "hdmi_tmds[1]" SITE "A14";
-IOBUF PORT "hdmi_tmds[1]" IO_TYPE=LVCMOS33D DRIVE=4;
-LOCATE COMP "hdmi_tmds[2]" SITE "A12";
-IOBUF PORT "hdmi_tmds[2]" IO_TYPE=LVCMOS33D DRIVE=4;
-LOCATE COMP "hdmi_tmds_clock" SITE "A17";
-IOBUF PORT "hdmi_tmds_clock" IO_TYPE=LVCMOS33D DRIVE=4;
-LOCATE COMP "hdmi_hpd" SITE "E13";
-IOBUF PORT "hdmi_hpd" IO_TYPE=LVCMOS33 PULLMODE=DOWN;
-LOCATE COMP "hdmi_scl" SITE "D15";
-IOBUF PORT "hdmi_scl" IO_TYPE=LVCMOS33 PULLMODE=UP;
-LOCATE COMP "hdmi_sda" SITE "E15";
-IOBUF PORT "hdmi_sda" IO_TYPE=LVCMOS33 PULLMODE=UP;
 # --- power ---
 LOCATE COMP "host_3v3_ok" SITE "K2";
 IOBUF PORT "host_3v3_ok" IO_TYPE=LVCMOS33 PULLMODE=DOWN;

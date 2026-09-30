@@ -15,8 +15,8 @@ Original carts, Super EverDrive X5/X6 and FXPAK Pro are first-class targets. Man
 
 | Area | What exists | Where |
 |---|---|---|
-| FPGA | Whole design (SNES core, cartridge bridge, N64 endpoint + CIC, SNES CIC lock, ROM-header region probe, power sequencer, Si5351 start-up, HDMI NTSC/PAL, cartridge audio, flash boot ROM) in `sn64_board_top`; full simulation suite passes; routed on the 85F with the real pinout, all clocks pass | `fpga/` |
-| KiCad | Complete schematic draft: N64 edge J1, SNES socket J2, USB-C programmer, cartridge interface (rev 0.3.1), FPGA with real pinout, power, clock/HDMI/audio sheets; all static checks pass. **No PCB layout yet.** | `hardware/sn64/` |
+| FPGA | Whole design (SNES core, cartridge bridge, N64 endpoint + CIC, SNES CIC lock, ROM-header region probe, power sequencer, Si5351 start-up, console video path (frame/audio window), cartridge audio, flash boot ROM) in `sn64_board_top`; full simulation suite passes; routed on the 85F with the real pinout, all clocks pass | `fpga/` |
+| KiCad | Complete schematic draft: N64 edge J1, SNES socket J2, USB-C programmer, cartridge interface (rev 0.3.1), FPGA with real pinout, power, clock/audio sheets (HDMI output removed 2026-09-29); all static checks pass. **PCB: placed draft from the netlist, nothing routed.** | `hardware/sn64/` |
 | Mechanical | FreeCAD fit references: SNES hole-pattern coupon, SummerCart64 N64 board reference. No enclosure. | `mechanical/` |
 
 ## Decisions the user has made (keep them)
@@ -69,7 +69,7 @@ KiCad static checks. These **rewrite tracked** `hardware/sn64/validation/*` repo
 & 'C:\Program Files\KiCad\10.0\bin\python.exe' hardware/sn64/tools/verify_usb_programmer.py --kicad-cli 'C:\Program Files\KiCad\10.0\bin\kicad-cli.exe'
 ```
 
-Baselines (2026-09-29, after round 3; all five child sheets attached): ERC 0 errors + 10 warnings (5 `isolated_pin_label` on reserved N64 labels, 5 `pin_to_pin` on cart U206); `verify_interfaces` 31/31 (J2 is the socket-board joint); `verify_usb_programmer` 69/69; `verify_cart_interface` 20/20 (negative 6/6); `verify_fpga_sheet` 13/13 with `--lattice-csv build/fpga-sheet/datasheets/ECP5U-85-pinout.csv --datasheets build/fpga-sheet/datasheets` (12/12 without; negative 10/10); `verify_power_sheet` 23/23 (negative 12/12); `verify_av_clock_sheet` 30/30 (negative 12/12); `verify_root_connectivity` 4/4 (negative 4/4); `verify_socket_joint` 9/9 (negative 3/3) across hardware/sn64 and hardware/sn64-socket. The command block is in `hardware/sn64/README.md`. Mechanical scripts take `--source-root .` now that `references/downloads/` is local (see `mechanical/README.md`).
+Baselines (2026-09-29, after the HDMI removal; all five child sheets attached): ERC 0 errors + 10 warnings (5 `isolated_pin_label` on reserved N64 labels, 5 `pin_to_pin` on cart U206); `verify_interfaces` 31/31 (J2 is the socket-board joint); `verify_usb_programmer` 69/69; `verify_cart_interface` 20/20 (negative 6/6); `verify_fpga_sheet` 14/14 with `--lattice-csv build/fpga-sheet/datasheets/ECP5U-85-pinout.csv --datasheets build/fpga-sheet/datasheets` (13/13 without; negative 10/10); `verify_power_sheet` 23/23 (negative 12/12); `verify_av_clock_sheet` 27/27 (negative 10/10); `verify_root_connectivity` 4/4 (negative 4/4); `verify_socket_joint` 9/9 (negative 3/3) across hardware/sn64 and hardware/sn64-socket. The command block is in `hardware/sn64/README.md`. Mechanical scripts take `--source-root .` now that `references/downloads/` is local (see `mechanical/README.md`).
 
 ## Next engineering work (from the plan's "Next" section)
 

@@ -217,15 +217,7 @@ def main():
             raise RuntimeError('Clock init test exited without its acceptance marker')
         report['simulation']['clock_init'] = clk_pass
         run('clock-init-no-ack', [str(clk_exe), '+wrong_addr'], 'master reported i2c_error on NACK')
-        # Fault build: the CLK2 retarget sequence keeps writing after the SNES clock starts; must be caught.
-        clk_f_obj = obj / 'clock-init-ignore-stop'
-        run('clock-init-ignore-stop-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
-            '+define+SN64_FAULT_CLK_IGNORE_STOP', '--top-module', 'tb_clock_init', '--Mdir', str(clk_f_obj).replace('\\', '/'),
-            'fpga/rtl/sn64_clock_init.sv', 'fpga/tests/tb_clock_init.sv'])
-        run('clock-init-ignore-stop', [str(clk_f_obj / ('Vtb_clock_init.exe' if os.name == 'nt' else 'Vtb_clock_init'))],
-            'Si5351 written while the SNES clock runs')
-        report['simulation']['injected_clock_fault'] = ('Rejected: a non-responding Si5351 is reported as i2c_error, and a CLK2 '
-                                                        'retarget that keeps writing after the SNES clock starts is detected')
+        report['simulation']['injected_clock_fault'] = 'Rejected: a non-responding Si5351 is reported as i2c_error'
         # Clock-domain crossing word transfer
         cdc_obj = obj / 'cdc'
         run('cdc-build', [verilator, '--binary', '--timing', '--build-jobs', '4', '-Wno-fatal',
@@ -235,31 +227,6 @@ def main():
         if cdc_pass is None:
             raise RuntimeError('CDC test exited without its acceptance marker')
         report['simulation']['cdc'] = cdc_pass
-        # Digital A/V output (HDMI 720x480p or 720x576p50 + 32 kHz audio); the bench decodes the serial TMDS lanes.
-        hdmi_vendor = sorted(str(p.relative_to(ROOT)).replace('\\', '/')
-                             for p in (ROOT / 'fpga/vendor/hdl-util-hdmi/src').glob('*.sv'))
-        av_sources = hdmi_vendor + ['fpga/rtl/sn64_av_hdmi_tx.sv', 'fpga/rtl/sn64_av_serializer.sv',
-                                    'fpga/rtl/sn64_av_out.sv', 'fpga/tests/tb_av_out.sv']
-        av_flags = ['--binary', '--timing', '--build-jobs', '4', '-Wno-fatal', '-Wno-lint', '-Wno-style',
-                    '-Wno-TIMESCALEMOD', '--top-module', 'tb_av_out']
-        for av_label, av_defines, av_expect in (
-                ('av-out', [], None),
-                ('av-out-async', ['+define+SN64_TB_ASYNC_27M'], None),
-                ('av-out-pixel-fault', ['+define+SN64_AV_FAULT_PIXEL'], 'got 845239 expected 8c5239'),
-                ('av-out-sync-fault', ['+define+SN64_AV_FAULT_SYNC'], 'hsync width 61'),
-                ('av-out-pal', ['+define+SN64_TB_PAL'], None),
-                ('av-out-pal-lines-fault', ['+define+SN64_TB_PAL', '+define+SN64_AV_FAULT_PAL_LINES'], 'frame lock not steady')):
-            av_obj = obj / av_label
-            run(av_label + '-build', [verilator] + av_flags + ['--Mdir', str(av_obj).replace('\\', '/')]
-                + av_defines + av_sources)
-            av_body = run(av_label, [str(av_obj / ('Vtb_av_out.exe' if os.name == 'nt' else 'Vtb_av_out'))], av_expect)
-            if av_expect is None:
-                av_pass = next((line for line in av_body.splitlines() if line.startswith('PASS:')), None)
-                if av_pass is None:
-                    raise RuntimeError(f'{av_label} exited without its acceptance marker')
-                report['simulation'][av_label.replace('-', '_')] = av_pass
-        report['simulation']['injected_av_faults'] = ('Rejected: one flipped pixel bit, one short hsync and a PAL raster of 625 '
-                                                      'instead of 624 lines are all detected from the decoded TMDS')
         # Whole-system power-on: N64 host, Si5351, rails, cartridge, SNES core, all blocks in sn64_top.
         if (ROOT / 'build/cic/cic-build.json').exists():
             sys_sources = ['-Ibuild/generated/snestang/src', '-Ibuild/generated/snestang/src/spc700',
@@ -268,8 +235,7 @@ def main():
                            'fpga/rtl/sn64_console_with_bridge.sv'] + n64_common + [
                            'fpga/rtl/sn64_cdc.sv', 'fpga/rtl/sn64_clock_init.sv', 'fpga/rtl/sn64_power_sequencer.sv',
                            'fpga/rtl/sn64_snes_cic_lock.sv', 'fpga/vendor/snestang-controller/src/controller_adapter.sv',
-                           'fpga/rtl/sn64_snes_joypad.sv'] + hdmi_vendor + [
-                           'fpga/rtl/sn64_av_hdmi_tx.sv', 'fpga/rtl/sn64_av_serializer.sv', 'fpga/rtl/sn64_av_out.sv',
+                           'fpga/rtl/sn64_snes_joypad.sv',
                            'fpga/rtl/sn64_header_probe.sv', 'fpga/rtl/sn64_i2s_rx.sv', 'fpga/rtl/sn64_audio_mix.sv',
                            'fpga/rtl/sn64_top.sv', 'fpga/tests/tb_system.sv']
             sys_obj = obj / 'system'
@@ -286,8 +252,6 @@ def main():
             sys_pal_pass = next((line for line in sys_pal_body.splitlines() if line.startswith('PASS:')), None)
             if sys_pal_pass is None or 'STATUS=54df' not in sys_pal_pass:   # STATUS bit 7 = region PAL
                 raise RuntimeError('System PAL-header test did not start in PAL')
-            if 'HDMI: raster 864x624 VIC 17 frame-locked' not in sys_pal_body:
-                raise RuntimeError('System PAL-header test: HDMI not in the frame-locked PAL raster')
             report['simulation']['system_pal_header'] = sys_pal_pass
             # Key CIC in the cartridge: a passing key decides the region and wins over a contradicting ROM header.
             sys_exe = str(sys_obj / ('Vtb_system.exe' if os.name == 'nt' else 'Vtb_system'))
@@ -298,8 +262,6 @@ def main():
                 key_pass = next((line for line in key_body.splitlines() if line.startswith('PASS:')), None)
                 if key_pass is None or any(x not in key_pass for x in key_expect):
                     raise RuntimeError(f'{key_label}: the key CIC did not decide the region as expected')
-                if 'PAL via' in key_expect[0] and 'HDMI: raster 864x624 VIC 17 frame-locked' not in key_body:
-                    raise RuntimeError(f'{key_label}: HDMI not in the frame-locked PAL raster')
                 report['simulation'][key_label.replace('-', '_')] = key_pass
             # Negative: a key that fails the exchange must not decide the region (the NTSC header does).
             run('system-pal-key-corrupted', [sys_exe, '+pal_key', '+ntsc_header', '+corrupt_key'],
@@ -419,10 +381,9 @@ def main():
                     raise RuntimeError('CIC pad test exited without its acceptance marker')
                 report['simulation']['cic_pad'] = c_pass
         report['simulation']['injected_cic_pad_fault'] = 'Rejected: pad drive and DIR switching together is detected as contention'
-        report['simulation']['limit'] = ('tb_system PAL runs use a PAL-rate master and a pixel clock at exactly master x 108/85 '
-                                         '(simulation time units, not the real frequencies); NTSC HDMI frame lock is reported, '
-                                         'not checked (the core lines are 1360 master clocks, the 39/31 ratio assumes 1364); '
-                                         'PPU/APU not qualified; bridge bus model is behavioural (no analog levels or '
+        report['simulation']['limit'] = ('tb_system runs use simulation-time master clocks (NTSC and PAL rates), not the real '
+                                         'Si5351 outputs; the console video path is checked against a PI host model, not a '
+                                         'console; PPU/APU not qualified; bridge bus model is behavioural (no analog levels or '
                                          'translator delays)')
 
     if args.mode in ('synth', 'all'):

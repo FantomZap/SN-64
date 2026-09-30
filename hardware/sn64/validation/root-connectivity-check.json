@@ -1,17 +1,17 @@
 {
   "status": "pass",
-  "generated_at_utc": "2026-09-30T00:51:35.828905+00:00",
+  "generated_at_utc": "2026-09-30T03:28:47.236806+00:00",
   "scope": "root hierarchy connectivity: hierarchical labels, sheet pins, root labels and the shared net-name contract",
   "tool": "hardware/sn64/tools/verify_root_connectivity.py",
   "checks_passed": 4,
   "checks_failed": 0,
   "inputs": {
-    "sn64.kicad_sch": "e6b8db9ae8891be85ceba04973537c6430c2831e07c6bc8b80b56fd22d0e800a",
+    "sn64.kicad_sch": "fa5de621014b6b892738ffcbc6112dd277cf53b2069a8200c4aba570e7584959",
     "usb-programmer.kicad_sch": "b8cfd904b2ea9a024f47461d22f97630a7414379b5f59f308514e877f118861d",
     "cart-interface.kicad_sch": "71f79297ebf20618138eb1d05044cdcc1c3e719a6b62d1dfb639b74a56693e1c",
-    "fpga.kicad_sch": "0a2c5c6b651acf6349636239c4eb994d2c3bba8bcb526bd7f8e938f781867e75",
-    "power.kicad_sch": "14d5328907a943e9cbbbecc31dc1b685f4714dc595a91a176ed44d8a1d50d2c1",
-    "av-clock.kicad_sch": "66c40c96bddd5d0a8fa40f0638624a2bd0bd515b502e62d219734b05addf6bfa"
+    "fpga.kicad_sch": "3de3b8e3f0ad3e0eee2eb1806673ab9fdcd71e22f1f3871d6f838dc4887a6972",
+    "power.kicad_sch": "8d8262242c31c184dc9f30dd5ad25a4be73e73ee3da9a60fdbb0820007ff9210",
+    "av-clock.kicad_sch": "dc0e9e8a21a89763b4266bf26e4109a17531545543a51b905003ef49cd00a634"
   },
   "checks": [
     {
@@ -20,9 +20,9 @@
       "detail": {
         "usb-programmer.kicad_sch": 10,
         "cart-interface.kicad_sch": 50,
-        "fpga.kicad_sch": 92,
+        "fpga.kicad_sch": 80,
         "power.kicad_sch": 21,
-        "av-clock.kicad_sch": 25
+        "av-clock.kicad_sch": 13
       }
     },
     {
@@ -44,7 +44,7 @@
       "check": "contract_nets_connected_on_both_ends",
       "passed": true,
       "detail": {
-        "checked": 141,
+        "checked": 129,
         "problems": {},
         "cartridge_contract_names": 63
       }
@@ -53,5 +53,60 @@
   "limitations": [
     "Static connectivity only: no electrical, level, timing or layout claim.",
     "N64_AUDIO_L/R and HOST_12V are expected on the edge connector only (reserved / unused)."
-  ]
+  ],
+  "negative_test": {
+    "status": "pass",
+    "results": [
+      {
+        "mutation": "root label osc_25 at the FPGA sheet pin replaced by a no-connect",
+        "expected_failures": [
+          "contract_nets_connected_on_both_ends",
+          "every_sheet_pin_labelled_at_root"
+        ],
+        "failed": [
+          "contract_nets_connected_on_both_ends",
+          "every_sheet_pin_labelled_at_root"
+        ],
+        "detected": true
+      },
+      {
+        "mutation": "A/V sheet hierarchical label adc_dout renamed",
+        "expected_failures": [
+          "hierarchical_labels_match_sheet_pins"
+        ],
+        "failed": [
+          "contract_nets_connected_on_both_ends",
+          "hierarchical_labels_match_sheet_pins"
+        ],
+        "detected": true
+      },
+      {
+        "mutation": "root label jtag_tck at the USB sheet pin renamed",
+        "expected_failures": [
+          "contract_nets_connected_on_both_ends",
+          "every_sheet_pin_labelled_at_root"
+        ],
+        "failed": [
+          "contract_nets_connected_on_both_ends",
+          "every_sheet_pin_labelled_at_root"
+        ],
+        "detected": true
+      },
+      {
+        "mutation": "power sheet pin efuse_fault_n removed from the root sheet symbol",
+        "expected_failures": [
+          "contract_nets_connected_on_both_ends",
+          "every_sheet_pin_has_a_partner",
+          "hierarchical_labels_match_sheet_pins"
+        ],
+        "failed": [
+          "contract_nets_connected_on_both_ends",
+          "every_sheet_pin_has_a_partner",
+          "hierarchical_labels_match_sheet_pins"
+        ],
+        "detected": true
+      }
+    ],
+    "generated_at_utc": "2026-09-30T03:30:09.287443+00:00"
+  }
 }
