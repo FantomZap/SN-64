@@ -102,7 +102,7 @@ footprint exposed-pad size; USB pull-up switched only after PLL lock.
 ## Open items
 
 - Routing: 211 of 218 signal nets (KiCadRoutingTools passes plus scripted gap closing); 7 nets left for hand routing in KiCad (`validation/pcb-open-connections.json`: N64_AD6 and N64_JOYBUS to the fingers, USB_PU and USB_DP_F across to the USB corner, FLASH_D2, a SNES_5V_CART segment, the TLA2528 DVDD pin). DRC: 0 errors apart from 6 single-spoke thermal reliefs and the USB-C shield pad on the edge (intended). 3,612 tracks, 997 vias (v1 draft: 7,065 and 1,453 with a fifth of the work left).
-- Shell: none yet. SummerCart64's lower shell fits the tongue; the upper part must hold the socket, support the flat cartridge from underneath and clamp the board at its six holes. The socket's height above the board and nose reach are not sourced and set the cartridge-to-board gap.
+- Shell: envelope model only (`docs/design/v2-shell.md`, `mechanical/sn64-v2-shell/`). The upper part must hold the socket, support the flat cartridge from underneath and clamp the board at its six holes. The socket's height above the board and nose reach are not sourced and set the cartridge-to-board gap. Board height and the USB-C position follow the owner's review of the shell.
 - PCBWay: annular ring (6 mil) and spacing (5 mil) against the 0.125 / 0.1 mm rules, as in v1.
 - Four-layer trial: with 210 fan-out vias and signals on the outer rings a four-layer stack may
   route; not tried yet.
