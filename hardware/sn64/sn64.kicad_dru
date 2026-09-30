@@ -1,0 +1,10 @@
+(version 1)
+(rule "N64 edge fingers reach the board edge (SummerCart64 geometry)"
+    (condition "A.memberOfFootprint('J1') || B.memberOfFootprint('J1')")
+    (constraint edge_clearance (min 0mm)))
+(rule "USB-C receptacle sits on the board edge"
+    (condition "A.memberOfFootprint('J101') || B.memberOfFootprint('J101')")
+    (constraint edge_clearance (min 0mm)))
+(rule "HDMI receptacle overhangs the board edge"
+    (condition "A.memberOfFootprint('J701') || B.memberOfFootprint('J701')")
+    (constraint edge_clearance (min 0mm)))

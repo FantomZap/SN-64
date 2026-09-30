@@ -48,12 +48,9 @@ def load_footprint(fpid):
 
 
 def outline(board):
-    pts = SC64_LEFT + [(-x, y) for (x, y) in reversed(SC64_LEFT)]
-    # extend the SC64 top (y = -47.3 in the original) upward to -TOP: replace the last left point and
-    # first right point by the taller corners
-    pts = [p for p in pts]
-    pts[len(SC64_LEFT) - 1] = (-HALF_W, -TOP)
-    pts[len(SC64_LEFT)] = (HALF_W, -TOP)
+    # SC64 left profile up to (-50.9, -26.4), then straight up to the taller top corners, then the
+    # mirrored right profile back down to the tongue shoulder (the original top was y = -47.3)
+    pts = SC64_LEFT + [(-HALF_W, -TOP), (HALF_W, -TOP)] + [(-x, y) for (x, y) in reversed(SC64_LEFT)]
     for a, b in zip(pts, pts[1:]):
         seg = pcbnew.PCB_SHAPE(board)
         seg.SetShape(pcbnew.SHAPE_T_SEGMENT)
@@ -77,6 +74,12 @@ def rules(board):
     ds.m_SolderMaskMinWidth = mm(0.1)
     ds.m_HoleClearance = mm(0.25)
     ds.m_CopperEdgeClearance = mm(0.3)
+    # The N64 edge fingers share one solder-mask opening (SummerCart64 footprint, mask polygons):
+    # keep the mask-bridge check visible as a warning instead of an error.
+    try:
+        ds.m_DRCSeverities[pcbnew.DRCE_SOLDERMASK_BRIDGE] = pcbnew.RPT_SEVERITY_WARNING
+    except Exception as e:
+        print('mask-bridge severity not set:', e)
     try:
         nc = ds.m_NetSettings.GetDefaultNetclass()
         nc.SetClearance(mm(0.1))
@@ -131,18 +134,18 @@ def block_of(c):
 # Chips, connectors, inductors and 0805/1206 capacitors go on the top side; 0402/0603 passives,
 # resistor arrays and test points of the same block go on the bottom side under it.
 BLOCKS = {
-    ('n64if', 'top'):        (-30.0, -14.0, 30.0, -3.0),
-    ('n64if', 'bottom'):     (-30.0, -14.0, 30.0, -3.0),
-    ('fpga_support', 'top'): (-26.0, -53.5, 26.0, -47.0),
-    ('fpga_support', 'bottom'): (-26.0, -53.5, 26.0, -47.0),
-    ('cart', 'top'):         (-41.0, -64.5, 47.0, -54.0),
-    ('cart', 'bottom'):      (-41.0, -64.5, 47.0, -54.0),
-    ('power', 'top'):        (-49.0, -35.0, -22.0, -3.0),
-    ('power', 'bottom'):     (-49.0, -35.0, -13.0, -3.0),
+    ('n64if', 'top'):        (-20.0, -14.0, 30.0, -3.0),
+    ('n64if', 'bottom'):     (-12.0, -16.0, 30.0, -3.0),
+    ('fpga_support', 'top'): (-30.0, -52.0, 30.0, -43.0),
+    ('fpga_support', 'bottom'): (-30.0, -55.0, 30.0, -44.0),
+    ('cart', 'top'):         (-41.0, -64.5, 47.0, -51.0),
+    ('cart', 'bottom'):      (-41.0, -66.0, 47.0, -45.0),
+    ('power', 'top'):        (-49.0, -38.0, -21.0, -3.0),
+    ('power', 'bottom'):     (-49.0, -50.0, -12.0, -3.0),
     ('usb', 'top'):          (-49.0, -55.0, -22.0, -36.0),
-    ('usb', 'bottom'):       (-49.0, -55.0, -22.0, -36.0),
+    ('usb', 'bottom'):       (-49.0, -66.0, -12.0, -36.0),
     ('av', 'top'):           (27.0, -58.0, 40.0, -18.0),
-    ('av', 'bottom'):        (27.0, -58.0, 40.0, -18.0),
+    ('av', 'bottom'):        (20.0, -58.0, 49.0, -12.0),
     ('misc', 'top'):         (27.0, -18.0, 49.0, -10.0),
     ('misc', 'bottom'):      (27.0, -18.0, 49.0, -10.0),
 }
@@ -160,32 +163,154 @@ FIXED = {
 }
 
 
+def courtyard_box(fp):
+    """(x0, y0, x1, y1) in mm of the footprint's courtyard (either side) or bounding box, at its current place."""
+    for layer in (pcbnew.F_CrtYd, pcbnew.B_CrtYd):
+        c = fp.GetCourtyard(layer)
+        if c.OutlineCount():
+            bb = c.BBox()
+            break
+    else:
+        bb = fp.GetBoundingBox(False, False)
+    return bb.GetLeft() / 1e6, bb.GetTop() / 1e6, bb.GetRight() / 1e6, bb.GetBottom() / 1e6
+
+
 def courtyard_size(fp):
-    bb = fp.GetCourtyard(pcbnew.F_CrtYd).BBox() if fp.GetCourtyard(pcbnew.F_CrtYd).OutlineCount() else fp.GetBoundingBox(False, False)
-    return bb.GetWidth() / 1e6, bb.GetHeight() / 1e6
+    x0, y0, x1, y1 = courtyard_box(fp)
+    return x1 - x0, y1 - y0
 
 
-def place_blocks(fps, blocks):
-    """Row-fill each block rectangle with its footprints, largest first, 0.4 mm gaps."""
-    for (name, side), (x0, y0, x1, y1) in BLOCKS.items():
-        items = [f for f in blocks.get(name, []) if side_of(f) == side]
-        items.sort(key=lambda f: -courtyard_size(f)[0] * courtyard_size(f)[1])
-        x, y, row_h = x0, y0, 0.0
+def place_by_attraction(board, fps, blocks, fixed_refs):
+    """Connectivity-aware placement inside the block rectangles.
+
+    Parts are ordered by graph distance (over nets with at most BIG_NET pads) from the fixed
+    anchors (connectors, FPGA). Each part is pulled to the centroid of the already-placed pads it
+    connects to and dropped on the nearest free spot of its block/side, found by a spiral search
+    over a 0.25 mm occupancy grid (courtyard + 0.3 mm margin). Chips are placed before passives
+    at equal distance so they get the good spots.
+    """
+    BIG_NET = 12
+    net_pads = {}                      # net -> [(ref, x, y)] for placed parts only (updated as we go)
+    net_refs = {}                      # net -> set(refs) over small nets
+    for fp in fps.values():
+        for p in fp.Pads():
+            n = p.GetNetname()
+            if n:
+                net_refs.setdefault(n, set()).add(fp.GetReference())
+    small = {n: r for n, r in net_refs.items() if len(r) and sum(1 for fp in fps.values() for p in fp.Pads() if p.GetNetname() == n) <= BIG_NET}
+    adj = {}
+    for n, refs in small.items():
+        for r in refs:
+            adj.setdefault(r, set()).update(refs - {r})
+    # BFS distance from anchors
+    dist = {r: 0 for r in fixed_refs if r in fps}
+    frontier = list(dist)
+    while frontier:
+        nxt = []
+        for r in frontier:
+            for q in adj.get(r, ()):
+                if q not in dist:
+                    dist[q] = dist[r] + 1
+                    nxt.append(q)
+        frontier = nxt
+    # occupancy grid per side
+    CELL = 0.25
+    occ = {'top': set(), 'bottom': set()}
+
+    def cells(fp, x, y, side):
+        """Grid cells the footprint's courtyard (+0.3 mm) would cover with its origin moved to (x, y)."""
+        bx0, by0, bx1, by1 = courtyard_box(fp)
+        dx = x - fp.GetPosition().x / 1e6
+        dy = y - fp.GetPosition().y / 1e6
+        x0, y0, x1, y1 = bx0 + dx - 0.15, by0 + dy - 0.15, bx1 + dx + 0.15, by1 + dy + 0.15
+        cs = set()
+        for i in range(int(x0 // CELL), int(x1 // CELL) + 1):
+            for j in range(int(y0 // CELL), int(y1 // CELL) + 1):
+                cs.add((i, j))
+        return cs
+
+    def record(fp, side):
+        occ[side] |= cells(fp, fp.GetPosition().x / 1e6, fp.GetPosition().y / 1e6, side)
+        if any(p.GetAttribute() == pcbnew.PAD_ATTRIB_PTH for p in fp.Pads()):   # through-hole parts block both sides
+            other = 'top' if side == 'bottom' else 'bottom'
+            occ[other] |= cells(fp, fp.GetPosition().x / 1e6, fp.GetPosition().y / 1e6, other)
+        for p in fp.Pads():
+            n = p.GetNetname()
+            if n in small:
+                net_pads.setdefault(n, []).append((p.GetPosition().x / 1e6, p.GetPosition().y / 1e6))
+
+    # keep-outs: the SummerCart64 shell notches cut into the board sides, plus 1 mm inside every edge
+    def block_rect(x0, y0, x1, y1):
+        for side in occ:
+            for i in range(int(x0 // CELL), int(x1 // CELL) + 1):
+                for j in range(int(y0 // CELL), int(y1 // CELL) + 1):
+                    occ[side].add((i, j))
+    for sx in (-1, 1):
+        block_rect(min(sx * 50.9, sx * 45.9) - 1.0, -27.4, max(sx * 50.9, sx * 45.9) + 1.0, -20.9)
+    block_rect(-HALF_W - 1, -TOP - 1, HALF_W + 1, -TOP + 1.0)          # top edge band
+    block_rect(-HALF_W - 1, -TOP, -HALF_W + 1.0, 8)                    # left edge band
+    block_rect(HALF_W - 1.0, -TOP, HALF_W + 1, 8)                      # right edge band
+    for r in fixed_refs:
+        if r in fps:
+            fp = fps[r]
+            record(fp, 'bottom' if fp.IsFlipped() else 'top')
+
+    def free(fp, x, y, side, rect):
+        bx0, by0, bx1, by1 = courtyard_box(fp)
+        dx = x - fp.GetPosition().x / 1e6
+        dy = y - fp.GetPosition().y / 1e6
+        x0, y0, x1, y1 = rect
+        if bx0 + dx < x0 or bx1 + dx > x1 or by0 + dy < y0 or by1 + dy > y1:
+            return False
+        return not (cells(fp, x, y, side) & occ[side])
+
+    grid_cache = {}
+
+    def spot(fp, tx, ty, side, rect):
+        """Nearest free position to (tx, ty) on a 0.5 mm grid inside rect (full search, sorted by distance)."""
+        x0, y0, x1, y1 = rect
+        key = rect
+        if key not in grid_cache:
+            xs = [x0 + 0.5 * i for i in range(int((x1 - x0) / 0.5) + 1)]
+            ys = [y0 + 0.5 * j for j in range(int((y1 - y0) / 0.5) + 1)]
+            grid_cache[key] = [(x, y) for x in xs for y in ys]
+        cand = sorted(grid_cache[key], key=lambda p: (p[0] - tx) ** 2 + (p[1] - ty) ** 2)
+        for (x, y) in cand:
+            if free(fp, x, y, side, rect):
+                return x, y
+        return None
+
+    order = []
+    for name, items in blocks.items():
+        if name == 'fpga_decap':
+            continue
         for fp in items:
-            if side == 'bottom':
-                fp.Flip(fp.GetPosition(), False)
-            w, h = courtyard_size(fp)
-            w += 0.4
-            h += 0.4
-            if x + w > x1 and x > x0:
-                x = x0
-                y += row_h
-                row_h = 0.0
-            fp.SetPosition(pcbnew.VECTOR2I(mm(x + w / 2), mm(y + h / 2)))
-            x += w
-            row_h = max(row_h, h)
-        if items and y + row_h > y1 + 0.01:
-            print(f'  block {name}/{side}: overflows its rectangle by {y + row_h - y1:.1f} mm ({len(items)} parts)')
+            r = fp.GetReference()
+            big = courtyard_size(fp)[0] * courtyard_size(fp)[1]
+            order.append((dist.get(r, 99), 0 if side_of(fp) == 'top' else 1, -big, r, name, fp))
+    order.sort(key=lambda t: t[:4])
+    unplaced = []
+    for d, _, _, r, name, fp in order:
+        side = side_of(fp)
+        rect = BLOCKS.get((name, side)) or BLOCKS[('misc', side)]
+        if side == 'bottom' and not fp.IsFlipped():
+            fp.Flip(fp.GetPosition(), False)
+        pts = [xy for p in fp.Pads() for xy in net_pads.get(p.GetNetname(), [])]
+        if pts:
+            tx = sum(x for x, _ in pts) / len(pts)
+            ty = sum(y for _, y in pts) / len(pts)
+        else:
+            tx, ty = (rect[0] + rect[2]) / 2, (rect[1] + rect[3]) / 2
+        tx = min(max(tx, rect[0]), rect[2])
+        ty = min(max(ty, rect[1]), rect[3])
+        s = spot(fp, tx, ty, side, rect)
+        if s is None:
+            unplaced.append(r)
+            s = (tx, ty)
+        fp.SetPosition(pcbnew.VECTOR2I(mm(s[0]), mm(s[1])))
+        record(fp, side)
+    if unplaced:
+        print('  no free spot found for:', unplaced)
 
 
 def main():
@@ -201,12 +326,14 @@ def main():
     rules(board)
     outline(board)
     # shell mounting holes (SummerCart64: 2.5 mm at +-47.5, 7.25 above the tip)
+    holes = []
     for x in (-47.5, 47.5):
         h = load_footprint('MountingHole:MountingHole_2.5mm')
         h.SetReference('H1' if x < 0 else 'H2')
         h.SetPosition(pcbnew.VECTOR2I(mm(x), mm(3.25)))
         board.Add(h)
-    fps = {}
+        holes.append(h)
+    fps = {h.GetReference(): h for h in holes}
     blocks = {}
     for c in comps:
         fp = load_footprint(c['fp'])
@@ -242,8 +369,8 @@ def main():
                     found = True
             if not found:
                 print(f'  warning: {ref} pad {pin} not in footprint {fp.GetFPIDAsString()}')
-    place_blocks(fps, blocks)
-    # FPGA decoupling capacitors on the bottom side under the BGA, in a grid
+    # FPGA decoupling capacitors on the bottom side under the BGA, in a grid (placed before the
+    # attraction pass so the rest keeps clear of them)
     decaps = sorted(blocks.get('fpga_decap', []), key=lambda f: f.GetReference())
     cols = 6
     for i, fp in enumerate(decaps):
@@ -251,8 +378,21 @@ def main():
         x = -7.5 + (i % cols) * 3.0
         y = -38.0 + (i // cols) * 2.2
         fp.SetPosition(pcbnew.VECTOR2I(mm(x), mm(y)))
+    place_by_attraction(board, fps, blocks, list(FIXED) + ['H1', 'H2'] + [f.GetReference() for f in decaps])
     board.BuildListOfNets()
     pcbnew.SaveBoard(str(a.out), board)
+    # custom design rules: the two connectors that sit at the board edge by design
+    (a.out.with_suffix('.kicad_dru')).write_text('''(version 1)
+(rule "N64 edge fingers reach the board edge (SummerCart64 geometry)"
+    (condition "A.memberOfFootprint('J1') || B.memberOfFootprint('J1')")
+    (constraint edge_clearance (min 0mm)))
+(rule "USB-C receptacle sits on the board edge"
+    (condition "A.memberOfFootprint('J101') || B.memberOfFootprint('J101')")
+    (constraint edge_clearance (min 0mm)))
+(rule "HDMI receptacle overhangs the board edge"
+    (condition "A.memberOfFootprint('J701') || B.memberOfFootprint('J701')")
+    (constraint edge_clearance (min 0mm)))
+''', encoding='utf-8', newline='\n')
     print(f'wrote {a.out}: {len(fps)} footprints, {len(nets)} nets; blocks:', {k: len(v) for k, v in blocks.items()})
 
 
