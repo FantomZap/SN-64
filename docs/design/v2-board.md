@@ -1,7 +1,8 @@
 # SN64 v2 board: schematic write-up and rationale
 
 **Status (2026-09-30): draft 0.1 on branch `v2`. Schematic complete (ERC 0 errors), FPGA
-logic simulated, boards placed and autorouted. Not fabrication-ready: see "Open items".**
+logic simulated and routed with timing met, riser routed and DRC-clean, main board routed to 212 of
+218 nets with 7 hand-routing items open. Not fabrication-ready: see "Open items".**
 
 v1 (`hardware/sn64/`) turned every line of the specification into its own chip: six window
 comparators, a temperature switch, a USB-C controller, three eFuses, a clock synthesiser, two
@@ -92,7 +93,7 @@ footprint exposed-pad size; USB pull-up switched only after PLL lock.
 
 ## Open items
 
-- Routing result and DRC: see the work log entry for 2026-09-30 (v2).
+- Routing: 212 of 218 signal nets by one 40 s router pass on the via-first board; 7 open items left for hand routing (`validation/pcb-open-connections.json`: N64_AD6, N64_AD7, USB_PU, AUD_L_N, FLASH_D2, a SNES_5V_CART segment, TLA2528 DVDD). DRC: 0 errors apart from 5 single-spoke thermal reliefs (USB shield pads, mux pin). 3,588 tracks, 922 vias (v1 draft: 7,065 and 1,453 with a fifth of the work left).
 - Shell: the riser joint must not carry the cartridge insertion load; the socket needs support from
   the enclosure (unchanged from v1).
 - PCBWay: annular ring (6 mil) and spacing (5 mil) against the 0.125 / 0.1 mm rules, as in v1.

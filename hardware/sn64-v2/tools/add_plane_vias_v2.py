@@ -202,7 +202,7 @@ def main():
             # The N64 edge fingers (J1) sit inside the finger keep-out: their vias go further up the board.
             # Nearest spots first; on a routed board the stub may have to reach a few mm (a longer
             # decoupling stub is a compromise to fix by hand later, an open pad is not usable at all).
-            dists = (0.7, 0.85, 1.0, 1.2, 1.6, 2.0, 2.5, 3.0) if fp.GetReference() not in () else (1.5, 2.0, 2.5, 3.0, 3.5)
+            dists = (0.5, 0.6, 0.7, 0.85, 1.0, 1.2, 1.6, 2.0, 2.5, 3.0)
             for dist in dists:
                 for ang in (0, 180, 90, 270, 45, 135, 225, 315, 22.5, 67.5, 112.5, 157.5, 202.5, 247.5, 292.5, 337.5):
                     r = math.radians(ang)

@@ -1,0 +1,95 @@
+{
+ "date": "2026-09-30",
+ "board": "hardware/sn64-v2/sn64-v2.kicad_pcb",
+ "router": "KiCadRoutingTools v0.22 (pass 1 on the via-first board, build/route-v2/krt2-pass1.log)",
+ "tracks": 3588,
+ "vias": 922,
+ "track_length_mm": 7493,
+ "signal_nets_routed": "212 of 218",
+ "drc_errors": {
+  "starved_thermal": 5
+ },
+ "drc_warnings": {
+  "via_dangling": 11,
+  "silk": "placement-stage silk overlaps"
+ },
+ "open_items_for_hand_routing": [
+  {
+   "net": "FPGA_3V3",
+   "items": [
+    "Track [FPGA_3V3] on B.Cu, length 1.1000 mm",
+    "Pad 10 [FPGA_3V3] of U6 on F.Cu"
+   ],
+   "pos": {
+    "x": 15.325,
+    "y": -18.0
+   }
+  },
+  {
+   "net": "SNES_5V_CART",
+   "items": [
+    "Track [SNES_5V_CART] on B.Cu, length 0.5657 mm",
+    "Pad 7 [SNES_5V_CART] of U202 on F.Cu"
+   ],
+   "pos": {
+    "x": -10.7,
+    "y": 15.5
+   }
+  },
+  {
+   "net": "N64_AD6",
+   "items": [
+    "Via [N64_AD6] on F.Cu - B.Cu",
+    "PTH pad 7 [N64_AD6] of J1"
+   ],
+   "pos": {
+    "x": 1.4,
+    "y": -19.75
+   }
+  },
+  {
+   "net": "N64_AD7",
+   "items": [
+    "PTH pad 8 [N64_AD7] of J1",
+    "Track [N64_AD7] on F.Cu, length 0.4500 mm"
+   ],
+   "pos": {
+    "x": 13.0,
+    "y": -26.5
+   }
+  },
+  {
+   "net": "USB_PU",
+   "items": [
+    "Pad 1 [USB_PU] of R21 on B.Cu",
+    "Pad C14 [USB_PU] of U1 on F.Cu"
+   ],
+   "pos": {
+    "x": -38.175,
+    "y": -11.0
+   }
+  },
+  {
+   "net": "AUD_L_N",
+   "items": [
+    "Pad 2 [AUD_L_N] of R35 on B.Cu",
+    "Track [AUD_L_N] on B.Cu, length 0.2000 mm"
+   ],
+   "pos": {
+    "x": 10.175,
+    "y": -10.5
+   }
+  },
+  {
+   "net": "FLASH_D2",
+   "items": [
+    "Track [FLASH_D2] on B.Cu, length 3.1113 mm",
+    "Pad Y2 [FLASH_D2] of U1 on F.Cu"
+   ],
+   "pos": {
+    "x": -18.6,
+    "y": 1.7
+   }
+  }
+ ]
+}
