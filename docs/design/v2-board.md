@@ -1,8 +1,8 @@
 # SN64 v2 board: schematic write-up and rationale
 
 **Status (2026-09-30): draft 0.1 on branch `v2`. One board. Schematic complete (ERC 0 errors), FPGA
-logic simulated and routed with timing met, board routed to 211 of 218 nets with 7 nets left for
-hand routing. Not fabrication-ready: see "Open items".**
+logic simulated and routed with timing met, board refitted to the upright tower shell with the
+socket on its top edge (213 of 218 signal nets fully connected). Not fabrication-ready: see "Open items".**
 
 v1 (`hardware/sn64/`) turned every line of the specification into its own chip: six window
 comparators, a temperature switch, a USB-C controller, three eFuses, a clock synthesiser, two
@@ -30,19 +30,20 @@ line: one continuous vertical item like a TriStar 64. The bottom is the SummerCa
 (tongue 10.5 mm below the shoulders, 1.2 mm thick, 101.8 mm wide with the shell notches, six
 layers). The SNES socket (console-replacement family with ears: 62 contacts, 2.5 mm pitch, rows
 7.0 mm apart, ear holes 95 mm apart) sits on the board's top edge with its tails on pads on both
-faces, pins 1-31 on the front face. Its ears screw into the shell, which takes the insertion force,
+faces, pins 1-31 on B.Cu (the face toward the front of the console, like the N64 edge's pins 1-25). Its ears screw into the shell, which takes the insertion force,
 and above the USB-C the shell bells out into a mushroom cap whose pocket holds the bottom of the
 cartridge on all four sides. How the tails reach the pads is settled in the board footprint once a sample is measured. Shell
 envelope: [v2-shell.md](v2-shell.md).
 
 History: the board was first drawn with the socket through-hole on its face and the cartridge lying
-flat over the console; the owner rejected that when he saw it in 3D. The committed routed board
-still has J2 on the face at 56.5 mm. Moving it to the top edge, widening the outline for the USB-C
-and moving the USB-C above the console line are the next board change (list in v2-shell.md).
+flat over the console; the owner rejected that when he saw it in 3D. The same day the routed board
+was refitted to the tower shell (`tools/refit_tower_v2.py`, details in v2-shell.md): socket on the
+top edge, outline widened for the USB-C, USB-C moved above the console line; only the socket and
+USB nets were routed again.
 
-Layout (committed board) is the horizontal v2 layout turned 180 degrees: FPGA banks 0/1 face the
-N64 edge, the translator row sits between the FPGA and the socket, USB-C on the right edge, power
-lower left.
+Layout is the horizontal v2 layout turned 180 degrees: FPGA banks 0/1 face the N64 edge, the
+translator row sits between the FPGA and the socket edge, USB-C on the right edge 50 mm above the
+shoulders (the player's left), power lower left.
 
 ## What moved into the FPGA (LFE5U-85F-8BG381I, the grade in stock)
 
@@ -86,8 +87,8 @@ lower left.
 | Generator | `hardware/sn64-v2/tools/build_v2_schematic.py` (every part, value, source and net; `--force` regenerates all sheets) |
 | Pin plan | `hardware/sn64-v2/tools/pin_plan.py` -> `interfaces/fpga-pin-map.csv`, `fpga/constraints/sn64_board.lpf` |
 | Sheets | `sn64-v2.kicad_sch` (root), `fpga.kicad_sch`, `cart.kicad_sch`, `power.kicad_sch` |
-| Libraries | `libraries/SN64_V2.kicad_sym` (TPS2121, TLA2528, TPS2553 drawn from the TI pin tables), v1 libraries reused unchanged; `libraries/v2-provenance.json` |
-| Boards | `build_v2_pcb.py` (placement), `prepare_route_v2.py` (fan-out, planes), `apply_netclasses_v2.py`, `finish_route_v2.py`, `add_plane_vias_v2.py`; router KiCadRoutingTools (see `docs/design/pcb-routing.md`) |
+| Libraries | `libraries/SN64_V2.kicad_sym` (TPS2121, TLA2528, TPS2553 drawn from the TI pin tables), `libraries/SN64_V2.pretty` (straddle socket footprint from `tools/make_socket_footprint.py`), `libraries/3d/` (socket model from `tools/socket_3d_model.py`), v1 libraries reused unchanged; `libraries/v2-provenance.json` |
+| Boards | `build_v2_pcb.py` (placement), `prepare_route_v2.py` (fan-out, planes), `apply_netclasses_v2.py`, `finish_route_v2.py`, `add_plane_vias_v2.py`, `refit_tower_v2.py` (tower refit), `report_board_v2.py` (DRC summary); router KiCadRoutingTools (see `docs/design/pcb-routing.md`) |
 | Checks | `validation/erc.json` (0 errors, 8 warnings: unused translator inputs tied to ground), `validation/*.xml` netlists, DRC reports under `build/` |
 | FPGA | `fpga/tools/evaluate.py --mode sim` (all benches pass, new `tb_sd_adc`); `fpga/tools/route_top.py --top board --speed 8` routes with every clock passing timing (`fpga/reports/v2-board-route.json`: 30.7k LUT4, 203/208 block RAMs, 111 I/O) |
 
@@ -99,7 +100,7 @@ footprint exposed-pad size; USB pull-up switched only after PLL lock.
 
 ## Open items
 
-- Routing: 211 of 218 signal nets (KiCadRoutingTools passes plus scripted gap closing); 7 nets left for hand routing in KiCad (`validation/pcb-open-connections.json`: N64_AD6 and N64_JOYBUS to the fingers, USB_PU and USB_DP_F across to the USB corner, FLASH_D2, a SNES_5V_CART segment, the TLA2528 DVDD pin). DRC: 0 errors apart from 6 single-spoke thermal reliefs and the USB-C shield pad on the edge (intended). 3,612 tracks, 997 vias (v1 draft: 7,065 and 1,453 with a fifth of the work left).
+- Routing after the tower refit: 3,551 tracks, 1,034 vias, 213 of 218 signal nets fully connected, 6 unconnected items (FLASH_D2, FPGA_3V3, N64_AD6, N64_JOYBUS, USB_DP_F, USB_PU); DRC errors: 5 starved_thermal. Remaining items are listed in `validation/pcb-open-connections.json` for hand routing in KiCad.
 - Shell: envelope model only (`docs/design/v2-shell.md`, `mechanical/sn64-v2-shell/`): upright tower, socket ears screwed to brackets in the shell. The board changes it asks for (socket on the top edge, outline widened for the USB-C, USB-C above the console line) are listed there and not made yet.
 - PCBWay: annular ring (6 mil) and spacing (5 mil) against the 0.125 / 0.1 mm rules, as in v1.
 - Four-layer trial: with 210 fan-out vias and signals on the outer rings a four-layer stack may

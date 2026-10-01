@@ -107,3 +107,14 @@ Two more things tried on the way, both rejected by their own tools: Freerouting 
 **Run 2 (FPGA at 0°, abandoned after 70 min at pass 3):** 327 of the routable nets connected; the leftovers were almost all the N64 bus between the FPGA and the bus switches (`fpga_n64_ad0..15`, `read_n`, `write_n`, `aleh`, `reset_n`, `nmi_n`, `cic_clk`, `int_n`, `si_dq`). Cause: with the package at 0° its bank 0 (the N64 bus) faces the top of the board while the bus switches sit at the bottom by the edge fingers, so those 27 signals had to cross the whole ball grid. The FPGA is now placed at 180° (bank 0 toward the switches, banks 2/3 toward the translator row) and the board rebuilt.
 
 **Runs 3 (FPGA at 180°, hole clearance set, one job per instance, 2 h 20 min):** the main job reached 335 nets with wires at pass 8 and the low-via-cost variant 333 at pass 5 before both were stopped; imported and checked, the main snapshot left about 80 signal nets and 64 plane pads open with no rule violations beyond the known edge items. KiCadRoutingTools reached a better state in a third of the time, so Freerouting is the fallback from here.
+
+## Adding routes to a routed board without disturbing it (v2 tower refit, 2026-09-30)
+
+KiCadRoutingTools rips pre-existing nets that block a new route and does not always restore them:
+on the v2 refit a first run broke 7 good nets, and a run with `KICAD_RIP_PREEXISTING=0` still broke
+5 because the end-of-run reconciliation grants itself rip authority over "hinted blockers". What
+works: **lock every existing track and via** (`PCB_TRACK.SetLocked(True)`, see
+`hardware/sn64-v2/tools/refit_tower_v2.py place`), route, then unlock; the router never rips locked
+copper. Also keep BGA escape copper in place when re-routing nets that start at the FPGA, and never
+adopt the `.kicad_pro` the router writes beside its output (it lowers the copper-to-hole floor to
+what it used); run DRC against the board's own project file.

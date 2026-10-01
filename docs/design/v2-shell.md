@@ -17,14 +17,17 @@ console_top), `sn64-v2-shell-assembly.stl`, `sn64-v2-shell-only.stl`, renders
 `shell-{front,right,top,iso}.png` taken in FreeCAD. FreeCAD opens the STEP directly; Blender
 imports the STL (File > Import > STL).
 
-Frame: X across the board, Y up with 0 at the N64 tongue shoulders, Z out of the board's front
-face. The exported files are turned so viewers see Z up with the front face toward -Y.
+Frame: X across the board, Y up with 0 at the N64 tongue shoulders, Z out of the board's F.Cu
+face. F.Cu faces the back of the console: the N64 edge's pins 1-25 are on B.Cu and pin 1 is on the
+front row of the slot. A player therefore sees the B.Cu side, and the USB-C (board +X) is on their
+left. The exported files are turned so viewers see Z up with the F.Cu face toward -Y.
 
 ## How it goes together
 
 - **Socket**: the 62-contact console-replacement SNES/SFC socket with ears. It sits on the board's
-  top edge with its tails on pads on both faces: pins 1-31 on the front face (they face the front
-  of the console and the cartridge label), pins 32-62 on the back. Its two rows are 7.0 mm apart and
+  top edge with its tails on pads on both faces: pins 1-31 on B.Cu, the face toward the front of
+  the console and the cartridge label, with pin 1 at the left end seen from the front; pins 32-62
+  on F.Cu. Its two rows are 7.0 mm apart and
   the board is 1.2 mm thick, so the tails do not reach the faces as supplied; the owner will adapt
   the board footprint to the measured sample.
 - **Ears** rest on two brackets in the shell and are screwed from above, so the shell carries the
@@ -50,16 +53,31 @@ face. The exported files are turned so viewers see Z up with the front face towa
 | USB-C window | 13 x 7 in the right wall at 50 | plug envelope 12.35 x 6.5 **assumed** |
 | Overall shell | 142.6 x 109.5 x 26.6 | derived |
 
-## Board changes this shell asks for (not made yet)
+## Board refit to this shell (done 2026-09-30)
 
-- J2 moves from the face (through-hole at 56.5) to a footprint on the top edge at 70, pins 1-31 on
-  the front face. The existing routing can stay: the old J2 holes become vias with short stubs to
-  the edge pads.
-- Outline widened to 111 mm between 32 and 60 mm above the shoulders so the USB-C reaches the
-  right wall; the top 10 mm narrowed to 88 mm so the ear screws pass beside the board. The two top
-  mounting holes at 66.5 move into the wide section.
-- USB-C J101 moves from 18 mm (inside the console) to 50 mm on the right edge; only the USB nets
-  re-route.
+`hardware/sn64-v2/tools/refit_tower_v2.py` changed the routed board in place of a full re-layout:
+
+- J2 is now `SN64_V2:SNES_Slot_Console_Straddle` on the top edge at 70 mm: 62 pads 1.5 x 3.5 mm,
+  0.5 mm from the edge, pins 1-31 on B.Cu and 32-62 on F.Cu at the old pin x positions (pin 1 at
+  +42.5). Its 3D model (`libraries/3d/SNES_Slot_Console_Straddle.step`) shows the eared body above
+  the edge. The face-mounted socket, its copper above the translator row and 226 leftover dangling
+  pieces were removed and the socket nets routed again from the translators.
+- Outline: 101.8 mm wide to 32 mm above the shoulders, 111 mm to 60 mm, then an 88 mm neck to the
+  top edge at 70 mm; the SummerCart64 part below 26.4 mm is unchanged.
+- USB-C J101 at the right edge 50 mm above the shoulders (22 mm above the assumed console line),
+  turned to face outward with the JAE reference 0.5 mm front overhang. Its ESD part and VBUS
+  capacitor moved with it; the series and pull-up resistors stay beside the FPGA with their routing.
+  The five nets that reach the moved parts were cut at the old connector and routed again.
+- Top mounting holes H5/H6 moved from 66.5 mm (inside the neck) to 38 mm in the widened part.
+- Planes and outer GND pours enlarged to the new outline.
+
+Result: 3,551 tracks, 1,034 vias, 213 of 218 signal nets fully connected, 6 unconnected items (FLASH_D2, FPGA_3V3, N64_AD6, N64_JOYBUS, USB_DP_F, USB_PU); DRC errors: 5 starved_thermal. Full list: `hardware/sn64-v2/validation/pcb-open-connections.json`.
+
+Fit check: the KiCad board exported as STEP with every part model (`hardware/sn64-v2/exports/sn64-v2.step`,
+288 solids including the socket) placed in this shell model has no interference with the shell or
+the cartridge. Its envelope is 111 mm wide against the stem's 112.1 mm inside and 11.25 mm thick
+(the socket) against 14.06 mm. The combined file is `sn64-v2-fit-assembly.step`, renders `fit-*.png`
+(`fit-front` is seen from the front of the console, `fit-rear` from behind).
 
 ## Socket sourcing (searched 2026-09-30)
 

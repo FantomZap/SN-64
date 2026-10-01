@@ -460,7 +460,7 @@ def build_cart_sheet(sh):
     sh.note('SN64 v2 CARTRIDGE SHEET - N64 edge J1 and SNES socket J2 on the one board, four SN74ALVC164245 translators (A = 3.3 V, B = 5 V), '
             'SN74LVC07A open-drain driver for the 5 V lines the FPGA pulls.', 1.8)
     sh.place('J2', 'SN64:SNES_Female_Slot_62', 'SNES cartridge socket 62', {str(k): v for k, v in SOCKET.items()},
-             'SN64:SNES_Slot_Console_7mm', {'Note': 'candidate NES Repair Shop snspt043; footprint from Sanni cartreader (CC-BY-4.0), 7 mm nose'})
+             'SN64_V2:SNES_Slot_Console_Straddle', {'Note': 'console-replacement socket with ears (sample candidate NES Repair Shop snspt043); straddles the board top edge, pins 1-31 on B.Cu (front of the console); ears screw to the shell; pin geometry from OpenSFC CartSlot'})
     sh.newline()
     A = [f'L_A{i}' for i in range(24)]; SA = [f'SNES_A{i}' for i in range(24)]
     ctl_l = ['L_RD_N', 'L_WR_N', 'L_PRD_N', 'L_PWR_N', 'L_ROMSEL_N', 'L_WRAMSEL_N', 'L_REFRESH', 'L_PHI2']
@@ -640,7 +640,7 @@ def main():
     for sh in (fpga, cart, power):
         save(V2 / sh.file, sh.render(f'SN64 v2 - {sh.name}'))
     save(V2 / f'{PROJECT}.kicad_sch', root_sheet(root_uuid, [fpga, cart, power], 'SN64 v2: one board in the N64 slot with the SNES socket on its face; FPGA, translators, power, USB'))
-    write_tables(V2, ['SN64', 'SN64_POWER', 'SN64_USB', 'SN64_V2'], ['SN64', 'SN64_USB'])
+    write_tables(V2, ['SN64', 'SN64_POWER', 'SN64_USB', 'SN64_V2'], ['SN64', 'SN64_USB', 'SN64_V2'])
     write_project(V2, PROJECT)
 
     prov = {'schema_version': 1, 'recorded_date': '2026-09-30', 'scope': 'SN64 v2 schematic draft 0.1 (branch v2); not a manufacturing release',

@@ -6,13 +6,16 @@ flares out into a mushroom cap whose pocket wraps the bottom of the cartridge on
 so the shell holds the cartridge upright (owner, 2026-09-30).
 
 The SNES socket is the 62-contact console-replacement part with ears. It sits on the board's top
-edge with its tails on pads on both faces (pins 1-31 on the front face, 32-62 on the back; how the
-tails reach the pads is settled in the board footprint once a sample is measured) and its ears
-screw into the shell, so the shell takes the cartridge insertion force and the solder joints none.
+edge with its tails on pads on both faces (pins 1-31 on B.Cu, the face toward the front of the
+console; 32-62 on F.Cu; how the tails reach the pads is settled in the board footprint once a
+sample is measured) and its ears screw into the shell, so the shell takes the cartridge insertion
+force and the solder joints none.
 
 Build frame (the KiCad board view): X across the board, Y up with 0 at the N64 tongue shoulders,
-Z out of the board's front face. Exported files are turned +90 degrees about X so a viewer sees
-Z up and the front face toward -Y (the FreeCAD "Front" view looks at the front face).
+Z out of the board's F.Cu face. F.Cu faces the BACK of the console (N64 edge pins 1-25 are on
+B.Cu, and pin 1 is on the front row), so a player sees the B.Cu side and the USB-C (at +X) on
+their left. Exported files are turned +90 degrees about X so a viewer sees Z up and the F.Cu face
+toward -Y (the FreeCAD "Front" view looks at the F.Cu face, i.e. from behind the console).
 
 Sourced
   SummerCart64 shell outer width 116.1, thickness 18.06
@@ -22,8 +25,10 @@ Sourced
   socket, console-replacement family (OpenSFC CartSlot.kicad_mod, SHA-256 1f9b60dd...,
       docs/dimensions.md): 62 contacts, 31 per row, 2.5 pitch with two 7.5 gaps, 85.0 first to
       last, rows 7.0 apart, body 99.0 x 11.25, mounting holes 3.2 at +-47.5 (95.0 apart)
-  pins 1-31 face the front of the console (the cartridge label side); pins 31 and 62 are the
-      cartridge audio inputs (SNESdev wiki, "Cartridge connector")
+  pins 1-31 face the front of the console (the cartridge label side) with pin 1 at the left end
+      seen from the front (SNESdev wiki "Cartridge connector"; OpenSFC SHVC-CPU-01 board); pins 31
+      and 62 are the cartridge audio inputs
+  N64 edge pin 1 on the front row of the slot (n64brew "Game Pak")
   USB-C receptacle J101 body 8.94 x 6.9 x 3.16 (its footprint)
   cartridge shell 136 x 88 x 20 (North American; Wikipedia, unverified; SFC/PAL 130 x 86 x 20)
 

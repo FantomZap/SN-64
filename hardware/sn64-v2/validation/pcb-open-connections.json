@@ -1,33 +1,28 @@
 {
  "date": "2026-09-30",
- "board": "hardware/sn64-v2/sn64-v2.kicad_pcb (single vertical board, SNES cartridge flat)",
- "tracks": 3612,
- "vias": 997,
- "track_length_mm": 7779,
- "signal_nets_routed": "210 of 218",
+ "board": "hardware/sn64-v2/sn64-v2.kicad_pcb",
+ "note": "single vertical board refitted to the mushroom-cap tower shell: SNES socket J2 straddling the top edge (pins 1-31 on B.Cu), USB-C 50 mm above the shoulders; DRC errors are the USB-C shield pad on the edge (by design) and single-spoke thermal reliefs",
+ "tracks": 3551,
+ "vias": 1034,
+ "track_length_mm": 8092,
+ "signal_nets_fully_connected": "213 of 218",
  "drc_errors": {
-  "starved_thermal": 6,
-  "copper_edge_clearance": 1,
-  "note": "thermal spokes on the USB shield pads and one mux pin; the USB-C shield pad sits on the board edge by design"
+  "starved_thermal": 5
  },
+ "drc_warnings": {
+  "silk_edge_clearance": 3,
+  "silk_over_copper": 92,
+  "silk_overlap": 123,
+  "solder_mask_bridge": 199,
+  "track_dangling": 3,
+  "via_dangling": 17
+ },
+ "unconnected_items": 6,
  "open_items_for_hand_routing": [
   {
-   "net": "GND",
-   "items": [
-    "Zone 'sn64_finish_route:gnd_fcu' [GND] on F.Cu, priority 0",
-    "PTH pad S1 [GND] of J101"
+   "nets": [
+    "FPGA_3V3"
    ],
-   "from": {
-    "x": -51.95,
-    "y": -71.05
-   },
-   "to": {
-    "x": 48.86,
-    "y": -22.32
-   }
-  },
-  {
-   "net": "FPGA_3V3",
    "items": [
     "Pad 10 [FPGA_3V3] of U6 on F.Cu",
     "Track [FPGA_3V3] on B.Cu, length 1.1000 mm"
@@ -42,24 +37,11 @@
    }
   },
   {
-   "net": "SNES_5V_CART",
-   "items": [
-    "Pad 7 [SNES_5V_CART] of U202 on F.Cu",
-    "Track [SNES_5V_CART] on B.Cu, length 0.5657 mm"
+   "nets": [
+    "N64_JOYBUS"
    ],
-   "from": {
-    "x": 14.75,
-    "y": -46.7125
-   },
-   "to": {
-    "x": 10.7,
-    "y": -49.5
-   }
-  },
-  {
-   "net": "N64_JOYBUS",
    "items": [
-    "Track [N64_JOYBUS] on B.Cu, length 1.4500 mm",
+    "Track [N64_JOYBUS] on B.Cu, length 0.2828 mm",
     "Via [N64_JOYBUS] on F.Cu - B.Cu"
    ],
    "from": {
@@ -72,7 +54,9 @@
    }
   },
   {
-   "net": "N64_AD6",
+   "nets": [
+    "N64_AD6"
+   ],
    "items": [
     "Track [N64_AD6] on F.Cu, length 0.0500 mm",
     "Track [N64_AD6] on F.Cu, length 4.2000 mm"
@@ -87,22 +71,9 @@
    }
   },
   {
-   "net": "N64_INT_N",
-   "items": [
-    "Via [N64_INT_N] on F.Cu - B.Cu",
-    "Track [N64_INT_N] on F.Cu, length 4.3000 mm"
+   "nets": [
+    "USB_DP_F"
    ],
-   "from": {
-    "x": -3.4,
-    "y": -12.2
-   },
-   "to": {
-    "x": -2.9,
-    "y": -12.1
-   }
-  },
-  {
-   "net": "USB_DP_F",
    "items": [
     "Pad C12 [USB_DP_F] of U1 on F.Cu",
     "Pad 2 [USB_DP_F] of R19 on B.Cu"
@@ -117,7 +88,9 @@
    }
   },
   {
-   "net": "USB_PU",
+   "nets": [
+    "USB_PU"
+   ],
    "items": [
     "Pad C14 [USB_PU] of U1 on F.Cu",
     "Pad 1 [USB_PU] of R21 on B.Cu"
@@ -132,7 +105,9 @@
    }
   },
   {
-   "net": "FLASH_D2",
+   "nets": [
+    "FLASH_D2"
+   ],
    "items": [
     "Track [FLASH_D2] on F.Cu, length 1.1000 mm",
     "Pad Y2 [FLASH_D2] of U1 on F.Cu"

@@ -2,7 +2,7 @@
 <export version="E">
   <design>
     <source>C:\Users\RyanB\.claude\projects\SN64\hardware\sn64-v2\sn64-v2.kicad_sch</source>
-    <date>2026-09-30T11:45:28</date>
+    <date>2026-09-30T20:15:40</date>
     <tool>Eeschema 10.0.6</tool>
     <sheet number="1" name="/" tstamps="/">
       <title_block>
@@ -3114,15 +3114,15 @@
     </comp>
     <comp ref="J2">
       <value>SNES cartridge socket 62</value>
-      <footprint>SN64:SNES_Slot_Console_7mm</footprint>
+      <footprint>SN64_V2:SNES_Slot_Console_Straddle</footprint>
       <fields>
-        <field name="Note">candidate NES Repair Shop snspt043; footprint from Sanni cartreader (CC-BY-4.0), 7 mm nose</field>
-        <field name="Footprint">SN64:SNES_Slot_Console_7mm</field>
+        <field name="Note">console-replacement socket with ears (sample candidate NES Repair Shop snspt043); straddles the board top edge, pins 1-31 on B.Cu (front of the console); ears screw to the shell; pin geometry from OpenSFC CartSlot</field>
+        <field name="Footprint">SN64_V2:SNES_Slot_Console_Straddle</field>
         <field name="Datasheet"/>
         <field name="Description"/>
       </fields>
       <libsource lib="SN64" part="SNES_Female_Slot_62" description="Reference-verified connector; passive pin types. See interface CSV for endpoint directions."/>
-      <property name="Note" value="candidate NES Repair Shop snspt043; footprint from Sanni cartreader (CC-BY-4.0), 7 mm nose"/>
+      <property name="Note" value="console-replacement socket with ears (sample candidate NES Repair Shop snspt043); straddles the board top edge, pins 1-31 on B.Cu (front of the console); ears screw to the shell; pin geometry from OpenSFC CartSlot"/>
       <property name="Sheetname" value="Cartridge"/>
       <property name="Sheetfile" value="cart.kicad_sch"/>
       <sheetpath names="/Cartridge/" tstamps="/69e05daa-4082-5d3e-8a2d-0d56f4a78932/"/>
