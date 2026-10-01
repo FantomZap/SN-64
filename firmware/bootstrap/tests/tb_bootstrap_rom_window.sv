@@ -130,31 +130,32 @@ module tb_bootstrap_rom_window #(
         io_read32(32'h1FFF_001C, v);
         if (v !== 32'h0016_0000) begin errors=errors+1; $display("  FAIL REGION_SOURCE pair %h", v); end
         // Frame 1: P1 A+Start (SNES B|Start = 0x0009), P2 idle, stick (x=-40,y=40), run_request with
-        // the menu's default cartridge check mode, report only (CONTROL = 0x0011).
+        // the cartridge check enforced, which is the menu's mode (CONTROL = 0x0001).
         io_write32(32'h1FFF_0010, {16'h0009, 16'h0000});
-        io_write32(32'h1FFF_0014, {8'd40, 8'hD8, 16'h0011});
+        io_write32(32'h1FFF_0014, {8'd40, 8'hD8, 16'h0001});
         io_write32(32'h1FFF_0018, 32'h0001_0000);
         repeat(4) @(negedge clk);
-        if (j1!==16'h0009 || j2!==16'h0000 || sx!==8'hD8 || sy!==8'd40 || run!==1'b1 || cm!==2'd1 || seq!==16'd1) begin
+        if (j1!==16'h0009 || j2!==16'h0000 || sx!==8'hD8 || sy!==8'd40 || run!==1'b1 || cm!==2'd0 || seq!==16'd1) begin
             errors=errors+1; $display("  FAIL frame 1: j1=%h j2=%h sx=%h sy=%h run=%b check=%0d seq=%0d", j1, j2, sx, sy, run, cm, seq);
         end
         // Frame 2: new buttons on both pads; the 0x1A half of COMMIT must not count.
         io_write32(32'h1FFF_0010, {16'h0F00, 16'h0030});
-        io_write32(32'h1FFF_0014, {16'h0000, 16'h0011});
+        io_write32(32'h1FFF_0014, {16'h0000, 16'h0001});
         io_write32(32'h1FFF_0018, 32'h0001_0000);
         repeat(4) @(negedge clk);
         if (j1!==16'h0F00 || j2!==16'h0030 || run!==1'b1 || seq!==16'd2) begin
             errors=errors+1; $display("  FAIL frame 2: j1=%h j2=%h run=%b seq=%0d", j1, j2, run, seq);
         end
         io_read32(32'h1FFF_0014, v);
-        if (v !== 32'h0000_0011) begin errors=errors+1; $display("  FAIL STICK/CONTROL readback %h", v); end
-        // Frame 3: "Power down cartridge" clears run_request; the check mode stays in CONTROL.
+        if (v !== 32'h0000_0001) begin errors=errors+1; $display("  FAIL STICK/CONTROL readback %h", v); end
+        // Frame 3: "Power down cartridge" clears run_request.
         io_write32(32'h1FFF_0010, 32'h0);
-        io_write32(32'h1FFF_0014, 32'h0000_0010);
+        io_write32(32'h1FFF_0014, 32'h0000_0000);
         io_write32(32'h1FFF_0018, 32'h0001_0000);
         repeat(4) @(negedge clk);
-        if (run!==1'b0 || cm!==2'd1 || seq!==16'd3) begin errors=errors+1; $display("  FAIL power down: run=%b check=%0d seq=%0d", run, cm, seq); end
-        // Frame 4: "Check cartridge (no power)": a request in check-only mode (CONTROL = 0x0031), neutral pads.
+        if (run!==1'b0 || cm!==2'd0 || seq!==16'd3) begin errors=errors+1; $display("  FAIL power down: run=%b check=%0d seq=%0d", run, cm, seq); end
+        // Frame 4: the service screen's "check the cartridge now": a request in check-only mode
+        // (CONTROL = 0x0031), neutral pads.
         io_write32(32'h1FFF_0010, 32'h0);
         io_write32(32'h1FFF_0014, 32'h0000_0031);
         io_write32(32'h1FFF_0018, 32'h0001_0000);
@@ -164,10 +165,17 @@ module tb_bootstrap_rom_window #(
         end
         // Frame 5: the check is over; the menu drops the request and goes back to its own mode.
         io_write32(32'h1FFF_0010, 32'h0);
-        io_write32(32'h1FFF_0014, 32'h0000_0010);
+        io_write32(32'h1FFF_0014, 32'h0000_0000);
         io_write32(32'h1FFF_0018, 32'h0001_0000);
         repeat(4) @(negedge clk);
-        if (run!==1'b0 || cm!==2'd1 || seq!==16'd5) begin errors=errors+1; $display("  FAIL after check: run=%b check=%0d seq=%0d", run, cm, seq); end
+        if (run!==1'b0 || cm!==2'd0 || seq!==16'd5) begin errors=errors+1; $display("  FAIL after check: run=%b check=%0d seq=%0d", run, cm, seq); end
+
+        // Frame 6: the service screen set the check to report only for the session, then a start (CONTROL = 0x0011).
+        io_write32(32'h1FFF_0010, 32'h0);
+        io_write32(32'h1FFF_0014, 32'h0000_0011);
+        io_write32(32'h1FFF_0018, 32'h0001_0000);
+        repeat(4) @(negedge clk);
+        if (run!==1'b1 || cm!==2'd1 || seq!==16'd6) begin errors=errors+1; $display("  FAIL report-only start: run=%b check=%0d seq=%0d", run, cm, seq); end
 
         if (errors) begin
             $display("FAIL: bootstrap ROM window, %0d error(s)%s", errors, $test$plusargs("corrupt_load") ? " (corrupt_load injected)" : "");

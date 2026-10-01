@@ -145,10 +145,30 @@ When a cartridge runs, the boot program no longer draws a status page: it switch
 
 For the owner's idea of catching a cartridge that is in back to front ([reversed-cartridge-detection.md](reversed-cartridge-detection.md)). The check itself is in the FPGA; the menu chooses its mode, shows its result, and says so on the screen.
 
-- New items: "Check cartridge (no power)" asks for the check alone and shows the result; "Cartridge check:" steps through report only, enforce and off. The menu starts in **report only** (`SN64_CHECK_MODE_DEFAULT`) until the check's thresholds have been confirmed on real cartridges.
+- No item on the main menu (owner, later the same day: "the 2 check things should be hiden and just be there and work upon clicking the start game option"). "Start SNES cartridge" asks for the check in enforce mode (`SN64_CHECK_MODE_DEFAULT`); a cartridge that fails is not powered.
+- The test tools are on a service screen the main menu does not show: Status / diagnostics, then Z. A runs the check alone and shows the result; L or R steps the mode through enforce, report only and off until the console is reset. While the mode is not enforce the main menu says so in red.
 - The mode travels in `CONTROL` bits 5:4 with every frame's write. The result comes back in `CART_CHECK`, read with `FAULT` as the 32-bit pair at `0x08`.
 - New alert screen. A latched fault or a finished check ends the request and shows the reason; the fault word is copied first, because dropping the request clears the latch. The reversed-cartridge text is "WHOA. WRONG WAY ROUND. / That cartridge is in backwards. / We don't do that around here. / Nothing was powered, so no harm done. Take it out, turn the label to the front, and try again." A rail that does not rise at all is reported as a short. In report-only mode a failed check followed by a power fault says that the check had warned.
 - The game display is entered only once the sequencer reports RUNNING with the SNES clock on. Until then a text screen shows "Checking the cartridge..." or "Starting the cartridge...". Before this change a start that ended in a power fault left the program waiting in the frame copy for lines that never came.
 - The decision which screen a result gives is in `src/sn64_cartcheck.c`, pure C. Host test `tests/test_cartcheck.c` (in `make test`): 74 checks, including that every screen line fits 38 columns. `make test-negative` builds it with a wrong short/backwards level and requires it to fail.
 
 Rebuilt: 131,072 bytes (unchanged size), CIC-6102 check OK, word image fits `ROM_ADDR_BITS = 16`. Not run on a console or an emulator, like the rest of the menu.
+
+## Splash screens at start-up (2026-10-01)
+
+Owner: "do sn64 logo splash followed by fantomzap logo splash", on the N64 and the M64 alike (it is one ROM). When the console starts, the program shows the SN64 logo, then the owner's FantomZap logo, then the menu. Each logo fades in over 20 frames, holds for 80 and fades out over 20: 2.0 s at 60 Hz, 2.4 s at 50 Hz. A, B or Start skips straight to the menu. The cartridge request is cleared before the first splash, as before.
+
+![Mock-up of the start-up sequence](img/splash-screens.png)
+
+The picture is drawn by `tools/mock_screens.py` from the pixels the ROM holds, not captured from a console.
+
+- Pictures: `tools/make_splash.py` draws both logos from their files in `assets/logo/` at screen size, puts them on black and reduces them to a palette: the SN64 logo 272 x 89 in 64 colours, the FantomZap logo 280 x 47 in 16 greys. The result is `src/sn64_splash_data.c` (generated; `make splash` rebuilds it). A first try with median-cut colour reduction merged the blue and the green button; maximum-coverage reduction keeps them (worst error 19 of 255 in any channel).
+- Drawing: `src/sn64_splash.c`, pure C. It fills the frame black and draws the picture in the centre through a palette scaled to the brightness of the frame.
+- Host test `tests/test_splash.c` (in `make test`): 35 checks on the fade, the centring, the clipping, brightness and the picture data. `make test-negative` builds it with the picture shifted 8 pixels and requires it to fail.
+- ROM: 131,072 bytes as before, SHA-256 `2d3a8feab927c465a7ef447479a81e3da6cee084b980a5e85ce5f0d040395140` (with the service screen that was added afterwards). The two pictures and their code took 6.6 KB of the compressed program; 5,514 bytes are left in the 128 KiB window that `ROM_ADDR_BITS = 16` gives. The v2 board uses 17 (256 KiB).
+
+Not run on a console or an emulator, like the rest of the menu. The FantomZap name and logo are the owner's and are not under the open licences (see `NOTICE`).
+
+## Menu ideas (2026-10-01)
+
+The owner asked what features and options the menu should get and said the menu system could be repackaged. The list of candidates, with what each would take, is in [menu-ideas.md](menu-ideas.md). Nothing in it is decided or built.

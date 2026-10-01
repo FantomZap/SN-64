@@ -31,6 +31,7 @@ Every target in the original specification remains in scope, including PAL, prot
 - [Controller path and default N64 mapping](docs/design/controller-path-implementation.md)
 - [SNES CIC lock and region detection](docs/design/snes-cic-implementation.md)
 - [N64 bootstrap menu ROM](docs/design/n64-bootstrap.md)
+- [Menu ideas: candidate features and a new layout (nothing decided)](docs/design/menu-ideas.md)
 - [Integrated top level and system simulation](docs/design/system-integration.md)
 - [Bootstrap ROM window from the configuration flash](docs/design/bootrom-flash.md)
 - [Mechanical architecture: board arrangement, insertion depths, region-free opening](docs/design/mechanical-architecture.md)

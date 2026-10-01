@@ -15,6 +15,7 @@
 #include "sn64_cartcheck.h"
 #include "sn64_mailbox.h"
 #include "sn64_mapping.h"
+#include "sn64_splash.h"
 
 // ---- console video path: the SNES picture and sound through the console's own output
 #define PI_BSD_DOM2_LAT_REG ((volatile uint32_t *)0xA4600024)
@@ -104,24 +105,23 @@ static void game_audio(void)
 #define MENU_HOTKEY        (N64_BTN_Z | N64_BTN_L | N64_BTN_R)
 #define MENU_HOTKEY_FRAMES 60
 
-// Cartridge check mode the menu starts with. Report only until the check's thresholds have
-// been confirmed on real cartridges (docs/design/reversed-cartridge-detection.md): it measures
-// and shows the verdict but cannot stop a cartridge from starting. Change to
-// SN64_CHECK_MODE_ENFORCE once it has earned that.
+// The cartridge check (docs/design/reversed-cartridge-detection.md) is not a menu option (owner,
+// 2026-10-01): it runs whenever a cartridge is started and a cartridge that fails is not powered.
+// Its test tools are on the service screen: Status / diagnostics, then Z. There the mode can be
+// changed for the session, which is what to do if the check ever refuses a good cartridge before
+// its thresholds have been confirmed on real ones.
 #ifndef SN64_CHECK_MODE_DEFAULT
-#define SN64_CHECK_MODE_DEFAULT SN64_CHECK_MODE_REPORT
+#define SN64_CHECK_MODE_DEFAULT SN64_CHECK_MODE_ENFORCE
 #endif
 // "Check cartridge" gives up after this many frames (the FPGA's own limit is 4 s).
 #define CHECK_WAIT_FRAMES  480
 
 typedef enum { MODE_MENU, MODE_RUN, MODE_CHECK } run_mode_t;
-typedef enum { SCREEN_MAIN, SCREEN_MAPPING, SCREEN_STATUS, SCREEN_ALERT } screen_t;
-typedef enum { ITEM_START, ITEM_CHECK, ITEM_CHECK_MODE, ITEM_MAPPING, ITEM_STATUS, ITEM_POWER_DOWN, ITEM_COUNT } item_t;
+typedef enum { SCREEN_MAIN, SCREEN_MAPPING, SCREEN_STATUS, SCREEN_SERVICE, SCREEN_ALERT } screen_t;
+typedef enum { ITEM_START, ITEM_MAPPING, ITEM_STATUS, ITEM_POWER_DOWN, ITEM_COUNT } item_t;
 
 static const char *const item_names[ITEM_COUNT] = {
     "Start SNES cartridge",
-    "Check cartridge (no power)",
-    "Cartridge check:",
     "Controller mapping",
     "Status / diagnostics",
     "Power down cartridge",
@@ -149,7 +149,7 @@ static screen_t   screen = SCREEN_MAIN;
 static int        cursor;
 static int        hotkey_frames;
 static const char *message = "";
-static unsigned   check_mode = SN64_CHECK_MODE_DEFAULT;   // enforce, report only or off
+static unsigned   check_mode = SN64_CHECK_MODE_DEFAULT;   // enforce; the service screen can change it for the session
 static int        wait_frames;                            // frames spent waiting for a check-only result
 static sn64_alert_t alert = SN64_ALERT_NONE;              // what the alert screen shows ...
 static uint16_t   alert_fault, alert_check;               // ... and the words it was decided from
@@ -232,28 +232,6 @@ static void menu_select(item_t item)
             message = "Running. Hold Z+L+R 1 s for menu";
         }
         break;
-    case ITEM_CHECK:
-        if (!mbox.present) {
-            message = "SN64 hardware not detected";
-        } else if (run_request) {
-            message = "Power the cartridge down first";
-        } else {
-            run_request = true;                 // with check only in CONTROL: nothing gets powered
-            mode = MODE_CHECK;
-            wait_frames = 0;
-            message = "";
-        }
-        break;
-    case ITEM_CHECK_MODE:                       // report only -> enforce -> off -> report only
-        if (run_request) {
-            message = "Power the cartridge down first";
-        } else {
-            check_mode = (check_mode == SN64_CHECK_MODE_REPORT)  ? SN64_CHECK_MODE_ENFORCE :
-                         (check_mode == SN64_CHECK_MODE_ENFORCE) ? SN64_CHECK_MODE_OFF :
-                                                                   SN64_CHECK_MODE_REPORT;
-            message = (check_mode == SN64_CHECK_MODE_OFF) ? "Check off: reversed carts not caught" : "";
-        }
-        break;
     case ITEM_MAPPING:
         screen = SCREEN_MAPPING;
         break;
@@ -269,10 +247,42 @@ static void menu_select(item_t item)
     }
 }
 
+// Service screen (Status / diagnostics, then Z): the cartridge check's test tools.
+static const char *service_note = "";
+
+static void service_input(joypad_buttons_t pressed)
+{
+    if (pressed.b || pressed.start) {
+        screen = SCREEN_STATUS;
+    } else if (run_request) {
+        if (pressed.a || pressed.l || pressed.r)
+            service_note = "Power the cartridge down first";
+    } else if (pressed.a) {
+        if (!mbox.present) {
+            service_note = "SN64 hardware not detected";
+        } else {
+            run_request = true;                 // with check only in CONTROL: nothing gets powered
+            mode = MODE_CHECK;
+            wait_frames = 0;
+            service_note = "";
+        }
+    } else if (pressed.l || pressed.r) {        // enforce -> report only -> off -> enforce
+        check_mode = (check_mode == SN64_CHECK_MODE_ENFORCE) ? SN64_CHECK_MODE_REPORT :
+                     (check_mode == SN64_CHECK_MODE_REPORT)  ? SN64_CHECK_MODE_OFF :
+                                                               SN64_CHECK_MODE_ENFORCE;
+        service_note = (check_mode == SN64_CHECK_MODE_ENFORCE) ? "" : "Until the console is reset";
+    }
+}
+
 static void menu_input(joypad_buttons_t pressed)
 {
+    if (screen == SCREEN_SERVICE) {
+        service_input(pressed);
+        return;
+    }
     if (screen != SCREEN_MAIN) {
         if (pressed.b || pressed.start || (screen == SCREEN_ALERT && pressed.a)) screen = SCREEN_MAIN;
+        else if (screen == SCREEN_STATUS && pressed.z) screen = SCREEN_SERVICE;
         return;
     }
     if (pressed.d_up)   cursor = (cursor + ITEM_COUNT - 1) % ITEM_COUNT;
@@ -390,15 +400,30 @@ static void draw_main(surface_t *d)
         line(d, 5, col_text, "Region: %s", rt);
     }
     for (int i = 0; i < ITEM_COUNT; i++)
-        line(d, 6 + i, i == cursor ? col_hi : col_text, "%c %s%s%s", i == cursor ? '>' : ' ', item_names[i],
-             i == ITEM_CHECK_MODE ? " " : "", i == ITEM_CHECK_MODE ? sn64_check_mode_name(check_mode) : "");
-    line(d, 13, col_warn, "%s", message);
-    if (mbox.present) {
-        char cs[40];
-        line(d, 15, (mbox.cart_check & SN64_CHECK_DONE) && !(mbox.cart_check & SN64_CHECK_PASS) ? col_warn : col_dim,
-             "Last check: %s", sn64_check_summary(mbox.cart_check, cs, sizeof(cs)));
-    }
+        line(d, 6 + i, i == cursor ? col_hi : col_text, "%c %s", i == cursor ? '>' : ' ', item_names[i]);
+    line(d, 12, col_warn, "%s", message);
+    if (check_mode != SN64_CHECK_MODE_ENFORCE)          // never silently: the service screen relaxed the check
+        line(d, 14, col_warn, "Cartridge check: %s", sn64_check_mode_name(check_mode));
     line(d, 20, col_dim, "Up/Down select  A choose  B back");
+}
+
+static void draw_service(surface_t *d)
+{
+    char cs[40];
+    draw_header(d);
+    line(d, 3, col_hi, "Service: cartridge check");
+    line(d, 5, col_text, "The check runs whenever a cartridge");
+    line(d, 6, col_text, "is started. These are its test tools.");
+    line(d, 8, check_mode == SN64_CHECK_MODE_ENFORCE ? col_text : col_warn, "Mode: %s", sn64_check_mode_name(check_mode));
+    line(d, 9, col_dim, check_mode == SN64_CHECK_MODE_ENFORCE ? "a failed check stops the start" :
+                        check_mode == SN64_CHECK_MODE_REPORT  ? "measures, then starts anyway" :
+                                                                "no check: nothing is caught");
+    line(d, 11, (mbox.cart_check & SN64_CHECK_DONE) && !(mbox.cart_check & SN64_CHECK_PASS) ? col_warn : col_text,
+         "Last check: %s", sn64_check_summary(mbox.cart_check, cs, sizeof(cs)));
+    line(d, 13, col_warn, "%s", service_note);
+    line(d, 19, col_dim, "A: check the cartridge now, no power");
+    line(d, 20, col_dim, "L or R: change the mode");
+    line(d, 22, col_dim, "B: back");
 }
 
 // A request is up but the cartridge is not running yet (or will not be: check only).
@@ -474,7 +499,32 @@ static void draw_status(surface_t *d)
     line(d, 19, col_text, "JOY1 %04X JOY2 %04X", mbox.rb_joy1, mbox.rb_joy2);
     line(d, 20, col_text, "STICK %04X CONTROL %04X", mbox.rb_stick, mbox.rb_control);
     line(d, 21, col_text, "FAULT %04X CHECK %04X", mbox.fault, mbox.cart_check);
-    line(d, 22, col_dim, "B: back");
+    line(d, 22, col_dim, "B: back   Z: service");
+}
+
+// ---- splash screens at start-up, on the N64 and the M64 alike (owner, 2026-10-01): the SN64
+// logo, then the FantomZap logo, then the menu. A, B or Start skips straight to the menu.
+
+static bool splash_one(const sn64_splash_image_t *img)
+{
+    for (int frame = 0; ; frame++) {
+        int level = sn64_splash_level(frame);
+        if (level < 0)
+            return true;
+        joypad_poll();
+        joypad_buttons_t pressed = joypad_get_buttons_pressed(JOYPAD_PORT_1);
+        if (pressed.a || pressed.b || pressed.start)
+            return false;
+        surface_t *d = display_get();
+        sn64_splash_draw((uint16_t *)d->buffer, d->width, d->height, d->stride / 2, img, level);
+        display_show(d);
+    }
+}
+
+static void splash(void)
+{
+    if (splash_one(&sn64_splash_sn64))
+        splash_one(&sn64_splash_fantomzap);
 }
 
 int main(void)
@@ -496,6 +546,8 @@ int main(void)
     run_request = false;
     mailbox_read();
     mailbox_write_frame(0, 0, 0, false);
+
+    splash();
 
     for (;;) {
         joypad_poll();
@@ -543,6 +595,7 @@ int main(void)
             if (mode != MODE_MENU)            draw_wait(d);
             else if (screen == SCREEN_MAPPING) draw_mapping(d, n1, live1);
             else if (screen == SCREEN_STATUS)  draw_status(d);
+            else if (screen == SCREEN_SERVICE) draw_service(d);
             else if (screen == SCREEN_ALERT)   draw_alert(d);
             else                               draw_main(d);
             display_show(d);

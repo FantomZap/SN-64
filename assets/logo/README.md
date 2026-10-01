@@ -35,6 +35,8 @@ The v2 shell carries the logo on the front of its cap, stamped in the way a Game
 
 The letters in every file are written in final coordinates with their arcs as Bezier curves and no `transform` attribute. A slanted arc is a piece of an ellipse, and the CAD importer used for the shell broke the S and the 6 when they were written as transformed arcs.
 
+The back of the cap carries the owner's own FantomZap logo in the same style; that logo is in [fantomzap/](fantomzap/README.md) and is not an SN64 logo.
+
 ## How the files are made
 
 [make_logo.py](make_logo.py) writes every SVG (pure Python). The four characters are drawn in the script as outlines, so no font is needed or embedded. [render_previews.py](render_previews.py) builds the preview sheet and needs PyMuPDF and Pillow.

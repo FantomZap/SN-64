@@ -19,8 +19,9 @@ usbc, console_top), `sn64-v2-shell-front.stl` and `sn64-v2-shell-back.stl` for t
 assembly STL and the 41 MB board fit assembly are generated locally and kept out of git), renders
 taken in FreeCAD:
 `shell-front` (label side, what the player sees), `shell-back`, `shell-right`, `shell-bottom` and
-`shell-port` (the port), `shell-iso`, `shell-iso-back`, `shell-low`, `shell-pocket` (looking into the empty
-pocket), `shell-logo` (the logo on the cap, close up), `halves-open` (both halves, insides up),
+`shell-port` (from low in front), `shell-iso`, `shell-iso-back`, `shell-low`, `shell-pocket` (looking into the empty
+pocket), `shell-logo` (the logo on the front of the cap, close up), `shell-logo-back` (the owner's logo
+on the back of the cap, close up), `shell-usb` (the USB-C port, close up), `halves-open` (both halves, insides up),
 `half-front-with-board` (the board in the label-side half), `section-screw-post` (cut through a screw
 post) and `section-centre` (cut through the middle). FreeCAD opens the STEP
 directly; Blender imports the STL (File > Import > STL).
@@ -69,8 +70,13 @@ CERN-OHL-S-2.0), so the shell model is CERN-OHL-S-2.0 too (`mechanical/README.md
   floor, which is level with the socket shoulder. The pocket is sized for the US cartridge and has
   no region tabs, so Super Famicom and PAL cartridges (about 6 mm narrower, same connector) go in
   too.
-- **USB-C** in the right wall of the stem, centre 32.5 mm above the shoulders: 8 mm above the
-  console's top surface and 5 mm below the flare.
+- **USB-C** in the side wall of the stem, centre 32.5 mm above the shoulders: 8 mm above the
+  console's top surface and 5 mm below the flare. It is on the board's +X side, which is the
+  player's left. The port has two steps with rounded ends (owner, 2026-10-01: the plain window
+  was a placeholder): a recess for the cable plug's overmold, and through its floor an opening
+  just larger than the receptacle's face. The recess is needed, not decoration: the receptacle's
+  face is 2.06 mm behind the wall's outer surface, and a mated plug's overmold stops 1.95 mm in
+  front of the receptacle, so against a flat wall a plug would stop 0.1 mm short of home.
 - **Two halves**, like an N64 cartridge: the label-side half carries the board and the back half
   closes over it. They part at the board's back face, where SummerCart64's halves part. The
   brackets under the socket ears belong to the label-side half and stand 0.25 mm clear of the back
@@ -93,6 +99,12 @@ CERN-OHL-S-2.0), so the shell model is CERN-OHL-S-2.0 too (`mechanical/README.md
   2026-10-01: "I dont want it proud of the surface"): a pill-shaped pocket, which is the inside of
   the logo's ring, with the button pads and the letters standing in it level with the face. The
   shapes come from `assets/logo/sn64-logo-mono.svg`.
+- **The owner's FantomZap logo** stamped into the back of the cap the same way (owner, 2026-10-01:
+  "use on the reverse side of the shell like we did with the front"): a pill-shaped pocket of the
+  same height and depth, with the warning triangle, the bolt and the nine letters standing in it
+  level with the face. It reads the right way round from behind and sits clear of the screws.
+  The shapes are outlines traced from his artwork, `assets/logo/fantomzap/fantomzap-wordmark-mono.svg`.
+  The FantomZap name and logo are his and are not under the open licences (see `NOTICE`).
 
 | Item | Value (mm) | Basis |
 |---|---|---|
@@ -110,7 +122,11 @@ CERN-OHL-S-2.0), so the shell model is CERN-OHL-S-2.0 too (`mechanical/README.md
 | Socket nose | 94.9 x 8.75, 10.55 high, slot 90.5 long with a key in each PCB gap | SNES Jr connector model (sourced, a different connector of the same family) |
 | Board top edge | 60 | socket underside 0.5 above it |
 | Cartridge | US shape: 135.4 wide, middle 92.2 x 19.9 x 87.5, sides 17.0 x 84.2; seat at 66.5, top at 154.0 | NESdev forum measurements (community, "a little rough") |
-| USB-C window | 13 x 7 in the right wall at 32.5, 8.3 above the console top | plug envelope 12.35 x 6.5 **assumed** |
+| USB-C port, recess | 13 x 7 with rounded ends, 1.0 deep, in the side wall at 32.5, 8.3 above the console top | plug overmold 12.35 x 6.5 at most **assumed**; depth chosen so the overmold ends 0.9 above the recess floor |
+| USB-C port, opening | 9.6 x 3.8 with rounded ends through the 1.0 rim that is left | receptacle 8.94 x 3.16 (JAE drawing SJ122205, sourced) plus 0.33 all round (**assumed** clearance) |
+| Plug against the wall | receptacle face 2.06 behind the outer surface; mated overmold 1.95 in front of the receptacle | wall 2.0 (model); 6.65 plug length less 4.7 engagement (JAE drawing, sourced) |
+| Back logo pocket | 102.4 x 19.0, 0.6 deep, centred on the cap's back face 12.25 above the board's top edge; artwork 88.4 x 14.6 | owner's logo; same height and depth as the front pocket |
+| Back logo detail at this size | triangle border 1.1, letter strokes 1.2 to 1.4; sharp tips under 0.7; tightest gaps under 0.35 | measured on the traced outlines |
 | Logo pocket | 64.7 x 19.0, 0.6 deep, centred on the cap's front face 12.25 above the board's top edge; 4.4 of wall left behind it | owner's choice of logo and style; size fitted to the flat face (25 high), depth **assumed** |
 | Logo detail at this size | letters 12.3 tall with 2.45 strokes; characters on the buttons 2.9 tall with 0.58 strokes; narrowest opening 0.46 (inside the 4 on its button) | derived from the logo file |
 | Parting plane | the board's back face, 0.6 behind its mid-plane | SummerCart64 shell (sourced) |
@@ -274,6 +290,17 @@ groups, which carry the cartridge audio inputs (pins 31 and 62, used by FXPAK Pr
   measured; what a part wider than the hole can meet on the way down is not.
 - SFC and PAL cartridges are 130 mm wide against the 136.6 mm pocket: guide ribs to centre them.
 - Pocket depth against grip: the cartridge must still be easy to pull out by its top.
+- **USB-C on the other side.** The owner would rather have the port on the player's right
+  (2026-10-01) and accepts the left if the move is costly. It is not a board redesign but it is not
+  free either: on the other side the open-drain driver U205 and two capacitors (C209, C212) sit
+  where the receptacle and its protection part would go, so the two corners trade places, about
+  twenty nets are routed again, and the USB data pair either runs about 95 mm across the board to
+  its series resistors or the FPGA's USB pins move. Not done; waiting for his word. The shell
+  script has `USB_SIDE` for it.
+- USB-C port in plastic: the 1.0 mm rim around the opening and the 0.33 mm clearance are untried.
+  Try real cables, including ones with a thick overmold.
+- Back logo against the process: its tips and its tightest gaps (under 0.35 mm) will fill in on a
+  filament printer; the strokes themselves (1.1 mm and up) hold.
 - Logo detail against the process that makes the shell: the characters on the buttons have 0.58 mm
   strokes and a 0.46 mm opening. Moulding or resin printing holds that; a filament printer does not.
   `LOGO_REL` in the script switches to `sn64-logo-mono-plain.svg` (no characters on the buttons,
@@ -292,3 +319,11 @@ groups, which carry the cartridge audio inputs (pins 31 and 62, used by FXPAK Pr
   wait for the sample.
 - Board: the right side notch is 1.3 mm higher than SummerCart64's; correct the outline so an
   unmodified SummerCart64 lower shell fits, or keep the trimmed post.
+
+## 2026-10-01: the owner's logo on the back, and a real USB-C port
+
+The owner chose one of his own logo files (warning triangle with a bolt, and the word FantomZap beside it) and asked for it on the back of the shell, done like the front. The artwork is a pixel image, so it was traced into outlines first ([assets/logo/fantomzap/](../../assets/logo/fantomzap/README.md)). The back of the cap now has a pocket 102.4 x 19.0 mm and 0.6 mm deep with the logo's eleven pieces standing in it level with the face. Checked in the model: both halves are single valid solids, nothing is higher than the back face, and the pocket ends 22 mm from the cap's corners and above the screw wells.
+
+He also pointed out that the USB-C opening was a placeholder: a plain 13 x 7 window. It is now a recess with rounded ends for the plug's overmold and an opening with rounded ends around the receptacle (values in the table above). The model's receptacle does not touch the shell.
+
+Pictures: [shell-back.png](../../mechanical/sn64-v2-shell/shell-back.png), [shell-logo-back.png](../../mechanical/sn64-v2-shell/shell-logo-back.png), [shell-iso-back.png](../../mechanical/sn64-v2-shell/shell-iso-back.png), [shell-usb.png](../../mechanical/sn64-v2-shell/shell-usb.png), [shell-right.png](../../mechanical/sn64-v2-shell/shell-right.png). The `fit-*.png` pictures were made before these two changes and do not show them.

@@ -1,14 +1,16 @@
 # Cartridge check: detecting a cartridge that is in back to front
 
 **Status (2026-10-01): implemented in the FPGA logic and the boot menu, simulated only. The
-thresholds are assumptions. Nothing has been measured on a board or on a cartridge. The menu
-therefore starts in "report only": the check measures and reports but cannot stop a cartridge
-from starting.**
+thresholds are assumptions. Nothing has been measured on a board or on a cartridge. The check is
+not a menu option (owner, 2026-10-01): it runs whenever a cartridge is started and a cartridge
+that fails is not powered. Until real cartridges have been measured, that means a wrong threshold
+would refuse good cartridges; the service screen is the way out (see "Modes").**
 
 Owner idea, 2026-10-01: "maybe we can have a detection circuit built into the fpga? If it detects
 the cart in backwards a message displays stating something quippy but serious enough about what
-we dont do around here." Follow-up the same day: it has to be testable in real life without false
-alarms blocking games, hence the modes below.
+we dont do around here." Follow-ups the same day: it has to be testable in real life without false
+alarms blocking games, hence the modes below; and it is not to be an option on the menu ("the 2
+check things should be hiden and just be there and work upon clicking the start game option").
 
 ## Why it matters
 
@@ -85,14 +87,15 @@ starts.
 
 | Mode | What a failed check does | Use |
 |---|---|---|
-| 0 enforce | latches fault 0x01; 5 V is never switched on | normal use, once the thresholds are proven |
+| 0 enforce | latches fault 0x01; 5 V is never switched on | normal use: what "Start SNES cartridge" does |
 | 1 report only | records the result; the cartridge is started anyway | first tests on real hardware: a false alarm cannot block a game |
 | 2 off | no check | behaviour before the check existed |
 | 3 check only | records the result; 5 V is **not** switched on, pass or fail | measuring cartridges, both ways round, without any risk |
 
-The FPGA resets to enforce. The boot menu writes **report only** until the thresholds have been
-confirmed on real cartridges (`SN64_CHECK_MODE_DEFAULT` in `firmware/bootstrap/src/main.c`). The
-check can also be left out of a build: `SEQ_PROBE_ENABLE = 0` in `sn64_top` (the v1 wrapper, which
+The FPGA resets to enforce and the boot menu asks for **enforce** (`SN64_CHECK_MODE_DEFAULT` in
+`firmware/bootstrap/src/main.c`). The other modes are on a service screen that the main menu does
+not show: Status / diagnostics, then Z. There A runs check only and L or R changes the mode until
+the console is reset; the main menu then says so in red. The check can also be left out of a build: `SEQ_PROBE_ENABLE = 0` in `sn64_top` (the v1 wrapper, which
 has no ADC, is built that way). A build without the check still honours check only by never
 powering.
 
@@ -101,9 +104,9 @@ before the switch's fault flag ends it.
 
 ## What the screen says
 
-Menu items: "Check cartridge (no power)" runs mode 3 and shows the result. "Cartridge check:" steps
-through report only, enforce and off. The main screen shows the last result ("Last check: ok,
-0.79 V"). When enforce refuses a cartridge, or check only finds one reversed:
+The main menu has no item for the check. Choosing "Start SNES cartridge" shows "Checking the
+cartridge..." and then either starts the game or, when the check refuses the cartridge (or the
+service screen's check only finds one reversed), shows:
 
 ```
 WHOA. WRONG WAY ROUND.
@@ -119,7 +122,7 @@ to the front, and try again.
 A rail that does not rise at all (below 0.145 V, assumed) is reported as a short instead. The
 wording is in `firmware/bootstrap/src/sn64_cartcheck.c`.
 
-![Mock-up of the menu and the three result screens](img/cart-check-screens.png)
+![Mock-up: the main menu, the wrong-way screen, the hidden service screen and the short screen](img/cart-check-screens.png)
 
 The picture is a drawing made by `firmware/bootstrap/tools/mock_screens.py` from the texts in the
 source, not a capture: the menu has not run on a console or an emulator, and the console's font
@@ -187,8 +190,9 @@ nothing below 0.8 V and then behaves as 150 ohm; back to front it is one silicon
 1. **No real cartridge has been measured.** The first job on a real board is check only on every
    cartridge to hand, both ways round, noting the reading: North American, PAL and Super Famicom
    cartridges, ones with a save battery, ones with extra chips, the Super EverDrive X5/X6 and the
-   FXPAK Pro. The threshold goes between the two groups. Only then should the menu default change
-   to enforce.
+   FXPAK Pro. The threshold goes between the two groups. Until that is done the enforced check
+   rests on assumptions; if it refuses good cartridges on the first board, switch it to report only
+   on the service screen and measure.
 2. **The margin may be thin.** In the model the two groups are 0.47 V and 0.80 V around a 0.65 V
    threshold. If real cartridges sit closer, the first fix is more test current by lowering R30 and
    R31 together (values only, for example 4.7 k and 2.4 k for 0.7 mA). The next would be a
@@ -211,14 +215,17 @@ nothing below 0.8 V and then behaves as 150 ohm; back to front it is one silicon
 The point is to find out whether the check ever calls a good cartridge bad, before it is allowed
 to block anything. Nothing in this plan powers a cartridge that is in back to front.
 
-1. Leave the menu's setting on report only.
-2. Empty socket: choose "Check cartridge (no power)". Expected: OK. Note the voltage.
-3. Each cartridge the right way round: "Check cartridge (no power)". Expected: OK. Note the
-   voltage and how long it took.
-4. The same cartridge back to front, if the pocket lets it in: "Check cartridge (no power)" only.
-   Expected: the wrong-way screen. Note the voltage. Do not choose "Start" with it reversed.
-5. Play each cartridge the right way round in report only. Afterwards the main screen must say
-   "Last check: ok". A "FAILED" there on a game that ran is a false alarm: note the voltage.
+The tools are on the service screen: Status / diagnostics, then Z.
+
+1. Empty socket: press A on the service screen ("check the cartridge now, no power"). Expected: OK.
+   Note the voltage.
+2. Each cartridge the right way round: the same. Expected: OK. Note the voltage and how long it took.
+3. The same cartridge back to front, if the pocket lets it in: the same, and only that. Expected:
+   the wrong-way screen. Note the voltage. Do not start a game with it reversed while the mode is
+   report only or off.
+4. Play each cartridge the right way round. A good cartridge that gets the wrong-way screen is a
+   false alarm: note the voltage, switch the mode to report only with L or R, and carry on. In
+   report only the service screen shows "Last check: FAILED" for a game that ran anyway.
 
 | Cartridge | Right way round (V) | Back to front (V) | Time to pass (s) | Notes |
 |---|---|---|---|---|
@@ -230,7 +237,7 @@ to block anything. Nothing in this plan powers a cartridge that is in back to fr
 | Super EverDrive X5 or X6 | | | | |
 | FXPAK Pro | | | | |
 
-The check is ready for enforce when every "right way round" reading is clearly above every "back
+The check has earned its place when every "right way round" reading is clearly above every "back
 to front" reading, with the threshold between them, and no game showed a false alarm. If the two
 groups touch or overlap, see items 2 to 4 under "Not known yet" before changing anything.
 

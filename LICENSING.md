@@ -34,5 +34,9 @@ Use it, build it, change it and sell it, in whole or in part.
 
 The names "SN64" and "SN 64" and any SN64 logo. Call a modified design "based on SN64".
 
+The name "FantomZap" and the FantomZap logo, which is on the back of the shell and on the second
+splash screen. They are the author's own. Take them out of a modified design or replace them; the
+attribution line "SN64 by FantomZap" stays.
+
 There is no warranty. Nintendo 64, Super NES, Super Famicom and M64 are trademarks of their owners;
 SN64 is not affiliated with or endorsed by Nintendo or ModRetro.

@@ -59,4 +59,8 @@ Build outputs stay under `build/n64-bootstrap/`. Do not commit ROM binaries.
 
 ## Cartridge check
 
-The menu has "Check cartridge (no power)" and a "Cartridge check:" setting (report only, enforce, off). The check is in the FPGA: before the cartridge's 5 V is switched on, a small test current shows whether the cartridge is in back to front. The menu starts in report only until the thresholds are confirmed on real cartridges; change `SN64_CHECK_MODE_DEFAULT` in `src/main.c` to make enforce the default. Screens and wording: `src/sn64_cartcheck.c`, tested on the host by `tests/test_cartcheck.c`. Design note: `docs/design/reversed-cartridge-detection.md`.
+The check is in the FPGA: before the cartridge's 5 V is switched on, a small test current shows whether the cartridge is in back to front. It is not a menu option: "Start SNES cartridge" runs it and a cartridge that fails is not powered (`SN64_CHECK_MODE_DEFAULT` in `src/main.c` is enforce). Its test tools are on a service screen the main menu does not show: Status / diagnostics, then Z (A: check now without power; L or R: enforce, report only or off until the console is reset). Screens and wording: `src/sn64_cartcheck.c`, tested on the host by `tests/test_cartcheck.c`. Design note: `docs/design/reversed-cartridge-detection.md`.
+
+## Splash screens
+
+At start-up the program shows the SN64 logo, then the owner's FantomZap logo, then the menu (about 2 s each; A, B or Start skips). The pictures are generated: `make splash` runs `tools/make_splash.py`, which draws the logo files in `assets/logo/` at screen size and writes `src/sn64_splash_data.c` (needs PyMuPDF and Pillow). Drawing code: `src/sn64_splash.c`, tested on the host by `tests/test_splash.c`. `tools/mock_screens.py` draws mock-ups of the splash and menu screens into `docs/design/img/`.

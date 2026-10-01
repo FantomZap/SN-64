@@ -62,6 +62,8 @@ Reference mounting uses a **1.2 mm PCB** and **0.5 mm front overhang**; the PCB 
 
 This matches the source placement: J1 is at **(102.2, 92.5), −90°**, facing the left PCB edge. Its fabrication outline maps to front X = **98.6 mm**, while that board edge is X = **99.1 mm**, giving the same 0.5 mm overhang. SummerCart64's board thickness is 1.2 mm. Its footprint courtyard is **10.94 × 8.43 mm**; this is component placement space, **not** a plug or enclosure keepout.
 
+2026-10-01: the v2 shell's port follows from these numbers: a 1.0 mm deep recess for the plug's overmold and an opening around the receptacle, see [v2-shell.md](v2-shell.md). The overmold envelope and the clearances there are still assumptions.
+
 For the next enclosure pass, place the selected connector model on the actual SN 64 board and reserve space for the complete mating plug, its overmold and cable bend. Derive the opening and wall setback from that assembly, printing tolerances and a fit coupon. The connector opening, courtyard, and nominal 1.95 mm exposed plug length cannot independently determine the shell cutout. Final side, elevation and distance from the cartridge bay are still unresolved here.
 
 ## Programmer clock: selected crystal and provisional capacitors

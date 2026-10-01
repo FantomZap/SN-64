@@ -21,7 +21,8 @@ CFLAGS += -DSN64_BOOTSTRAP_VERSION=\"$(SN64_BOOTSTRAP_VERSION)\"
 # Keep the builder's absolute source path out of the ROM (backtrace symbols).
 CFLAGS += -ffile-prefix-map="$(SRC_DIR)"=sn64_bootstrap
 
-OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/sn64_mapping.o $(BUILD_DIR)/sn64_cartcheck.o
+OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/sn64_mapping.o $(BUILD_DIR)/sn64_cartcheck.o \
+       $(BUILD_DIR)/sn64_splash.o $(BUILD_DIR)/sn64_splash_data.o
 
 # Standard libdragon header: libdragon IPL3 (signed for CIC-6102), title below.
 sn64_bootstrap.z64: N64_ROM_TITLE = "SN64 BOOTSTRAP"

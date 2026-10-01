@@ -37,7 +37,11 @@ Attribution
    where that is not practicable, on its packaging or in its documentation.
 
 3. Names. The names "SN64" and "SN 64" and any SN64 logo are not licensed by the above.
-   Describe a modified design as "based on SN64".
+   Describe a modified design as "based on SN64". The name "FantomZap" and the FantomZap
+   logo (assets/logo/fantomzap/, the back of the shell, the second splash screen of the
+   boot program) are the author's own and are not licensed by the above either: take
+   them out of a modified design or replace them, except in the attribution required
+   by items 1 and 2.
 
 No warranty
 -----------

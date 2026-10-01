@@ -1,0 +1,25 @@
+{
+  "source_name": "fantomzap text 2.png",
+  "source_size": [
+    3088,
+    673
+  ],
+  "source_bytes": 271947,
+  "source_sha256": "ccde05a832b0f6472cf7d4e2be347b55f150260d26643bef1e9ce7eb7ee006f9",
+  "artwork_box_px": [
+    40,
+    61,
+    3063,
+    561
+  ],
+  "settings": {
+    "threshold": "coverage > 50 %",
+    "turdsize": 20,
+    "alphamax": 1.0,
+    "opttolerance": 0.4,
+    "tracer": "potracer (potrace algorithm)"
+  },
+  "shapes": 11,
+  "holes": 5,
+  "segments": 350
+}

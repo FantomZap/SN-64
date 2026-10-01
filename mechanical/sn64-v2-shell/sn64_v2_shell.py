@@ -32,6 +32,10 @@ How it is built
                logo (owner, 2026-10-01): a pill-shaped pocket 19 mm high and 0.6 mm deep, which is
                the inside of the logo's ring, with the buttons and letters of
                assets/logo/sn64-logo-mono.svg standing in it level with the face. Nothing is proud.
+  back logo    the owner's FantomZap logo stamped into the back of the cap the same way (owner,
+               2026-10-01): a pill-shaped pocket of the same height and depth, with the warning
+               triangle, the bolt and the letters of assets/logo/fantomzap/fantomzap-wordmark-mono.svg
+               standing in it level with the face. It reads the right way round from behind.
 
 License: the lower body and the outline are derived from SummerCart64's shell
 (references/downloads/summercart64/hw/shell/injection mold/sc64_shell.stp, commit a1e7996d,
@@ -62,7 +66,7 @@ Assumed, to be measured before anything is cut
   cartridge seats with its bottom face on the socket shoulder
   cap: 5 mm walls, pocket clearance 0.6 / 0.3, rim 21.5 mm above the seat at the centre and 6 mm
       lower at the ends
-  USB-C plug overmold 12.35 x 6.5 (window 13 x 7)
+  USB-C plug overmold 12.35 x 6.5 at most (recess 13 x 7)
 
 Two geometries, picked by VARIANT below
   "board-60"  the board in hardware/sn64-v2 as it is since 2026-10-01 (owner: shorter, with about
@@ -118,7 +122,15 @@ WALL = 2.0
 Y_CUT = 24.5                            # real SummerCart64 shell below, extruded outline above
 SOCK_BASE_H = 6.0
 TAIL_T, TAIL_LAP = 0.5, 3.0
-PLUG_W, PLUG_T = 13.0, 7.0
+PLUG_W, PLUG_T = 13.0, 7.0               # recess for the cable plug's overmold (12.35 x 6.5 at most, ASSUMED)
+# USB-C port (owner, 2026-10-01: the plain window was a placeholder). Two steps with rounded ends, as on
+# a console: a recess for the plug's overmold, and through its floor an opening just larger than the
+# receptacle's face. JAE drawing SJ122205 (docs/design/usb-connector-mechanics.md): receptacle 8.94 x
+# 3.16; a mated plug's overmold stops 1.95 in front of the receptacle. The receptacle's face is 2.06
+# behind the wall's outer surface here, so without the recess a plug would stop 0.1 short of home.
+USB_SIDE = 1                            # +1: board +X, the player's left; -1 if the port moves to the other side
+USB_RECESS_DEPTH = 1.0                  # leaves a 1.0 rim around the opening; the overmold ends 0.9 above its floor
+USB_OPEN_CLR = 0.33                     # opening larger than the receptacle's face all round
 CAP_WALL, POCKET_CLR_X, POCKET_CLR_Z, POCKET_R = 5.0, 0.6, 0.3, 1.0
 # cartridge unknowns, to be replaced by two caliper readings on a real cartridge
 CART_BACK_TO_PCB = 8.5                  # back face to the PCB mid-plane (ASSUMED: PCB centred in the side sections,
@@ -135,6 +147,13 @@ LOGO_REL = "assets/logo/sn64-logo-mono.svg"
 LOGO_H = 19.0                           # height of the pocket; the flat face is about 25 high
 LOGO_UP = 12.25                         # its centre above the board's top edge: the middle of the flat face
 LOGO_DEPTH = 0.6                        # depth of the pocket
+# the owner's FantomZap logo stamped into the back of the cap the same way (owner, 2026-10-01). The
+# outlines are traced from his artwork (assets/logo/fantomzap/trace_logo.py). The pocket has the height
+# and depth of the front one; the artwork is 14.6 high in it, which makes its strokes 1.1 to 1.4 mm
+# wide and the whole logo 88 mm long.
+BACK_LOGO_REL = "assets/logo/fantomzap/fantomzap-wordmark-mono.svg"
+BACK_LOGO_ART_H = 14.6                  # height of the artwork (the triangle) inside the 19 mm pocket
+BACK_LOGO_END = 7.0                     # pocket beyond the artwork at each end (the ends are half circles)
 BOARD_W_WIDE, NECK_W = 111.0, 88.0
 # two halves and their fasteners (2026-10-01). The parting plane is the board's back face, as in
 # SummerCart64's shell.
@@ -345,6 +364,54 @@ def logo_recess(z_face):
     return pocket, islands[0].fuse(*islands[1:])
 
 
+def back_logo_recess(z_face):
+    """The owner's FantomZap logo stamped into the cap's back face like the logo on the front: a
+    pill-shaped pocket LOGO_H high and LOGO_DEPTH deep with the triangle, the bolt and the letters
+    standing in it, level with the face. Seen from behind it reads the right way round.
+    Returns (pocket to cut, islands to put back), or None if the logo file is missing."""
+    faces = []
+    for root in SC64_ROOTS:
+        try:
+            faces = [f for f in import_svg(root + BACK_LOGO_REL) if isinstance(f, Face)]
+            break
+        except Exception:               # try the next place
+            pass
+    if not faces:
+        NOTES.append("back logo file not found: no logo on the back of the cap")
+        return None
+    # imported faces carry the importer's own placement, so scale first (all about the same point),
+    # then measure and centre
+    k = BACK_LOGO_ART_H / Compound(children=faces).bounding_box().size.Y
+    scaled = [f.scale(k) for f in faces]
+    bb = Compound(children=scaled).bounding_box()
+    centre, width = bb.center(), bb.size.X + 2 * BACK_LOGO_END
+    # seen from behind the board's +X is on the right, so the logo's own x runs toward +X
+    back = Plane(origin=(0, Y_F1 + LOGO_UP, z_face), x_dir=(1, 0, 0), z_dir=(0, 0, 1))
+    pocket = extrude(back.from_local_coords(Pos(0, 0, 0.2) * SlotOverall(width, LOGO_H)),
+                     amount=LOGO_DEPTH + 0.2, dir=(0, 0, -1))
+    islands = [extrude(back.from_local_coords(f.translate((-centre.X, -centre.Y, 0))),
+                       amount=LOGO_DEPTH + 0.2, dir=(0, 0, -1)) for f in scaled]
+    NOTES.append(f"back logo recess {width:.1f} x {LOGO_H:.1f} mm on the cap back, {LOGO_DEPTH} mm deep, artwork "
+                 f"{bb.size.X:.1f} x {bb.size.Y:.1f}, {len(islands)} pieces standing in it level with the face")
+    return pocket, islands[0].fuse(*islands[1:])
+
+
+def usb_port():
+    """What to cut from the stem's side wall for the USB-C port: a recess with rounded ends for the
+    plug's overmold, and an opening with rounded ends for the plug itself through the floor of it."""
+    x_out = USB_SIDE * W_STEM / 2                        # the wall's outer surface at the port
+    # sketch plane on the wall, seen from outside: local x up the board (the port's long side), normal outward
+    face = Plane(origin=(x_out, Y_USB, USB_ZC), x_dir=(0, 1, 0), z_dir=(USB_SIDE, 0, 0))
+    inward = (-USB_SIDE, 0, 0)
+    recess = extrude(face.from_local_coords(Pos(0, 0, 1.0) * SlotOverall(PLUG_W, PLUG_T)),
+                     amount=1.0 + USB_RECESS_DEPTH, dir=inward)
+    opening = extrude(face.from_local_coords(Pos(0, 0, 1.0) * SlotOverall(USB_W + 2 * USB_OPEN_CLR, USB_H + 2 * USB_OPEN_CLR)),
+                      amount=1.0 + WALL + 1.5, dir=inward)
+    NOTES.append(f"USB-C port: recess {PLUG_W} x {PLUG_T} with rounded ends, {USB_RECESS_DEPTH} deep; opening "
+                 f"{USB_W + 2 * USB_OPEN_CLR:.1f} x {USB_H + 2 * USB_OPEN_CLR:.1f} through a {WALL - USB_RECESS_DEPTH:.1f} rim")
+    return recess + opening
+
+
 def build():
     sc = load_sc64()
     halves = [Pos(0, 0, DZ) * s for s in sc.solids()]
@@ -380,10 +447,13 @@ def build():
              + prism(Y_F1 + 1, Y_TOP - WALL, CAP_I))
     upper = outer - inner - pocket
     upper = upper - box(0, Y_TOP - WALL - 1, Y_TOP + 1, 0, SOCK_L + 0.5, SOCK_D + 0.5)          # socket opening
-    upper = upper - box(W_STEM / 2 - 1.0, Y_USB - PLUG_W / 2, Y_USB + PLUG_W / 2, USB_ZC, 5.0, PLUG_T)  # USB-C window
+    upper = upper - usb_port()
     logo = logo_recess(ZC - CAP_HT)
     if logo is not None:
         upper = upper - logo[0] + logo[1]
+    back_logo = back_logo_recess(ZC + CAP_HT)
+    if back_logo is not None:
+        upper = upper - back_logo[0] + back_logo[1]
 
     # the two halves part at the board's back face
     front_space = Pos(0, 60, PART_Z - 100) * Box(400, 400, 200)
@@ -439,7 +509,7 @@ def build():
 
     cart, cart_pcb = us_cartridge(Y_TOP)
 
-    usb = box(W_STEM / 2 - WALL - 0.06 - USB_D / 2, Y_USB - USB_W / 2, Y_USB + USB_W / 2, USB_ZC, USB_D, USB_H)
+    usb = box(USB_SIDE * (W_STEM / 2 - WALL - 0.06 - USB_D / 2), Y_USB - USB_W / 2, Y_USB + USB_W / 2, USB_ZC, USB_D, USB_H)
 
     console = (box(0, Y_LINE - 1, Y_LINE, DZ, 200, 90)
                - box(0, Y_LINE - 2, Y_LINE + 1, DZ, W_STEM + 2, 18.06 + 2))                      # console top surface (measured)
