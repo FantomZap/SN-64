@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <export version="E">
   <design>
-    <source>C:\Users\RyanB\.codex\worktrees\sn64-usbc-programming\SN 64 Project\hardware\sn64\sn64.kicad_sch</source>
+    <source>%USERPROFILE%\.codex\worktrees\sn64-usbc-programming\SN 64 Project\hardware\sn64\sn64.kicad_sch</source>
     <date>2026-09-28T23:59:55</date>
     <tool>Eeschema 10.0.6</tool>
     <sheet number="1" name="/" tstamps="/">

@@ -25,10 +25,10 @@ The coupon has nominal holes without printer or fabrication compensation. Inspec
 From the repository root, using the installed tool versions:
 
 ```powershell
-& 'C:/Program Files/KiCad/10.0/bin/python.exe' mechanical/extract_source_datums.py --source-root 'C:/Users/RyanB/Documents/Codex/SN 64 Project'
+& 'C:/Program Files/KiCad/10.0/bin/python.exe' mechanical/extract_source_datums.py --source-root '%USERPROFILE%/Documents/Codex/SN 64 Project'
 & 'C:/Program Files/FreeCAD 1.1/bin/python.exe' mechanical/build_fit_references.py
 & 'C:/Program Files/FreeCAD 1.1/bin/python.exe' mechanical/render_fit_references.py
-& 'C:/Program Files/FreeCAD 1.1/bin/python.exe' mechanical/inspect_reference_shells.py --source-root 'C:/Users/RyanB/Documents/Codex/SN 64 Project'
+& 'C:/Program Files/FreeCAD 1.1/bin/python.exe' mechanical/inspect_reference_shells.py --source-root '%USERPROFILE%/Documents/Codex/SN 64 Project'
 ```
 
 `build_fit_references.py` regenerates its named outputs. Preserve manual edits separately before running it. [Source datums](source-datums.json) include pinned source URLs and SHA-256 hashes. [Shell inspection](shell-inspection.json) records the independently imported upstream models; its bounding boxes must not be combined into a supposed assembled-cartridge envelope. Local originals and `downloads/Upstream-shell-references.FCStd` stay ignored in Git.
