@@ -349,3 +349,14 @@ Asked and answered: the board has the USB-C on its +X side, the player's left, a
 ROM after all of this: 131,072 bytes, SHA-256 `2d3a8feab927c465a7ef447479a81e3da6cee084b980a5e85ce5f0d040395140`, 5,514 bytes left in the 128 KiB window; host tests and their fault-injected builds as required; ROM/endpoint co-simulation passes.
 
 Checked in CAD and on the host only. Nothing printed, nothing run on a console. The shell's `fit-*.png` pictures predate the back logo and the port.
+
+## 2026-10-01 — what the chosen hardware allows; two defects found in the boot program
+
+The owner asked which quality functions the hardware on the v2 board can carry. Answer, with the numbers, in [menu-ideas.md](design/menu-ideas.md) under "What the chosen hardware allows". In short: plenty of logic (59 % free), flash (about 12 MB unused) and the whole console for picture and sound work; almost no block memory (5 of 208 blocks free), no current measurement, no spare pins brought out.
+
+Two things found while checking the boot program against that, both by reading the code:
+
+- The sound loop pads every 1,280-sample buffer with silence, because the FPGA's ring holds 1,024 samples. It would buzz. Software fix (`audio_push`).
+- Nothing matches the console's picture rate to the Super NES's 60.10 Hz, so a picture is dropped every few seconds. Software fix (the console's video timing is programmable), to be tried on real displays.
+
+Both are listed under "Still open" in [n64-bootstrap.md](design/n64-bootstrap.md). Neither is fixed.

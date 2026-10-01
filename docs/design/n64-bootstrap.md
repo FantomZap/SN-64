@@ -136,6 +136,8 @@ Options, not yet decided:
 6. **Telemetry (SN64-08-13):** voltage/current/temperature registers do not exist in the mailbox yet.
 7. **SNES serializer:** `joy1_buttons` to `JOY1_DI`/`JOY2_DI` is not in the RTL. It must follow the polarity above (1 = pressed in the image).
 8. **Controller-2 menu input** and GameCube-style pads on the M64 are untested. libdragon reports them through the same `joypad` API.
+9. **Sound loop (found 2026-10-01 by reading the code, not by ear).** `game_audio()` fills libdragon's 1,280-sample buffers from a ring that holds 1,024, padding the rest with silence, so the sound would buzz. Use `audio_push` with exactly the samples available, and match the output rate to the Super NES's. See "What the chosen hardware allows" in [menu-ideas.md](menu-ideas.md).
+10. **Frame pacing.** The display loop follows the Super NES's 60.10 Hz while the console's video runs at its own rate, so a picture is dropped every few seconds. Program the console's video timing to the Super NES's line and frame length. Same section.
 
 ## Console video path (2026-09-29): the game on the console's own screen
 

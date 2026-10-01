@@ -89,3 +89,44 @@ What limits it:
 | ROM space | 5.5 KB left of 128 KiB on the first board's window; the v2 board has a 256 KiB window | A font and graphics fit on v2. The 128 KiB build would have to stay text-only or be dropped |
 | Settings storage | None on the board that the menu can write | Controller Pak first; writing the board's flash from the menu would need FPGA work |
 | Not yet run on a console | The whole menu has only been compiled and tested on the PC | The first real run may change what is worth polishing |
+
+## What the chosen hardware allows (2026-10-01)
+
+The owner asked which quality functions the hardware already on the v2 board can carry. Numbers are from the routed design (`fpga/reports/v2-board-route.json`, `build/route-board/pnr.log`) and the design notes; nothing here has run on a board.
+
+| Part of the hardware | What is left | What it allows |
+|---|---|---|
+| FPGA logic (LFE5U-85F) | 41 % used, 59 % free | Cheat codes on the cartridge bus, turbo, the stick as a Super NES mouse, reading and writing a cartridge's save memory, a cartridge checksum test |
+| FPGA block memory | 203 of 208 blocks used; 5 free, about 11 KB | Nothing large. No second frame buffer, no save states, no rewind |
+| FPGA multipliers, PLLs | 19 of 156 multipliers, 3 of 4 PLLs | Room for filters in logic; one more clock if a function needs it |
+| Flash, 16 MB | bitstream and fallback image in the first 4 MB, menu after it; about 12 MB unused | A graphical menu with fonts and pictures, more languages, a game-name list. The menu cannot write it (only USB can), so it is no place for settings without new logic |
+| The console itself (N64 or M64 processor, video and sound chips) | all of it during a game; the game runs in the FPGA | Scaling, sharp or smooth, scanlines, picture position, the pause overlay, matching the console's video and sound timing to the Super NES |
+| Telemetry ADC | 8 of 8 channels used: 3.3 V from the console, USB 5 V, 5 V system, cartridge 5 V, 1.1 V core, temperature, both USB-C CC lines | Live voltages and temperature in plain words, which supply feeds the board, how much current the USB-C source offers, clear fault messages. There is no current measurement |
+| Cartridge bus through the FPGA | full access while the game is stopped | Game name and region from the header, reversed-cartridge check (done), empty-socket detection, save backup and restore, checksum test of the cartridge's contacts |
+| USB-C | programs and recovers the flash | Updates without tools; "restart into update" from the menu with one new mailbox bit |
+| Clocks | exact NTSC master clock, PAL within 27 ppm | Each region at its real speed |
+| Controller ports | four pads; Controller Pak, 32 KB | Remapping, turbo, two players, a place to keep settings and save backups |
+
+### Quality functions worth the most
+
+| Function | What it fixes | Needs |
+|---|---|---|
+| Frame lock | The Super NES makes 60.10 pictures a second, a Nintendo 64 shows 59.83 or 59.94. Unmatched, one picture is dropped about every 4 to 6 seconds, which shows as a hitch in scrolling. The console's video timing is programmable and can be set to the Super NES's own line and frame length | menu; to be tried on a television and on the M64's HDMI output |
+| Sound rate lock | The console's sound output runs at 32,006.5 Hz for a 32,000 Hz source. Matching them, by nudging the output rate or adding a sample now and then, removes a click every few minutes | menu |
+| Fallback image | A failed update cannot leave the board dead: the FPGA starts the fallback image and USB still works. The flash has the room and the board note already plans it | FPGA build and flash layout |
+| Save backup | Copies a cartridge's battery save to a Controller Pak and back | FPGA and menu |
+| Health screen | Voltages, temperature, supply and cartridge check in plain words | FPGA (readings into the mailbox) and menu |
+| Cartridge contact test | Reads the cartridge's own checksum before starting: "clean the contacts" instead of a crash | FPGA and menu |
+
+### What it cannot do
+
+- **Save states and rewind.** The block memory is full, and the chips inside a real cartridge cannot be snapshotted anyway.
+- **512-wide and interlaced pictures at full width.** The one frame buffer is 256 wide. Those modes show at half width in the first version; full width would need memory that is not there or a line-by-line transfer near the cartridge bus's speed limit.
+- **Cartridge current.** Only voltages and the switch's trip flag are measured.
+- **Settings in the board's own flash**, without new logic for the menu to write it.
+- **Anything on a spare FPGA pin.** The spare pins are not brought out on the board.
+- **Cartridge sound better than about 10 bits.** That is what the built-in converter for the cartridge's analogue sound pins gives.
+
+### Found while checking: the sound loop as written will crackle
+
+`game_audio()` in the boot program hands the console whole buffers of 1,280 samples (libdragon makes 25 buffers a second at 32 kHz), but the FPGA's sound ring holds 1,024, so every buffer is topped up with at least 257 samples of silence, and the ring overflows. That is a buzz at 25 Hz, not an occasional click. libdragon's `audio_push` takes any number of samples and queues a buffer only when it is full, so the fix is in the menu program alone. Not fixed yet.
