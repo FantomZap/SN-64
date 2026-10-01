@@ -55,12 +55,12 @@ def main():
          f'(property "Value" "{NAME}" (at 0 -8 0) (layer "F.Fab") (uuid "{u("value")}") (effects (font (size 1 1) (thickness 0.15))))',
          f'(property "Datasheet" "" (at 0 0 0) (layer "F.Fab") (hide yes) (uuid "{u("ds")}") (effects (font (size 1.27 1.27))))',
          f'(property "Description" "" (at 0 0 0) (layer "F.Fab") (hide yes) (uuid "{u("descr")}") (effects (font (size 1.27 1.27))))']
-    # body above the edge (documentation only): base 99 x 6 with the ear holes, nose 88 x 9
-    for name, (x0, y0, x1, y1) in (('base', (-49.5, -6.5, 49.5, -0.5)), ('nose', (-44.0, -15.5, 44.0, -6.5))):
+    # body above the edge (documentation only): base 99 x 6 with the ear holes, nose 94.9 x 10.55 (SNES Jr connector model)
+    for name, (x0, y0, x1, y1) in (('base', (-49.5, -6.5, 49.5, -0.5)), ('nose', (-47.45, -17.05, 47.45, -6.5))):
         L.append(f'(fp_rect (start {x0} {y0}) (end {x1} {y1}) (stroke (width 0.1) (type default)) (fill no) (layer "F.Fab") (uuid "{u(name)}"))')
     for sx in (-1, 1):
         L.append(f'(fp_circle (center {sx * 47.5} -3.5) (end {sx * 47.5 + 1.6} -3.5) (stroke (width 0.1) (type default)) (fill no) (layer "F.Fab") (uuid "{u(f"ear{sx}")}"))')
-    L.append(f'(fp_text user "board edge; socket body and ears above, ears screw to the shell" (at 0 -17 0) (layer "F.Fab") (uuid "{u("note")}") '
+    L.append(f'(fp_text user "board edge; socket body and ears above, ears screw to the shell" (at 0 -18.6 0) (layer "F.Fab") (uuid "{u("note")}") '
              '(effects (font (size 1 1) (thickness 0.15))))')
     # courtyards around the pads on both faces
     for side in ('F', 'B'):

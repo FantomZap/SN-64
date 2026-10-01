@@ -1,7 +1,7 @@
 {
- "date": "2026-09-30",
- "board": "hardware/sn64-v2/sn64-v2.kicad_pcb",
- "note": "single vertical board refitted to the mushroom-cap tower shell: SNES socket J2 straddling the top edge (pins 1-31 on B.Cu), USB-C 50 mm above the shoulders; DRC errors are the USB-C shield pad on the edge (by design) and single-spoke thermal reliefs",
+ "date": "2026-10-01",
+ "board": "sn64-v2.kicad_pcb",
+ "note": "single vertical board refitted to the mushroom-cap tower shell: SNES socket J2 straddling the top edge (pins 1-31 on B.Cu), USB-C 50 mm above the shoulders; DRC errors are single-spoke thermal reliefs",
  "tracks": 3551,
  "vias": 1034,
  "track_length_mm": 8092,
@@ -58,12 +58,12 @@
     "N64_AD6"
    ],
    "items": [
-    "Track [N64_AD6] on F.Cu, length 0.0500 mm",
+    "Track [N64_AD6] on F.Cu, length 0.2828 mm",
     "Track [N64_AD6] on F.Cu, length 4.2000 mm"
    ],
    "from": {
     "x": -1.4,
-    "y": -14.25
+    "y": -14.2
    },
    "to": {
     "x": -5.0,
@@ -76,7 +76,7 @@
    ],
    "items": [
     "Pad C12 [USB_DP_F] of U1 on F.Cu",
-    "Pad 2 [USB_DP_F] of R19 on B.Cu"
+    "Via [USB_DP_F] on F.Cu - B.Cu"
    ],
    "from": {
     "x": -1.2,
@@ -93,7 +93,7 @@
    ],
    "items": [
     "Pad C14 [USB_PU] of U1 on F.Cu",
-    "Pad 1 [USB_PU] of R21 on B.Cu"
+    "Via [USB_PU] on F.Cu - B.Cu"
    ],
    "from": {
     "x": -2.8,

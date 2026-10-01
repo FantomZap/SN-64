@@ -82,3 +82,23 @@ This is usable starting CAD for the lower enclosure. SN 64 still needs an upper 
 - Local exports: `.local/research/exports/` contains both schematic PDFs, a board STEP, and `SummerCart64-reference.FCStd`.
 
 Checked with KiCad 10.0.6 and FreeCAD 1.1.4: both native schematics export to PDF, the N64 PCB loads and exports a valid STEP solid, the downloaded shell STEP imports as valid solids, and a FreeCAD reference document saves successfully. No electrical or physical fit test has been claimed.
+
+## US cartridge and console connector nose (looked up 2026-10-01, unverified on parts)
+
+US SNES cartridge, caliper measurements by rainwarrior, [NESdev forum t=23890](https://forums.nesdev.org/viewtopic.php?t=23890), 2022-05-21, described by their author as "a little rough". "Depth" is front to back.
+
+| Feature | mm |
+|---|---|
+| Total width / middle section width | 135.4 / 92.2 |
+| Thickness: side sections / middle section | 17.0 / 19.9 |
+| Height: side sections / middle section | 84.2 / 87.5 |
+| Rear notches (both sides): outer edge from the side, width, height | 10.0, 4.9, 12.1 |
+| Front slot: from the bottom, height, width, depth, depth across a 24.8 wide centre trench | 28.9, 5.0, 83.6, 5.4, 3.9 |
+| Card-edge hole in the bottom face: width x front-to-back | 97.5 x 10.9 |
+| PCB edge: width, thickness | 59.9, 1.27 |
+| Extended (62-contact) edge: width, each tab, gap between tab and normal edge | 89.9, 12.55, 2.2 |
+| Contact pitch | 2.5 |
+
+The same thread gives a Super Famicom cartridge as 129 x 87 x 20 (jeffythedragonslayer). Not in the thread: which face the thicker middle section stands proud on, how far the PCB edge is from the bottom face, and where the PCB lies front to back; these need two caliper readings on a real cartridge.
+
+Console connector nose, from the SNES Jr connector model in [kicad-snn-cpu-01](https://github.com/qwertymodo/kicad-snn-cpu-01) (commit `a0018661`, CERN-OHL-S-2.0, `SNES_Cartridge_Connector_1pc.step`, SHA-256 `7621e92d...`; simplified, no slot or pins), sectioned 2026-10-01: base 151.8 x 15.0 up to 4.0, then 107.95 x 15.0 to 8.0, 107.95 x 8.75 to 13.0, and the nose 94.9 x 8.75 from 13.0 to 23.55 (10.55 high). The nose has 1.3 mm each side in width and 1.08 mm front to back in the measured 97.5 x 10.9 hole, so the two sources agree. It is a different connector from the SHVC replacement socket SN64 uses; its nose stands in for ours until the sample is measured.

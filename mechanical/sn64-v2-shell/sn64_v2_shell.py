@@ -60,8 +60,21 @@ DZ = 0.6                                # SummerCart64 shell frame -> board mid-
 BOARD_T, TONGUE_W, TONGUE_H, BOARD_W_SLOT = 1.2, 64.5, 10.5, 101.8
 SOCK_L, SOCK_D, EAR_X, EAR_HOLE, ROW_Z, PIN_SPAN = 99.0, 11.25, 47.5, 3.2, 3.5, 85.0
 USB_W, USB_D, USB_H = 8.94, 6.9, 3.16
-CART_W, CART_H, CART_T = 136.0, 88.0, 20.0
 W_STEM = 116.12                         # N64 cartridge width (measured on the SummerCart64 shell)
+# US SNES cartridge: caliper measurements by rainwarrior, NESdev forum t=23890, 2022-05-21 ("a little
+# rough" in the author's words). Depth = front to back.
+CART_W, CART_MID_W = 135.4, 92.2        # total width, width of the thicker middle section
+CART_SIDE_T, CART_MID_T = 17.0, 19.9    # thickness of the side sections and of the middle section
+CART_SIDE_H, CART_MID_H = 84.2, 87.5    # heights
+NOTCH_FROM_SIDE, NOTCH_W, NOTCH_H = 10.0, 4.9, 12.1          # two notches on the rear
+FSLOT_Y, FSLOT_H, FSLOT_W, FSLOT_D, FSLOT_D_MID, FSLOT_MID_W = 28.9, 5.0, 83.6, 5.4, 3.9, 24.8   # slot on the front
+HOLE_W, HOLE_T = 97.5, 10.9             # card-edge hole in the bottom face
+EDGE_W, EDGE_T, EDGE_EXT_W, EDGE_TAB_W, EDGE_GAP = 59.9, 1.27, 89.9, 12.55, 2.2   # PCB edge: normal, extended, tabs
+PIN_X = [42.5, 40.0, 37.5, 35.0] + [27.5 - 2.5 * i for i in range(23)] + [-35.0, -37.5, -40.0, -42.5]  # our socket
+# console connector nose that enters the cartridge: SNES Jr connector model in qwertymodo's
+# kicad-snn-cpu-01 (commit a0018661, CERN-OHL-S-2.0, simplified, SHA-256 7621e92d...): a different
+# connector of the same family, used until the sample socket is measured
+NOSE_L, NOSE_D, NOSE_H = 94.9, 8.75, 10.55
 # N64 cartridge plan outline, right half (X, Z): back end, back-corner mid, back-corner end, widest
 # point, parting notch, front-corner mid, front-corner end. Back corners 1 mm, front corners 9 mm.
 STEM_O = [(56.78, 9.60), (57.476, 9.318), (57.78, 8.63), (58.06, 0.60), (58.00, 0.40), (55.297, -5.830), (49.00, -8.40)]
@@ -69,10 +82,15 @@ STEM_O = [(56.78, 9.60), (57.476, 9.318), (57.78, 8.63), (58.06, 0.60), (58.00, 
 # assumed
 WALL, Y_LINE = 2.0, 25.0
 Y_CUT = 24.5                            # real SummerCart64 shell below, extruded outline above
-SOCK_BASE_H, NOSE_H, NOSE_L, NOSE_D = 6.0, 9.0, 88.0, 9.0
+SOCK_BASE_H = 6.0
 TAIL_T, TAIL_LAP = 0.5, 3.0
 PLUG_W, PLUG_T = 13.0, 7.0
-CAP_WALL, POCKET_CLR, POCKET_R = 5.0, 0.3, 1.0
+CAP_WALL, POCKET_CLR_X, POCKET_CLR_Z, POCKET_R = 5.0, 0.6, 0.3, 1.0
+# cartridge unknowns, to be replaced by two caliper readings on a real cartridge
+CART_BACK_TO_PCB = 8.5                  # back face to the PCB mid-plane (ASSUMED: PCB centred in the side sections,
+                                        # back face flat, the middle section proud on the label side)
+CART_EDGE_RECESS = 2.0                  # bottom face up to the PCB edge (ASSUMED)
+CART_HOLE_UP, NOTCH_D = 13.0, 3.0       # how far the hole and the rear notches go in (ASSUMED)
 Y_F0, Y_F1 = 57.5, 70.0                 # S-curve flare, above the USB-C window
 RIM_ABOVE_SEAT, RIM_SAG = 21.5, 6.0     # arched rim: height at the centre, drop at the ends
 RIM_FILLETS, LIP_CHAMFERS = (2.5, 2.0, 1.5, 1.2), (0.8, 0.5)
@@ -85,18 +103,24 @@ Y_BOARD_TOP, Y_WIDE0, Y_WIDE1, BOARD_W_WIDE, NECK_W, Y_USB = 70.0, 32.0, 60.0, 1
 Y_SOCK0 = Y_BOARD_TOP + 0.5             # socket body underside
 Y_TOP = Y_SOCK0 + SOCK_BASE_H           # nose shoulder = pocket floor = cartridge seat
 RIM_C = Y_TOP + RIM_ABOVE_SEAT          # rim height at the centre
-POCKET_W, POCKET_T = CART_W + 2 * POCKET_CLR, CART_T + 2 * POCKET_CLR
+# cartridge in the shell frame: its PCB is in the socket slot at z = 0, label side toward -Z
+CART_ZB = CART_BACK_TO_PCB              # back face
+CART_ZF_SIDE, CART_ZF_MID = CART_ZB - CART_SIDE_T, CART_ZB - CART_MID_T
+POCKET_W = CART_W + 2 * POCKET_CLR_X
+POCKET_Z0, POCKET_Z1 = CART_ZF_MID - POCKET_CLR_Z, CART_ZB + POCKET_CLR_Z
+POCKET_T, ZC = POCKET_Z1 - POCKET_Z0, (POCKET_Z0 + POCKET_Z1) / 2   # the cap is centred on the pocket
 CAP_HW, CAP_HT = POCKET_W / 2 + CAP_WALL, POCKET_T / 2 + CAP_WALL
 R_RIM = (CAP_HW ** 2 + RIM_SAG ** 2) / (2 * RIM_SAG)
 USB_ZC = BOARD_T / 2 + USB_H / 2
 C45 = 0.70710678
 # cap outline: 6 mm back corners, 9 mm front corners (the N64 cartridge's own radius)
-CAP_O = [(CAP_HW - 6, CAP_HT), (CAP_HW - 6 + 6 * C45, CAP_HT - 6 + 6 * C45), (CAP_HW, CAP_HT - 6), (CAP_HW, 0.0),
-         (CAP_HW, -CAP_HT + 9), (CAP_HW - 9 + 9 * C45, -CAP_HT + 9 - 9 * C45), (CAP_HW - 9, -CAP_HT)]
+CAP_O = [(CAP_HW - 6, ZC + CAP_HT), (CAP_HW - 6 + 6 * C45, ZC + CAP_HT - 6 + 6 * C45), (CAP_HW, ZC + CAP_HT - 6),
+         (CAP_HW, ZC), (CAP_HW, ZC - CAP_HT + 9), (CAP_HW - 9 + 9 * C45, ZC - CAP_HT + 9 - 9 * C45), (CAP_HW - 9, ZC - CAP_HT)]
 # cavities: 2 mm inside the stem and the cap
 STEM_I = [(55.56, 7.60), (55.914, 7.454), (56.06, 7.10), (56.06, 1.20), (56.00, 0.60), (53.95, -4.35), (49.00, -6.40)]
-CAP_I = [(CAP_HW - 6, CAP_HT - 2), (CAP_HW - 6 + 4 * C45, CAP_HT - 6 + 4 * C45), (CAP_HW - 2, CAP_HT - 6), (CAP_HW - 2, 0.0),
-         (CAP_HW - 2, -CAP_HT + 9), (CAP_HW - 9 + 7 * C45, -CAP_HT + 9 - 7 * C45), (CAP_HW - 9, -CAP_HT + 2)]
+CAP_I = [(CAP_HW - 6, ZC + CAP_HT - 2), (CAP_HW - 6 + 4 * C45, ZC + CAP_HT - 6 + 4 * C45), (CAP_HW - 2, ZC + CAP_HT - 6),
+         (CAP_HW - 2, ZC), (CAP_HW - 2, ZC - CAP_HT + 9), (CAP_HW - 9 + 7 * C45, ZC - CAP_HT + 9 - 7 * C45),
+         (CAP_HW - 9, ZC - CAP_HT + 2)]
 NOTES = []
 
 
@@ -147,7 +171,7 @@ def load_sc64():
 def cap_with_rim():
     """Cap block, arched on top, with the cartridge pocket, a filleted rim and a chamfered lip."""
     cap = prism(Y_F1, RIM_C + 2, CAP_O) & (Pos(0, RIM_C - R_RIM, 0) * Cylinder(R_RIM, 4 * CAP_HT))
-    pocket = box(0, Y_TOP, RIM_C + 5, 0, POCKET_W, POCKET_T)
+    pocket = box(0, Y_TOP, RIM_C + 5, ZC, POCKET_W, POCKET_T)
     pocket = bd.fillet(pocket.edges().filter_by(Axis.Y), POCKET_R)
     cap = cap - pocket
 
@@ -218,23 +242,66 @@ def build():
         board = board - box(s * 50.15, 21.9, 24.9, 0, 1.5, 2) - box(s * 48.9, 24.9, 26.4, 0, 4.0, 2)
 
     socket = box(0, Y_SOCK0, Y_TOP, 0, SOCK_L, SOCK_D) + box(0, Y_TOP, Y_TOP + NOSE_H, 0, NOSE_L, NOSE_D)
-    socket = socket - box(0, Y_TOP + 1.0, Y_TOP + NOSE_H + 1, 0, NOSE_L - 3, 1.6)               # cartridge slot
+    slot_y0 = Y_TOP + CART_EDGE_RECESS                                                          # the PCB edge bottoms here
+    socket = socket - box(0, slot_y0, Y_TOP + NOSE_H + 1, 0, EDGE_EXT_W + 0.6, 1.6)             # cartridge slot
     for s in (-1, 1):
+        socket = socket + box(s * (EDGE_W + EDGE_GAP) / 2, slot_y0, Y_TOP + NOSE_H, 0, EDGE_GAP - 0.6, 1.6)  # key in the PCB gap
         socket = socket - y_cyl(s * EAR_X, Y_SOCK0 - 1, Y_TOP + 1, 0, EAR_HOLE)
         z_in, z_out = BOARD_T / 2, ROW_Z + TAIL_T / 2                                            # tails, one strip per row
         socket = socket + box(0, Y_BOARD_TOP, Y_SOCK0, s * (z_in + z_out) / 2, PIN_SPAN + 1.5, z_out - z_in)
         socket = socket + box(0, Y_BOARD_TOP - TAIL_LAP, Y_SOCK0, s * (z_in + TAIL_T / 2), PIN_SPAN + 1.5, TAIL_T)
 
-    cart = (box(0, Y_TOP, Y_TOP + CART_H, 0, CART_W, CART_T)
-            - box(0, Y_TOP - 1, Y_TOP + NOSE_H + 0.5, 0, NOSE_L + 1, NOSE_D + 1))               # opening for the nose
+    cart, cart_pcb = us_cartridge(Y_TOP)
 
     usb = box(W_STEM / 2 - WALL - 0.06 - USB_D / 2, Y_USB - USB_W / 2, Y_USB + USB_W / 2, USB_ZC, USB_D, USB_H)
 
     console = (box(0, Y_LINE - 1, Y_LINE, DZ, 200, 90)
                - box(0, Y_LINE - 2, Y_LINE + 1, DZ, W_STEM + 2, 18.06 + 2))                      # console top (assumed)
 
-    return {"shell": shell, "board": board, "socket": socket, "cartridge": cart, "usbc": usb,
-            "console_top": console}
+    return {"shell": shell, "board": board, "socket": socket, "cartridge": cart, "cart_pcb": cart_pcb,
+            "usbc": usb, "console_top": console}
+
+
+def us_cartridge(y0):
+    """US SNES cartridge from the measured numbers: bottom face at y0, PCB mid-plane at z = 0, label side -Z."""
+    side_w = (CART_W - CART_MID_W) / 2
+    body = box(0, y0, y0 + CART_MID_H, (CART_ZB + CART_ZF_MID) / 2, CART_MID_W, CART_MID_T)
+    for s in (-1, 1):
+        body = body + box(s * (CART_MID_W + side_w) / 2, y0, y0 + CART_SIDE_H, (CART_ZB + CART_ZF_SIDE) / 2,
+                          side_w, CART_SIDE_T)
+    body = body - box(0, y0 - 1, y0 + CART_HOLE_UP, 0, HOLE_W, HOLE_T)                           # card-edge hole
+    body = body - box(0, y0 + CART_HOLE_UP - 0.1, y0 + 72, 0, EDGE_EXT_W + 6, 6.0)               # room for the PCB
+    for s in (-1, 1):
+        body = body - box(s * (CART_W / 2 - NOTCH_FROM_SIDE - NOTCH_W / 2), y0 - 1, y0 + NOTCH_H,
+                          CART_ZB - NOTCH_D / 2 + 0.5, NOTCH_W, NOTCH_D + 1)                     # rear notch
+    # front slot: FSLOT_D deep, FSLOT_D_MID deep across the centre trench
+    zf, ys = CART_ZF_MID, y0 + FSLOT_Y
+    body = body - box(0, ys, ys + FSLOT_H, zf + FSLOT_D_MID / 2 - 0.5, FSLOT_W, FSLOT_D_MID + 1)
+    w = (FSLOT_W - FSLOT_MID_W) / 2
+    for s in (-1, 1):
+        body = body - box(s * (FSLOT_MID_W + w) / 2, ys, ys + FSLOT_H, zf + FSLOT_D / 2 - 0.5, w, FSLOT_D + 1)
+    # PCB: extended (62-contact) edge with its two tabs, then the board above
+    ye = y0 + CART_EDGE_RECESS
+    pcb = box(0, ye, ye + 10, 0, EDGE_W, EDGE_T)
+    for s in (-1, 1):
+        pcb = pcb + box(s * (EDGE_W / 2 + EDGE_GAP + EDGE_TAB_W / 2), ye, ye + 10, 0, EDGE_TAB_W, EDGE_T)
+    pcb = pcb + box(0, ye + 10, y0 + 70, 0, EDGE_EXT_W + 4, EDGE_T)
+    return body, pcb
+
+
+def interface_checks():
+    """Numbers that say whether cartridge, socket and pocket agree (printed by report)."""
+    tab0 = EDGE_W / 2 + EDGE_GAP
+    on_edge = [abs(x) + 0.75 <= EDGE_W / 2 or (tab0 <= abs(x) - 0.75 and abs(x) + 0.75 <= tab0 + EDGE_TAB_W) for x in PIN_X]
+    return {
+        "socket contacts on the cartridge's PCB edge": f"{sum(on_edge)} of {len(PIN_X)} per side",
+        "PCB edge margin beyond the outer contacts": round(tab0 + EDGE_TAB_W - (PIN_X[0] + 0.75), 2),
+        "nose clearance in the card-edge hole, each side (width, thickness)": (round((HOLE_W - NOSE_L) / 2, 2), round((HOLE_T - NOSE_D) / 2, 2)),
+        "socket base wider than the hole, each side (width, thickness)": (round((SOCK_L - HOLE_W) / 2, 2), round((SOCK_D - HOLE_T) / 2, 2)),
+        "contact slot engagement on the PCB": round(NOSE_H - CART_EDGE_RECESS, 2),
+        "pocket clearance each side (width, thickness)": (POCKET_CLR_X, POCKET_CLR_Z),
+        "pocket and cap offset toward the label side": round(-ZC, 2),
+    }
 
 
 def viewer_frame(parts):
@@ -264,8 +331,10 @@ def report(parts):
           f"solids {len(sh.solids())}, volume {sh.volume / 1000:.1f} cm3, valid {sh.is_valid}")
     print(f"console line {Y_LINE} (assumed), USB-C centre {Y_USB} ({Y_USB - Y_LINE:.0f} above the line), "
           f"real N64 shell to {Y_CUT}, flare {Y_F0}..{Y_F1}, cartridge seat {Y_TOP}, rim {RIM_C} at the centre and "
-          f"{RIM_C - RIM_SAG} at the ends, cap {2 * CAP_HW:.1f} x {2 * CAP_HT:.1f}, cartridge top {Y_TOP + CART_H}")
+          f"{RIM_C - RIM_SAG} at the ends, cap {2 * CAP_HW:.1f} x {2 * CAP_HT:.1f}, cartridge top {Y_TOP + CART_MID_H}")
     print("notes:", "; ".join(NOTES))
+    for k, v in interface_checks().items():
+        print(f"  {k}: {v}")
 
 
 parts = build()

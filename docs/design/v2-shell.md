@@ -15,7 +15,8 @@ folder: `sn64-v2-shell-assembly.step` (named bodies: shell, board, socket, cartr
 console_top), `sn64-v2-shell-only.stl` (the assembly STL and the 39 MB board fit assembly are generated
 locally and kept out of git), renders taken in FreeCAD:
 `shell-front` (label side, what the player sees), `shell-back`, `shell-right`, `shell-bottom` and
-`shell-port` (the port), `shell-iso`, `shell-iso-back`, `shell-low`. FreeCAD opens the STEP
+`shell-port` (the port), `shell-iso`, `shell-iso-back`, `shell-low`, `shell-pocket` (looking into the empty
+pocket) and `section-centre` (cut through the middle). FreeCAD opens the STEP
 directly; Blender imports the STL (File > Import > STL).
 
 Frame: X across the board, Y up with 0 at the N64 tongue shoulders, Z out of the board's F.Cu
@@ -53,8 +54,10 @@ CERN-OHL-S-2.0), so the shell model is CERN-OHL-S-2.0 too (`mechanical/README.md
   adapt the board footprint to the measured sample.
 - **Ears** rest on two brackets in the shell and are screwed from above, so the shell carries the
   cartridge insertion force and the solder joints carry none.
-- **Cartridge** stands in the cap's pocket, held on all four sides, its bottom face on the socket
-  shoulder.
+- **Cartridge** stands in the cap's pocket, held on all four sides, its bottom face on the pocket
+  floor, which is level with the socket shoulder. The pocket is sized for the US cartridge and has
+  no region tabs, so Super Famicom and PAL cartridges (about 6 mm narrower, same connector) go in
+  too.
 - **USB-C** in the right wall of the stem, centre 50 mm above the shoulders, below the flare.
 
 | Item | Value (mm) | Basis |
@@ -63,20 +66,53 @@ CERN-OHL-S-2.0), so the shell model is CERN-OHL-S-2.0 too (`mechanical/README.md
 | Board plane in the body | 8.4 to the label face, 9.6 to the screw face | SummerCart64 ledges and bosses (sourced) |
 | Real shell kept up to | 24.5 above the shoulders | below SummerCart64's side openings |
 | Flare | 57.5 to 70, S-curve | assumed; starts above the USB-C window |
-| Cap | 146.6 x 30.6, front corners 9, back corners 6 | cartridge + 0.3 clearance + 5 wall |
-| Cartridge pocket | 136.6 x 20.6, floor at 76.5 (socket shoulder) | assumed seat |
+| Cap | 146.6 x 30.5, front corners 9, back corners 6, centred on the pocket | pocket + 5 wall |
+| Cartridge pocket | 136.6 x 20.5, floor at 76.5 (socket shoulder), 1.45 off-centre toward the label side | US cartridge 135.4 x 19.9 (measured, community) + 0.6 / 0.3 clearance; offset **assumed** |
 | Rim | 98.0 at the centre, 92.0 at the ends, fillet 2.5 | assumed |
 | Wall | 2.0 body and stem, 2.0 to 2.9 through the flare, 5.0 around the pocket | SummerCart64 2.0; rest assumed |
 | Console top line | drawn at 25 | **assumed**: SummerCart64's own USB-C opening starts at 25.8, so the console top is lower |
 | Socket body | 99.0 x 11.25, ear holes 3.2 at 95.0 | OpenSFC console footprint (sourced) |
-| Socket base / nose height | 6 / 9, nose 88 x 9 | **assumed**; a marketplace listing gives 21 mm overall |
+| Socket base | 6 high | **assumed**; a marketplace listing gives 21 mm overall |
+| Socket nose | 94.9 x 8.75, 10.55 high, slot 90.5 long with a key in each PCB gap | SNES Jr connector model (sourced, a different connector of the same family) |
 | Board top edge | 70 | socket underside 0.5 above it |
-| Cartridge | 136 x 88 x 20 upright, seat at 76.5, top at 164.5 | Wikipedia (unverified) |
+| Cartridge | US shape: 135.4 wide, middle 92.2 x 19.9 x 87.5, sides 17.0 x 84.2; seat at 76.5, top at 164.0 | NESdev forum measurements (community, "a little rough") |
 | USB-C window | 13 x 7 in the right wall at 50 | plug envelope 12.35 x 6.5 **assumed** |
-| Overall shell | 146.6 x 110.3 x 30.6, one valid solid | derived |
+| Overall shell | 146.6 x 110.3 x 30.5, one valid solid | derived |
 
 Fit check with this shell: the KiCad board STEP with every part model, plus an envelope for the
 FPGA (its model is missing from the STEP), has no interference with the shell or the cartridge.
+
+## Cartridge in the slot (2026-10-01)
+
+The plain box that stood in for the cartridge is replaced by a US SNES cartridge built from caliper
+measurements (rainwarrior, NESdev forum; table in `docs/dimensions.md`): thick middle section, thinner
+side sections, two rear notches, the front slot, the card-edge hole, and a 62-contact PCB edge with
+its two tabs. No open North American shell model with a usable license was found (the one GitHub
+reconstruction is CC BY-NC-ND and calls its own dimensions estimates), and the Super Famicom meshes in
+`mechanical/downloads` are hobby models that fail a closed-mesh test.
+
+What the cartridge checks, and the result (`interface_checks()` in the script):
+
+| Check | Result |
+|---|---|
+| Socket contacts that land on the cartridge's PCB edge (our footprint's pin positions against the measured edge and tabs) | 31 of 31 per side, 1.45 mm of edge beyond the outer contacts |
+| Connector nose in the card-edge hole | 1.3 mm clear each side in width, 1.08 mm front to back |
+| Keys | the two gaps in the PCB edge (2.2 mm at +-31.05) line up with the 7.5 mm gaps in the pin pattern |
+| Contact overlap on the PCB edge | 8.55 mm with the assumed 2.0 mm recess (the fingers reach 8 mm) |
+| Real board with all part models, FPGA envelope, cartridge and its PCB | no interference |
+
+One error found and fixed by this check: the socket nose had been guessed at 88 mm wide, which a
+62-contact cartridge edge (89.9 mm) cannot enter. The nose is now the SNES Jr connector's
+94.9 x 8.75 x 10.55 in the shell model and in the board's 3D model
+(`hardware/sn64-v2/tools/socket_3d_model.py`).
+
+Still assumed, and needing two caliper readings on a real US cartridge:
+
+1. From the cartridge's back face to its PCB (drawn 8.5 mm to the PCB's mid-plane, with the back face
+   flat and the thick middle section proud on the label side). This sets where the pocket sits front
+   to back; the cap is drawn 1.45 mm off-centre toward the label side because of it.
+2. From the cartridge's bottom face up to the PCB's edge (drawn 2.0 mm). This sets how far the
+   contacts overlap the fingers.
 
 ## Board refit to this shell (done 2026-09-30)
 
@@ -129,6 +165,8 @@ groups, which carry the cartridge audio inputs (pins 31 and 62, used by FXPAK Pr
 - **Cartridge keying.** The pocket is a plain rectangle, so a cartridge can be put in back to
   front, which swaps its 5 V and ground contacts. The pocket needs the console's keying so a
   cartridge only goes in label-forward. This is a safety item, not a cosmetic one.
+- Two caliper readings on a real US cartridge (see "Cartridge in the slot"), and the same for a
+  Super Famicom or PAL cartridge.
 - Buy one sample socket and measure it: height, nose, tail length and section, ear shape and hole
   spacing, and how deep a cartridge seats.
 - Console top line (N64) and the M64 opening.

@@ -14136,8 +14136,8 @@
 			(uuid "dd78ba61-0372-4dd8-8acf-fcc0bfd8c69d")
 		)
 		(fp_rect
-			(start -44 -15.5)
-			(end 44 -6.5)
+			(start -47.45 -17.05)
+			(end 47.45 -6.5)
 			(stroke
 				(width 0.1)
 				(type default)
@@ -14215,7 +14215,7 @@
 			)
 		)
 		(fp_text user "board edge; socket body and ears above, ears screw to the shell"
-			(at 0 -17 0)
+			(at 0 -18.6 0)
 			(layer "F.Fab")
 			(uuid "d37c8b80-75e8-4d62-b49b-4aad7c215128")
 			(effects
