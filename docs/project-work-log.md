@@ -360,3 +360,21 @@ Two things found while checking the boot program against that, both by reading t
 - Nothing matches the console's picture rate to the Super NES's 60.10 Hz, so a picture is dropped every few seconds. Software fix (the console's video timing is programmable), to be tried on real displays.
 
 Both are listed under "Still open" in [n64-bootstrap.md](design/n64-bootstrap.md). Neither is fixed.
+
+## 2026-10-01 — frame lock, compatibility mode, and the sound path rebuilt
+
+The owner asked whether the menu could keep the console's own picture rate and switch to the Super NES's only when a game starts, and whether a compatibility mode could go in the menu in case the changed timing does not work on an M64: something turned on through a confirmation screen that states how much slower the game then runs, at least until he has play-tested it. Both are built. Design note: [frame-lock.md](design/frame-lock.md).
+
+What was decided on the way, and why:
+
+- **The game follows the console.** The console's timing is written once when a game starts and not touched again. The other way round (steering the console every picture with its leap-line register) would leave the game at exact speed, but the N64brew documentation says a shortened leap line has side effects in the sync signal, and a register rewritten every picture is one more thing a display might not take. Cost: normal mode runs the game 0.04 % slow. Compatibility mode: 0.45 %.
+- **Slowing the game without touching a clock pulse.** First idea: gate single pulses with the FPGA's clock gate. A small test design routes, but the gate's enable timing is not checked by the tools, and a shortened pulse on this clock would corrupt the game. Built instead: the PLLs make twice the master clock and a flip-flop halves it, holding an occasional low phase longer (`sn64_clock_pace`). PAL's master moved from -27 to +46 ppm, the closest a doubled PAL clock gets.
+- **Sound.** The loop found faulty earlier today is replaced, not patched: the program drives the console's sound output itself, one block per picture, through a cubic resampler. A model of the console's two-place sound queue found a fault in the first version of the hand-over (after one late picture the queue refused a block and ran dry a picture later); the rule was changed to one picture's worth per block and the model now passes with pictures up to 10 ms late.
+- **ROM size.** 147,456 bytes, 357 over a 128 KiB window. `ROM_ADDR_BITS` is 17 in the build files, as on the v2 board.
+- **An older fault found on the way.** The clock select on the v2 board was written with its mode as a Verilog parameter. nextpnr-ecp5 reads that setting from an attribute, so every routed v2 build so far had the select in its default mode (idle high) instead of the one the source named (idle low). Seen in the text configuration of a small test build; fixed by adding the attribute; `route_top.py` now writes the configuration and checks it ([clock-plan.md](design/clock-plan.md)).
+
+Evidence (PC only): FPGA suite 88 runs pass, 24 of them fault runs; the whole design routes with every clock passing; menu program host tests 343 checks in seven sets, eight fault builds rejected; ROM and endpoint co-simulation passes. Numbers in the design note.
+
+Also answered: there is no simulated game cartridge and no simulated N64 with a screen. The tests are a tiny stand-in cartridge, the real FPGA design, a model of the N64's cartridge-slot wiring, and the menu program's logic run as PC tests; the menu ROM itself has never run. Two ways to close some of that gap before hardware were offered (an N64 emulator for the menu ROM, a free test cartridge in the FPGA simulation); neither is started.
+
+**Nothing here has run on a console, a television or an M64.** The hardware checks are listed at the end of the design note; the reading to look at first is the slowdown the lock settles on, which measures how far a real console's clock is from the board's.

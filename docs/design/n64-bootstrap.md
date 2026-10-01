@@ -136,8 +136,8 @@ Options, not yet decided:
 6. **Telemetry (SN64-08-13):** voltage/current/temperature registers do not exist in the mailbox yet.
 7. **SNES serializer:** `joy1_buttons` to `JOY1_DI`/`JOY2_DI` is not in the RTL. It must follow the polarity above (1 = pressed in the image).
 8. **Controller-2 menu input** and GameCube-style pads on the M64 are untested. libdragon reports them through the same `joypad` API.
-9. **Sound loop (found 2026-10-01 by reading the code, not by ear).** `game_audio()` fills libdragon's 1,280-sample buffers from a ring that holds 1,024, padding the rest with silence, so the sound would buzz. Use `audio_push` with exactly the samples available, and match the output rate to the Super NES's. See "What the chosen hardware allows" in [menu-ideas.md](menu-ideas.md).
-10. **Frame pacing.** The display loop follows the Super NES's 60.10 Hz while the console's video runs at its own rate, so a picture is dropped every few seconds. Program the console's video timing to the Super NES's line and frame length. Same section.
+9. **Sound loop (found 2026-10-01 by reading the code, not by ear).** `game_audio()` filled libdragon's 1,280-sample buffers from a ring that holds 1,024, padding the rest with silence, so the sound would have buzzed. **Reworked the same day**, see "Frame lock, compatibility mode and the sound path" below. Not heard on a console yet.
+10. **Frame pacing.** The display loop followed the Super NES's 60.10 Hz while the console's video ran at its own rate, so a picture was dropped every few seconds. **Reworked the same day**, same section. Not seen on a console yet.
 
 ## Console video path (2026-09-29): the game on the console's own screen
 
@@ -174,3 +174,25 @@ Not run on a console or an emulator, like the rest of the menu. The FantomZap na
 ## Menu ideas (2026-10-01)
 
 The owner asked what features and options the menu should get and said the menu system could be repackaged. The list of candidates, with what each would take, is in [menu-ideas.md](menu-ideas.md). Nothing in it is decided or built.
+
+## Frame lock, compatibility mode and the sound path (2026-10-01)
+
+Owner: keep the console's own picture rate in the menu and switch only when a game starts; and a compatibility mode in the menu, turned on through a confirmation screen that states how much slower the game then runs, in case an M64 does not take the changed timing. The design and all the numbers are in [frame-lock.md](frame-lock.md). What changed in the program:
+
+- **Game loop.** Paced by the console's vertical interrupt. Each picture: frame lock, sound, first quarter of the picture, controllers, the other three quarters. The controllers are read after the first quarter, so the Super NES sees them at the end of the same picture and not a picture later. A fetch that sees no progress for 40 ms gives up, so a stopped game clock no longer hangs the program.
+- **Frame lock** (`src/sn64_framelock.c`, pure C). Normal mode writes the Super NES's picture shape to the console's three timing registers when the game display starts (262 lines of 3093 video clocks on a 60 Hz console) and libdragon's values come back when it ends. In both modes a control loop reads `FRAME_PHASE` once a picture and steers `PACE` so the game stays a fixed distance ahead of the console's picture swap.
+- **Compatibility mode.** A fifth row on the main menu. Choosing it shows the confirmation (0.45 % slower on a 60 Hz console, 0.18 % on a 50 Hz one); A turns it on; choosing it again turns it off. It is off after every start-up: the menu has nowhere to keep settings. While it is on the main menu says so in red.
+- **Sound** (`src/sn64_resample.c`, `src/sn64_audioout.c`, pure C). libdragon's audio queue is no longer used. The program sets the console's sound divider itself, fits the game's samples with a four-point cubic resampler, and hands the console one block per picture.
+- **Service screen** (Status / diagnostics, then Z): the lock's state, the slowdown in force, the position error and the pictures lost; C-up switches on a one-line readout above the game picture.
+- **Mailbox:** `FEATURES` at 0x0C, the pair `{FRAME_PHASE, PACE}` at 0x24. An FPGA build without them reads 0 and the program runs free, as before but with the new sound path.
+
+![Mock-up of the compatibility mode screens](img/compat-screens.png)
+
+Evidence, all on the PC:
+
+- `make test`: `test_framelock` 120 checks, `test_resample` 34, `test_audioout` 36, beside the earlier ones (mapping 27, cartridge check 74, splash 35, ROM tools 17).
+- `make test-negative`: a control loop that pushes the wrong way, a resampler that loses its carry and a sound queue that loses the pairs it holds back are each rejected, with the earlier five.
+- ROM: **147,456 bytes**, SHA-256 `d85ec509b9a4e3b587e919326b1b9debbd3bd46379703439c6c89b8a8e2936c9`, CIC-6102 check OK. It no longer fits the 128 KiB window (357 bytes over), so `ROM_ADDR_BITS` is **17** in the Makefile, the co-simulation and its script, as on the v2 board (256 KiB window, 130 KB free).
+- Co-simulation with the FPGA endpoint at `ROM_ADDR_BITS = 17`: the image reads back, and the lock's traffic (`FEATURES`, the `FRAME_PHASE`/`PACE` pair read and written) arrives as written; the corrupted-load run fails as required.
+
+**Not run on a console or an emulator.** The first things to look at on hardware are in the table at the end of [frame-lock.md](frame-lock.md).

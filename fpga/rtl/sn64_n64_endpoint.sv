@@ -49,6 +49,7 @@ module sn64_n64_endpoint #(
     output reg         soft_reset,                   // "reset SNES" (holds /RESET, keeps cartridge power)
     output reg  [1:0]  region_mode,                  // 0 auto, 1 NTSC, 2 PAL (applies at next cartridge power-up)
     output reg  [1:0]  cart_check_mode,              // 0 enforce, 1 report only, 2 off, 3 check only (taken when a request starts)
+    output reg  [15:0] pace_rate,                    // SNES clock pace for sn64_clock_pace: 0 = full speed
     output reg  [15:0] mailbox_seq,                   // increments on every controller update
 
     // Mailbox: SNES/system -> N64 side
@@ -56,6 +57,7 @@ module sn64_n64_endpoint #(
     input  wire [15:0] fault_flags,       // {fault_code, reserved}
     input  wire [15:0] cart_check,        // CART_CHECK: result of the last cartridge check (layout in the register map below)
     input  wire [15:0] build_id,
+    input  wire [15:0] features,          // FEATURES: what this build can do (layout in the register map below)
     input  wire [15:0] region_info,       // REGION_INFO: ROM-header probe result (layout in the register map below)
     input  wire [15:0] region_source,     // REGION_SOURCE: how the region was decided
     // ---------------- Frame window: SNES picture and audio for the console (clk_snes domain) ----------------
@@ -142,7 +144,7 @@ module sn64_n64_endpoint #(
     assign rom_bus.address = mem_bus.address;
     assign rom_bus.wdata   = mem_bus.wdata;
     wire        fb_ack;
-    wire [15:0] fb_rdata, frame_status, audio_wptr, video_mode;
+    wire [15:0] fb_rdata, frame_status, audio_wptr, video_mode, frame_phase;
     sn64_frame_window frame_window (
         .clk_snes(clk_snes), .rst_snes_n(rst_snes_n),
         .rgb(video_rgb), .hde(video_hde), .vde(video_vde), .video_x(video_x), .video_y(video_y),
@@ -151,7 +153,7 @@ module sn64_n64_endpoint #(
         .clk_host(clk), .reset(reset),
         .req(mem_bus.request & sel_fb), .write(mem_bus.write), .address(mem_bus.address), .wdata(mem_bus.wdata),
         .ack(fb_ack), .rdata(fb_rdata),
-        .frame_status(frame_status), .audio_wptr(audio_wptr), .video_mode(video_mode));
+        .frame_status(frame_status), .audio_wptr(audio_wptr), .video_mode(video_mode), .frame_phase(frame_phase));
     assign mem_bus.ack   = sel_fb ? fb_ack   : rom_bus.ack;
     assign mem_bus.rdata = sel_fb ? fb_rdata : rom_bus.rdata;
 
@@ -196,6 +198,7 @@ module sn64_n64_endpoint #(
     //   0x08 FAULT          r  {fault_code, 8'h00} 0x0A CART_CHECK    r  [15] done, [14] pass, [13:12] mode used,
     //                                                                        [8] this build has the check,
     //                                                                        [7:0] rail reading (9.67 mV per count)
+    //   0x0C FEATURES       r  [0] the SNES clock can be paced (PACE works), [1] FRAME_PHASE exists
     //   0x10 JOY1_BUTTONS   w                      0x12 JOY2_BUTTONS  w
     //   0x14 JOY1_STICK     w  {y,x}               0x16 CONTROL       w  bit0 run_request, bit1 soft reset,
     //                                                                        bits3:2 region mode (0 auto, 1 NTSC, 2 PAL),
@@ -210,6 +213,12 @@ module sn64_n64_endpoint #(
     //   0x1E FRAME_STATUS  r  {frame_count[7:0], lines_done[7:0]} of the frame window (0x0800_0000)
     //   0x20 AUDIO_WPTR    r  next stereo pair index the audio ring will receive
     //   0x22 VIDEO_MODE    r  {12'd0, pal, interlace, high_res, overscan}
+    //   0x24 FRAME_PHASE   r  {frames_started[4:0], position[10:0]}: quarter lines (341 master clocks) since the
+    //                         SNES's visible area began, and a count of frame starts that steps when the position
+    //                         returns to 0; position 0x7FF until the first frame (docs/design/frame-lock.md)
+    //   0x26 PACE          w  SNES clock pace: this many of every 1,048,576 master clock periods are half a
+    //                         period longer (0 = full speed, 0xFFFF = 3.03 % slower); cleared by a host reset.
+    //                         Reads back. A 32-bit write at 0x24 writes it (0x24 itself is read-only).
     //   Writes to 0x1A/0x1C are ignored (a 32-bit write at 0x18 also writes 0x1A).
     //   Both words are produced in the clk_25 domain and cross with sn64_cdc_word (sn64_top).
     // ---------------------------------------------------------------------
@@ -220,7 +229,7 @@ module sn64_n64_endpoint #(
             joy1_buttons <= 16'h0; joy2_buttons <= 16'h0;
             joy1_stick_x <= 8'h0; joy1_stick_y <= 8'h0;
             run_request  <= 1'b0; mailbox_seq  <= 16'h0; soft_reset <= 1'b0; region_mode <= 2'd0;
-            cart_check_mode <= 2'd0;
+            cart_check_mode <= 2'd0; pace_rate <= 16'h0;
         end else if (reg_bus.write && reg_bus.cfg_select) begin
             case (ra[7:0])
                 8'h10: joy1_buttons <= reg_bus.wdata;
@@ -229,13 +238,15 @@ module sn64_n64_endpoint #(
                 8'h16: begin run_request <= reg_bus.wdata[0]; soft_reset <= reg_bus.wdata[1]; region_mode <= reg_bus.wdata[3:2];
                              cart_check_mode <= reg_bus.wdata[5:4]; end
                 8'h18: mailbox_seq  <= mailbox_seq + 16'd1;
+                8'h26: pace_rate    <= reg_bus.wdata;
                 default: ;
             endcase
         end
         // Host reset drops the run request: cartridge power must be re-requested
         // by the bootstrap after every console reset (safety principle).
         // The cartridge check goes back to "enforce" with it: a relaxed mode has to be asked for again.
-        if (!n64_reset) begin run_request <= 1'b0; soft_reset <= 1'b0; cart_check_mode <= 2'd0; end
+        // The SNES clock goes back to full speed.
+        if (!n64_reset) begin run_request <= 1'b0; soft_reset <= 1'b0; cart_check_mode <= 2'd0; pace_rate <= 16'h0; end
     end
 
     reg [15:0] cfg_rdata;
@@ -247,6 +258,7 @@ module sn64_n64_endpoint #(
             8'h06: cfg_rdata = mailbox_seq;
             8'h08: cfg_rdata = fault_flags;
             8'h0A: cfg_rdata = cart_check;
+            8'h0C: cfg_rdata = features;
             8'h10: cfg_rdata = joy1_buttons;
             8'h12: cfg_rdata = joy2_buttons;
             8'h14: cfg_rdata = {joy1_stick_y, joy1_stick_x};
@@ -261,6 +273,13 @@ module sn64_n64_endpoint #(
             8'h1E: cfg_rdata = frame_status;
             8'h20: cfg_rdata = audio_wptr;
             8'h22: cfg_rdata = video_mode;
+`ifdef SN64_FAULT_PACE_SWAP
+            8'h24: cfg_rdata = pace_rate;       // fault injection: words swapped (tb_n64_endpoint must fail)
+            8'h26: cfg_rdata = frame_phase;
+`else
+            8'h24: cfg_rdata = frame_phase;
+            8'h26: cfg_rdata = pace_rate;
+`endif
             default: cfg_rdata = 16'h0000;
         endcase
     end

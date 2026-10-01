@@ -7,6 +7,9 @@
 // ROM reads return the loaded program, mailbox writes reach the SNES-side
 // outputs, mailbox reads return magic/status, the AD bus is never driven by
 // the cartridge except while /READ is low, and a host reset clears run_request.
+// FEATURES (0x0C), FRAME_PHASE (0x24) and PACE (0x26): PACE is written with the 32-bit
+// pair at 0x24, reads back, reaches its output and is cleared by a host reset. Fault build
+// SN64_FAULT_PACE_SWAP (the two words swapped in the read decode) must fail.
 module tb_n64_endpoint;
     reg clk=0; always #23.28 clk=~clk;      // 21.477 MHz
     reg reset=1;
@@ -15,6 +18,7 @@ module tb_n64_endpoint;
     wire [15:0] ad = host_drive ? host_ad : 16'hzzzz;
     reg rom_we=0; reg [11:0] rom_waddr=0; reg [15:0] rom_wdata=0;
     wire [15:0] j1,j2,seq; wire [7:0] sx,sy; wire run; wire [1:0] check_mode;
+    wire [15:0] pace;
     reg [15:0] cart_check=16'hC143;                              // arbitrary pattern; the RTL passes it through
     reg [15:0] status=16'hA5C3;
     reg [15:0] region_info=16'h7E02, region_source=16'h0016;   // arbitrary patterns; the RTL passes them through
@@ -26,7 +30,7 @@ module tb_n64_endpoint;
         .rom_we(rom_we),.rom_waddr(rom_waddr),.rom_wdata(rom_wdata),
         .joy1_buttons(j1),.joy2_buttons(j2),.joy1_stick_x(sx),.joy1_stick_y(sy),
         .run_request(run),.soft_reset(),.region_mode(),.mailbox_seq(seq),.fault_flags(16'h0100),.status_flags(status),.build_id(16'h0102),
-        .cart_check_mode(check_mode),.cart_check(cart_check),
+        .cart_check_mode(check_mode),.cart_check(cart_check),.pace_rate(pace),.features(16'h0003),
         .region_info(region_info),.region_source(region_source),
         .clk_snes(1'b0), .rst_snes_n(1'b0), .video_rgb(15'd0), .video_hde(1'b0), .video_vde(1'b0), .video_x(9'd0), .video_y(9'd0),
         .video_high_res(1'b0), .video_interlace(1'b0), .video_pal(1'b0), .audio_left(16'd0), .audio_right(16'd0), .audio_ready(1'b0),
@@ -123,12 +127,23 @@ module tb_n64_endpoint;
         if (d3!==16'h0031) $fatal(1,"CONTROL readback wrong: %h",d3);
         pi_addr(32'h1FFF_0008); pi_read(d0); pi_read(d1); pi_end;
         if (d0!==16'h0100 || d1!==16'hC143) $fatal(1,"FAULT/CART_CHECK read wrong: %h %h",d0,d1);
+        // 5e) FEATURES at 0x0C; PACE written as the low half of the 32-bit pair at 0x24 (the high half,
+        //     FRAME_PHASE, is read-only and reads 0x07FF here: the SNES clock never ran, no frame yet).
+        pi_addr(32'h1FFF_000C); pi_read(d0); pi_end;
+        if (d0!==16'h0003) $fatal(1,"FEATURES read wrong: %h",d0);
+        if (pace!==16'h0000) $fatal(1,"PACE not 0 after reset: %h",pace);
+        pi_addr(32'h1FFF_0024); pi_write(16'hFFFF); pi_write(16'h2558); pi_end;
+        repeat(4) @(negedge clk);
+        if (pace!==16'h2558) $fatal(1,"PACE write wrong: %h",pace);
+        pi_addr(32'h1FFF_0024); pi_read(d0); pi_read(d1); pi_end;
+        if (d0!==16'h07FF || d1!==16'h2558) $fatal(1,"FRAME_PHASE/PACE read wrong: %h %h",d0,d1);
         // 6) Host reset drops the run request and produces an event on release
         n64_reset=0; repeat(6) @(negedge clk);
         if (run!==1'b0) $fatal(1,"run_request survived host reset");
         if (check_mode!==2'd0) $fatal(1,"cartridge check mode not back to enforce after host reset");
+        if (pace!==16'h0000) $fatal(1,"PACE survived host reset: %h",pace);
         n64_reset=1; repeat(4) @(negedge clk);
-        $display("PASS: N64 endpoint ROM burst/offset reads, mailbox read/write/readback, REGION_INFO/REGION_SOURCE at 0x1A/0x1C read-only, COMMIT pair +1, check mode in CONTROL and CART_CHECK at 0x0A, run_request and check mode cleared by host reset (%0d clocks)",cycles);
+        $display("PASS: N64 endpoint ROM burst/offset reads, mailbox read/write/readback, REGION_INFO/REGION_SOURCE at 0x1A/0x1C read-only, COMMIT pair +1, check mode in CONTROL and CART_CHECK at 0x0A, FEATURES at 0x0C, PACE at 0x26 written through the pair at 0x24 and read back beside FRAME_PHASE, run_request, check mode and PACE cleared by host reset (%0d clocks)",cycles);
         $finish;
     end
 endmodule

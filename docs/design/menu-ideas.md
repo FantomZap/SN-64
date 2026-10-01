@@ -1,6 +1,6 @@
 # Menu ideas
 
-**Status (2026-10-01): a list to choose from. Nothing here is decided or built.** The owner asked what features and options the menu should get, and said the menu system could be repackaged. What exists today is in [n64-bootstrap.md](n64-bootstrap.md): a text menu with Start, Controller mapping (view only), Status / diagnostics and Power down, two splash screens before it, and a hidden service screen.
+**Status (2026-10-01): a list to choose from. Nothing here is decided or built, except where a row says so** (the frame lock and the sound rate lock were built later the same day, with a compatibility mode row on the main menu). The owner asked what features and options the menu should get, and said the menu system could be repackaged. What exists today is in [n64-bootstrap.md](n64-bootstrap.md): a text menu with Start, Controller mapping (view only), Status / diagnostics and Power down, two splash screens before it, and a hidden service screen.
 
 "Needs" says what each idea touches: **menu** is the N64 program only; **FPGA** needs logic and a simulation as well; **board** would need a hardware change, which is the owner's call.
 
@@ -86,7 +86,7 @@ What limits it:
 
 | Limit | Today | Meaning |
 |---|---|---|
-| ROM space | 5.5 KB left of 128 KiB on the first board's window; the v2 board has a 256 KiB window | A font and graphics fit on v2. The 128 KiB build would have to stay text-only or be dropped |
+| ROM space | The program is 147,456 bytes since 2026-10-01 and no longer fits a 128 KiB window; the v2 board's window is 256 KiB, with 130 KB free | A font and graphics fit on v2 |
 | Settings storage | None on the board that the menu can write | Controller Pak first; writing the board's flash from the menu would need FPGA work |
 | Not yet run on a console | The whole menu has only been compiled and tested on the PC | The first real run may change what is worth polishing |
 
@@ -104,15 +104,15 @@ The owner asked which quality functions the hardware already on the v2 board can
 | Telemetry ADC | 8 of 8 channels used: 3.3 V from the console, USB 5 V, 5 V system, cartridge 5 V, 1.1 V core, temperature, both USB-C CC lines | Live voltages and temperature in plain words, which supply feeds the board, how much current the USB-C source offers, clear fault messages. There is no current measurement |
 | Cartridge bus through the FPGA | full access while the game is stopped | Game name and region from the header, reversed-cartridge check (done), empty-socket detection, save backup and restore, checksum test of the cartridge's contacts |
 | USB-C | programs and recovers the flash | Updates without tools; "restart into update" from the menu with one new mailbox bit |
-| Clocks | exact NTSC master clock, PAL within 27 ppm | Each region at its real speed |
+| Clocks | exact NTSC master clock, PAL within 46 ppm; since 2026-10-01 the master can be slowed in 0.5 ppm steps | Each region at its real speed, and the frame lock |
 | Controller ports | four pads; Controller Pak, 32 KB | Remapping, turbo, two players, a place to keep settings and save backups |
 
 ### Quality functions worth the most
 
 | Function | What it fixes | Needs |
 |---|---|---|
-| Frame lock | The Super NES makes 60.10 pictures a second, a Nintendo 64 shows 59.83 or 59.94. Unmatched, one picture is dropped about every 4 to 6 seconds, which shows as a hitch in scrolling. The console's video timing is programmable and can be set to the Super NES's own line and frame length | menu; to be tried on a television and on the M64's HDMI output |
-| Sound rate lock | The console's sound output runs at 32,006.5 Hz for a 32,000 Hz source. Matching them, by nudging the output rate or adding a sample now and then, removes a click every few minutes | menu |
+| Frame lock | The Super NES makes 60.10 pictures a second, a Nintendo 64 shows 59.83 or 59.94. Unmatched, one picture is dropped about every 4 to 6 seconds, which shows as a hitch in scrolling. **Built 2026-10-01, simulated only** ([frame-lock.md](frame-lock.md)): the console's timing takes the Super NES's shape while a game is shown and the game's clock is held to it; a compatibility mode in the menu leaves the console's timing alone and slows the game by 0.45 % | FPGA and menu; to be tried on a television and on the M64's HDMI output |
+| Sound rate lock | The console's sound output is never exactly the game's 32,000 Hz. **Built 2026-10-01, simulated only**: the output's divider is chosen per mode and a cubic resampler takes up the rest | menu |
 | Fallback image | A failed update cannot leave the board dead: the FPGA starts the fallback image and USB still works. The flash has the room and the board note already plans it | FPGA build and flash layout |
 | Save backup | Copies a cartridge's battery save to a Controller Pak and back | FPGA and menu |
 | Health screen | Voltages, temperature, supply and cartridge check in plain words | FPGA (readings into the mailbox) and menu |
@@ -129,4 +129,4 @@ The owner asked which quality functions the hardware already on the v2 board can
 
 ### Found while checking: the sound loop as written will crackle
 
-`game_audio()` in the boot program hands the console whole buffers of 1,280 samples (libdragon makes 25 buffers a second at 32 kHz), but the FPGA's sound ring holds 1,024, so every buffer is topped up with at least 257 samples of silence, and the ring overflows. That is a buzz at 25 Hz, not an occasional click. libdragon's `audio_push` takes any number of samples and queues a buffer only when it is full, so the fix is in the menu program alone. Not fixed yet.
+`game_audio()` in the boot program handed the console whole buffers of 1,280 samples (libdragon makes 25 buffers a second at 32 kHz), but the FPGA's sound ring holds 1,024, so every buffer was topped up with at least 257 samples of silence, and the ring overflowed. That is a buzz at 25 Hz, not an occasional click. **Reworked the same day** with the frame lock ([frame-lock.md](frame-lock.md)): the program now drives the console's sound output itself, one block per picture, through a resampler. Not heard on a console yet.

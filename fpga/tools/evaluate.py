@@ -144,6 +144,14 @@ def main():
         run('n64-endpoint-region-swap', [str(n64_fault_obj / ('Vtb_n64_endpoint.exe' if os.name == 'nt' else 'Vtb_n64_endpoint'))],
             'REGION_INFO/REGION_SOURCE read wrong')
         report['simulation']['injected_n64_endpoint_fault'] = 'Rejected: swapped REGION_INFO/REGION_SOURCE decode is detected'
+        # Fault injection: FRAME_PHASE and PACE swapped in the register decode must be caught (frame lock).
+        n64_pace_obj = obj / 'n64-endpoint-pace-swap'
+        run('n64-pace-swap-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
+            '+define+SN64_FAULT_PACE_SWAP', '--top-module', 'tb_n64_endpoint',
+            '--Mdir', str(n64_pace_obj).replace('\\', '/')] + n64_sources)
+        run('n64-endpoint-pace-swap', [str(n64_pace_obj / ('Vtb_n64_endpoint.exe' if os.name == 'nt' else 'Vtb_n64_endpoint'))],
+            'FRAME_PHASE/PACE read wrong')
+        report['simulation']['injected_n64_endpoint_pace_fault'] = 'Rejected: swapped FRAME_PHASE/PACE decode is detected'
         # Console video path: frame/audio window read by an N64 host model at fast domain-2 timing,
         # plus a fault build (R/B swapped) that must fail.
         fw_src = n64_common + ['fpga/tests/tb_frame_window.sv']
@@ -162,6 +170,12 @@ def main():
         run('frame-window-rb-swap', [str(fwf_obj / ('Vtb_frame_window.exe' if os.name == 'nt' else 'Vtb_frame_window')), '+pwd=5', '+rls=1'],
             'FAIL: tb_frame_window')
         report['simulation']['injected_frame_window_fault'] = 'Rejected: swapped red/blue in the RGBA5551 conversion is detected on every pixel'
+        fwp_obj = obj / 'frame-window-phase-fault'
+        run('frame-window-phase-fault-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
+            '+define+SN64_FAULT_PHASE_NO_RESTART', '--top-module', 'tb_frame_window', '--Mdir', str(fwp_obj).replace('\\', '/')] + fw_src)
+        run('frame-window-phase-no-restart', [str(fwp_obj / ('Vtb_frame_window.exe' if os.name == 'nt' else 'Vtb_frame_window')), '+pwd=5', '+rls=1'],
+            'FAIL: tb_frame_window: FRAME_PHASE')
+        report['simulation']['injected_frame_phase_fault'] = 'Rejected: a frame position that is not restarted at each frame start is detected'
         prepare_flash_pads()
         # Bootstrap ROM window from the configuration flash: SummerCart64 memory_flash (unmodified) + QSPI flash model.
         flash_sources = n64_common + ['build/generated/summercart64/memory_flash_dq.sv',
@@ -249,6 +263,23 @@ def main():
         if cdc_pass is None:
             raise RuntimeError('CDC test exited without its acceptance marker')
         report['simulation']['cdc'] = cdc_pass
+        # SNES master clock with pace control (frame lock, docs/design/frame-lock.md): halved doubled clock with
+        # stretched low phases; no shortened pulse, exact stretch counts. The fault build ignores the rate.
+        pace_src = ['fpga/rtl/sn64_cdc.sv', 'fpga/rtl/sn64_clock_pace.sv', 'fpga/tests/tb_clock_pace.sv']
+        pace_name = 'Vtb_clock_pace.exe' if os.name == 'nt' else 'Vtb_clock_pace'
+        pace_obj = obj / 'clock-pace'
+        run('clock-pace-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
+            '--top-module', 'tb_clock_pace', '--Mdir', str(pace_obj).replace('\\', '/')] + pace_src)
+        pace_body = run('clock-pace', [str(pace_obj / pace_name)])
+        pace_pass = next((line for line in pace_body.splitlines() if line.startswith('PASS:')), None)
+        if pace_pass is None:
+            raise RuntimeError('Clock pace test exited without its acceptance marker')
+        report['simulation']['clock_pace'] = pace_pass
+        pacef_obj = obj / 'clock-pace-no-stretch'
+        run('clock-pace-no-stretch-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
+            '+define+SN64_FAULT_PACE_NO_STRETCH', '--top-module', 'tb_clock_pace', '--Mdir', str(pacef_obj).replace('\\', '/')] + pace_src)
+        run('clock-pace-no-stretch', [str(pacef_obj / pace_name)], 'FAIL: tb_clock_pace')
+        report['simulation']['injected_clock_pace_fault'] = 'Rejected: a divider that ignores the pace rate is detected'
         # Whole-system power-on: N64 host, Si5351, rails, cartridge, SNES core, all blocks in sn64_top.
         if (ROOT / 'build/cic/cic-build.json').exists():
             sys_sources = ['-Ibuild/generated/snestang/src', '-Ibuild/generated/snestang/src/spc700',
@@ -259,7 +290,7 @@ def main():
                            'fpga/rtl/sn64_snes_cic_lock.sv', 'fpga/vendor/snestang-controller/src/controller_adapter.sv',
                            'fpga/rtl/sn64_snes_joypad.sv',
                            'fpga/rtl/sn64_header_probe.sv', 'fpga/rtl/sn64_sd_adc.sv', 'fpga/rtl/sn64_audio_mix.sv',
-                           'fpga/rtl/sn64_top.sv', 'fpga/tests/tb_system.sv']
+                           'fpga/rtl/sn64_clock_pace.sv', 'fpga/rtl/sn64_top.sv', 'fpga/tests/tb_system.sv']
             sys_obj = obj / 'system'
             run('system-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
                 '-Wno-lint', '-Wno-style', '-Wno-TIMESCALEMOD',
@@ -404,7 +435,7 @@ def main():
                 report['simulation']['cic_pad'] = c_pass
         report['simulation']['injected_cic_pad_fault'] = 'Rejected: pad drive and DIR switching together is detected as contention'
         report['simulation']['limit'] = ('tb_system runs use simulation-time master clocks (NTSC and PAL rates), not the real '
-                                         'Si5351 outputs; the console video path is checked against a PI host model, not a '
+                                         'PLL outputs; the pace divider is simulated as logic only, the board PLLs and clock select are not; the console video path is checked against a PI host model, not a '
                                          'console; PPU/APU not qualified; bridge bus model is behavioural (no analog levels or '
                                          'translator delays); the cartridge check runs against an assumed electrical model of the rail and of '
                                          'a cartridge (tb_cart_check), not against measured cartridges')

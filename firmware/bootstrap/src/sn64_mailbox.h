@@ -14,11 +14,14 @@
 //   0x00  {MAGIC,        VERSION}       read
 //   0x04  {STATUS,       SEQ}           read
 //   0x08  {FAULT,        CART_CHECK}    read   (FAULT = fault_code << 8; CART_CHECK = last cartridge check)
+//   0x0C  {FEATURES,     reserved}      read   (what this FPGA build can do)
 //   0x10  {JOY1_BUTTONS, JOY2_BUTTONS}  write (and read back)
 //   0x14  {JOY1_STICK,   CONTROL}       write (and read back)
 //   0x18  {COMMIT,       REGION_INFO}   write COMMIT (0x1A is read-only, the write is ignored);
 //                                        read: COMMIT reads 0, low half = REGION_INFO
-//   0x1C  {REGION_SOURCE, reserved}     read
+//   0x1C  {REGION_SOURCE, FRAME_STATUS} read
+//   0x20  {AUDIO_WPTR,   VIDEO_MODE}    read
+//   0x24  {FRAME_PHASE,  PACE}          read; a write sets PACE (0x24 itself is read-only)
 #ifndef SN64_MAILBOX_H
 #define SN64_MAILBOX_H
 
@@ -36,6 +39,19 @@
 #define SN64_REG_COMMIT_REGION   0x18u         // read: low half = REGION_INFO (0x1A)
 #define SN64_REG_REGION_SOURCE   0x1Cu         // read: high half = REGION_SOURCE (0x1C), low half = FRAME_STATUS (0x1E)
 #define SN64_REG_AUDIO_MODE      0x20u         // read: high half = AUDIO_WPTR (0x20), low half = VIDEO_MODE (0x22)
+#define SN64_REG_FEATURES        0x0Cu         // read: high half = FEATURES (0x0C)
+#define SN64_REG_PHASE_PACE      0x24u         // read: high half = FRAME_PHASE (0x24), low half = PACE (0x26); write: PACE
+
+// Frame lock (docs/design/frame-lock.md, src/sn64_framelock.h).
+// FEATURES: what this FPGA build can do. A build from before these registers reads 0.
+#define SN64_FEATURE_PACE        0x0001u       // PACE slows the SNES clock (the v2 board's clock divider)
+#define SN64_FEATURE_FRAME_PHASE 0x0002u       // FRAME_PHASE exists
+// FRAME_PHASE: where the Super NES is in its picture.
+#define SN64_PHASE_POSITION(w)   ((w) & 0x07FFu)        // quarter lines (341 master clocks) since the picture began
+#define SN64_PHASE_STARTS(w)     (((w) >> 11) & 0x1Fu)  // pictures started, modulo 32; steps as the position returns to 0
+#define SN64_PHASE_NONE          0x07FFu                // no picture has started yet
+// PACE: this many of every 1,048,576 SNES master clock periods are half a period longer.
+// 0 = full speed, 0xFFFF = 3.03 % slower. Cleared by a console reset.
 
 // Console video path (docs/design/console-video-path.md): the SNES frame and audio ring the
 // N64 reads through PI domain 2 at SN64_FRAME_BASE. Frame: 240 lines x 256 pixels RGBA5551,

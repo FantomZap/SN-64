@@ -7,7 +7,7 @@
 # from fpga/tools/build_cic.py).
 param(
     [string]$Image = 'build/n64-bootstrap/sn64_bootstrap_words.mem',
-    [int]$RomAddrBits = 16,
+    [int]$RomAddrBits = 17,
     [string]$Mdir = 'build/n64-bootstrap/verilator'
 )
 $ErrorActionPreference = 'Stop'

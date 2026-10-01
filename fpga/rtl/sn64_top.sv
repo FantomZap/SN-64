@@ -6,7 +6,9 @@
 //   clk_host 62.5 MHz (PLL from clk_25), always on: N64 endpoint and N64 CIC,
 //            and the I2S receiver that oversamples the cartridge-audio ADC
 //   clk_snes Si5351 output (NTSC or PAL master), started once at power-on:
-//            SNES core, cartridge bridge, controller emulation
+//            SNES core, cartridge bridge, controller emulation. On the v2 board
+//            it comes from sn64_clock_pace, which can slow it by the amount the
+//            N64 program writes to PACE (snes_pace here; docs/design/frame-lock.md)
 // The board wrapper owns the PLL, the SNES clock select/gate (driven by
 // snes_clk_run and region_pal), pads and translator/rail control pins.
 //
@@ -29,6 +31,7 @@ module sn64_top #(
     parameter        SEQ_PROBE_ENABLE = 0,         // 1: cartridge check before 5 V (needs sn64_rail_monitor on the board)
     parameter        SEQ_PROBE_TIMEOUT_MS = 4000,  // assumed: time for the test current to charge the rail
     parameter [11:0] SEQ_PROBE_OK_CODE = 12'd269,  // assumed: 0.65 V on the rail (code x 3 x 0.806 mV)
+    parameter        PACE_PRESENT = 0,             // 1: the board makes clk_snes with sn64_clock_pace (FEATURES bit 0)
     parameter        CIC_LOCK_CLK_DIV = 8,         // 25 MHz / 8 = 3.125 MHz CIC_CLK, 50 % duty (key follows the lock's clock)
     parameter        CIC_LOCK_T_PWRUP = 49605      // lock start-up wait (instruction cycles)
 ) (
@@ -58,6 +61,7 @@ module sn64_top #(
     input  wire        monitor_error,              // board: telemetry ADC not answering
     output reg         snes_clk_run,               // board: start the SNES master clock domain
     output wire        region_pal,                 // board: 0 = NTSC PLL, 1 = PAL PLL (frozen while the SNES clock runs)
+    output wire [15:0] snes_pace,                  // board: PACE for sn64_clock_pace (clk_host domain; 0 = full speed)
 
     // ---------------- Power monitors and enables ----------------
     input  wire        host_3v3_ok, fpga_rails_ok, cart_5v_ok, iface_rail_ok, efuse_fault_n, overtemp,
@@ -124,8 +128,9 @@ module sn64_top #(
         .ext_spi_miso(ext_spi_miso), .ext_spi_active(ext_spi_active),
         .joy1_buttons(joy1_h), .joy2_buttons(joy2_h), .joy1_stick_x(stick_x_h), .joy1_stick_y(stick_y_h),
         .run_request(run_req_h), .soft_reset(soft_reset_h), .region_mode(region_mode_h), .mailbox_seq(seq_h),
-        .cart_check_mode(check_mode_h), .cart_check(cart_check_h),
+        .cart_check_mode(check_mode_h), .cart_check(cart_check_h), .pace_rate(snes_pace),
         .status_flags(status_h), .fault_flags(fault_h), .build_id(BUILD_ID),
+        .features({14'd0, 1'b1, PACE_PRESENT ? 1'b1 : 1'b0}),   // [1] FRAME_PHASE exists, [0] PACE works
         .region_info(region_info_h), .region_source(region_source_h),
         .clk_snes(clk_snes), .rst_snes_n(core_reset_n),
         .video_rgb(snes_rgb), .video_hde(snes_hde), .video_vde(snes_vde), .video_x(snes_video_x), .video_y(snes_video_y),

@@ -8,6 +8,7 @@ Decision (owner, 2026-09-29): **this is the primary video and audio path.** FPGA
 2. **Frame window (FPGA).** The endpoint exposes the buffer to the N64 at a fixed address inside a PI **domain 2** region (`0x0800_0000`, the region the console reserves for cartridge RAM), because domain 2 has its own timing registers: the boot menu programs it fast, while the flash boot-ROM window keeps its slow domain-1 timing ([bootrom-flash.md](bootrom-flash.md) forbids lowering DOM1 LAT). A status register reports the frame counter and the last completed line, so the reader never overtakes the writer.
 3. **Audio window.** The core's 32 kHz stereo samples (after the cartridge-audio mixer) go into a small ring buffer read through the same window; the menu feeds them to the N64 audio interface.
 4. **Display loop (N64 boot program, libdragon).** Every frame: wait for the frame counter to advance, DMA the completed lines into a 256 × 224 16-bit framebuffer in console RAM (in a few chunks, following the SNES line counter), DMA the audio samples, and let the VI display the framebuffer scaled to the TV; controllers keep going the other way through the mailbox. Latency: about one frame.
+5. **One game picture per console picture (2026-10-01).** The game and the console do not make pictures at the same rate (60.10 against 59.83 a second). The game's clock is held to the console's, the console's picture timing is given the Super NES's shape while a game is shown, and a compatibility mode leaves the console's timing alone. The sound is fitted to the console's output rate instead of being padded. All of it is in [frame-lock.md](frame-lock.md).
 
 ## Bandwidth and memory
 
@@ -42,3 +43,11 @@ Decision (owner, 2026-09-29): **this is the primary video and audio path.** FPGA
 - `tb_system` (NTSC default, PAL header, PAL key, NTSC key) reads FRAME_STATUS/VIDEO_MODE and two pixels through the PI from the real core: frames complete, the PAL bit follows the region, the pixels carry the alpha bit. All 42 `evaluate.py --mode sim` results pass.
 - Resources, routed on the 85F with the real pinout (`route_top.py --top board`, build/route-board-nohdmi, after the HDMI removal): **203 of 208 DP16KD** (the frame buffer maps to 62 blocks the way the tool packs 16-bit words), 41 % logic, 1 PLL, 113 of 365 I/O; all three clocks pass (host 72.5 MHz vs 62.5 required, SNES 26.7 vs 21.5, housekeeping 57.4 vs 25). Block RAM is the tight resource; a second (double-buffered) frame does not fit on the 85F.
 
+## Frame lock, compatibility mode and the sound path (2026-10-01, simulation only)
+
+The display loop described above dropped a picture about every 3.7 seconds and would have buzzed (its sound blocks were padded with silence). Both are reworked; the design, the numbers, the evidence and the hardware checks still to do are in [frame-lock.md](frame-lock.md). In short:
+
+- `sn64_frame_window` also reports where the Super NES is in its picture (`FRAME_PHASE`, mailbox 0x24), through the blanking too, which `lines_done` cannot show.
+- The Super NES master clock on the v2 board comes from `sn64_clock_pace`, which can slow it in steps of 0.5 ppm (`PACE`, mailbox 0x26).
+- The boot program holds the game to the console with those two, and drives the console's sound output directly, one block per picture, through a cubic resampler.
+- Menu and logos keep the console's own timing. Normal mode changes it only while a game is shown; compatibility mode never does and slows the game by 0.45 % instead (owner, 2026-10-01).

@@ -16,7 +16,12 @@
 // lines_done[7:0]} (lines_done = last line completely written; the console
 // reads a line only after it is done and is never more than one frame
 // behind), AUDIO_WPTR (next stereo pair index to be written), VIDEO_MODE
-// {12'd0, pal, interlace, high_res, overscan}.
+// {12'd0, pal, interlace, high_res, overscan}, FRAME_PHASE {frames_started[4:0],
+// position[10:0]}: where the SNES is in its frame, in quarter lines (341 master
+// clocks) since the first visible line began, and a count of frame starts that
+// steps at the moment the position returns to 0; position 0x7FF until the first
+// frame. The console's program reads it to hold one SNES picture per console
+// picture (docs/design/frame-lock.md).
 module sn64_frame_window #(
     parameter LINES = 240,
     parameter AUDIO_LOG2 = 10
@@ -42,7 +47,8 @@ module sn64_frame_window #(
     output reg  [15:0] rdata = 16'h0000,
     output wire [15:0] frame_status,
     output wire [15:0] audio_wptr,
-    output wire [15:0] video_mode
+    output wire [15:0] video_mode,
+    output wire [15:0] frame_phase
 );
     localparam FB_WORDS = LINES * 256;
     localparam AUDIO_BASE = 17'h1E000;  // byte offset of the audio ring inside the window
@@ -65,6 +71,9 @@ module sn64_frame_window #(
     reg [7:0] frame_count = 8'd0, lines_done = 8'hFF;
     reg [AUDIO_LOG2-1:0] wptr = '0;
     reg overscan_q = 1'b0;
+    reg [10:0] pos = 11'h7FF;                 // 0x7FF: no frame has started yet
+    reg [8:0]  pos_div = 9'd0;
+    reg [4:0]  starts = 5'd0;                 // frame starts, modulo 32
     always @(posedge clk_snes) begin
         if (px_valid) fb[{line, video_x[8:1]}] <= px_word;
         hde_q <= hde;
@@ -75,6 +84,20 @@ module sn64_frame_window #(
             overscan_q  <= (line > 8'd224);
         end
         if (!vde_q && vde) lines_done <= 8'hFF;                 // new frame: nothing done yet
+        // Position in the frame: quarter lines since the visible area began. It runs through the
+        // vertical blanking too, which lines_done cannot show.
+`ifdef SN64_FAULT_PHASE_NO_RESTART
+        if (1'b0) begin                                         // fault injection: never restarted at a frame start
+`else
+        if (!vde_q && vde) begin
+`endif
+            pos <= 11'd0; pos_div <= 9'd0; starts <= starts + 5'd1;
+        end else if (pos_div == 9'd340) begin
+            pos_div <= 9'd0;
+            if (pos != 11'h7FF) pos <= pos + 11'd1;
+        end else begin
+            pos_div <= pos_div + 9'd1;
+        end
         if (audio_ready) begin
             aud[{wptr, 1'b0}] <= audio_left;
             aud[{wptr, 1'b1}] <= audio_right;
@@ -83,13 +106,16 @@ module sn64_frame_window #(
     end
 
     // Status to the host domain (word transfers with handshake; each changes at
-    // most once per SNES line / sample, far slower than the handshake).
+    // most once per quarter line (341 master clocks) or sample, far slower than
+    // the handshake).
     sn64_cdc_word #(.W(16)) x_frame (.src_clk(clk_snes), .src_data({frame_count, lines_done}),
                                      .dst_clk(clk_host), .dst_data(frame_status));
     sn64_cdc_word #(.W(16)) x_aud   (.src_clk(clk_snes), .src_data({{(16 - AUDIO_LOG2){1'b0}}, wptr}),
                                      .dst_clk(clk_host), .dst_data(audio_wptr));
     sn64_cdc_word #(.W(16)) x_mode  (.src_clk(clk_snes), .src_data({12'd0, pal, interlace, high_res, overscan_q}),
                                      .dst_clk(clk_host), .dst_data(video_mode));
+    sn64_cdc_word #(.W(16), .INIT(16'h07FF)) x_phase (.src_clk(clk_snes), .src_data({starts, pos}),
+                                                      .dst_clk(clk_host), .dst_data(frame_phase));
 
     // ------------------------------------------------------------------
     // Host read port. Both memories are read unconditionally every clock

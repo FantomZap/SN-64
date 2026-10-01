@@ -53,7 +53,7 @@ def main():
               'fpga/rtl/sn64_sd_adc.sv', 'fpga/rtl/sn64_audio_mix.sv', 'fpga/rtl/sn64_top.sv'])
     top = 'sn64_board_top' if args.top == 'board' else 'sn64_pnr_wrap'
     if args.top == 'board':
-        files += ['fpga/rtl/sn64_rail_monitor.sv', 'fpga/rtl/sn64_usb_prog.sv'] + \
+        files += ['fpga/rtl/sn64_rail_monitor.sv', 'fpga/rtl/sn64_usb_prog.sv', 'fpga/rtl/sn64_clock_pace.sv'] + \
                  rel(sorted((ROOT / 'build/generated/tinyfpga').glob('*.v')))   # fpga/tools/prepare_usb_core.py
     files.append(args.top_file or f'fpga/rtl/{top}.sv')
     lpf = args.lpf or ('fpga/constraints/sn64_board.lpf' if args.top == 'board' else 'fpga/constraints/sn64_trial.lpf')
@@ -83,6 +83,7 @@ def main():
         r = subprocess.run([shutil.which('nextpnr-ecp5'), '--85k', '--package', 'CABGA381', '--speed', args.speed,
                             '--json', str(netlist), '--lpf', lpf,
                             '--lpf-allow-unconstrained', '--timing-allow-fail',
+                            '--textcfg', str(out / f'{top}.config'),
                             '--report', str(out / 'pnr-report.json')], cwd=ROOT, stdout=fh, stderr=subprocess.STDOUT)
     body = pnr_log.read_text(encoding='utf-8', errors='replace')
     fmax = {}
@@ -91,6 +92,15 @@ def main():
             'achieved_mhz': float(m.group(2)), 'required_mhz': float(m.group(4)), 'result': m.group(3)}
     summary = {'top': top, 'speed_grade': args.speed, 'lpf': lpf, 'synthesis_cells': cells, 'nextpnr_exit': r.returncode,
                'max_frequency': fmax, 'logs': [str(synth_log), str(pnr_log)]}
+    # The clock select's mode as it went into the configuration (the board top asks for NEG: switches on
+    # falling edges, idles low). nextpnr takes it from the cell's attribute, not from the parameter.
+    config = out / f'{top}.config'
+    if config.exists():
+        modes = re.findall(r'^enum: (DCS\d)\.DCSMODE (\w+)', config.read_text(encoding='utf-8', errors='replace'), re.M)
+        summary['dcs_modes'] = dict(modes)
+        if args.top == 'board' and r.returncode == 0 and 'NEG' not in dict(modes).values():
+            print(json.dumps(summary, indent=2))
+            sys.exit('the clock select did not get DCSMODE NEG in the configuration')
     (out / 'summary.json').write_text(json.dumps(summary, indent=2) + '\n', encoding='utf-8')
     print(json.dumps(summary, indent=2))
     if r.returncode or any(v['result'] != 'PASS' for v in fmax.values()):

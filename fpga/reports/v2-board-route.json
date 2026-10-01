@@ -3,44 +3,87 @@
   "speed_grade": "8",
   "lpf": "fpga/constraints/sn64_board.lpf",
   "synthesis_cells": {
-    "TRELLIS_FF": 13348,
+    "TRELLIS_FF": 13488,
     "EHXPLLL": 3,
     "DCSC": 1,
     "USRMCLK": 1,
     "DP16KD": 203,
     "MULT18X18D": 19,
-    "LUT4": 30189
+    "LUT4": 32138
   },
   "nextpnr_exit": 0,
   "max_frequency": {
     "clk_usb48": {
-      "achieved_mhz": 161.6,
+      "achieved_mhz": 193.24,
       "required_mhz": 48.0,
       "result": "PASS"
     },
     "clk_usb12": {
-      "achieved_mhz": 93.66,
+      "achieved_mhz": 100.95,
       "required_mhz": 12.0,
       "result": "PASS"
     },
     "clk_host": {
-      "achieved_mhz": 100.26,
+      "achieved_mhz": 100.16,
       "required_mhz": 61.72,
       "result": "PASS"
     },
+    "clk_snes2": {
+      "achieved_mhz": 344.83,
+      "required_mhz": 42.96,
+      "result": "PASS"
+    },
     "clk_snes": {
-      "achieved_mhz": 34.98,
+      "achieved_mhz": 36.23,
       "required_mhz": 21.48,
       "result": "PASS"
     },
     "osc_27": {
-      "achieved_mhz": 78.44,
+      "achieved_mhz": 80.82,
       "required_mhz": 27.0,
       "result": "PASS"
     }
   },
   "logs": [
-    "%USERPROFILE%\\.claude\\projects\\SN64\\build\\route-board\\synth.log",
-    "%USERPROFILE%\\.claude\\projects\\SN64\\build\\route-board\\pnr.log"
-  ]
+    "build/route-board/synth.log",
+    "build/route-board/pnr.log"
+  ],
+  "dcs_modes": {
+    "DCS0": "NEG"
+  },
+  "utilisation": {
+    "TRELLIS_IO": {
+      "used": 111,
+      "available": 365
+    },
+    "DCCA": {
+      "used": 7,
+      "available": 56
+    },
+    "DP16KD": {
+      "used": 203,
+      "available": 208
+    },
+    "MULT18X18D": {
+      "used": 19,
+      "available": 156
+    },
+    "EHXPLLL": {
+      "used": 3,
+      "available": 4
+    },
+    "DCSC": {
+      "used": 1,
+      "available": 2
+    },
+    "TRELLIS_FF": {
+      "used": 13488,
+      "available": 83640
+    },
+    "TRELLIS_COMB": {
+      "used": 37002,
+      "available": 83640
+    }
+  },
+  "note": "2026-10-01, frame lock: the two game PLLs make twice the SNES master and sn64_clock_pace halves it (clk_snes2 = doubled clock, clk_snes = master, constrained by name in sn64_board.lpf). dcs_modes is the clock select mode as it went into the configuration (NEG asked for; it is read from the cell's attribute). Feasibility run: internal timing on the real pinout, no board-level I/O timing."
 }

@@ -36,6 +36,7 @@ Every target in the original specification remains in scope, including PAL, prot
 - [Bootstrap ROM window from the configuration flash](docs/design/bootrom-flash.md)
 - [Mechanical architecture: board arrangement, insertion depths, region-free opening](docs/design/mechanical-architecture.md)
 - [Console video path: SNES picture and sound through the N64/M64's own output](docs/design/console-video-path.md)
+- [Frame lock: one Super NES picture per console picture, compatibility mode, sound path](docs/design/frame-lock.md)
 - [ROM-header region fallback](docs/design/header-region-probe.md)
 - [On-board HDMI output (retired 2026-09-29)](docs/design/av-output-implementation.md)
 - [Cartridge analog audio into the console stream](docs/design/cart-audio-implementation.md)

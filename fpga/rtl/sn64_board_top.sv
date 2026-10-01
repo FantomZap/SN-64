@@ -2,12 +2,15 @@
 // One 27 MHz oscillator; every clock comes from the FPGA PLLs:
 //   EHXPLLL with feedback from CLKOS: f_CLKOS = f_in / CLKI_DIV x CLKFB_DIV, f_VCO = f_CLKOS x CLKOS_DIV,
 //   every output = f_VCO / its divider (PFD 3.125-400 MHz, VCO 400-800 MHz).
-//   * pll_ntsc: 27/2 x 5 = 67.5 (CLKOS), VCO 472.5, CLKOP /22 = 21.477273 MHz (exact)
-//   * pll_pal:  27/7 x 4 = 15.43 (CLKOS), VCO 617.14, CLKOP /29 = 21.280788 MHz (-27 ppm vs 21.28137)
+//   * pll_ntsc: 27/2 x 5 = 67.5 (CLKOS), VCO 472.5, CLKOP /11 = 42.954545 MHz = 2 x 21.477273 (exact)
+//   * pll_pal:  27/5 x 2 = 10.8 (CLKOS), VCO 723.6, CLKOP /17 = 42.564706 MHz = 2 x 21.282353
+//               (+46 ppm vs 21.28137; the best doubled PAL master these dividers reach)
 //   * pll_host: 27 x 4 = 108 (CLKOS), VCO 432: CLKOP /9 = 48 MHz USB, CLKOS2 /36 = 12 MHz USB logic,
 //               CLKOS3 /7 = 61.714 MHz host
-// The SNES master is selected per region through a DCS and gated until the
-// region is decided (sn64_top). Absorbed into the FPGA in v2: USB device
+// Twice the SNES master is selected per region through a DCS and gated until the
+// region is decided (sn64_top); sn64_clock_pace halves it into the SNES master
+// and can slow it by the amount the N64 program asks for (PACE, frame lock:
+// docs/design/frame-lock.md). Absorbed into the FPGA in v2: USB device
 // (sn64_usb_prog), rail telemetry front end (sn64_rail_monitor over I2C to the
 // TLA2528), cartridge audio ADC (sn64_sd_adc), open-drain pulls through the
 // SN74LVC07A. Pin names follow hardware/sn64-v2/interfaces/fpga-pin-map.csv;
@@ -49,29 +52,29 @@ module sn64_board_top (
     inout  wire [3:0]  flash_dq
 );
     // ---------------- PLLs ----------------
-    wire clk_ntsc, clk_pal, clk_usb48, clk_host, clk_usb12;
+    wire clk_ntsc2, clk_pal2, clk_usb48, clk_host, clk_usb12;   // clk_ntsc2 / clk_pal2: twice the SNES master
     wire lock_ntsc, lock_pal, lock_host;
     wire fb_ntsc, fb_pal, fb_host;
-    (* FREQUENCY_PIN_CLKI="27", FREQUENCY_PIN_CLKOP="21.477273", FREQUENCY_PIN_CLKOS="67.5", ICP_CURRENT="12", LPF_RESISTOR="8", MFG_ENABLE_FILTEROPAMP="1", MFG_GMCREF_SEL="2" *)
+    (* FREQUENCY_PIN_CLKI="27", FREQUENCY_PIN_CLKOP="42.954545", FREQUENCY_PIN_CLKOS="67.5", ICP_CURRENT="12", LPF_RESISTOR="8", MFG_ENABLE_FILTEROPAMP="1", MFG_GMCREF_SEL="2" *)
     EHXPLLL #(
         .PLLRST_ENA("DISABLED"), .INTFB_WAKE("DISABLED"), .STDBY_ENABLE("DISABLED"), .DPHASE_SOURCE("DISABLED"),
         .OUTDIVIDER_MUXA("DIVA"), .OUTDIVIDER_MUXB("DIVB"), .OUTDIVIDER_MUXC("DIVC"), .OUTDIVIDER_MUXD("DIVD"),
-        .CLKI_DIV(2), .CLKOP_ENABLE("ENABLED"), .CLKOP_DIV(22), .CLKOP_CPHASE(10), .CLKOP_FPHASE(0),
+        .CLKI_DIV(2), .CLKOP_ENABLE("ENABLED"), .CLKOP_DIV(11), .CLKOP_CPHASE(5), .CLKOP_FPHASE(0),
         .CLKOS_ENABLE("ENABLED"), .CLKOS_DIV(7), .CLKOS_CPHASE(2), .CLKOS_FPHASE(0),
         .FEEDBK_PATH("CLKOS"), .CLKFB_DIV(5)
     ) pll_ntsc (
-        .RST(1'b0), .STDBY(1'b0), .CLKI(osc_27), .CLKOP(clk_ntsc), .CLKOS(fb_ntsc), .CLKFB(fb_ntsc), .CLKINTFB(),
+        .RST(1'b0), .STDBY(1'b0), .CLKI(osc_27), .CLKOP(clk_ntsc2), .CLKOS(fb_ntsc), .CLKFB(fb_ntsc), .CLKINTFB(),
         .PHASESEL0(1'b0), .PHASESEL1(1'b0), .PHASEDIR(1'b1), .PHASESTEP(1'b1), .PHASELOADREG(1'b1),
         .PLLWAKESYNC(1'b0), .ENCLKOP(1'b0), .LOCK(lock_ntsc));
-    (* FREQUENCY_PIN_CLKI="27", FREQUENCY_PIN_CLKOP="21.280788", FREQUENCY_PIN_CLKOS="15.428571", ICP_CURRENT="12", LPF_RESISTOR="8", MFG_ENABLE_FILTEROPAMP="1", MFG_GMCREF_SEL="2" *)
+    (* FREQUENCY_PIN_CLKI="27", FREQUENCY_PIN_CLKOP="42.564706", FREQUENCY_PIN_CLKOS="10.8", ICP_CURRENT="12", LPF_RESISTOR="8", MFG_ENABLE_FILTEROPAMP="1", MFG_GMCREF_SEL="2" *)
     EHXPLLL #(
         .PLLRST_ENA("DISABLED"), .INTFB_WAKE("DISABLED"), .STDBY_ENABLE("DISABLED"), .DPHASE_SOURCE("DISABLED"),
         .OUTDIVIDER_MUXA("DIVA"), .OUTDIVIDER_MUXB("DIVB"), .OUTDIVIDER_MUXC("DIVC"), .OUTDIVIDER_MUXD("DIVD"),
-        .CLKI_DIV(7), .CLKOP_ENABLE("ENABLED"), .CLKOP_DIV(29), .CLKOP_CPHASE(14), .CLKOP_FPHASE(0),
-        .CLKOS_ENABLE("ENABLED"), .CLKOS_DIV(40), .CLKOS_CPHASE(19), .CLKOS_FPHASE(0),
-        .FEEDBK_PATH("CLKOS"), .CLKFB_DIV(4)
+        .CLKI_DIV(5), .CLKOP_ENABLE("ENABLED"), .CLKOP_DIV(17), .CLKOP_CPHASE(8), .CLKOP_FPHASE(0),
+        .CLKOS_ENABLE("ENABLED"), .CLKOS_DIV(67), .CLKOS_CPHASE(33), .CLKOS_FPHASE(0),
+        .FEEDBK_PATH("CLKOS"), .CLKFB_DIV(2)
     ) pll_pal (
-        .RST(1'b0), .STDBY(1'b0), .CLKI(osc_27), .CLKOP(clk_pal), .CLKOS(fb_pal), .CLKFB(fb_pal), .CLKINTFB(),
+        .RST(1'b0), .STDBY(1'b0), .CLKI(osc_27), .CLKOP(clk_pal2), .CLKOS(fb_pal), .CLKFB(fb_pal), .CLKINTFB(),
         .PHASESEL0(1'b0), .PHASESEL1(1'b0), .PHASEDIR(1'b1), .PHASESTEP(1'b1), .PHASELOADREG(1'b1),
         .PLLWAKESYNC(1'b0), .ENCLKOP(1'b0), .LOCK(lock_pal));
     (* FREQUENCY_PIN_CLKI="27", FREQUENCY_PIN_CLKOP="48", FREQUENCY_PIN_CLKOS="108", FREQUENCY_PIN_CLKOS2="12", FREQUENCY_PIN_CLKOS3="61.714286", ICP_CURRENT="12", LPF_RESISTOR="8", MFG_ENABLE_FILTEROPAMP="1", MFG_GMCREF_SEL="2" *)
@@ -90,15 +93,23 @@ module sn64_board_top (
         .PLLWAKESYNC(1'b0), .ENCLKOP(1'b0), .ENCLKOS(1'b0), .ENCLKOS2(1'b0), .ENCLKOS3(1'b0), .LOCK(lock_host));
     wire pll_locked = lock_ntsc & lock_pal & lock_host;
 
-    // ---------------- SNES master: region select, then run gate ----------------
-    wire snes_clk_run, region_pal, clk_snes;
+    // ---------------- SNES master: region select and run gate at twice the frequency, then
+    // the pace divider. clk_snes is a flip-flop output: no gate, no shortened pulse. --------
+    wire snes_clk_run, region_pal, clk_snes2, clk_snes;
+    wire [15:0] snes_pace;
     reg  sel_ntsc = 1'b0, sel_pal = 1'b0;
     always @(posedge osc_27) begin
         sel_ntsc <= snes_clk_run & !region_pal;
         sel_pal  <= snes_clk_run &  region_pal;
     end
-    DCSC #(.DCSMODE("NEG")) snes_clock (.CLK0(clk_ntsc), .CLK1(clk_pal), .SEL0(sel_ntsc), .SEL1(sel_pal),
-                                        .MODESEL(1'b0), .DCSOUT(clk_snes));
+    // The mode is given as an attribute as well: nextpnr-ecp5 takes DCSMODE from the cell's
+    // attribute and leaves it at the default (POS: switches on rising edges, idles high) when only
+    // the parameter is set. Found 2026-10-01 in the text configuration of a test build; the routed
+    // design's configuration is checked for it by route_top.py.
+    (* DCSMODE="NEG" *)
+    DCSC #(.DCSMODE("NEG")) snes_clock (.CLK0(clk_ntsc2), .CLK1(clk_pal2), .SEL0(sel_ntsc), .SEL1(sel_pal),
+                                        .MODESEL(1'b0), .DCSOUT(clk_snes2));
+    sn64_clock_pace pace (.clk2x(clk_snes2), .clk_host(clk_host), .rate(snes_pace), .clk_snes(clk_snes), .stretching());
 
     // Power-on reset: board supervisor and PLL lock.
     wire por_n = board_reset_n & pll_locked;
@@ -156,7 +167,8 @@ module sn64_board_top (
 
     wire [15:0] status_word;
     sn64_top #(.ROM_ADDR_BITS(17), .ROM_FROM_FLASH(1), .FLASH_USE_USRMCLK(1), .CLK25_HZ(27_000_000),      // 256 KiB flash ROM window
-               .SEQ_PROBE_ENABLE(1)) top (                                                                    // cartridge check before 5 V
+               .SEQ_PROBE_ENABLE(1),                                                                          // cartridge check before 5 V
+               .PACE_PRESENT(1)) top (                                                                        // sn64_clock_pace above
         .clk_25(osc_27), .clk_host(clk_host), .clk_snes(clk_snes), .por_n(por_n),
         .n64_reset_n(n64_reset_n), .n64_nmi_n(n64_nmi_n), .n64_alel(n64_alel), .n64_aleh(n64_aleh),
         .n64_read_n(n64_read_n), .n64_write_n(n64_write_n), .n64_ad(n64_ad),
@@ -166,7 +178,7 @@ module sn64_board_top (
         .ext_spi_sel_req(!spi_cs_n_u), .ext_spi_sck(spi_sck_u), .ext_spi_cs_n(spi_cs_n_u), .ext_spi_mosi(spi_mosi_u),
         .ext_spi_miso(spi_miso_u), .ext_spi_active(spi_active),
         .pll_locked(pll_locked), .monitor_error(monitor_error),
-        .snes_clk_run(snes_clk_run), .region_pal(region_pal),
+        .snes_clk_run(snes_clk_run), .region_pal(region_pal), .snes_pace(snes_pace),
         .host_3v3_ok(host_3v3_ok), .fpga_rails_ok(fpga_rails_ok), .cart_5v_ok(cart_5v_ok), .iface_rail_ok(1'b1),
         .efuse_fault_n(efuse_fault_n), .overtemp(overtemp), .cart_5v_enable(cart_5v_enable), .iface_rail_enable(),
         .cart_probe_req(cart_probe_req), .cart_probe_active(cart_probe_active), .cart_probe_strobe(cart_probe_strobe),

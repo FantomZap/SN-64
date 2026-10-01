@@ -3,7 +3,8 @@
 #   make            build build/n64-bootstrap/sn64_bootstrap.z64 (needs N64_INST)
 #   make check      verify the ROM header and its CIC-6102 IPL2 checksum
 #   make words      convert the ROM to the FPGA ROM-window word image (.mem)
-#   make test       host tests: mapping table, cartridge-check screens, splash screens + ROM tools
+#   make test       host tests: mapping table, cartridge-check screens, splash screens, frame lock,
+#                   sound resampler, sound output queue + ROM tools
 #   make splash     regenerate src/sn64_splash_data.c from the logo files (needs PyMuPDF and Pillow)
 #   make test-negative  the same tests with injected faults: every run must fail
 #   make clean      remove build/n64-bootstrap
@@ -16,12 +17,14 @@ OUT           ?= $(ROOT)/build/n64-bootstrap
 ROM           := $(OUT)/sn64_bootstrap.z64
 PYTHON        ?= python
 HOST_CC       ?= gcc
-# Must equal the ROM_ADDR_BITS parameter of sn64_n64_endpoint in the top level
-# (the RTL default is still 12 = 8 KiB, too small; see the design note).
-ROM_ADDR_BITS ?= 16
+# Must equal the ROM_ADDR_BITS parameter of sn64_n64_endpoint in the top level: 17 on the v2
+# board (a 256 KiB window in the configuration flash, fpga/rtl/sn64_board_top.sv). The program
+# was 131,072 bytes and fitted 16 until the frame lock and the sound queue (2026-10-01); it is
+# 147,456 bytes now. The RTL default is still 12 = 8 KiB, too small; see the design note.
+ROM_ADDR_BITS ?= 17
 
 all: rom
-.PHONY: all rom check words splash test test-mapping test-cartcheck test-splash test-tools test-negative clean
+.PHONY: all rom check words splash test test-mapping test-cartcheck test-splash test-framelock test-resample test-audioout test-tools test-negative clean
 
 rom:
 	mkdir -p $(OUT)
@@ -34,7 +37,7 @@ words: rom
 	$(PYTHON) tools/z64_to_rom_words.py $(ROM) --rom-addr-bits $(ROM_ADDR_BITS) \
 	    --out $(OUT)/sn64_bootstrap_words.mem --manifest $(OUT)/sn64_bootstrap_words.json
 
-test: test-mapping test-cartcheck test-splash test-tools
+test: test-mapping test-cartcheck test-splash test-framelock test-resample test-audioout test-tools
 
 splash:
 	$(PYTHON) tools/make_splash.py
@@ -43,6 +46,24 @@ test-splash:
 	mkdir -p $(OUT)/host
 	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -Isrc -o $(OUT)/host/test_splash tests/test_splash.c src/sn64_splash.c src/sn64_splash_data.c
 	$(OUT)/host/test_splash
+
+# Frame lock: timing numbers, the confirmation screen's text and the control loop against a model
+# of the two clocks. Also writes the confirmation screen's lines for tools/mock_screens.py.
+test-framelock:
+	mkdir -p $(OUT)/host
+	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -Isrc -o $(OUT)/host/test_framelock tests/test_framelock.c src/sn64_framelock.c -lm
+	$(OUT)/host/test_framelock --screens $(OUT)/host/compat-screen.txt
+
+test-resample:
+	mkdir -p $(OUT)/host
+	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -Isrc -o $(OUT)/host/test_resample tests/test_resample.c src/sn64_resample.c -lm
+	$(OUT)/host/test_resample
+
+# Sound output queue with the resampler and its rate control, against a model of the console's sound output.
+test-audioout:
+	mkdir -p $(OUT)/host
+	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -Isrc -o $(OUT)/host/test_audioout tests/test_audioout.c src/sn64_audioout.c src/sn64_resample.c -lm
+	$(OUT)/host/test_audioout
 
 test-cartcheck:
 	mkdir -p $(OUT)/host
@@ -66,6 +87,12 @@ test-negative:
 	if $(OUT)/host/test_cartcheck_fault; then echo "NOT DETECTED: wrong short/backwards level"; exit 1; fi
 	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -DSN64_FAULT_SPLASH_OFFCENTRE -Isrc -o $(OUT)/host/test_splash_fault tests/test_splash.c src/sn64_splash.c src/sn64_splash_data.c
 	if $(OUT)/host/test_splash_fault; then echo "NOT DETECTED: splash picture off centre"; exit 1; fi
+	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -DSN64_FAULT_PACE_SIGN -Isrc -o $(OUT)/host/test_framelock_fault tests/test_framelock.c src/sn64_framelock.c -lm
+	if $(OUT)/host/test_framelock_fault; then echo "NOT DETECTED: frame lock pushes the wrong way"; exit 1; fi
+	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -DSN64_FAULT_RESAMPLE_NO_CARRY -Isrc -o $(OUT)/host/test_resample_fault tests/test_resample.c src/sn64_resample.c -lm
+	if $(OUT)/host/test_resample_fault; then echo "NOT DETECTED: resampler loses its carry"; exit 1; fi
+	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -DSN64_FAULT_AOUT_NO_CARRY -Isrc -o $(OUT)/host/test_audioout_fault tests/test_audioout.c src/sn64_audioout.c src/sn64_resample.c -lm
+	if $(OUT)/host/test_audioout_fault; then echo "NOT DETECTED: sound queue loses the pairs it holds back"; exit 1; fi
 	if $(PYTHON) tools/test_rom_tools.py --rom $(ROM) --work $(OUT)/tooltest-fault1 --inject-fault size-guard; then echo "NOT DETECTED: size guard"; exit 1; fi
 	if $(PYTHON) tools/test_rom_tools.py --rom $(ROM) --work $(OUT)/tooltest-fault2 --inject-fault checksum; then echo "NOT DETECTED: checksum"; exit 1; fi
 	@echo "NEGATIVE: all fault-injected runs failed as required"

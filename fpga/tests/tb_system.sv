@@ -32,15 +32,21 @@
 // its output disabled when the SNES clock starts (no pixel clock: the picture
 // goes to the console through the frame window, docs/design/console-video-path.md).
 // Clocks: the SNES master follows region_pal (CLK0 NTSC / CLK1 PAL); the core
-// has hardware-length lines (long dots restored in prepare_core.py).
+// has hardware-length lines (long dots restored in prepare_core.py). As on the v2 board the
+// master is sn64_clock_pace halving a doubled clock; at the end the bench writes PACE through
+// the mailbox and counts SNES clocks to see the slowdown arrive (docs/design/frame-lock.md).
 module tb_system;
     // ---------------- Clocks ----------------
-    reg clk_25=0, clk_host=0, clk_snes=0;
+    reg clk_25=0, clk_host=0, clk_snes2=0;
+    wire clk_snes;
     always #20 clk_25 = ~clk_25;                  // 25 MHz
     always #8  clk_host = ~clk_host;              // 62.5 MHz
     wire snes_clk_run;
     // verilator lint_off ZERODLY
-    always #(dut.region_pal ? 23.76 : 23.22892) clk_snes = snes_clk_run ? ~clk_snes : 1'b0;   // PAL / NTSC master PLL, gated by the board
+    // twice the PAL / NTSC master, gated by the board (stops low, as the clock select does), then the pace divider
+    always #(dut.region_pal ? 11.88 : 11.61446) clk_snes2 = (snes_clk_run || clk_snes2) ? ~clk_snes2 : 1'b0;
+    wire [15:0] snes_pace;
+    sn64_clock_pace pace (.clk2x(clk_snes2), .clk_host(clk_host), .rate(snes_pace), .clk_snes(clk_snes), .stretching());
     // verilator lint_on ZERODLY
     reg por_n=0;
 
@@ -264,12 +270,12 @@ module tb_system;
     // of start-up, 15 x 372 of slots, then up to 6 table updates of several
     // 78/84-cycle iterations each). No-key runs still decide at key_fail (~1.7 ms).
     sn64_top #(.BUILD_ID(16'h5A01), .ROM_ADDR_BITS(4), .REGION_TIMEOUT_MS(20), .SEQ_RESET_HOLD_MS(1),
-               .SEQ_RAIL_TIMEOUT_MS(2), .CIC_LOCK_T_PWRUP(200)) dut (
+               .SEQ_RAIL_TIMEOUT_MS(2), .CIC_LOCK_T_PWRUP(200), .PACE_PRESENT(1)) dut (
         .clk_25(clk_25), .clk_host(clk_host), .clk_snes(clk_snes), .por_n(por_n),
         .n64_reset_n(n64_reset_n), .n64_nmi_n(1'b1), .n64_alel(alel), .n64_aleh(aleh), .n64_read_n(rd_n), .n64_write_n(wr_n),
         .n64_ad(ad), .n64_cic_clk(1'b1), .n64_si_clk(1'b0), .n64_cic_dq(n64_cic_dq),
         .rom_we(1'b0), .rom_waddr(4'd0), .rom_wdata(16'd0),
-        .pll_locked(1'b1), .monitor_error(1'b0), .snes_clk_run(snes_clk_run), .region_pal(region_pal),
+        .pll_locked(1'b1), .monitor_error(1'b0), .snes_clk_run(snes_clk_run), .region_pal(region_pal), .snes_pace(snes_pace),
         .ext_spi_sel_req(1'b0), .ext_spi_sck(1'b0), .ext_spi_cs_n(1'b1), .ext_spi_mosi(1'b0), .ext_spi_miso(), .ext_spi_active(),
         .host_3v3_ok(1'b1), .fpga_rails_ok(1'b1), .cart_5v_ok(cart_5v_ok), .iface_rail_ok(iface_rail_ok),
         .efuse_fault_n(1'b1), .overtemp(1'b0), .cart_5v_enable(cart_5v_enable), .iface_rail_enable(iface_rail_enable),
@@ -283,6 +289,18 @@ module tb_system;
         .snes_cic_data1_o(d1o), .snes_cic_data1_oe(d1oe), .snes_cic_data1_i(line1),
         .aud_l_cmp(aud_l_cmp), .aud_r_cmp(aud_r_cmp), .aud_l_fb(aud_l_fb), .aud_r_fb(aud_r_fb),
         .status_word(status_word));
+
+    // SNES master clocks in a fixed window of the host clock (frame lock check at the end).
+    int snes_edges = 0, pace_base, pace_slow, pace_back;
+    always @(posedge clk_snes) snes_edges++;
+    task automatic pace_count(output int n);
+        int e0;
+        begin
+            @(posedge clk_host); e0 = snes_edges;
+            repeat (40000) @(posedge clk_host);
+            n = snes_edges - e0;
+        end
+    endtask
 
     // ---------------- Invariants ----------------
     reg run_seen=0, pal_at_start=0;
@@ -410,8 +428,38 @@ module tb_system;
         $display("audio at the frame window: %0d priming (DSP only), %0d mixed with the ADC words, %0d wrong; slips ovf %0d unf %0d; ADC frame errors %0d",
                  audio_priming, audio_mixed, audio_bad, dut.audio_ovf_slips, dut.audio_unf_slips, dut.adc_frame_errors_h);
         if (audio_bad != 0 || audio_mixed < 100) $fatal(1,"cartridge audio path: %0d wrong samples, only %0d mixed", audio_bad, audio_mixed);
-        $display("PASS: system power-on: N64 mailbox, ordered cartridge power, PLL lock, region decided before the SNES clock (%s via %s), reset release, SNES program from cartridge, controller image via auto-joypad, cartridge audio mixed (%0d samples), STATUS=%h REGION_INFO=%h REGION_SOURCE=%h",
-                 exp_region_s, exp_src_s, audio_mixed, d0, d1, d2);
+        // Frame lock (docs/design/frame-lock.md): FEATURES says the clock can be paced; FRAME_PHASE moves
+        // through the frame; PACE written through the mailbox slows the SNES clock by rate / (2^21 + rate).
+        pi_addr(32'h1FFF_000C); pi_read(f0); pi_end;
+        if (f0 !== 16'h0003) $fatal(1,"FEATURES %h, expected 0003 (pace and frame phase)", f0);
+        pi_addr(32'h1FFF_0024); pi_read(f1); pi_read(f2); pi_end;
+        #100_000;
+        pi_addr(32'h1FFF_0024); pi_read(f0); pi_end;
+        begin
+            int n, adv;
+            n = region_pal ? 1248 : 1048;                               // quarter lines in a frame
+            if (f1[10:0] >= n || f0[10:0] >= n) $fatal(1,"FRAME_PHASE position outside the frame: %h then %h", f1, f0);
+            adv = ((int'(f0[15:11]) - int'(f1[15:11]) + 32) % 32) * n + int'(f0[10:0]) - int'(f1[10:0]);
+            if (adv < 5 || adv > 9) $fatal(1,"FRAME_PHASE advanced %0d quarter lines in about 103 us (%h then %h), expected 6 or 7", adv, f1, f0);
+            if (f2 !== 16'h0000) $fatal(1,"PACE reads %h before anything was written", f2);
+        end
+        pace_count(pace_base);
+        pi_addr(32'h1FFF_0024); pi_write(16'h0000); pi_write(16'hFFFF); pi_end;
+        repeat(40) @(posedge clk_snes);
+        pace_count(pace_slow);
+        pi_addr(32'h1FFF_0024); pi_write(16'h0000); pi_write(16'h0000); pi_end;
+        repeat(40) @(posedge clk_snes);
+        pace_count(pace_back);
+        begin
+            real want;
+            want = pace_base * 2097152.0 / (2097152.0 + 65535.0);
+            $display("pace: %0d SNES clocks in the window at full speed, %0d with PACE = ffff (expected %0.1f), %0d after PACE = 0",
+                     pace_base, pace_slow, want, pace_back);
+            if (pace_slow < want - 3.0 || pace_slow > want + 3.0) $fatal(1,"PACE did not slow the SNES clock as written: %0d, expected %0.1f", pace_slow, want);
+            if (pace_back < pace_base - 2 || pace_back > pace_base + 2) $fatal(1,"SNES clock did not return to full speed: %0d, was %0d", pace_back, pace_base);
+        end
+        $display("PASS: system power-on: N64 mailbox, ordered cartridge power, PLL lock, region decided before the SNES clock (%s via %s), reset release, SNES program from cartridge, controller image via auto-joypad, cartridge audio mixed (%0d samples), PACE ffff slows the SNES clock %0.2f %%, STATUS=%h REGION_INFO=%h REGION_SOURCE=%h",
+                 exp_region_s, exp_src_s, audio_mixed, 100.0 * (pace_base - pace_slow) / pace_base, d0, d1, d2);
         $finish;
     end
     initial begin #400_000_000; $fatal(1,"system test timed out (status %h)", status_word); end

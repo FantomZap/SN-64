@@ -1,12 +1,16 @@
-"""Draw mock-ups of the boot menu's screens: the two splash screens and the cartridge-check screens.
+"""Draw mock-ups of the boot menu's screens: the two splash screens, the cartridge-check screens
+and the compatibility-mode screens.
 
 The splash pictures are read from src/sn64_splash_data.c, pixel for pixel as the ROM holds them.
 The texts are read from src/sn64_cartcheck.c, so the picture cannot drift from the wording; the
 layout (8x8 character cells at x = 16, y = 12 + 10 * row on a 320 x 240 screen, the colours) is
-copied by hand from src/main.c. This is a drawing, not a capture: the menu has not run on a
-console or an emulator yet, and the console's own font looks different.
+copied by hand from src/main.c. The compatibility-mode confirmation is read from the file the
+host test writes with the code under test (`make test-framelock` ->
+build/n64-bootstrap/host/compat-screen.txt), numbers included. This is a drawing, not a capture:
+the menu has not run on a console or an emulator yet, and the console's own font looks different.
 
-  python tools/mock_screens.py        writes docs/design/img/cart-check-screens.png and splash-screens.png
+  python tools/mock_screens.py        writes docs/design/img/cart-check-screens.png, splash-screens.png
+                                      and compat-screens.png
 """
 import argparse
 import re
@@ -97,20 +101,34 @@ def sheet_of(screens, cols):
     return sheet
 
 
-def main_menu(check_summary, summary_colour):
+def main_menu(check_summary, summary_colour, cursor=0, compat=False, message=''):
     s = Screen('Main menu')
     s.header()
     s.line(2, TEXT, 'Status 0x0003  seq 512  OFF')
     s.line(4, TEXT, 'Cartridge: off')
     s.line(5, TEXT, 'Region: not decided yet')
-    items = ['Start SNES cartridge', 'Controller mapping', 'Status / diagnostics', 'Power down cartridge']
+    items = ['Start SNES cartridge', 'Controller mapping', 'Compatibility mode: ' + ('ON' if compat else 'off'),
+             'Status / diagnostics', 'Power down cartridge']
     for i, name in enumerate(items):
-        s.line(6 + i, HI if i == 0 else TEXT, ('> ' if i == 0 else '  ') + name)
+        s.line(6 + i, HI if i == cursor else TEXT, ('> ' if i == cursor else '  ') + name)
+    s.line(12, WARN, message)
+    if compat:
+        s.line(15, WARN, 'Compatibility mode: games run slower')
     s.line(20, DIM, 'Up/Down select  A choose  B back')
     return s
 
 
-def service(check_summary, summary_colour):
+def compat_confirm(title, lines):
+    """The confirmation screen as draw_compat() lays it out: text from row 3, the two figures in the warning colour."""
+    s = Screen(title)
+    s.header()
+    for i, text in enumerate(lines):
+        s.line(3 + i, HI if i == 0 else WARN if i in (11, 12) else TEXT, text)
+    s.line(21, DIM, 'A: turn it on        B: cancel')
+    return s
+
+
+def service(check_summary, summary_colour, lock=('no game shown yet', 'Slow 0.00 %  off +0  lost 0', '-')):
     s = Screen('Service screen (Status / diagnostics, then Z)')
     s.header()
     s.line(3, HI, 'Service: cartridge check')
@@ -119,8 +137,13 @@ def service(check_summary, summary_colour):
     s.line(8, TEXT, 'Mode: enforce')
     s.line(9, DIM, 'a failed check stops the start')
     s.line(11, summary_colour, 'Last check: ' + check_summary)
+    s.line(14, HI, 'Frame lock: ' + lock[0])
+    s.line(15, TEXT, lock[1])
+    s.line(16, DIM, 'Console timing: ' + lock[2])
+    s.line(17, DIM, 'Readout over the game: off')
     s.line(19, DIM, 'A: check the cartridge now, no power')
-    s.line(20, DIM, 'L or R: change the mode')
+    s.line(20, DIM, 'L or R: change the check mode')
+    s.line(21, DIM, 'C-up: readout over the game')
     s.line(22, DIM, 'B: back')
     return s
 
@@ -160,6 +183,30 @@ def main():
     sheet = sheet_of(order, 3)
     sheet.save(args.out_dir / 'splash-screens.png')
     print('wrote splash-screens.png', sheet.size)
+    # Compatibility mode: the menu row, the confirmation with its figures, the menu with it on, and
+    # the service screen's frame-lock lines as they would read after a game in normal mode.
+    made = HERE.parents[2] / 'build/n64-bootstrap/host/compat-screen.txt'
+    if not made.exists():
+        raise SystemExit('run `make test-framelock` first: it writes ' + str(made))
+    text = {}
+    for row in made.read_text(encoding='utf-8').splitlines():
+        key, _, body = row.partition('|')
+        text.setdefault(key, []).append(body)
+    screens = [
+        main_menu('none yet', DIM, cursor=2),
+        compat_confirm('Choosing it asks first (N64 or M64, 60 Hz)', text['ntsc']),
+        main_menu('none yet', DIM, cursor=2, compat=True, message='Compatibility mode on'),
+        compat_confirm('The same on a 50 Hz console', text['pal']),
+        service('ok, 0.79 V', TEXT, ('locked', 'Slow 0.04 %  off +1  lost 0', 'Super NES')),
+        service('ok, 0.79 V', TEXT, ('locked', 'Slow 0.45 %  off -1  lost 0', 'its own')),
+    ]
+    screens[0].title = 'Main menu: the new row'
+    screens[2].title = 'After A: it is on, and says so'
+    screens[4].title = 'Service screen after a game, normal'
+    screens[5].title = 'Service screen after a game, compatibility'
+    sheet = sheet_of(screens, 2)
+    sheet.save(args.out_dir / 'compat-screens.png')
+    print('wrote compat-screens.png', sheet.size)
 
 
 if __name__ == '__main__':

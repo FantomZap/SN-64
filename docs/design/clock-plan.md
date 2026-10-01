@@ -198,3 +198,22 @@ Evidence: `tb_clock_init` checks both register images and decodes the exact rati
 - ECP5 TMDS PLL behaviour on the CLK2 frequency step (its LOCK also holds the HDMI domain in reset).
 - TMDS eye at 135.2 MHz.
 - Display and capture acceptance of 864 × 624 at 50.007 Hz.
+
+## v2 board: doubled PLL clocks and the pace divider (2026-10-01)
+
+For the frame lock ([frame-lock.md](frame-lock.md)) the Super NES master clock on the v2 board has to be slowable in fine steps. The two game PLLs now make twice the master frequency; `sn64_clock_pace` halves it with a flip-flop and holds an occasional low phase one doubled-clock period longer.
+
+| | Before | Now |
+|---|---|---|
+| NTSC PLL | 27 / 2 x 5 x 7 / 22 = 21.477273 MHz | 27 / 2 x 5 x 7 / 11 = 42.954545 MHz, halved: 21.477273 MHz (exact, as before) |
+| PAL PLL | 27 / 7 x 4 x 40 / 29 = 21.280788 MHz (-27 ppm) | 27 / 5 x 2 x 67 / 17 = 42.564706 MHz, halved: 21.282353 MHz (+46 ppm) |
+| Region select | DCSC between the two master clocks | DCSC between the two doubled clocks, then the divider |
+| SNES clock | a PLL output | a flip-flop output, constrained by name in the generated `sn64_board.lpf` |
+
+A search of every divider setting (PFD at least 3.125 MHz, VCO 400 to 800 MHz) finds no doubled PAL clock closer than +46 ppm; the next best is +333 ppm. The board's oscillator is +-50 ppm itself. The S-DSP's sample clock is derived from the master by a fixed ratio, so PAL sound is 32,001.5 Hz.
+
+A clock gate on the PLL outputs (the ECP5's DCC) was tried first and routes, but was not used: the gate sits before the clock select, its enable would have to come from logic on the ungated clock, and the tools do not check that path's timing. A pulse cut short on this clock would corrupt the game. The divider cannot shorten a pulse by construction; `tb_clock_pace` checks it.
+
+**Clock select mode (found the same day).** The board top asks the clock select (DCSC) for `DCSMODE = "NEG"`: switch on falling edges, idle low. The text configuration of a test build showed `DCS0.DCSMODE POS`: nextpnr-ecp5 takes the mode from the cell's *attribute* and falls back to its default when only the Verilog parameter is set. Every routed v2 build since 2026-09-30 therefore had the select in its default mode (switching on rising edges, idling high), not the one the source named. The instance now carries the attribute too, and `route_top.py` writes the text configuration and fails a board run whose select is not `NEG`. With the divider behind the select, its idle level no longer reaches the SNES clock either way. Not seen on hardware: no v2 board exists.
+
+Routed with the real pinout at speed grade 8 (figures in [fpga/reports/v2-board-route.json](../../fpga/reports/v2-board-route.json), which also records the select's mode): every clock passes, the SNES clock with about 60 % margin.

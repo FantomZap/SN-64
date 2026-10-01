@@ -11,9 +11,12 @@ The small program an N64 or M64 boots from the SN64 cartridge. It shows the SN64
 | `src/main.c` | Menu, controller loop, mailbox access (libdragon `display`, `graphics`, `joypad`, `io_read`/`io_write`) |
 | `src/sn64_mailbox.h` | Register map at `0x1FFF_0000`, the 32-bit register pairing, and the provisional STATUS bit layout, REGION_INFO/REGION_SOURCE layouts |
 | `src/sn64_mapping.[ch]` | N64 to SNES mapping table and function (pure C, host-testable) |
+| `src/sn64_framelock.[ch]` | Frame lock: timing numbers for each console and region, the compatibility-mode confirmation text, the control loop (pure C, host-testable) |
+| `src/sn64_resample.[ch]`, `src/sn64_audioout.[ch]` | Sound: cubic resampler with rate control, and the queue that hands the console one block per picture (pure C, host-testable) |
 | `rom.mk` | libdragon ROM build (runs inside the output directory) |
 | `Makefile` | Entry point: `rom`, `check`, `words`, `test`, `test-negative`, `clean` |
 | `tests/test_mapping.c` | Host unit test of the default mapping |
+| `tests/test_framelock.c`, `tests/test_resample.c`, `tests/test_audioout.c` | Host tests of the frame lock (against a model of the two clocks), the resampler, and the sound queue (against a model of the console's sound output) |
 | `tests/tb_bootstrap_rom_window.sv` | Verilator bench: loads the converted image into `sn64_n64_endpoint`, reads it back over the PI model, and replays the per-frame mailbox traffic |
 | `tools/setup_libdragon.sh` | Pinned, SHA-256-checked toolchain + libdragon install (no admin, no Docker, no WSL) |
 | `tools/n64_cic_check.py` | CIC-6102 boot check (IPL2 hash of IPL3, ported from ares, ISC) |
@@ -45,9 +48,9 @@ Build outputs stay under `build/n64-bootstrap/`. Do not commit ROM binaries.
 
 ## FPGA contract
 
-- The ROM image needs **`ROM_ADDR_BITS = 16`** (64 Ki words = 128 KiB) with the default aPLib compression (`N64_ROM_ELFCOMPRESS=2`). It was 114,688 bytes before the console video path; with the display loop it is 131,072 bytes (exactly the 128 KiB window; the board top uses `ROM_ADDR_BITS = 17`, 256 KiB, for headroom). With libdragon's default LZ4 it is 147,456 bytes and needs 17. The endpoint's current default of 12 (8 KiB) is too small; the converter rejects the image for it.
+- **Since 2026-10-01 the ROM image needs `ROM_ADDR_BITS = 17`** (256 KiB, what the v2 board has): with the frame lock and the sound queue it is 147,456 bytes, 357 bytes over a 128 KiB window. The Makefile, the co-simulation bench and its script default to 17. History: the ROM image needed **`ROM_ADDR_BITS = 16`** (64 Ki words = 128 KiB) with the default aPLib compression (`N64_ROM_ELFCOMPRESS=2`). It was 114,688 bytes before the console video path; with the display loop it is 131,072 bytes (exactly the 128 KiB window; the board top uses `ROM_ADDR_BITS = 17`, 256 KiB, for headroom). With libdragon's default LZ4 it is 147,456 bytes and needs 17. The endpoint's current default of 12 (8 KiB) is too small; the converter rejects the image for it.
 - Word image: `word[i] = rom[2i] << 8 | rom[2i+1]`. Line *i* of the `.mem` file is `rom_waddr` *i*, with zero padding up to `2**ROM_ADDR_BITS`.
-- Mailbox registers are accessed only as 32-bit pairs: `{MAGIC,VERSION}`, `{STATUS,SEQ}`, `{FAULT,CART_CHECK}`, `{JOY1,JOY2}`, `{JOY1_STICK,CONTROL}`, `{COMMIT,REGION_INFO}` (COMMIT written, REGION_INFO read) and `{REGION_SOURCE,-}` (read). The bootstrap never writes unless MAGIC reads `0x534E`.
+- Mailbox registers are accessed only as 32-bit pairs: `{MAGIC,VERSION}`, `{STATUS,SEQ}`, `{FAULT,CART_CHECK}`, `{JOY1,JOY2}`, `{JOY1_STICK,CONTROL}`, `{COMMIT,REGION_INFO}` (COMMIT written, REGION_INFO read), `{REGION_SOURCE,FRAME_STATUS}`, `{AUDIO_WPTR,VIDEO_MODE}`, `{FEATURES,-}` (read) and `{FRAME_PHASE,PACE}` (read; a write sets PACE). The bootstrap never writes unless MAGIC reads `0x534E`.
 - SNES button image: bit 0 = B, then Y, Select, Start, Up, Down, Left, Right, A, X, L, R (bit 11). **1 = pressed.** Bits 15:12 are 0.
 
 ## Controls
@@ -56,6 +59,10 @@ Build outputs stay under `build/n64-bootstrap/`. Do not commit ROM binaries.
 - **Start SNES cartridge:** sets `CONTROL.run_request` and forwards both controllers. While the menu is shown, the SNES sees a neutral pad.
 - **Returning to the menu:** hold **Z+L+R for about 1 s**. The cartridge keeps running.
 - **Power down cartridge:** clears `run_request`.
+
+## Frame lock and compatibility mode
+
+The menu and the logos run on the console's own picture timing. While a game is shown the console's timing takes the Super NES's shape and the game's clock is held to the console's, so no picture is dropped or shown twice. "Compatibility mode" on the main menu leaves the console's timing alone and slows the game by 0.45 % instead (0.18 % on a 50 Hz console); choosing it shows a confirmation that says so. It is off after every start-up. If the picture is lost when a game starts, hold Z+L+R for a second or reset the console, then turn it on. Design, numbers and what is still to be checked on hardware: [docs/design/frame-lock.md](../../docs/design/frame-lock.md).
 
 ## Cartridge check
 

@@ -10,7 +10,7 @@
 // Plusargs: +image=<readmemh file> (required), +corrupt_load (fault injection:
 // one word is altered while loading; the bench must then FAIL).
 module tb_bootstrap_rom_window #(
-    parameter integer AW = 16                      // ROM_ADDR_BITS the bootstrap needs (override with -GAW=)
+    parameter integer AW = 17                      // ROM_ADDR_BITS the bootstrap needs (override with -GAW=); 17 as on the v2 board
 );
     localparam integer DEPTH = 1 << AW;
     reg clk=0; always #23.28 clk=~clk;             // 21.477 MHz
@@ -20,6 +20,7 @@ module tb_bootstrap_rom_window #(
     wire [15:0] ad = host_drive ? host_ad : 16'hzzzz;
     reg rom_we=0; reg [AW-1:0] rom_waddr=0; reg [15:0] rom_wdata=0;
     wire [15:0] j1,j2,seq; wire [7:0] sx,sy; wire run; wire [1:0] cm;
+    wire [15:0] pace;
     wire rst_ev, nmi_ev;
 
     sn64_n64_endpoint #(.ROM_ADDR_BITS(AW)) dut(.clk(clk),.reset(reset),.cic_cpu_clk(clk),
@@ -28,7 +29,7 @@ module tb_bootstrap_rom_window #(
         .rom_we(rom_we),.rom_waddr(rom_waddr),.rom_wdata(rom_wdata),
         .joy1_buttons(j1),.joy2_buttons(j2),.joy1_stick_x(sx),.joy1_stick_y(sy),
         .run_request(run),.mailbox_seq(seq),.fault_flags(16'h0000),.status_flags(16'h0011),.build_id(16'h0102),
-        .cart_check_mode(cm),.cart_check(16'h8152),
+        .cart_check_mode(cm),.cart_check(16'h8152),.pace_rate(pace),.features(16'h0003),
         .region_info(16'h7002),.region_source(16'h0016),
         .n64_cic_clk(1'b1),.n64_cic_dq(),.n64_si_clk(1'b0),.cic_region(1'b0),.cic_invalid_region(),.cic_step(),
         .host_reset_event(rst_ev),.host_nmi_event(nmi_ev));
@@ -124,6 +125,9 @@ module tb_bootstrap_rom_window #(
         // {FAULT, CART_CHECK}: the power fault code and the result of the last cartridge check.
         io_read32(32'h1FFF_0008, v);
         if (v !== 32'h0000_8152) begin errors=errors+1; $display("  FAIL FAULT/CART_CHECK pair %h", v); end
+        // {FEATURES, reserved}: this build can pace the SNES clock and has FRAME_PHASE.
+        io_read32(32'h1FFF_000C, v);
+        if (v !== 32'h0003_0000) begin errors=errors+1; $display("  FAIL FEATURES pair %h", v); end
         // Region telemetry pairs, as mailbox_read() issues them: {COMMIT reads 0, REGION_INFO}, {REGION_SOURCE, 0x1E}.
         io_read32(32'h1FFF_0018, v);
         if (v !== 32'h0000_7002) begin errors=errors+1; $display("  FAIL COMMIT/REGION_INFO pair %h", v); end
@@ -177,11 +181,28 @@ module tb_bootstrap_rom_window #(
         repeat(4) @(negedge clk);
         if (run!==1'b1 || cm!==2'd1 || seq!==16'd6) begin errors=errors+1; $display("  FAIL report-only start: run=%b check=%0d seq=%0d", run, cm, seq); end
 
+        // The game display's frame lock (lock_service() in main.c): one 32-bit read of {FRAME_PHASE, PACE}
+        // and one 32-bit write per picture, whose high half lands on the read-only FRAME_PHASE and whose low
+        // half is PACE. No SNES clock in this bench, so FRAME_PHASE reads "no picture yet" (0x07FF).
+        io_read32(32'h1FFF_0024, v);
+        if (v !== 32'h07FF_0000) begin errors=errors+1; $display("  FAIL FRAME_PHASE/PACE pair before any write %h", v); end
+        io_write32(32'h1FFF_0024, 32'h0000_0367);            // PACE 871: the normal mode's nominal pace on an NTSC console
+        repeat(4) @(negedge clk);
+        if (pace !== 16'd871) begin errors=errors+1; $display("  FAIL PACE after the frame lock's write: %0d", pace); end
+        io_read32(32'h1FFF_0024, v);
+        if (v !== 32'h07FF_0367) begin errors=errors+1; $display("  FAIL FRAME_PHASE/PACE pair %h", v); end
+        io_write32(32'h1FFF_0024, 32'h0000_2558);            // PACE 9560: compatibility mode
+        repeat(4) @(negedge clk);
+        if (pace !== 16'd9560) begin errors=errors+1; $display("  FAIL PACE in compatibility mode: %0d", pace); end
+        io_write32(32'h1FFF_0024, 32'h0000_0000);            // leaving the game display: full speed again
+        repeat(4) @(negedge clk);
+        if (pace !== 16'd0) begin errors=errors+1; $display("  FAIL PACE after leaving the game display: %0d", pace); end
+
         if (errors) begin
             $display("FAIL: bootstrap ROM window, %0d error(s)%s", errors, $test$plusargs("corrupt_load") ? " (corrupt_load injected)" : "");
             $fatal(1, "bootstrap ROM window check failed");
         end
-        $display("PASS: bootstrap image (%0d words, last non-zero word %0d) loaded via rom_we, %0d words read back over PI, mailbox frame traffic (32-bit pairs, FAULT/CART_CHECK and REGION_INFO/REGION_SOURCE reads, COMMIT once per frame, run/power-down, cartridge check mode and check-only request) correct (%0d clocks)",
+        $display("PASS: bootstrap image (%0d words, last non-zero word %0d) loaded via rom_we, %0d words read back over PI, mailbox frame traffic (32-bit pairs, FAULT/CART_CHECK and REGION_INFO/REGION_SOURCE reads, COMMIT once per frame, run/power-down, cartridge check mode and check-only request, FEATURES, frame lock FRAME_PHASE/PACE pair) correct (%0d clocks)",
                  DEPTH, last, words_checked, cycles);
         $finish;
     end

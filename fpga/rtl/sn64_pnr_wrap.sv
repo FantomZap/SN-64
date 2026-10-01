@@ -42,7 +42,7 @@ module sn64_pnr_wrap (
         .rom_we(1'b0), .rom_waddr(16'd0), .rom_wdata(16'd0),
         .pll_locked(pll_locked), .monitor_error(monitor_error),
         .ext_spi_sel_req(1'b0), .ext_spi_sck(1'b0), .ext_spi_cs_n(1'b1), .ext_spi_mosi(1'b0), .ext_spi_miso(), .ext_spi_active(),
-        .snes_clk_run(snes_clk_run), .region_pal(region_pal),
+        .snes_clk_run(snes_clk_run), .region_pal(region_pal), .snes_pace(),   // no pace: clk_snes is a pin here
         .host_3v3_ok(host_3v3_ok), .fpga_rails_ok(fpga_rails_ok), .cart_5v_ok(cart_5v_ok), .iface_rail_ok(iface_rail_ok),
         .efuse_fault_n(efuse_fault_n), .overtemp(overtemp), .cart_5v_enable(cart_5v_enable), .iface_rail_enable(iface_rail_enable),
         .cart_probe_req(), .cart_probe_active(1'b0), .cart_probe_strobe(1'b0), .cart_probe_code(12'd0),   // v1: no cartridge check
