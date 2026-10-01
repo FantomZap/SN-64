@@ -50,3 +50,6 @@ output_files/
 # KiCad project history/backups
 **/.history/
 *-backups/
+
+# derived: shell model + hardware/sn64-v2/exports/sn64-v2.step (35 MB)
+mechanical/sn64-v2-shell/sn64-v2-fit-assembly.step

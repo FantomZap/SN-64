@@ -76,7 +76,7 @@ Result: 3,551 tracks, 1,034 vias, 213 of 218 signal nets fully connected, 6 unco
 Fit check: the KiCad board exported as STEP with every part model (`hardware/sn64-v2/exports/sn64-v2.step`,
 288 solids including the socket) placed in this shell model has no interference with the shell or
 the cartridge. Its envelope is 111 mm wide against the stem's 112.1 mm inside and 11.25 mm thick
-(the socket) against 14.06 mm. The combined file is `sn64-v2-fit-assembly.step`, renders `fit-*.png`
+(the socket) against 14.06 mm. The combined file `sn64-v2-fit-assembly.step` (35 MB) is generated locally and kept out of git; renders `fit-*.png`
 (`fit-front` is seen from the front of the console, `fit-rear` from behind).
 
 ## Socket sourcing (searched 2026-09-30)
