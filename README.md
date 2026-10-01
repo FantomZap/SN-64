@@ -26,6 +26,7 @@ Every target in the original specification remains in scope, including PAL, prot
 - [N64/M64 endpoint implementation and mailbox map](docs/design/n64-endpoint-implementation.md)
 - [N64 CIC lockout implementation](docs/design/n64-cic-implementation.md)
 - [Power-control state machine](docs/design/power-sequencer-implementation.md)
+- [Cartridge check: detecting a cartridge that is in back to front](docs/design/reversed-cartridge-detection.md)
 - [Clock plan and region selection](docs/design/clock-plan.md)
 - [Controller path and default N64 mapping](docs/design/controller-path-implementation.md)
 - [SNES CIC lock and region detection](docs/design/snes-cic-implementation.md)

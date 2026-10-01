@@ -26,6 +26,9 @@ module sn64_top #(
     parameter        REGION_TIMEOUT_MS = 300,      // give up waiting for a key CIC
     parameter        SEQ_RESET_HOLD_MS = 20,
     parameter        SEQ_RAIL_TIMEOUT_MS = 50,
+    parameter        SEQ_PROBE_ENABLE = 0,         // 1: cartridge check before 5 V (needs sn64_rail_monitor on the board)
+    parameter        SEQ_PROBE_TIMEOUT_MS = 4000,  // assumed: time for the test current to charge the rail
+    parameter [11:0] SEQ_PROBE_OK_CODE = 12'd269,  // assumed: 0.65 V on the rail (code x 3 x 0.806 mV)
     parameter        CIC_LOCK_CLK_DIV = 8,         // 25 MHz / 8 = 3.125 MHz CIC_CLK, 50 % duty (key follows the lock's clock)
     parameter        CIC_LOCK_T_PWRUP = 49605      // lock start-up wait (instruction cycles)
 ) (
@@ -59,6 +62,11 @@ module sn64_top #(
     // ---------------- Power monitors and enables ----------------
     input  wire        host_3v3_ok, fpga_rails_ok, cart_5v_ok, iface_rail_ok, efuse_fault_n, overtemp,
     output wire        cart_5v_enable, iface_rail_enable,
+    // Cartridge check before 5 V (SEQ_PROBE_ENABLE = 1). Synchronous to clk_25: the board runs
+    // sn64_rail_monitor on the same clock. Without the check tie the three inputs to 0.
+    output wire        cart_probe_req,
+    input  wire        cart_probe_active, cart_probe_strobe,
+    input  wire [11:0] cart_probe_code,
 
     // ---------------- SNES socket (through translators) ----------------
     output wire [23:0] cart_address,
@@ -96,8 +104,8 @@ module sn64_top #(
     // N64 endpoint (clk_host, always on)
     // =====================================================================
     wire [15:0] joy1_h, joy2_h, seq_h; wire [7:0] stick_x_h, stick_y_h;
-    wire run_req_h, soft_reset_h; wire [1:0] region_mode_h;
-    wire [15:0] status_h, fault_h, region_info_h, region_source_h;
+    wire run_req_h, soft_reset_h; wire [1:0] region_mode_h, check_mode_h;
+    wire [15:0] status_h, fault_h, cart_check_h, region_info_h, region_source_h;
     wire n64_cic_invalid_region; wire [3:0] n64_cic_step;
     // SNES-domain signals the endpoint's frame window consumes (declared here for the synthesis
     // front-end; produced further down by the core, the audio mixer and the reset synchroniser)
@@ -116,6 +124,7 @@ module sn64_top #(
         .ext_spi_miso(ext_spi_miso), .ext_spi_active(ext_spi_active),
         .joy1_buttons(joy1_h), .joy2_buttons(joy2_h), .joy1_stick_x(stick_x_h), .joy1_stick_y(stick_y_h),
         .run_request(run_req_h), .soft_reset(soft_reset_h), .region_mode(region_mode_h), .mailbox_seq(seq_h),
+        .cart_check_mode(check_mode_h), .cart_check(cart_check_h),
         .status_flags(status_h), .fault_flags(fault_h), .build_id(BUILD_ID),
         .region_info(region_info_h), .region_source(region_source_h),
         .clk_snes(clk_snes), .rst_snes_n(core_reset_n),
@@ -129,11 +138,13 @@ module sn64_top #(
     // =====================================================================
     // Housekeeping domain (clk_25): requests from the host, host reset
     // =====================================================================
-    wire [3:0] ctl_25;
-    sn64_cdc_word #(.W(4)) x_ctl (.src_clk(clk_host), .src_data({region_mode_h, soft_reset_h, run_req_h}),
+    // One word, so the request and the check mode it was written with arrive together.
+    wire [5:0] ctl_25;
+    sn64_cdc_word #(.W(6)) x_ctl (.src_clk(clk_host), .src_data({check_mode_h, region_mode_h, soft_reset_h, run_req_h}),
                                   .dst_clk(clk_25), .dst_data(ctl_25));
     wire run_req_25 = ctl_25[0], soft_reset_25 = ctl_25[1];
     wire [1:0] region_mode_25 = ctl_25[3:2];
+    wire [1:0] check_mode_25 = ctl_25[5:4];
     wire host_reset_n_25, cart_reset_sense_25;
     sn64_sync_bit #(1'b0) s_hreset (.clk(clk_25), .d(n64_reset_n), .q(host_reset_n_25));
     sn64_sync_bit #(1'b0) s_creset (.clk(clk_25), .d(cart_reset_n_sense), .q(cart_reset_sense_25));
@@ -151,13 +162,19 @@ module sn64_top #(
     // Power sequencer (clk_25)
     // =====================================================================
     wire seq_reset_pull, bus_permit, fault_latched; wire [3:0] seq_state; wire [7:0] fault_code;
+    wire probe_done, probe_pass; wire [1:0] probe_mode_q; wire [7:0] probe_level;
     reg  release_ok;
-    sn64_power_sequencer #(.CLK_HZ(CLK25_HZ), .RESET_HOLD_MS(SEQ_RESET_HOLD_MS), .RAIL_TIMEOUT_MS(SEQ_RAIL_TIMEOUT_MS)) sequencer (
+    sn64_power_sequencer #(.CLK_HZ(CLK25_HZ), .RESET_HOLD_MS(SEQ_RESET_HOLD_MS), .RAIL_TIMEOUT_MS(SEQ_RAIL_TIMEOUT_MS),
+                           .PROBE_ENABLE(SEQ_PROBE_ENABLE), .PROBE_TIMEOUT_MS(SEQ_PROBE_TIMEOUT_MS),
+                           .PROBE_OK_CODE(SEQ_PROBE_OK_CODE)) sequencer (
         .clk(clk_25), .reset_n(rst25_n),
         .configured(clocks_ready), .host_3v3_ok(host_3v3_ok), .fpga_rails_ok(fpga_rails_ok),
         .cart_5v_ok(cart_5v_ok), .iface_rail_ok(iface_rail_ok), .efuse_fault_n(efuse_fault_n),
         .overtemp(overtemp), .host_reset_n(host_reset_n_25),
         .run_request(run_req_25), .fault_clear(!run_req_25), .release_ok(release_ok), .hold_reset(soft_reset_25),
+        .probe_mode(check_mode_25), .probe_req(cart_probe_req), .probe_active(cart_probe_active),
+        .probe_strobe(cart_probe_strobe), .probe_code(cart_probe_code),
+        .probe_done(probe_done), .probe_pass(probe_pass), .probe_mode_q(probe_mode_q), .probe_level(probe_level),
         .cart_5v_enable(cart_5v_enable), .iface_rail_enable(iface_rail_enable), .cart_reset_pull(seq_reset_pull),
         .bus_permit(bus_permit), .fault_latched(fault_latched), .state(seq_state), .fault_code(fault_code));
 
@@ -322,7 +339,9 @@ module sn64_top #(
     // not permitted. The bridge's own reset request is NOT used here: it
     // follows the core reset, which itself follows the socket /RESET level,
     // and combining them deadlocks (found by tb_system).
-    assign cart_reset_pull = seq_reset_pull | !bus_permit;
+    // /RESET is pulled whenever the bus is not permitted, except during the cartridge check:
+    // the pull-up of /RESET hangs from the cartridge rail and would load the test current.
+    assign cart_reset_pull = seq_reset_pull | (!bus_permit & !cart_probe_req);
 
     // =====================================================================
     // Status and fault words to the N64 mailbox (clk_25 -> clk_host).
@@ -331,13 +350,17 @@ module sn64_top #(
     //   [3] interface rail ok  [4] bus permit  [5] fault latched  [6] run request seen
     //   [7] PAL  [11:8] power sequencer state  [12] SNES clock running
     //   [13] SNES key CIC ok  [14] SNES key CIC fail  [15] telemetry ADC error
-    // FAULT: {fault_code, 8'h00}
+    // FAULT: {fault_code, 8'h00}; fault_code bit 0 = cartridge check failed in enforce mode
+    // CART_CHECK: [15] done  [14] pass  [13:12] mode used  [8] this build has the check
+    //   [7:0] last rail reading (ADC code / 4, saturated: 9.67 mV per count on the rail)
     // =====================================================================
     assign status_word = {i2c_error, cic_key_fail, cic_key_ok, snes_clk_run, seq_state,
                           region_pal, run_req_25, fault_latched, bus_permit,
                           iface_rail_ok, cart_5v_ok, host_3v3_ok & fpga_rails_ok, clocks_ready};
     sn64_cdc_word #(.W(16)) x_status (.src_clk(clk_25), .src_data(status_word), .dst_clk(clk_host), .dst_data(status_h));
     sn64_cdc_word #(.W(16)) x_fault (.src_clk(clk_25), .src_data({fault_code, 8'h00}), .dst_clk(clk_host), .dst_data(fault_h));
+    wire [15:0] cart_check_25 = {probe_done, probe_pass, probe_mode_q, 3'd0, SEQ_PROBE_ENABLE ? 1'b1 : 1'b0, probe_level};
+    sn64_cdc_word #(.W(16)) x_check (.src_clk(clk_25), .src_data(cart_check_25), .dst_clk(clk_host), .dst_data(cart_check_h));
     // REGION_INFO / REGION_SOURCE (mailbox 0x1A / 0x1C): one 32-bit word so
     // both halves always come from the same snapshot.
     wire [15:0] region_info_25   = rgn_decided ? rgn_hdr : hdr_word;

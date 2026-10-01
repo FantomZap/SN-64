@@ -48,11 +48,13 @@ module sn64_n64_endpoint #(
     output reg         run_request,                  // bootstrap asks for cartridge power/run
     output reg         soft_reset,                   // "reset SNES" (holds /RESET, keeps cartridge power)
     output reg  [1:0]  region_mode,                  // 0 auto, 1 NTSC, 2 PAL (applies at next cartridge power-up)
+    output reg  [1:0]  cart_check_mode,              // 0 enforce, 1 report only, 2 off, 3 check only (taken when a request starts)
     output reg  [15:0] mailbox_seq,                   // increments on every controller update
 
     // Mailbox: SNES/system -> N64 side
     input  wire [15:0] status_flags,      // STATUS layout: docs/design/n64-endpoint-implementation.md
     input  wire [15:0] fault_flags,       // {fault_code, reserved}
+    input  wire [15:0] cart_check,        // CART_CHECK: result of the last cartridge check (layout in the register map below)
     input  wire [15:0] build_id,
     input  wire [15:0] region_info,       // REGION_INFO: ROM-header probe result (layout in the register map below)
     input  wire [15:0] region_source,     // REGION_SOURCE: how the region was decided
@@ -191,10 +193,14 @@ module sn64_n64_endpoint #(
     // Mailbox registers (16-bit words at 0x1FFF_0000 + offset)
     //   0x00 SN64_MAGIC     r  0x534E ("SN")      0x02 SN64_VERSION  r  build_id
     //   0x04 STATUS         r  status_flags        0x06 SEQ           r  mailbox_seq
-    //   0x08 FAULT          r  {fault_code, 8'h00} 0x0A reserved      r  0
+    //   0x08 FAULT          r  {fault_code, 8'h00} 0x0A CART_CHECK    r  [15] done, [14] pass, [13:12] mode used,
+    //                                                                        [8] this build has the check,
+    //                                                                        [7:0] rail reading (9.67 mV per count)
     //   0x10 JOY1_BUTTONS   w                      0x12 JOY2_BUTTONS  w
     //   0x14 JOY1_STICK     w  {y,x}               0x16 CONTROL       w  bit0 run_request, bit1 soft reset,
-    //                                                                        bits3:2 region mode (0 auto, 1 NTSC, 2 PAL)
+    //                                                                        bits3:2 region mode (0 auto, 1 NTSC, 2 PAL),
+    //                                                                        bits5:4 cartridge check (0 enforce,
+    //                                                                        1 report only, 2 off, 3 check only)
     //   0x18 COMMIT         w  any write increments SEQ (bootstrap writes after a full update); reads 0
     //   0x1A REGION_INFO    r  ROM-header probe snapshot: [7:0] country byte ($FFD9), [11:8] reject
     //                          {unstable, checksum, map, country}, [12] done, [13] valid, [14] PAL, [15] aborted
@@ -214,19 +220,22 @@ module sn64_n64_endpoint #(
             joy1_buttons <= 16'h0; joy2_buttons <= 16'h0;
             joy1_stick_x <= 8'h0; joy1_stick_y <= 8'h0;
             run_request  <= 1'b0; mailbox_seq  <= 16'h0; soft_reset <= 1'b0; region_mode <= 2'd0;
+            cart_check_mode <= 2'd0;
         end else if (reg_bus.write && reg_bus.cfg_select) begin
             case (ra[7:0])
                 8'h10: joy1_buttons <= reg_bus.wdata;
                 8'h12: joy2_buttons <= reg_bus.wdata;
                 8'h14: {joy1_stick_y, joy1_stick_x} <= reg_bus.wdata;
-                8'h16: begin run_request <= reg_bus.wdata[0]; soft_reset <= reg_bus.wdata[1]; region_mode <= reg_bus.wdata[3:2]; end
+                8'h16: begin run_request <= reg_bus.wdata[0]; soft_reset <= reg_bus.wdata[1]; region_mode <= reg_bus.wdata[3:2];
+                             cart_check_mode <= reg_bus.wdata[5:4]; end
                 8'h18: mailbox_seq  <= mailbox_seq + 16'd1;
                 default: ;
             endcase
         end
         // Host reset drops the run request: cartridge power must be re-requested
         // by the bootstrap after every console reset (safety principle).
-        if (!n64_reset) begin run_request <= 1'b0; soft_reset <= 1'b0; end
+        // The cartridge check goes back to "enforce" with it: a relaxed mode has to be asked for again.
+        if (!n64_reset) begin run_request <= 1'b0; soft_reset <= 1'b0; cart_check_mode <= 2'd0; end
     end
 
     reg [15:0] cfg_rdata;
@@ -237,10 +246,11 @@ module sn64_n64_endpoint #(
             8'h04: cfg_rdata = status_flags;
             8'h06: cfg_rdata = mailbox_seq;
             8'h08: cfg_rdata = fault_flags;
+            8'h0A: cfg_rdata = cart_check;
             8'h10: cfg_rdata = joy1_buttons;
             8'h12: cfg_rdata = joy2_buttons;
             8'h14: cfg_rdata = {joy1_stick_y, joy1_stick_x};
-            8'h16: cfg_rdata = {12'd0, region_mode, soft_reset, run_request};
+            8'h16: cfg_rdata = {10'd0, cart_check_mode, region_mode, soft_reset, run_request};
 `ifdef SN64_FAULT_REGION_SWAP
             8'h1A: cfg_rdata = region_source;   // fault injection: words swapped (tb_n64_endpoint must fail)
             8'h1C: cfg_rdata = region_info;

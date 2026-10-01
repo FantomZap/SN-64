@@ -1635,7 +1635,7 @@
 (property "Datasheet" "https://www.ti.com/lit/ds/symlink/tla2528.pdf" (at 67.31 441.96 0) (effects (font (size 1.27 1.27)) (hide yes)))
 (property "LCSC" "C2866175" (at 67.31 441.96 0) (effects (font (size 1.27 1.27)) (hide yes)))
 (property "MPN" "TLA2528IRTER" (at 67.31 441.96 0) (effects (font (size 1.27 1.27)) (hide yes)))
-(property "Note" "ADDR=GND; AIN4 = FPGA_1V1 direct; footprint EP size to verify against SBAS925 mechanical drawing" (at 67.31 441.96 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Note" "ADDR=GND; AIN4 = FPGA_1V1 direct; footprint EP size to verify against SBAS961A mechanical drawing" (at 67.31 441.96 0) (effects (font (size 1.27 1.27)) (hide yes)))
 (pin "15" (uuid "b674a3e1-c385-51f8-a255-e70027724528"))
 (pin "16" (uuid "d4e3b06a-6842-594f-b2a4-be728ccb29a3"))
 (pin "1" (uuid "6deb1c8f-58b8-5cf0-936c-85e0bf96a0c8"))

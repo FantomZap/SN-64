@@ -273,6 +273,7 @@ module tb_system;
         .ext_spi_sel_req(1'b0), .ext_spi_sck(1'b0), .ext_spi_cs_n(1'b1), .ext_spi_mosi(1'b0), .ext_spi_miso(), .ext_spi_active(),
         .host_3v3_ok(1'b1), .fpga_rails_ok(1'b1), .cart_5v_ok(cart_5v_ok), .iface_rail_ok(iface_rail_ok),
         .efuse_fault_n(1'b1), .overtemp(1'b0), .cart_5v_enable(cart_5v_enable), .iface_rail_enable(iface_rail_enable),
+        .cart_probe_req(), .cart_probe_active(1'b0), .cart_probe_strobe(1'b0), .cart_probe_code(12'd0),   // check not built in
         .cart_address(a), .cart_pa(pa), .cart_rd_n(rd_c), .cart_wr_n(wr_c), .cart_prd_n(prd_c), .cart_pwr_n(pwr_c),
         .cart_romsel_n(romsel), .cart_wramsel_n(wramsel), .cart_refresh(refresh), .cart_phi2(phi2), .cart_sysclk(sysclk),
         .cart_data_out(dout), .cart_data_in(bus_in), .cart_irq_n(1'b1), .cart_reset_n_sense(cart_reset_n),

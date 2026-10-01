@@ -19,6 +19,7 @@ $serv = Get-ChildItem fpga/vendor/summercart64/fw/rtl/serv/*.v | ForEach-Object 
 $src = @('fpga/vendor/summercart64/fw/rtl/memory/mem_bus.sv', 'fpga/rtl/sn64_n64_reg_bus.sv',
          'fpga/vendor/summercart64/fw/rtl/n64/n64_scb.sv', 'fpga/vendor/summercart64/fw/rtl/n64/n64_pi_fifo.sv',
          'fpga/vendor/summercart64/fw/rtl/n64/n64_pi.sv', 'build/generated/summercart64/n64_cic.sv',
+         'fpga/rtl/sn64_cdc.sv', 'fpga/rtl/sn64_frame_window.sv',
          'fpga/rtl/sn64_n64_endpoint.sv') + $serv + @('firmware/bootstrap/tests/tb_bootstrap_rom_window.sv')
 
 verilator_bin --binary --timing --build-jobs 4 -Wno-fatal --top-module tb_bootstrap_rom_window "-GAW=$RomAddrBits" --Mdir $Mdir @src | Out-Null

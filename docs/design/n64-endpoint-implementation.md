@@ -30,12 +30,13 @@ New SN64 logic:
 | `0x00` | MAGIC | r | `0x534E` ("SN") |
 | `0x02` | VERSION | r | `build_id` input |
 | `0x04` | STATUS | r | bit 0 configured (Si5351 locked), 1 host+FPGA rails, 2 cartridge 5 V, 3 interface rail, 4 bus permit, 5 fault latched, 6 run request seen, 7 PAL, 11:8 power-sequencer state, 12 SNES clock running, 13 key CIC ok, 14 key CIC fail, 15 clock-chip error (wired in `sn64_top.sv`) |
-| `0x08` | FAULT | r | `{fault_code, 8'h00}` from the power sequencer; a latched fault clears when CONTROL.run_request is dropped |
+| `0x08` | FAULT | r | `{fault_code, 8'h00}` from the power sequencer; a latched fault clears when CONTROL.run_request is dropped. Bit 8 (fault code `0x01`): cartridge check failed in enforce mode |
+| `0x0A` | CART_CHECK | r | result of the last cartridge check ([reversed-cartridge-detection.md](reversed-cartridge-detection.md)): bit 15 done, 14 pass, 13:12 mode used, 8 this build has the check, 7:0 rail reading (9.67 mV per count). Kept after the request is dropped; cleared when the next request starts |
 | `0x06` | SEQ | r | increments on every COMMIT |
 | `0x10` | JOY1_BUTTONS | r/w | SNES button image for controller 1 |
 | `0x12` | JOY2_BUTTONS | r/w | SNES button image for controller 2 |
 | `0x14` | JOY1_STICK | r/w | `{y, x}` analog stick, retained for the deferred virtual mouse |
-| `0x16` | CONTROL | r/w | bit 0 `run_request` (cartridge power and run); bit 1 soft reset ("reset SNES": holds /RESET, keeps cartridge power); bits 3:2 region mode (0 auto, 1 NTSC, 2 PAL; applied at the next cartridge power-up, never live) |
+| `0x16` | CONTROL | r/w | bit 0 `run_request` (cartridge power and run); bit 1 soft reset ("reset SNES": holds /RESET, keeps cartridge power); bits 3:2 region mode (0 auto, 1 NTSC, 2 PAL; applied at the next cartridge power-up, never live); bits 5:4 cartridge check mode (0 enforce, 1 report only, 2 off, 3 check only; taken when a request starts; back to 0 on host reset) |
 | `0x18` | COMMIT | w | any write increments SEQ after a complete controller update; reads 0 |
 | `0x1A` | REGION_INFO | r | ROM-header probe result ([header-region-probe.md](header-region-probe.md)): bits 7:0 country byte (`$FFD9`), 11:8 reject `{unstable, checksum, map, country}`, 12 done, 13 valid, 14 PAL, 15 aborted. Snapshot taken on the clk_25 edge that starts the SNES clock, kept until the next cartridge start; live probe state before the first decision. Writes ignored |
 | `0x1C` | REGION_SOURCE | r | bits 1:0 decision source (0 forced by CONTROL, 1 key CIC, 2 ROM header, 3 NTSC default, i.e. no passing key and no valid header, or the region timeout); 2 decided (the fields describe the last cartridge start); 3 region timeout had expired; 4 decided region is PAL; 15:5 zero. Writes ignored |
@@ -53,6 +54,7 @@ New SN64 logic:
 3. mailbox writes reach `joy1_buttons`, `joy2_buttons`, the stick, `run_request` and increment SEQ, and read back;
 4. host reset clears `run_request`;
 5. (2026-09-29) `REGION_INFO`/`REGION_SOURCE` read back at `0x1A`/`0x1C` (also as the bootstrap's pairs at `0x18` and `0x1C`), follow their inputs, ignore writes, and the COMMIT pair write `{0x18, 0x1A}` increments SEQ exactly once.
+6. (2026-10-01) the cartridge check mode in `CONTROL` bits 5:4 reaches `cart_check_mode`, reads back, and returns to 0 on host reset; `CART_CHECK` reads at `0x0A` as the low half of the bootstrap's pair at `0x08`. With these the bench passes in 5,145 master clocks.
 
 Result: **PASS, 4,953 master clocks** (4,595 before the REGION registers were added). Fault build `+define+SN64_FAULT_REGION_SWAP` (the two words swapped in the decode) **fails as required**: `REGION_INFO/REGION_SOURCE read wrong: 0000 0016 7e02 0000`. Both are part of `evaluate.py --mode sim`. The whole path (header probe and key CIC in clk_25 → `sn64_cdc_word` → mailbox → N64 read) is checked by `tb_system` in four runs; see [system-integration.md](system-integration.md). Two host-model errors were found and fixed while writing the bench (ALE states held too briefly for the controller's three-stage synchroniser, and ALE_H/ALE_L dropped in the wrong order); both were in the test, not the design, and are recorded here because the same mistakes would matter in a bootstrap or fixture.
 

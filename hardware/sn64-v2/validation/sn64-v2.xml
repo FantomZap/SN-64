@@ -2680,7 +2680,7 @@
       <fields>
         <field name="LCSC">C2866175</field>
         <field name="MPN">TLA2528IRTER</field>
-        <field name="Note">ADDR=GND; AIN4 = FPGA_1V1 direct; footprint EP size to verify against SBAS925 mechanical drawing</field>
+        <field name="Note">ADDR=GND; AIN4 = FPGA_1V1 direct; footprint EP size to verify against SBAS961A mechanical drawing</field>
         <field name="Footprint">Package_DFN_QFN:Texas_RTE0016D_WQFN-16-1EP_3x3mm_P0.5mm_EP0.8x0.8mm</field>
         <field name="Datasheet">https://www.ti.com/lit/ds/symlink/tla2528.pdf</field>
         <field name="Description"/>
@@ -2688,7 +2688,7 @@
       <libsource lib="SN64_V2" part="TLA2528RTE" description="8-channel 12-bit I2C ADC, WQFN-16"/>
       <property name="LCSC" value="C2866175"/>
       <property name="MPN" value="TLA2528IRTER"/>
-      <property name="Note" value="ADDR=GND; AIN4 = FPGA_1V1 direct; footprint EP size to verify against SBAS925 mechanical drawing"/>
+      <property name="Note" value="ADDR=GND; AIN4 = FPGA_1V1 direct; footprint EP size to verify against SBAS961A mechanical drawing"/>
       <property name="Sheetname" value="FPGA"/>
       <property name="Sheetfile" value="fpga.kicad_sch"/>
       <sheetpath names="/FPGA/" tstamps="/49a25805-a067-579f-a6eb-7f18e22e413b/"/>
@@ -5208,7 +5208,7 @@
       <fields>
         <field name="LCSC">C55266</field>
         <field name="MPN">TPS2553DBVR</field>
-        <field name="Note">RILIM 24.9k ~ 1.0 A typ (provisional, SLVS963 equation to confirm at review)</field>
+        <field name="Note">RILIM 24.9k: 1.04 A nominal, 0.96 to 1.12 A (SLVS841F equations, checked 2026-10-01)</field>
         <field name="Footprint">Package_TO_SOT_SMD:SOT-23-6</field>
         <field name="Datasheet">https://www.ti.com/lit/ds/symlink/tps2553.pdf</field>
         <field name="Description"/>
@@ -5216,7 +5216,7 @@
       <libsource lib="SN64_V2" part="TPS2553DBV" description="Power-distribution switch 1.5 A, adjustable current limit, fault flag, SOT-23-6"/>
       <property name="LCSC" value="C55266"/>
       <property name="MPN" value="TPS2553DBVR"/>
-      <property name="Note" value="RILIM 24.9k ~ 1.0 A typ (provisional, SLVS963 equation to confirm at review)"/>
+      <property name="Note" value="RILIM 24.9k: 1.04 A nominal, 0.96 to 1.12 A (SLVS841F equations, checked 2026-10-01)"/>
       <property name="Sheetname" value="Power and USB"/>
       <property name="Sheetfile" value="power.kicad_sch"/>
       <sheetpath names="/Power and USB/" tstamps="/f4e2a951-3c5b-5e10-8b24-91bf5be6ddc2/"/>

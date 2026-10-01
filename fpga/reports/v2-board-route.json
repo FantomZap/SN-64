@@ -3,44 +3,44 @@
   "speed_grade": "8",
   "lpf": "fpga/constraints/sn64_board.lpf",
   "synthesis_cells": {
-    "TRELLIS_FF": 13242,
+    "TRELLIS_FF": 13348,
     "EHXPLLL": 3,
     "DCSC": 1,
     "USRMCLK": 1,
     "DP16KD": 203,
     "MULT18X18D": 19,
-    "LUT4": 30721
+    "LUT4": 30189
   },
   "nextpnr_exit": 0,
   "max_frequency": {
     "clk_usb48": {
-      "achieved_mhz": 186.57,
+      "achieved_mhz": 161.6,
       "required_mhz": 48.0,
       "result": "PASS"
     },
     "clk_usb12": {
-      "achieved_mhz": 92.94,
+      "achieved_mhz": 93.66,
       "required_mhz": 12.0,
       "result": "PASS"
     },
     "clk_host": {
-      "achieved_mhz": 108.7,
+      "achieved_mhz": 100.26,
       "required_mhz": 61.72,
       "result": "PASS"
     },
     "clk_snes": {
-      "achieved_mhz": 36.44,
+      "achieved_mhz": 34.98,
       "required_mhz": 21.48,
       "result": "PASS"
     },
     "osc_27": {
-      "achieved_mhz": 81.24,
+      "achieved_mhz": 78.44,
       "required_mhz": 27.0,
       "result": "PASS"
     }
   },
   "logs": [
-    "%USERPROFILE%\\.claude\\projects\\SN64\\build\\route-board-v2\\synth.log",
-    "%USERPROFILE%\\.claude\\projects\\SN64\\build\\route-board-v2\\pnr.log"
+    "%USERPROFILE%\\.claude\\projects\\SN64\\build\\route-board\\synth.log",
+    "%USERPROFILE%\\.claude\\projects\\SN64\\build\\route-board\\pnr.log"
   ]
 }

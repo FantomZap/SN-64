@@ -207,6 +207,28 @@ def main():
         if pwr_pass is None:
             raise RuntimeError('Power sequencer test exited without its acceptance marker')
         report['simulation']['power_sequencer'] = pwr_pass
+        # Cartridge check before 5 V (reversed-cartridge detection): rail monitor and sequencer against a
+        # TLA2528 model and an electrical model of the cartridge rail (docs/design/reversed-cartridge-detection.md)
+        chk_src = ['fpga/rtl/sn64_rail_monitor.sv', 'fpga/rtl/sn64_power_sequencer.sv', 'fpga/tests/tb_cart_check.sv']
+        chk_name = 'Vtb_cart_check.exe' if os.name == 'nt' else 'Vtb_cart_check'
+        chk_obj = obj / 'cart-check'
+        run('cart-check-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
+            '--top-module', 'tb_cart_check', '--Mdir', str(chk_obj).replace('\\', '/')] + chk_src)
+        chk_body = run('cart-check', [str(chk_obj / chk_name)])
+        chk_pass = next((line for line in chk_body.splitlines() if line.startswith('PASS:')), None)
+        if chk_pass is None:
+            raise RuntimeError('Cartridge check test exited without its acceptance marker')
+        report['simulation']['cart_check'] = chk_pass
+        # Fault injection: /RESET kept pulled during the check loads the test current (its pull-up hangs
+        # from the cartridge rail), and a sequencer that does not enforce a failed check powers a reversed cartridge.
+        run('cart-check-reset-kept-pulled', [str(chk_obj / chk_name), '+keep_reset'], 'empty socket failed the check')
+        chkf_obj = obj / 'cart-check-not-enforced'
+        run('cart-check-not-enforced-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
+            '+define+SN64_FAULT_CHECK_IGNORED', '--top-module', 'tb_cart_check',
+            '--Mdir', str(chkf_obj).replace('\\', '/')] + chk_src)
+        run('cart-check-not-enforced', [str(chkf_obj / chk_name)], '5 V switched on into a cartridge the check must protect')
+        report['simulation']['injected_cart_check_faults'] = ('Rejected: /RESET kept pulled during the check; '
+                                                              'a sequencer that does not enforce a failed check')
         # Sigma-delta cartridge-audio ADC (v2: replaces the PCM1808 and the Si5351 start-up test)
         adc_obj = obj / 'sd-adc'
         run('sd-adc-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
@@ -384,7 +406,8 @@ def main():
         report['simulation']['limit'] = ('tb_system runs use simulation-time master clocks (NTSC and PAL rates), not the real '
                                          'Si5351 outputs; the console video path is checked against a PI host model, not a '
                                          'console; PPU/APU not qualified; bridge bus model is behavioural (no analog levels or '
-                                         'translator delays)')
+                                         'translator delays); the cartridge check runs against an assumed electrical model of the rail and of '
+                                         'a cartridge (tb_cart_check), not against measured cartridges')
 
     if args.mode in ('synth', 'all'):
         run('yosys-version', [shutil.which('yosys'), '-V'])

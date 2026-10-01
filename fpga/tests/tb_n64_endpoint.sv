@@ -14,7 +14,8 @@ module tb_n64_endpoint;
     reg host_drive=0; reg [15:0] host_ad=16'h0;
     wire [15:0] ad = host_drive ? host_ad : 16'hzzzz;
     reg rom_we=0; reg [11:0] rom_waddr=0; reg [15:0] rom_wdata=0;
-    wire [15:0] j1,j2,seq; wire [7:0] sx,sy; wire run;
+    wire [15:0] j1,j2,seq; wire [7:0] sx,sy; wire run; wire [1:0] check_mode;
+    reg [15:0] cart_check=16'hC143;                              // arbitrary pattern; the RTL passes it through
     reg [15:0] status=16'hA5C3;
     reg [15:0] region_info=16'h7E02, region_source=16'h0016;   // arbitrary patterns; the RTL passes them through
     wire rst_ev, nmi_ev;
@@ -24,7 +25,8 @@ module tb_n64_endpoint;
         .n64_pi_read(rd),.n64_pi_write(wr),.n64_pi_ad(ad),
         .rom_we(rom_we),.rom_waddr(rom_waddr),.rom_wdata(rom_wdata),
         .joy1_buttons(j1),.joy2_buttons(j2),.joy1_stick_x(sx),.joy1_stick_y(sy),
-        .run_request(run),.soft_reset(),.region_mode(),.mailbox_seq(seq),.fault_flags(16'h0000),.status_flags(status),.build_id(16'h0102),
+        .run_request(run),.soft_reset(),.region_mode(),.mailbox_seq(seq),.fault_flags(16'h0100),.status_flags(status),.build_id(16'h0102),
+        .cart_check_mode(check_mode),.cart_check(cart_check),
         .region_info(region_info),.region_source(region_source),
         .clk_snes(1'b0), .rst_snes_n(1'b0), .video_rgb(15'd0), .video_hde(1'b0), .video_vde(1'b0), .video_x(9'd0), .video_y(9'd0),
         .video_high_res(1'b0), .video_interlace(1'b0), .video_pal(1'b0), .audio_left(16'd0), .audio_right(16'd0), .audio_ready(1'b0),
@@ -112,11 +114,21 @@ module tb_n64_endpoint;
         if (seq!==16'd2) $fatal(1,"COMMIT pair write: SEQ=%0d expected 2",seq);
         pi_addr(32'h1FFF_001A); pi_read(d1); pi_read(d2); pi_end;
         if (d1!==16'h8B31 || d2!==16'h0005) $fatal(1,"write to read-only REGION words changed them: %h %h",d1,d2);
+        // 5d) Cartridge check: CONTROL bits 5:4 carry the mode and read back; CART_CHECK is at 0x0A,
+        //     the low half of the bootstrap's 32-bit read at 0x08 {FAULT, CART_CHECK}.
+        pi_addr(32'h1FFF_0016); pi_write(16'h0031); pi_end;
+        repeat(4) @(negedge clk);
+        if (check_mode!==2'd3 || run!==1'b1) $fatal(1,"CONTROL check mode not taken: mode=%0d run=%b",check_mode,run);
+        pi_addr(32'h1FFF_0016); pi_read(d3); pi_end;
+        if (d3!==16'h0031) $fatal(1,"CONTROL readback wrong: %h",d3);
+        pi_addr(32'h1FFF_0008); pi_read(d0); pi_read(d1); pi_end;
+        if (d0!==16'h0100 || d1!==16'hC143) $fatal(1,"FAULT/CART_CHECK read wrong: %h %h",d0,d1);
         // 6) Host reset drops the run request and produces an event on release
         n64_reset=0; repeat(6) @(negedge clk);
         if (run!==1'b0) $fatal(1,"run_request survived host reset");
+        if (check_mode!==2'd0) $fatal(1,"cartridge check mode not back to enforce after host reset");
         n64_reset=1; repeat(4) @(negedge clk);
-        $display("PASS: N64 endpoint ROM burst/offset reads, mailbox read/write/readback, REGION_INFO/REGION_SOURCE at 0x1A/0x1C read-only, COMMIT pair +1, run_request cleared by host reset (%0d clocks)",cycles);
+        $display("PASS: N64 endpoint ROM burst/offset reads, mailbox read/write/readback, REGION_INFO/REGION_SOURCE at 0x1A/0x1C read-only, COMMIT pair +1, check mode in CONTROL and CART_CHECK at 0x0A, run_request and check mode cleared by host reset (%0d clocks)",cycles);
         $finish;
     end
 endmodule

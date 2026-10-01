@@ -45,6 +45,7 @@ module sn64_pnr_wrap (
         .snes_clk_run(snes_clk_run), .region_pal(region_pal),
         .host_3v3_ok(host_3v3_ok), .fpga_rails_ok(fpga_rails_ok), .cart_5v_ok(cart_5v_ok), .iface_rail_ok(iface_rail_ok),
         .efuse_fault_n(efuse_fault_n), .overtemp(overtemp), .cart_5v_enable(cart_5v_enable), .iface_rail_enable(iface_rail_enable),
+        .cart_probe_req(), .cart_probe_active(1'b0), .cart_probe_strobe(1'b0), .cart_probe_code(12'd0),   // v1: no cartridge check
         .cart_address(cart_address), .cart_pa(cart_pa), .cart_rd_n(cart_rd_n), .cart_wr_n(cart_wr_n),
         .cart_prd_n(cart_prd_n), .cart_pwr_n(cart_pwr_n), .cart_romsel_n(cart_romsel_n), .cart_wramsel_n(cart_wramsel_n),
         .cart_refresh(cart_refresh), .cart_phi2(cart_phi2), .cart_sysclk(cart_sysclk),

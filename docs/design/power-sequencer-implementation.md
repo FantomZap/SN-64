@@ -23,6 +23,9 @@ This block decides when the SNES cartridge gets power and when the FPGA may driv
 | RUN (4) | everything on, `bus_permit` may be high; `hold_reset` pulls cartridge /RESET only | request dropped or host reset → SHUTDOWN |
 | SHUTDOWN (5) | reset pulled, rails off | next clock → OFF |
 | FAULT (6) | everything off, reset pulled, fault latched | `fault_clear` while `run_request` is low → OFF |
+| CART CHECK (7) | 5 V off, test current on, reset released | two rail readings in a row at or above the threshold → CHECK END; timeout → FAULT code `0x01` (enforce) or CHECK END (report only, check only) |
+| CHECK END (8) | 5 V off, test current off, reset pulled | the monitor has given the rail-sense pin back → RESET, or CHECK HOLD in check-only mode |
+| CHECK HOLD (9) | everything off, reset pulled | request dropped → SHUTDOWN |
 
 The interface rail is never enabled without cartridge 5 V (translator A side must be powered first; see the power-architecture translator section). `fault_code` records the trip cause: bit 1 configuration loss, 2 host/USB rail, 3 FPGA rails… as coded in the module; bit 3 5 V window, bit 4 interface rail, bit 6 eFuse, bit 7 over-temperature. It is intended for the telemetry registers.
 
@@ -33,3 +36,11 @@ The interface rail is never enabled without cartridge 5 V (translator A side mus
 The bench uses shortened hold/timeout parameters and rail models that become valid a few clocks after their enable. Every clock it asserts that `bus_permit` is never high with any condition false, never high outside RUN, and that the interface rail is never on without 5 V. Sequence checks: normal bring-up and request drop; a 50-clock soft reset in RUN keeps both rails enabled and the state in RUN while /RESET is held, then releases cleanly; host reset during RUN removes permission on the next clock and shuts down; eFuse fault, over-temperature, configuration loss and 5 V loss each remove permission within one clock, latch with the right code, keep outputs off, refuse `fault_clear` while the run request is still high, and clear properly afterwards; a 5 V rail that never comes up times out with code `0x08`. Result: **PASS**.
 
 Limits: digital behaviour only. The analog veto, eFuse current limit and slew, monitor thresholds and all real timings (reset hold, rail timeouts) must be set from the selected parts and measured on hardware. Hardware inputs are assumed already synchronised; board integration must add synchronisers for asynchronous monitor outputs.
+
+## Cartridge check before 5 V (2026-10-01)
+
+Added for the owner's idea of catching a cartridge that is in back to front; the full description is in [reversed-cartridge-detection.md](reversed-cartridge-detection.md). With `PROBE_ENABLE = 1` (the v2 board) a request first goes through CART CHECK: the [rail monitor](../../fpga/rtl/sn64_rail_monitor.sv) feeds a small test current into the switched-off cartridge rail and reports the rail voltage. A reversed or shorted cartridge holds the rail low. `probe_mode`, taken when the request starts, decides what a failed check does: 0 enforce (fault `0x01`, 5 V never applied), 1 report only (recorded, started anyway), 2 off (no check), 3 check only (recorded, 5 V never applied, pass or fail). The state numbers 0 to 6 are unchanged because other blocks and the menu compare against them; the new states are 7 to 9. /RESET is released during the check, in the sequencer and in `sn64_top`, because its pull-up hangs from the cartridge rail.
+
+`fault_code` bit 0, which was always 0, now means "cartridge check failed in enforce mode". The result of the last check (`probe_done`, `probe_pass`, mode, rail reading) stays readable after the request is dropped and is cleared when the next request starts.
+
+Verification: `tb_power_sequencer` has a second instance with the check and ten more cases (two readings in a row to pass, enforce, report only, check only, off, abort, hardware fault during the check, a monitor that never gives the pin back, and a build without the check asked for check only). `tb_cart_check` runs the sequencer with the real monitor against an ADC model and an electrical model of the rail. Both are in `evaluate.py --mode sim`. Simulation only; the threshold (0.65 V) and the timeout (4 s) are assumptions.

@@ -261,7 +261,11 @@ groups, which carry the cartridge audio inputs (pins 31 and 62, used by FXPAK Pr
 
 - **Cartridge keying.** The pocket is a plain rectangle, so a cartridge can be put in back to
   front, which swaps its 5 V and ground contacts. The pocket needs the console's keying so a
-  cartridge only goes in label-forward. This is a safety item, not a cosmetic one.
+  cartridge only goes in label-forward. This is a safety item, not a cosmetic one. Since
+  2026-10-01 the FPGA also checks for a reversed cartridge before it switches 5 V on
+  ([reversed-cartridge-detection.md](reversed-cartridge-detection.md)). That is a second line,
+  simulated only, and it does not cover a cartridge with its own reverse protection, so the
+  keying is still needed.
 - Two caliper readings on a real US cartridge (see "Cartridge in the slot"), and the same for a
   Super Famicom or PAL cartridge.
 - Buy one sample socket and measure it: height, nose, tail length and section, ear shape and hole

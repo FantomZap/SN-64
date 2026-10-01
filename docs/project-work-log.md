@@ -306,3 +306,28 @@ The owner corrected the mounting: he did not want the board merely pinched betwe
 Checked in CAD only. Pictures: [section-screw-post.png](../mechanical/sn64-v2-shell/section-screw-post.png), [halves-open.png](../mechanical/sn64-v2-shell/halves-open.png), [half-front-with-board.png](../mechanical/sn64-v2-shell/half-front-with-board.png).
 
 Still open on the same theme: the SNES cartridge can go into the cap's pocket back to front (see the open list in [v2-shell.md](design/v2-shell.md)).
+
+## 2026-10-01 — cartridge check: a cartridge that is in back to front is detected before 5 V is switched on
+
+The owner asked whether the FPGA could detect a cartridge that is in backwards and show a message, "something quippy but serious enough about what we dont do around here". While it was being built he asked for a way to test it in real life without false alarms blocking games.
+
+What a reversed cartridge does was checked on the socket footprint first: contact k lands on contact 63 - k, so the cartridge's ground sits on the 5 V rail and its supply on ground. Until today the board would have pushed the switch's whole current limit (1.04 A) backwards through the cartridge for up to 10 ms before the switch's fault flag ended it.
+
+- **How it is detected, with no added part.** The telemetry ADC (TLA2528) already reads the cartridge rail through 20 k and 10 k. Its channels can also be outputs. Before the switch is enabled the FPGA makes that channel an output at 3.3 V, so the 20 k feeds at most 0.165 mA into the switched-off rail, and reads the rail back about every 21 ms. A reversed cartridge holds the rail at a diode drop; the right way round it rises. /RESET is released during the check because its pull-up hangs from the same rail. [sn64_rail_monitor.sv](../fpga/rtl/sn64_rail_monitor.sv), [sn64_power_sequencer.sv](../fpga/rtl/sn64_power_sequencer.sv) (new states 7 to 9, fault code 0x01).
+- **Modes, in one firmware** (mailbox `CONTROL` bits 5:4): check only (measures, never powers), report only (measures, starts anyway), enforce (refuses), off. The FPGA resets to enforce; the menu starts in report only until real cartridges have been measured. The check can be left out of a build (`SEQ_PROBE_ENABLE = 0`; the v1 wrapper has no ADC and is built that way).
+- **Menu** ([main.c](../firmware/bootstrap/src/main.c), [sn64_cartcheck.c](../firmware/bootstrap/src/sn64_cartcheck.c)): "Check cartridge (no power)", a "Cartridge check:" setting, the last result on the main screen, and an alert screen: "WHOA. WRONG WAY ROUND. That cartridge is in backwards. We don't do that around here. Nothing was powered, so no harm done. Take it out, turn the label to the front, and try again." A rail that does not rise at all is reported as a short. Mock-up: [cart-check-screens.png](design/img/cart-check-screens.png). The menu also no longer enters the game display before the cartridge really runs; before, a start that ended in a power fault left it waiting for a picture.
+- **Result register** `CART_CHECK` at mailbox 0x0A: done, pass, mode used, "this build has the check", rail reading.
+
+Evidence, all simulation:
+
+| Check | Result |
+|---|---|
+| `evaluate.py --mode sim` | all benches pass; new `tb_cart_check`, ten more cases in `tb_power_sequencer`, more in `tb_n64_endpoint` |
+| Fault injection | `/RESET` kept pulled during the check, and a sequencer that does not enforce: both fail as required |
+| `tb_cart_check` with the board's real capacitances | empty socket passes in 0.28 s, good cartridge in 0.38 s, reversed cartridge held at 0.47 V with 0.14 mA through it and the switch never closed |
+| Boot ROM | builds, 131,072 bytes, CIC-6102 check OK; host tests pass (74 new checks) and their fault-injected builds fail; ROM/endpoint co-simulation passes |
+| `route_top.py --top board --speed 8` | all five clocks pass; 30.2k LUT4, 13,348 flip-flops, 203 of 208 block RAMs |
+
+Not measured on anything. The cartridge in the simulation is an assumption (nothing below 0.8 V, then 150 ohm; reversed: one silicon junction). The threshold (0.65 V) and the timeout (4 s) follow from that assumption. First job on a real board: check only on every cartridge to hand, both ways round, then set the threshold. Open points are listed in [reversed-cartridge-detection.md](design/reversed-cartridge-detection.md); the main ones are the unknown margin, what the four translators draw from the rail at low voltage, and that a cartridge with its own reverse protection is not seen. The keying in the shell's pocket is still needed.
+
+Also fixed on the way: the notes for U6 and U12 cited document numbers that do not match the datasheets on TI's site; they now cite SBAS961A and SLVS841F, read today, and the pin tables were checked against them. The current limit with 24.9 k is 1.04 A nominal (0.96 to 1.12 A). The ROM co-simulation script was missing two source files since the console video path was added; it runs again.

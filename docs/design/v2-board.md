@@ -94,12 +94,12 @@ shoulders (the player's left), power lower left.
 | Libraries | `libraries/SN64_V2.kicad_sym` (TPS2121, TLA2528, TPS2553 drawn from the TI pin tables), `libraries/SN64_V2.pretty` (straddle socket footprint from `tools/make_socket_footprint.py`), `libraries/3d/` (socket model from `tools/socket_3d_model.py`), v1 libraries reused unchanged; `libraries/v2-provenance.json` |
 | Boards | `build_v2_pcb.py` (placement), `prepare_route_v2.py` (fan-out, planes), `apply_netclasses_v2.py`, `finish_route_v2.py`, `add_plane_vias_v2.py`, `refit_tower_v2.py` (tower refit), `report_board_v2.py` (DRC summary); router KiCadRoutingTools (see `docs/design/pcb-routing.md`) |
 | Checks | `validation/erc.json` (0 errors, 8 warnings: unused translator inputs tied to ground), `validation/*.xml` netlists, DRC reports under `build/` |
-| FPGA | `fpga/tools/evaluate.py --mode sim` (all benches pass, new `tb_sd_adc`); `fpga/tools/route_top.py --top board --speed 8` routes with every clock passing timing (`fpga/reports/v2-board-route.json`: 30.7k LUT4, 203/208 block RAMs, 111 I/O) |
+| FPGA | `fpga/tools/evaluate.py --mode sim` (all benches pass, new `tb_sd_adc`); `fpga/tools/route_top.py --top board --speed 8` routes with every clock passing timing (`fpga/reports/v2-board-route.json`, rerun 2026-10-01 with the cartridge check: 30.2k LUT4, 203/208 block RAMs, 111 I/O) |
 
 ## Provisional values (to confirm at review or bring-up)
 
-TPS2553 RILIM 24.9 k (~1.0 A); TPS2121 CSS 1 nF; decoupling counts; sigma-delta RC 10 k / 1 nF;
-NTC part and its threshold; TLA2528 register map and I2C address (SBAS925, manual mode); TLA2528
+TPS2553 RILIM 24.9 k (1.04 A nominal, 0.96 to 1.12 A by the SLVS841F equations; the choice of limit is provisional); TPS2121 CSS 1 nF; decoupling counts; sigma-delta RC 10 k / 1 nF;
+NTC part and its threshold; TLA2528 register map and I2C address (SBAS961A, manual mode); TLA2528
 footprint exposed-pad size; USB pull-up switched only after PLL lock.
 
 ## Open items
@@ -107,6 +107,7 @@ footprint exposed-pad size; USB pull-up switched only after PLL lock.
 - Routing after the refit to the shorter shell: 3,603 tracks, 1,066 vias, 213 of 218 signal nets fully connected, 6 unconnected items (FLASH_D2, FPGA_3V3, N64_AD6, N64_JOYBUS, USB_DP_F, USB_PU); DRC errors: 6 starved_thermal. Remaining items are listed in `validation/pcb-open-connections.json` for hand routing in KiCad.
 - Shell: envelope model only (`docs/design/v2-shell.md`, `mechanical/sn64-v2-shell/`): upright tower, socket ears screwed to brackets in the shell. The board was refitted to it on 2026-09-30 (socket on the top edge, outline widened for the USB-C, USB-C above the console's top) and to the 10 mm shorter shell on 2026-10-01 (top edge at 60 mm, USB-C at 32.5 mm).
 - Mounting holes (2026-10-01): H1, H2, H5 and H6 are 4.0 mm (KiCad `MountingHole_4mm`, set by `tools/set_mounting_holes_v2.py`) because the shell's screw posts pass through the board there; H3 and H4 stay 2.5 mm for the shell's two registration pins, which sit at different heights so the board cannot go in back to front. No copper is within 4.5 mm of the four larger holes; the checks are unchanged (6 starved thermals, 6 open items).
+- Cartridge check (2026-10-01): before the cartridge's 5 V is switched on, the FPGA uses the telemetry ADC's channel 3 as an output so that R30 feeds 0.165 mA into the rail, and reads the rail back; a cartridge that is in back to front holds it at about half a volt ([reversed-cartridge-detection.md](reversed-cartridge-detection.md)). No part, pin or trace was added. Simulated only. To do on a real board: measure real cartridges both ways round in check-only mode and set the threshold; if the gap is thin, lower R30 and R31 together for more test current.
 - PCBWay: annular ring (6 mil) and spacing (5 mil) against the 0.125 / 0.1 mm rules, as in v1.
 - Four-layer trial: with 210 fan-out vias and signals on the outer rings a four-layer stack may
   route; not tried yet.

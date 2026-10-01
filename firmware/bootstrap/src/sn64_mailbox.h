@@ -13,7 +13,7 @@
 //
 //   0x00  {MAGIC,        VERSION}       read
 //   0x04  {STATUS,       SEQ}           read
-//   0x08  {FAULT,        reserved}      read   (FAULT = fault_code << 8)
+//   0x08  {FAULT,        CART_CHECK}    read   (FAULT = fault_code << 8; CART_CHECK = last cartridge check)
 //   0x10  {JOY1_BUTTONS, JOY2_BUTTONS}  write (and read back)
 //   0x14  {JOY1_STICK,   CONTROL}       write (and read back)
 //   0x18  {COMMIT,       REGION_INFO}   write COMMIT (0x1A is read-only, the write is ignored);
@@ -29,7 +29,7 @@
 
 #define SN64_REG_MAGIC_VERSION   0x00u
 #define SN64_REG_STATUS_SEQ      0x04u
-#define SN64_REG_FAULT           0x08u
+#define SN64_REG_FAULT           0x08u         // read: high half = FAULT (0x08), low half = CART_CHECK (0x0A)
 #define SN64_REG_JOY1_JOY2       0x10u
 #define SN64_REG_STICK_CONTROL   0x14u
 #define SN64_REG_COMMIT          0x18u
@@ -63,6 +63,34 @@
 #define SN64_CONTROL_SOFT_RESET  0x0002u       // CONTROL bit 1: reset SNES (keeps cartridge power)
 #define SN64_CONTROL_REGION_SHIFT 2            // CONTROL bits 3:2: 0 auto, 1 NTSC, 2 PAL (next power-up)
 #define SN64_CONTROL_REGION_MASK  0x000Cu
+#define SN64_CONTROL_CHECK_SHIFT 4             // CONTROL bits 5:4: cartridge check mode, taken when a request starts
+#define SN64_CONTROL_CHECK_MASK  0x0030u
+
+// Cartridge check before 5 V is switched on (docs/design/reversed-cartridge-detection.md).
+#define SN64_CHECK_MODE_ENFORCE    0u          // a failed check latches a fault; the cartridge is not powered
+#define SN64_CHECK_MODE_REPORT     1u          // the result is recorded; the cartridge is started anyway
+#define SN64_CHECK_MODE_OFF        2u          // no check
+#define SN64_CHECK_MODE_CHECK_ONLY 3u          // the result is recorded; the cartridge is NOT powered, pass or fail
+
+// FAULT (0x08): fault_code in the high byte, a bit per cause (fpga/rtl/sn64_power_sequencer.sv).
+#define SN64_FAULT_CODE(w)        (((w) >> 8) & 0xFFu)
+#define SN64_FAULT_CHECK          0x01u        // cartridge check failed in enforce mode (reversed or shorted)
+#define SN64_FAULT_NOT_CONFIGURED 0x02u
+#define SN64_FAULT_HOST_RAIL      0x04u
+#define SN64_FAULT_FPGA_RAILS     0x08u        // also: cartridge 5 V did not come up in time (code exactly 0x08)
+#define SN64_FAULT_CART_5V        0x10u
+#define SN64_FAULT_IFACE_RAIL     0x20u
+#define SN64_FAULT_SWITCH         0x40u        // the cartridge power switch's own fault flag (overcurrent)
+#define SN64_FAULT_OVERTEMP       0x80u
+
+// CART_CHECK (0x0A): result of the last cartridge check. It stays readable after the request
+// is dropped and is cleared when the next request starts.
+#define SN64_CHECK_DONE           0x8000u      // a check finished for the latest request
+#define SN64_CHECK_PASS           0x4000u      // the rail rose above the threshold: not reversed, not shorted
+#define SN64_CHECK_MODE_SHIFT     12           // bits 13:12: mode the request was started with
+#define SN64_CHECK_MODE_MASK      0x3000u
+#define SN64_CHECK_PRESENT        0x0100u      // this FPGA build has the check
+#define SN64_CHECK_LEVEL_MASK     0x00FFu      // rail reading, 9.67 mV per count (saturates at 255)
 
 // JOY1_STICK packing: {y, x}, two's-complement bytes (y in bits 15:8).
 static inline uint16_t sn64_pack_stick(int8_t x, int8_t y)
@@ -87,6 +115,13 @@ typedef struct {
 #define SN64_STATUS_PAL           0x0080u  // region configuration = PAL
 #define SN64_STATUS_SEQ_STATE_SHIFT 8      // bits 11:8 = power sequencer state[3:0]
 #define SN64_STATUS_SEQ_STATE_MASK  0x0F00u
+#define SN64_SEQ_STATE(status)    (((status) & SN64_STATUS_SEQ_STATE_MASK) >> SN64_STATUS_SEQ_STATE_SHIFT)
+#define SN64_SEQ_OFF              0u
+#define SN64_SEQ_RUNNING          4u
+#define SN64_SEQ_FAULT            6u
+#define SN64_SEQ_CHECK            7u       // cartridge check: test current on, 5 V off
+#define SN64_SEQ_CHECK_END        8u
+#define SN64_SEQ_CHECK_HOLD       9u       // check only: finished, nothing powered, waiting for the request to drop
 #define SN64_STATUS_SNES_CLOCK    0x1000u  // SNES master clock running
 #define SN64_STATUS_KEY_CIC_OK    0x2000u  // SNES key CIC answered correctly
 #define SN64_STATUS_KEY_CIC_FAIL  0x4000u  // SNES key CIC mismatch or absent

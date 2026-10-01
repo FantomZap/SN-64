@@ -429,7 +429,7 @@ def build_fpga_sheet(sh, balls, rows):
               '7': V33, '10': V33, '9': GND, '17': GND},
              'Package_DFN_QFN:Texas_RTE0016D_WQFN-16-1EP_3x3mm_P0.5mm_EP0.8x0.8mm',
              {'Datasheet': 'https://www.ti.com/lit/ds/symlink/tla2528.pdf', 'LCSC': LCSC['TLA2528IRTER'][0], 'MPN': 'TLA2528IRTER',
-              'Note': 'ADDR=GND; AIN4 = FPGA_1V1 direct; footprint EP size to verify against SBAS925 mechanical drawing'})
+              'Note': 'ADDR=GND; AIN4 = FPGA_1V1 direct; footprint EP size to verify against SBAS961A mechanical drawing'})
     sh.cap('C34', '1uF', 'ADC_DECAP', GND)
     sh.cap('C35', '100nF', V33, GND)
     sh.res('R22', '4.7k', V33, 'ADC_SCL')
@@ -565,7 +565,7 @@ def build_power_sheet(sh):
     # Cartridge 5 V switch with current limit and fault flag (replaces the v1 TPS259470L eFuse)
     sh.place('U12', 'SN64_V2:TPS2553DBV', 'TPS2553DBVR', {'1': V5, '3': 'CART_5V_EN', '5': 'CART_ILIM', '6': CART5, '4': 'EFUSE_FAULT_N', '2': GND},
              'Package_TO_SOT_SMD:SOT-23-6', {'Datasheet': 'https://www.ti.com/lit/ds/symlink/tps2553.pdf', 'LCSC': LCSC['TPS2553DBVR'][0], 'MPN': 'TPS2553DBVR',
-                                             'Note': 'RILIM 24.9k ~ 1.0 A typ (provisional, SLVS963 equation to confirm at review)'})
+                                             'Note': 'RILIM 24.9k: 1.04 A nominal, 0.96 to 1.12 A (SLVS841F equations, checked 2026-10-01)'})
     sh.res('R318', '24.9k 1%', GND, 'CART_ILIM'); sh.res('R319', '100k', GND, 'CART_5V_EN'); sh.res('R320', '10k', V33, 'EFUSE_FAULT_N')
     sh.cap('C322', '100nF', V5, GND); sh.cap('C323', '10uF 10V', CART5, GND, C0805)
 
@@ -645,8 +645,8 @@ def main():
 
     prov = {'schema_version': 1, 'recorded_date': '2026-09-30', 'scope': 'SN64 v2 schematic draft 0.1 (branch v2); not a manufacturing release',
             'drawn_symbols': {'TPS2121RUX': {'pins': {n: [lab, typ] for n, lab, typ, _ in TPS2121_PINS}, 'source': 'TI SLVSEA3F (Aug 2020) pin table via LCSC C485916 pinout; design values from SLVSEA3F sections 7.5/9.3'},
-                              'TLA2528RTE': {'pins': {n: [lab, typ] for n, lab, typ, _ in TLA2528_PINS}, 'source': 'TI SBAS925 pin table via LCSC C2866175 pinout'},
-                              'TPS2553DBV': {'pins': {n: [lab, typ] for n, lab, typ, _ in TPS2553_PINS}, 'source': 'TI SLVS963 pin table via LCSC C55266 pinout'}},
+                              'TLA2528RTE': {'pins': {n: [lab, typ] for n, lab, typ, _ in TLA2528_PINS}, 'source': 'TI SBAS961A pin table (LCSC C2866175 pinout, checked against the datasheet 2026-10-01)'},
+                              'TPS2553DBV': {'pins': {n: [lab, typ] for n, lab, typ, _ in TPS2553_PINS}, 'source': 'TI SLVS841F pin table (LCSC C55266 pinout, checked against the datasheet 2026-10-01)'}},
             'reused_v1_libraries': ['SN64 (socket, N64 edge: Sanni CC-BY-4.0, SummerCart64 CERN-OHL-S-2.0)', 'SN64_POWER (TPS63070RNM, TI SLVSC58B)', 'SN64_USB (JAE DX07S016JA3R1500)'],
             'installed_kicad_symbols': ['FPGA_Lattice:LFE5U-85F-8BG381x', '74xx:74ALVC164245', '74xx:74LS07 (as SN74LVC07APW)', 'Memory_Flash:W25Q128JVS', 'Power_Supervisor:TPS3808DBV',
                                         'Regulator_Switching:TLV62569DBV', 'Regulator_Linear:AP2112K-2.5', 'Power_Protection:USBLC6-2SC6', 'Oscillator:ASE-xxxMHz'],

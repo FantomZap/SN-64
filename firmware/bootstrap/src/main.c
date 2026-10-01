@@ -12,6 +12,7 @@
 
 #include <libdragon.h>
 
+#include "sn64_cartcheck.h"
 #include "sn64_mailbox.h"
 #include "sn64_mapping.h"
 
@@ -103,12 +104,24 @@ static void game_audio(void)
 #define MENU_HOTKEY        (N64_BTN_Z | N64_BTN_L | N64_BTN_R)
 #define MENU_HOTKEY_FRAMES 60
 
-typedef enum { MODE_MENU, MODE_RUN } run_mode_t;
-typedef enum { SCREEN_MAIN, SCREEN_MAPPING, SCREEN_STATUS } screen_t;
-typedef enum { ITEM_START, ITEM_MAPPING, ITEM_STATUS, ITEM_POWER_DOWN, ITEM_COUNT } item_t;
+// Cartridge check mode the menu starts with. Report only until the check's thresholds have
+// been confirmed on real cartridges (docs/design/reversed-cartridge-detection.md): it measures
+// and shows the verdict but cannot stop a cartridge from starting. Change to
+// SN64_CHECK_MODE_ENFORCE once it has earned that.
+#ifndef SN64_CHECK_MODE_DEFAULT
+#define SN64_CHECK_MODE_DEFAULT SN64_CHECK_MODE_REPORT
+#endif
+// "Check cartridge" gives up after this many frames (the FPGA's own limit is 4 s).
+#define CHECK_WAIT_FRAMES  480
+
+typedef enum { MODE_MENU, MODE_RUN, MODE_CHECK } run_mode_t;
+typedef enum { SCREEN_MAIN, SCREEN_MAPPING, SCREEN_STATUS, SCREEN_ALERT } screen_t;
+typedef enum { ITEM_START, ITEM_CHECK, ITEM_CHECK_MODE, ITEM_MAPPING, ITEM_STATUS, ITEM_POWER_DOWN, ITEM_COUNT } item_t;
 
 static const char *const item_names[ITEM_COUNT] = {
     "Start SNES cartridge",
+    "Check cartridge (no power)",
+    "Cartridge check:",
     "Controller mapping",
     "Status / diagnostics",
     "Power down cartridge",
@@ -116,7 +129,7 @@ static const char *const item_names[ITEM_COUNT] = {
 
 static const char *const seq_state_names[16] = {
     "OFF", "RESET", "5V RAMP", "IFACE RAIL", "RUNNING", "SHUTDOWN", "FAULT",
-    "?7", "?8", "?9", "?10", "?11", "?12", "?13", "?14", "?15",
+    "CART CHECK", "CHECK END", "CHECK HOLD", "?10", "?11", "?12", "?13", "?14", "?15",
 };
 
 // Mailbox state as last read from the hardware.
@@ -125,6 +138,7 @@ typedef struct {
     uint16_t magic, version, status, seq;
     uint16_t rb_joy1, rb_joy2, rb_stick, rb_control;
     uint16_t region_info, region_source;
+    uint16_t fault, cart_check;
 } mailbox_t;
 
 static mailbox_t  mbox;
@@ -135,6 +149,10 @@ static screen_t   screen = SCREEN_MAIN;
 static int        cursor;
 static int        hotkey_frames;
 static const char *message = "";
+static unsigned   check_mode = SN64_CHECK_MODE_DEFAULT;   // enforce, report only or off
+static int        wait_frames;                            // frames spent waiting for a check-only result
+static sn64_alert_t alert = SN64_ALERT_NONE;              // what the alert screen shows ...
+static uint16_t   alert_fault, alert_check;               // ... and the words it was decided from
 
 static uint16_t n64_word(joypad_buttons_t b)
 {
@@ -167,6 +185,7 @@ static void mailbox_read(void)
     if (!mbox.present)
         return;
     uint32_t ss = io_read(SN64_MBOX_BASE + SN64_REG_STATUS_SEQ);
+    uint32_t fc = io_read(SN64_MBOX_BASE + SN64_REG_FAULT);           // {FAULT, CART_CHECK}
     uint32_t jj = io_read(SN64_MBOX_BASE + SN64_REG_JOY1_JOY2);
     uint32_t sc = io_read(SN64_MBOX_BASE + SN64_REG_STICK_CONTROL);
     uint32_t cr = io_read(SN64_MBOX_BASE + SN64_REG_COMMIT_REGION);   // {COMMIT reads 0, REGION_INFO}
@@ -179,6 +198,8 @@ static void mailbox_read(void)
     mbox.rb_control = (uint16_t)sc;
     mbox.region_info   = (uint16_t)cr;
     mbox.region_source = (uint16_t)(rs >> 16);
+    mbox.fault         = (uint16_t)(fc >> 16);
+    mbox.cart_check    = (uint16_t)fc;
 }
 
 // One complete controller update per frame, then COMMIT (SEQ increments).
@@ -188,8 +209,10 @@ static void mailbox_write_frame(uint16_t joy1, uint16_t joy2, uint16_t stick, bo
     if (!mbox.present)
         return;
     io_write(SN64_MBOX_BASE + SN64_REG_JOY1_JOY2, ((uint32_t)joy1 << 16) | joy2);
+    // The check mode travels with the request; "check cartridge" asks for check only.
+    unsigned cm = (mode == MODE_CHECK) ? SN64_CHECK_MODE_CHECK_ONLY : check_mode;
     io_write(SN64_MBOX_BASE + SN64_REG_STICK_CONTROL,
-             ((uint32_t)stick << 16) | (run ? SN64_CONTROL_RUN_REQUEST : 0u));
+             ((uint32_t)stick << 16) | (run ? SN64_CONTROL_RUN_REQUEST : 0u) | (cm << SN64_CONTROL_CHECK_SHIFT));
     io_write(SN64_MBOX_BASE + SN64_REG_COMMIT, 0x00010000u);   // COMMIT at 0x18; 0x1A ignored
 }
 
@@ -207,6 +230,28 @@ static void menu_select(item_t item)
             run_request = true;
             mode = MODE_RUN;
             message = "Running. Hold Z+L+R 1 s for menu";
+        }
+        break;
+    case ITEM_CHECK:
+        if (!mbox.present) {
+            message = "SN64 hardware not detected";
+        } else if (run_request) {
+            message = "Power the cartridge down first";
+        } else {
+            run_request = true;                 // with check only in CONTROL: nothing gets powered
+            mode = MODE_CHECK;
+            wait_frames = 0;
+            message = "";
+        }
+        break;
+    case ITEM_CHECK_MODE:                       // report only -> enforce -> off -> report only
+        if (run_request) {
+            message = "Power the cartridge down first";
+        } else {
+            check_mode = (check_mode == SN64_CHECK_MODE_REPORT)  ? SN64_CHECK_MODE_ENFORCE :
+                         (check_mode == SN64_CHECK_MODE_ENFORCE) ? SN64_CHECK_MODE_OFF :
+                                                                   SN64_CHECK_MODE_REPORT;
+            message = (check_mode == SN64_CHECK_MODE_OFF) ? "Check off: reversed carts not caught" : "";
         }
         break;
     case ITEM_MAPPING:
@@ -227,12 +272,50 @@ static void menu_select(item_t item)
 static void menu_input(joypad_buttons_t pressed)
 {
     if (screen != SCREEN_MAIN) {
-        if (pressed.b || pressed.start) screen = SCREEN_MAIN;
+        if (pressed.b || pressed.start || (screen == SCREEN_ALERT && pressed.a)) screen = SCREEN_MAIN;
         return;
     }
     if (pressed.d_up)   cursor = (cursor + ITEM_COUNT - 1) % ITEM_COUNT;
     if (pressed.d_down) cursor = (cursor + 1) % ITEM_COUNT;
     if (pressed.a)      menu_select((item_t)cursor);
+}
+
+// ---- cartridge supervision: a latched power fault or a finished check ends the request and
+// puts the reason on the alert screen. The fault code is only readable while the request is
+// still up (dropping the request clears the latch), so it is copied first.
+
+static bool cartridge_running(void)
+{
+    return mbox.present && SN64_SEQ_STATE(mbox.status) == SN64_SEQ_RUNNING &&
+           (mbox.status & SN64_STATUS_SNES_CLOCK);
+}
+
+static void cartridge_stop(sn64_alert_t why)
+{
+    alert = why;
+    alert_fault = mbox.fault;
+    alert_check = mbox.cart_check;
+    run_request = false;
+    mode = MODE_MENU;
+    screen = SCREEN_ALERT;
+    message = "";
+}
+
+static void cartridge_supervise(void)
+{
+    if (!mbox.present || mode == MODE_MENU)
+        return;
+    if (mbox.status & SN64_STATUS_FAULT_LATCHED) {
+        sn64_alert_t why = sn64_alert_for(mbox.fault, mbox.cart_check, mode == MODE_CHECK);
+        if (why == SN64_ALERT_NONE || why == SN64_ALERT_CHECK_OK)   // latched, whatever the words say
+            why = SN64_ALERT_POWER_FAULT;
+        cartridge_stop(why);
+    } else if (mode == MODE_CHECK) {
+        if (SN64_SEQ_STATE(mbox.status) == SN64_SEQ_CHECK_HOLD)
+            cartridge_stop(sn64_alert_for(0, mbox.cart_check, true));
+        else if (++wait_frames > CHECK_WAIT_FRAMES)
+            cartridge_stop(SN64_ALERT_CHECK_TIMEOUT);
+    }
 }
 
 // ---- region telemetry text
@@ -307,9 +390,49 @@ static void draw_main(surface_t *d)
         line(d, 5, col_text, "Region: %s", rt);
     }
     for (int i = 0; i < ITEM_COUNT; i++)
-        line(d, 6 + i, i == cursor ? col_hi : col_text, "%c %s", i == cursor ? '>' : ' ', item_names[i]);
-    line(d, 12, col_warn, "%s", message);
+        line(d, 6 + i, i == cursor ? col_hi : col_text, "%c %s%s%s", i == cursor ? '>' : ' ', item_names[i],
+             i == ITEM_CHECK_MODE ? " " : "", i == ITEM_CHECK_MODE ? sn64_check_mode_name(check_mode) : "");
+    line(d, 13, col_warn, "%s", message);
+    if (mbox.present) {
+        char cs[40];
+        line(d, 15, (mbox.cart_check & SN64_CHECK_DONE) && !(mbox.cart_check & SN64_CHECK_PASS) ? col_warn : col_dim,
+             "Last check: %s", sn64_check_summary(mbox.cart_check, cs, sizeof(cs)));
+    }
     line(d, 20, col_dim, "Up/Down select  A choose  B back");
+}
+
+// A request is up but the cartridge is not running yet (or will not be: check only).
+static void draw_wait(surface_t *d)
+{
+    unsigned st = SN64_SEQ_STATE(mbox.status);
+    draw_header(d);
+    if (mode == MODE_CHECK || st == SN64_SEQ_CHECK || st == SN64_SEQ_CHECK_END)
+        line(d, 4, col_hi, "Checking the cartridge...");
+    else
+        line(d, 4, col_hi, "Starting the cartridge...");
+    line(d, 6, col_text, "Sequencer: %s", seq_state_names[st]);
+    if (mode == MODE_CHECK)
+        line(d, 8, col_dim, "Cartridge power stays off.");
+    else if (check_mode == SN64_CHECK_MODE_REPORT)
+        line(d, 8, col_dim, "Check is set to report only.");
+    if (mode == MODE_RUN)
+        line(d, 20, col_dim, "Hold Z+L+R 1 s for the menu");
+}
+
+static void draw_alert(surface_t *d)
+{
+    const char *const *text = sn64_alert_lines(alert);
+    bool good = (alert == SN64_ALERT_CHECK_OK);
+    draw_header(d);
+    for (int i = 0; i < SN64_ALERT_MAX_LINES && text[i]; i++)
+        line(d, 3 + i, i == 0 ? (good ? col_hi : col_warn) : col_text, "%s", text[i]);
+    unsigned mv = sn64_check_millivolts(alert_check);
+    if (alert_check & SN64_CHECK_DONE)
+        line(d, 13, col_dim, "Rail test %u.%02u V, check %s", mv / 1000u, (mv % 1000u) / 10u,
+             sn64_check_mode_name((alert_check & SN64_CHECK_MODE_MASK) >> SN64_CHECK_MODE_SHIFT));
+    if (SN64_FAULT_CODE(alert_fault))
+        line(d, 14, col_dim, "Fault code 0x%02X", SN64_FAULT_CODE(alert_fault));
+    line(d, 20, col_dim, "A or B: back to the menu");
 }
 
 static void draw_mapping(surface_t *d, uint16_t n1, uint16_t s1)
@@ -350,6 +473,7 @@ static void draw_status(surface_t *d)
     line(d, 18, col_dim, "RINFO %04X RSRC %04X", mbox.region_info, mbox.region_source);
     line(d, 19, col_text, "JOY1 %04X JOY2 %04X", mbox.rb_joy1, mbox.rb_joy2);
     line(d, 20, col_text, "STICK %04X CONTROL %04X", mbox.rb_stick, mbox.rb_control);
+    line(d, 21, col_text, "FAULT %04X CHECK %04X", mbox.fault, mbox.cart_check);
     line(d, 22, col_dim, "B: back");
 }
 
@@ -397,28 +521,33 @@ int main(void)
                 hotkey_frames = 0;
             }
             if (!run_request) mode = MODE_MENU;
-        } else {
+        } else if (mode == MODE_MENU) {
             menu_input(pressed);
         }
 
-        // While the menu owns controller 1, the SNES sees a neutral pad.
-        if (mode == MODE_MENU) {
+        // Unless a cartridge is being played, the SNES sees a neutral pad.
+        uint16_t live1 = s1;
+        if (mode != MODE_RUN) { s1 = 0; s2 = 0; stick = 0; }
+        mailbox_write_frame(s1, s2, stick, run_request);
+        mailbox_read();
+        cartridge_supervise();
+
+        if (!(mode == MODE_RUN && cartridge_running())) {
+            // Menu, or a request that is still being checked or started: text screens. The game
+            // display below waits for the SNES to finish lines, so it is only entered once the
+            // cartridge really runs.
             display_mode(false);
             game_frames_shown = 0;
-            uint16_t live1 = s1;
-            s1 = 0; s2 = 0; stick = 0;
-            mailbox_write_frame(s1, s2, stick, run_request);
-            mailbox_read();
             surface_t *d = display_get();
             graphics_fill_screen(d, col_bg);
-            if (screen == SCREEN_MAPPING)     draw_mapping(d, n1, live1);
-            else if (screen == SCREEN_STATUS) draw_status(d);
-            else                              draw_main(d);
+            if (mode != MODE_MENU)            draw_wait(d);
+            else if (screen == SCREEN_MAPPING) draw_mapping(d, n1, live1);
+            else if (screen == SCREEN_STATUS)  draw_status(d);
+            else if (screen == SCREEN_ALERT)   draw_alert(d);
+            else                               draw_main(d);
             display_show(d);
         } else {
             // Game: the SNES picture and sound go to the console's own output.
-            mailbox_write_frame(s1, s2, stick, run_request);
-            mailbox_read();
             display_mode(true);
             surface_t *d = display_get();
             if (game_frames_shown < 2) graphics_fill_screen(d, graphics_make_color(0, 0, 0, 0xFF));   // both buffers' borders once

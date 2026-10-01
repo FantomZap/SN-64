@@ -127,7 +127,7 @@
      "power_in"
     ]
    },
-   "source": "TI SBAS925 pin table via LCSC C2866175 pinout"
+   "source": "TI SBAS961A pin table (LCSC C2866175 pinout, checked against the datasheet 2026-10-01)"
   },
   "TPS2553DBV": {
    "pins": {
@@ -156,7 +156,7 @@
      "power_in"
     ]
    },
-   "source": "TI SLVS963 pin table via LCSC C55266 pinout"
+   "source": "TI SLVS841F pin table (LCSC C55266 pinout, checked against the datasheet 2026-10-01)"
   }
  },
  "reused_v1_libraries": [

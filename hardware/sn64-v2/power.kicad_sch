@@ -730,7 +730,7 @@
 (property "Datasheet" "https://www.ti.com/lit/ds/symlink/tps2553.pdf" (at 67.31 360.68 0) (effects (font (size 1.27 1.27)) (hide yes)))
 (property "LCSC" "C55266" (at 67.31 360.68 0) (effects (font (size 1.27 1.27)) (hide yes)))
 (property "MPN" "TPS2553DBVR" (at 67.31 360.68 0) (effects (font (size 1.27 1.27)) (hide yes)))
-(property "Note" "RILIM 24.9k ~ 1.0 A typ (provisional, SLVS963 equation to confirm at review)" (at 67.31 360.68 0) (effects (font (size 1.27 1.27)) (hide yes)))
+(property "Note" "RILIM 24.9k: 1.04 A nominal, 0.96 to 1.12 A (SLVS841F equations, checked 2026-10-01)" (at 67.31 360.68 0) (effects (font (size 1.27 1.27)) (hide yes)))
 (pin "1" (uuid "604ef8e5-8e12-50c5-bbae-1667ad5a6dac"))
 (pin "3" (uuid "375bc944-3532-58a1-a269-d7820bc269b0"))
 (pin "5" (uuid "d951a3c3-c07f-5660-a19c-eda8b6f5cf84"))

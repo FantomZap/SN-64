@@ -107,10 +107,15 @@ module sn64_board_top (
     wire scl_oe, sda_oe;
     wire host_3v3_ok, sys_5v_ok, cart_5v_ok, core_1v1_ok, overtemp, monitor_error;
     wire [127:0] adc_codes;
+    // Cartridge check: the monitor feeds a small test current into the switched-off cartridge
+    // rail through the ADC's channel 3 and reports the rail voltage to the sequencer in sn64_top.
+    wire cart_probe_req, cart_probe_active, cart_probe_strobe; wire [11:0] cart_probe_code;
     sn64_rail_monitor #(.CLK_HZ(27_000_000)) monitor (
         .clk(osc_27), .rst_n(board_reset_n), .scl_oe(scl_oe), .sda_oe(sda_oe), .sda_in(adc_sda),
         .host_3v3_ok(host_3v3_ok), .sys_5v_ok(sys_5v_ok), .cart_5v_ok(cart_5v_ok), .core_1v1_ok(core_1v1_ok),
-        .overtemp(overtemp), .error(monitor_error), .codes(adc_codes));
+        .overtemp(overtemp), .error(monitor_error), .codes(adc_codes),
+        .probe_req(cart_probe_req), .probe_active(cart_probe_active), .probe_strobe(cart_probe_strobe),
+        .probe_code(cart_probe_code));
     assign adc_scl = scl_oe ? 1'b0 : 1'bz;
     assign adc_sda = sda_oe ? 1'b0 : 1'bz;
     wire fpga_rails_ok = core_1v1_ok & sys_5v_ok & board_reset_n;
@@ -150,7 +155,8 @@ module sn64_board_top (
     assign n64_int_n = 1'bz;                              // no cartridge interrupt yet
 
     wire [15:0] status_word;
-    sn64_top #(.ROM_ADDR_BITS(17), .ROM_FROM_FLASH(1), .FLASH_USE_USRMCLK(1), .CLK25_HZ(27_000_000)) top (   // 256 KiB flash ROM window
+    sn64_top #(.ROM_ADDR_BITS(17), .ROM_FROM_FLASH(1), .FLASH_USE_USRMCLK(1), .CLK25_HZ(27_000_000),      // 256 KiB flash ROM window
+               .SEQ_PROBE_ENABLE(1)) top (                                                                    // cartridge check before 5 V
         .clk_25(osc_27), .clk_host(clk_host), .clk_snes(clk_snes), .por_n(por_n),
         .n64_reset_n(n64_reset_n), .n64_nmi_n(n64_nmi_n), .n64_alel(n64_alel), .n64_aleh(n64_aleh),
         .n64_read_n(n64_read_n), .n64_write_n(n64_write_n), .n64_ad(n64_ad),
@@ -163,6 +169,8 @@ module sn64_board_top (
         .snes_clk_run(snes_clk_run), .region_pal(region_pal),
         .host_3v3_ok(host_3v3_ok), .fpga_rails_ok(fpga_rails_ok), .cart_5v_ok(cart_5v_ok), .iface_rail_ok(1'b1),
         .efuse_fault_n(efuse_fault_n), .overtemp(overtemp), .cart_5v_enable(cart_5v_enable), .iface_rail_enable(),
+        .cart_probe_req(cart_probe_req), .cart_probe_active(cart_probe_active), .cart_probe_strobe(cart_probe_strobe),
+        .cart_probe_code(cart_probe_code),
         .cart_address(cart_address), .cart_pa(cart_pa), .cart_rd_n(cart_rd_n), .cart_wr_n(cart_wr_n),
         .cart_prd_n(cart_prd_n), .cart_pwr_n(cart_pwr_n), .cart_romsel_n(cart_romsel_n), .cart_wramsel_n(cart_wramsel_n),
         .cart_refresh(cart_refresh), .cart_phi2(cart_phi2), .cart_sysclk(cart_sysclk),

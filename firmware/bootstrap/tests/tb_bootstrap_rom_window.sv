@@ -19,7 +19,7 @@ module tb_bootstrap_rom_window #(
     reg host_drive=0; reg [15:0] host_ad=16'h0;
     wire [15:0] ad = host_drive ? host_ad : 16'hzzzz;
     reg rom_we=0; reg [AW-1:0] rom_waddr=0; reg [15:0] rom_wdata=0;
-    wire [15:0] j1,j2,seq; wire [7:0] sx,sy; wire run;
+    wire [15:0] j1,j2,seq; wire [7:0] sx,sy; wire run; wire [1:0] cm;
     wire rst_ev, nmi_ev;
 
     sn64_n64_endpoint #(.ROM_ADDR_BITS(AW)) dut(.clk(clk),.reset(reset),.cic_cpu_clk(clk),
@@ -28,6 +28,7 @@ module tb_bootstrap_rom_window #(
         .rom_we(rom_we),.rom_waddr(rom_waddr),.rom_wdata(rom_wdata),
         .joy1_buttons(j1),.joy2_buttons(j2),.joy1_stick_x(sx),.joy1_stick_y(sy),
         .run_request(run),.mailbox_seq(seq),.fault_flags(16'h0000),.status_flags(16'h0011),.build_id(16'h0102),
+        .cart_check_mode(cm),.cart_check(16'h8152),
         .region_info(16'h7002),.region_source(16'h0016),
         .n64_cic_clk(1'b1),.n64_cic_dq(),.n64_si_clk(1'b0),.cic_region(1'b0),.cic_invalid_region(),.cic_step(),
         .host_reset_event(rst_ev),.host_nmi_event(nmi_ev));
@@ -120,41 +121,59 @@ module tb_bootstrap_rom_window #(
         if (v !== 32'h534E_0102) begin errors=errors+1; $display("  FAIL MAGIC/VERSION pair %h", v); end
         io_read32(32'h1FFF_0004, v);
         if (v[31:16] !== 16'h0011 || v[15:0] !== 16'h0000) begin errors=errors+1; $display("  FAIL STATUS/SEQ pair %h", v); end
+        // {FAULT, CART_CHECK}: the power fault code and the result of the last cartridge check.
+        io_read32(32'h1FFF_0008, v);
+        if (v !== 32'h0000_8152) begin errors=errors+1; $display("  FAIL FAULT/CART_CHECK pair %h", v); end
         // Region telemetry pairs, as mailbox_read() issues them: {COMMIT reads 0, REGION_INFO}, {REGION_SOURCE, 0x1E}.
         io_read32(32'h1FFF_0018, v);
         if (v !== 32'h0000_7002) begin errors=errors+1; $display("  FAIL COMMIT/REGION_INFO pair %h", v); end
         io_read32(32'h1FFF_001C, v);
         if (v !== 32'h0016_0000) begin errors=errors+1; $display("  FAIL REGION_SOURCE pair %h", v); end
-        // Frame 1: P1 A+Start (SNES B|Start = 0x0009), P2 idle, stick (x=-40,y=40), run_request.
+        // Frame 1: P1 A+Start (SNES B|Start = 0x0009), P2 idle, stick (x=-40,y=40), run_request with
+        // the menu's default cartridge check mode, report only (CONTROL = 0x0011).
         io_write32(32'h1FFF_0010, {16'h0009, 16'h0000});
-        io_write32(32'h1FFF_0014, {8'd40, 8'hD8, 16'h0001});
+        io_write32(32'h1FFF_0014, {8'd40, 8'hD8, 16'h0011});
         io_write32(32'h1FFF_0018, 32'h0001_0000);
         repeat(4) @(negedge clk);
-        if (j1!==16'h0009 || j2!==16'h0000 || sx!==8'hD8 || sy!==8'd40 || run!==1'b1 || seq!==16'd1) begin
-            errors=errors+1; $display("  FAIL frame 1: j1=%h j2=%h sx=%h sy=%h run=%b seq=%0d", j1, j2, sx, sy, run, seq);
+        if (j1!==16'h0009 || j2!==16'h0000 || sx!==8'hD8 || sy!==8'd40 || run!==1'b1 || cm!==2'd1 || seq!==16'd1) begin
+            errors=errors+1; $display("  FAIL frame 1: j1=%h j2=%h sx=%h sy=%h run=%b check=%0d seq=%0d", j1, j2, sx, sy, run, cm, seq);
         end
         // Frame 2: new buttons on both pads; the 0x1A half of COMMIT must not count.
         io_write32(32'h1FFF_0010, {16'h0F00, 16'h0030});
-        io_write32(32'h1FFF_0014, {16'h0000, 16'h0001});
+        io_write32(32'h1FFF_0014, {16'h0000, 16'h0011});
         io_write32(32'h1FFF_0018, 32'h0001_0000);
         repeat(4) @(negedge clk);
         if (j1!==16'h0F00 || j2!==16'h0030 || run!==1'b1 || seq!==16'd2) begin
             errors=errors+1; $display("  FAIL frame 2: j1=%h j2=%h run=%b seq=%0d", j1, j2, run, seq);
         end
         io_read32(32'h1FFF_0014, v);
-        if (v !== 32'h0000_0001) begin errors=errors+1; $display("  FAIL STICK/CONTROL readback %h", v); end
-        // Frame 3: "Power down cartridge" clears run_request.
+        if (v !== 32'h0000_0011) begin errors=errors+1; $display("  FAIL STICK/CONTROL readback %h", v); end
+        // Frame 3: "Power down cartridge" clears run_request; the check mode stays in CONTROL.
         io_write32(32'h1FFF_0010, 32'h0);
-        io_write32(32'h1FFF_0014, 32'h0);
+        io_write32(32'h1FFF_0014, 32'h0000_0010);
         io_write32(32'h1FFF_0018, 32'h0001_0000);
         repeat(4) @(negedge clk);
-        if (run!==1'b0 || seq!==16'd3) begin errors=errors+1; $display("  FAIL power down: run=%b seq=%0d", run, seq); end
+        if (run!==1'b0 || cm!==2'd1 || seq!==16'd3) begin errors=errors+1; $display("  FAIL power down: run=%b check=%0d seq=%0d", run, cm, seq); end
+        // Frame 4: "Check cartridge (no power)": a request in check-only mode (CONTROL = 0x0031), neutral pads.
+        io_write32(32'h1FFF_0010, 32'h0);
+        io_write32(32'h1FFF_0014, 32'h0000_0031);
+        io_write32(32'h1FFF_0018, 32'h0001_0000);
+        repeat(4) @(negedge clk);
+        if (run!==1'b1 || cm!==2'd3 || j1!==16'h0000 || seq!==16'd4) begin
+            errors=errors+1; $display("  FAIL check only: run=%b check=%0d j1=%h seq=%0d", run, cm, j1, seq);
+        end
+        // Frame 5: the check is over; the menu drops the request and goes back to its own mode.
+        io_write32(32'h1FFF_0010, 32'h0);
+        io_write32(32'h1FFF_0014, 32'h0000_0010);
+        io_write32(32'h1FFF_0018, 32'h0001_0000);
+        repeat(4) @(negedge clk);
+        if (run!==1'b0 || cm!==2'd1 || seq!==16'd5) begin errors=errors+1; $display("  FAIL after check: run=%b check=%0d seq=%0d", run, cm, seq); end
 
         if (errors) begin
             $display("FAIL: bootstrap ROM window, %0d error(s)%s", errors, $test$plusargs("corrupt_load") ? " (corrupt_load injected)" : "");
             $fatal(1, "bootstrap ROM window check failed");
         end
-        $display("PASS: bootstrap image (%0d words, last non-zero word %0d) loaded via rom_we, %0d words read back over PI, mailbox frame traffic (32-bit pairs, REGION_INFO/REGION_SOURCE reads, COMMIT once per frame, run/power-down) correct (%0d clocks)",
+        $display("PASS: bootstrap image (%0d words, last non-zero word %0d) loaded via rom_we, %0d words read back over PI, mailbox frame traffic (32-bit pairs, FAULT/CART_CHECK and REGION_INFO/REGION_SOURCE reads, COMMIT once per frame, run/power-down, cartridge check mode and check-only request) correct (%0d clocks)",
                  DEPTH, last, words_checked, cycles);
         $finish;
     end

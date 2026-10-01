@@ -16,6 +16,7 @@ This directory contains a reproducible **console-only engineering candidate** bu
 - [Bootstrap ROM from flash](rtl/sn64_bootrom_flash.sv): vendored SummerCart64 `memory_flash` (QSPI EBh, unmodified) behind the endpoint's ROM window, `ROM_FROM_FLASH=1`; [bench](tests/tb_bootrom_flash.sv) with a QSPI flash model. See [notes](../docs/design/bootrom-flash.md).
 - [ROM-header region probe](rtl/sn64_header_probe.sv): reads the SNES header with the cartridge held in reset to pick NTSC/PAL when there is no key CIC; [bench](tests/tb_header_probe.sv). See [notes](../docs/design/header-region-probe.md).
 - [CIC pad sequencing](rtl/sn64_cic_pad.sv): SN74LVC1T45 DIR against pad drive; [bench](tests/tb_cic_pad.sv).
+- [Cartridge check](../docs/design/reversed-cartridge-detection.md): before the cartridge's 5 V is switched on, [sn64_rail_monitor.sv](rtl/sn64_rail_monitor.sv) feeds a small test current into the rail through the telemetry ADC and [sn64_power_sequencer.sv](rtl/sn64_power_sequencer.sv) refuses a cartridge that is in back to front (modes: enforce, report only, off, check only); [bench](tests/tb_cart_check.sv) with an ADC model and an electrical model of the rail. Simulated only.
 - [Physical-cartridge bridge work](../docs/design/physical-cartridge-bridge.md) and [FPGA selection](../docs/design/fpga-board-selection.md).
 
 ## What is reused and changed
