@@ -135,12 +135,12 @@ In compatibility mode the game's sound is lower in pitch by the same 0.45 %, whi
 
 The picture is drawn by `firmware/bootstrap/tools/mock_screens.py`; the confirmation's text and figures come from the code under test. It is not a capture.
 
-- One new row on the main menu, "Compatibility mode: off". Choosing it shows the confirmation with the slowdown for this console (0.45 % on a 60 Hz console, 0.18 % on a 50 Hz one). A turns it on, B cancels. Choosing it again turns it off without asking.
-- While it is on, the main menu says so in red.
+- One row, "Compatibility mode: off", first on the main menu and under Settings since the menu rework of the same day ([n64-bootstrap.md](n64-bootstrap.md)). Choosing it shows the confirmation with the slowdown for this console (0.45 % on a 60 Hz console, 0.18 % on a 50 Hz one). A turns it on, B cancels. Choosing it again turns it off without asking.
+- While it is on, the main menu and Settings say so in red.
 - It is forgotten when the console is reset or switched off. The menu has nowhere to keep settings yet ([menu-ideas.md](menu-ideas.md)).
-- If the picture is lost when a game starts: hold Z+L+R for a second (the menu hotkey, which works blind) or reset the console, then turn compatibility mode on.
+- If the picture is lost when a game starts: press all four C buttons together (the menu shortcut, which works blind; it was Z+L+R held for a second until the menu rework) or reset the console, then turn compatibility mode on.
 - On an FPGA build without the pace the row answers "Not in this SN64 build".
-- Service screen (Status / diagnostics, then Z): the lock's state, how much the game is being slowed, the position error and how many pictures were lost, as they were when a game was last shown. C-up switches on a one-line readout above the game picture for bring-up.
+- Service screen (Settings, Status / diagnostics, then Z): the lock's state, how much the game is being slowed, the position error and how many pictures were lost, as they were when a game was last shown. C-up switches on a one-line readout above the game picture for bring-up.
 
 ## Why the game follows the console
 

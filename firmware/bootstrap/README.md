@@ -10,13 +10,16 @@ The small program an N64 or M64 boots from the SN64 cartridge. It shows the SN64
 |---|---|
 | `src/main.c` | Menu, controller loop, mailbox access (libdragon `display`, `graphics`, `joypad`, `io_read`/`io_write`) |
 | `src/sn64_mailbox.h` | Register map at `0x1FFF_0000`, the 32-bit register pairing, and the provisional STATUS bit layout, REGION_INFO/REGION_SOURCE layouts |
-| `src/sn64_mapping.[ch]` | N64 to SNES mapping table and function (pure C, host-testable) |
+| `src/sn64_mapping.[ch]` | N64 to SNES mapping table and function, the menu shortcut, changing the table (pure C, host-testable) |
+| `src/sn64_padview.[ch]` | Controller pictures with buttons that light up and the single-button pictures of the mapping screen (pure C, host-testable). Diagrams drawn from discs and bars; no maker's logo |
+| `src/sn64_mapscreen.[ch]` | The controller mapping screen: cursor, the two controller lists, the choices for a row, drawing (pure C, host-testable) |
 | `src/sn64_credits.[ch]`, `src/sn64_credits_data.c` | Credits roll: which lines are on screen (pure C, host-testable) and the text, generated from `CREDITS.md` by `tools/make_credits.py` (`make credits`) |
 | `src/sn64_framelock.[ch]` | Frame lock: timing numbers for each console and region, the compatibility-mode confirmation text, the control loop (pure C, host-testable) |
 | `src/sn64_resample.[ch]`, `src/sn64_audioout.[ch]` | Sound: cubic resampler with rate control, and the queue that hands the console one block per picture (pure C, host-testable) |
 | `rom.mk` | libdragon ROM build (runs inside the output directory) |
 | `Makefile` | Entry point: `rom`, `check`, `words`, `test`, `test-negative`, `clean` |
-| `tests/test_mapping.c` | Host unit test of the default mapping |
+| `tests/test_mapping.c` | Host unit test of the default mapping, the shortcut and changing the table |
+| `tests/test_padview.c`, `tests/test_mapscreen.c` | Host tests of the controller pictures (every button lights its own place and no other) and of the mapping screen (what the buttons do, what is drawn). `test_mapscreen` also writes the screens for `tools/mock_screens.py` |
 | `tests/test_framelock.c`, `tests/test_resample.c`, `tests/test_audioout.c` | Host tests of the frame lock (against a model of the two clocks), the resampler, and the sound queue (against a model of the console's sound output) |
 | `tests/tb_bootstrap_rom_window.sv` | Verilator bench: loads the converted image into `sn64_n64_endpoint`, reads it back over the PI model, and replays the per-frame mailbox traffic |
 | `tools/setup_libdragon.sh` | Pinned, SHA-256-checked toolchain + libdragon install (no admin, no Docker, no WSL) |
@@ -56,22 +59,31 @@ Build outputs stay under `build/n64-bootstrap/`. Do not commit ROM binaries.
 
 ## Controls
 
-- **Menu:** Up/Down to move, A to choose, B to go back.
-- **Start SNES cartridge:** sets `CONTROL.run_request` and forwards both controllers. While the menu is shown, the SNES sees a neutral pad.
-- **Returning to the menu:** hold **Z+L+R for about 1 s**. The cartridge keeps running.
-- **Power down cartridge:** clears `run_request`.
+- **Main menu (owner, 2026-10-01):** Play, Controller mapping, Settings, Power off cartridge. Up/Down to move, A to choose, B to go back.
+- **Settings:** Compatibility mode, Status / diagnostics (the service screen is behind Z there), Credits.
+- **Play:** sets `CONTROL.run_request` and forwards both controllers, or goes back to a cartridge that is still running. While the menu is shown, the SNES sees a neutral pad.
+- **Returning to the menu:** press **all four C buttons together** on controller 1 (they have to be down together for a tenth of a second). The cartridge keeps running, and the game is not given the four buttons.
+- **Power off cartridge:** clears `run_request`.
+
+## Controller mapping
+
+Defaults (owner, 2026-10-01): every button gives the Super NES button of the same name (A, B, L, R, Start, the D-pad) and Z gives Select. X and Y have no namesake, so the C buttons give the Super NES diamond: C-Up X, C-Left Y, C-Down B, C-Right A. The stick also presses the D-pad.
+
+The mapping screen shows the controller in the player's hands and the controller the game sees side by side. Buttons light up as they are pressed: on the left the button held, on the right the button the game is given. A list over each picture chooses which controller is drawn (left: N64 controller, M64 Pro, Hyperkin Captain, Switch N64 pad, Brawler64, 8BitDo 64; right: Super NES or Super Famicom colours); the lists change the picture only. Below are the 14 rows of the mapping, each with a small picture of the single button and of the button it gives. A on a row opens its choices, "Restore defaults" puts the defaults back. Only the D-pad, A and B do anything on this screen, so every other button can be tried; B leaves when it is let go.
+
+The pictures are diagrams drawn by `src/sn64_padview.c` and carry no maker's logo. Nothing is kept when the console is switched off. Mock-ups: `docs/design/img/mapping-screens.png` and `menu-screens.png` (`make test-mapscreen`, then `python tools/mock_screens.py`).
 
 ## Credits
 
-"Credits" on the main menu rolls the repository's [CREDITS.md](../../CREDITS.md) up the screen: the credit line, everyone whose work SN64 builds on, the tools, and the SN64 crew at the end. A makes it quicker, B goes back. After changing `CREDITS.md` run `make credits`; `make test` fails if the roll is stale.
+"Credits" under Settings rolls the repository's [CREDITS.md](../../CREDITS.md) up the screen: the credit line, everyone whose work SN64 builds on, the tools, and the SN64 crew at the end. A makes it quicker, B goes back. After changing `CREDITS.md` run `make credits`; `make test` fails if the roll is stale.
 
 ## Frame lock and compatibility mode
 
-The menu and the logos run on the console's own picture timing. While a game is shown the console's timing takes the Super NES's shape and the game's clock is held to the console's, so no picture is dropped or shown twice. "Compatibility mode" on the main menu leaves the console's timing alone and slows the game by 0.45 % instead (0.18 % on a 50 Hz console); choosing it shows a confirmation that says so. It is off after every start-up. If the picture is lost when a game starts, hold Z+L+R for a second or reset the console, then turn it on. Design, numbers and what is still to be checked on hardware: [docs/design/frame-lock.md](../../docs/design/frame-lock.md).
+The menu and the logos run on the console's own picture timing. While a game is shown the console's timing takes the Super NES's shape and the game's clock is held to the console's, so no picture is dropped or shown twice. "Compatibility mode" under Settings leaves the console's timing alone and slows the game by 0.45 % instead (0.18 % on a 50 Hz console); choosing it shows a confirmation that says so. It is off after every start-up. If the picture is lost when a game starts, hold Z+L+R for a second or reset the console, then turn it on. Design, numbers and what is still to be checked on hardware: [docs/design/frame-lock.md](../../docs/design/frame-lock.md).
 
 ## Cartridge check
 
-The check is in the FPGA: before the cartridge's 5 V is switched on, a small test current shows whether the cartridge is in back to front. It is not a menu option: "Start SNES cartridge" runs it and a cartridge that fails is not powered (`SN64_CHECK_MODE_DEFAULT` in `src/main.c` is enforce). Its test tools are on a service screen the main menu does not show: Status / diagnostics, then Z (A: check now without power; L or R: enforce, report only or off until the console is reset). Screens and wording: `src/sn64_cartcheck.c`, tested on the host by `tests/test_cartcheck.c`. Design note: `docs/design/reversed-cartridge-detection.md`.
+The check is in the FPGA: before the cartridge's 5 V is switched on, a small test current shows whether the cartridge is in back to front. It is not a menu option: "Play" runs it and a cartridge that fails is not powered (`SN64_CHECK_MODE_DEFAULT` in `src/main.c` is enforce). Its test tools are on a service screen the main menu does not show: Settings, Status / diagnostics, then Z (A: check now without power; L or R: enforce, report only or off until the console is reset). Screens and wording: `src/sn64_cartcheck.c`, tested on the host by `tests/test_cartcheck.c`. Design note: `docs/design/reversed-cartridge-detection.md`.
 
 ## Splash screens
 

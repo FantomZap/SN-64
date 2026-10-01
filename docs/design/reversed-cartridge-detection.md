@@ -87,14 +87,14 @@ starts.
 
 | Mode | What a failed check does | Use |
 |---|---|---|
-| 0 enforce | latches fault 0x01; 5 V is never switched on | normal use: what "Start SNES cartridge" does |
+| 0 enforce | latches fault 0x01; 5 V is never switched on | normal use: what "Play" does (the row was called "Start SNES cartridge" until the menu rework of 2026-10-01) |
 | 1 report only | records the result; the cartridge is started anyway | first tests on real hardware: a false alarm cannot block a game |
 | 2 off | no check | behaviour before the check existed |
 | 3 check only | records the result; 5 V is **not** switched on, pass or fail | measuring cartridges, both ways round, without any risk |
 
 The FPGA resets to enforce and the boot menu asks for **enforce** (`SN64_CHECK_MODE_DEFAULT` in
 `firmware/bootstrap/src/main.c`). The other modes are on a service screen that the main menu does
-not show: Status / diagnostics, then Z. There A runs check only and L or R changes the mode until
+not show: Settings, Status / diagnostics, then Z. There A runs check only and L or R changes the mode until
 the console is reset; the main menu then says so in red. The check can also be left out of a build: `SEQ_PROBE_ENABLE = 0` in `sn64_top` (the v1 wrapper, which
 has no ADC, is built that way). A build without the check still honours check only by never
 powering.
@@ -104,7 +104,7 @@ before the switch's fault flag ends it.
 
 ## What the screen says
 
-The main menu has no item for the check. Choosing "Start SNES cartridge" shows "Checking the
+The main menu has no item for the check. Choosing "Play" shows "Checking the
 cartridge..." and then either starts the game or, when the check refuses the cartridge (or the
 service screen's check only finds one reversed), shows:
 
@@ -215,7 +215,7 @@ nothing below 0.8 V and then behaves as 150 ohm; back to front it is one silicon
 The point is to find out whether the check ever calls a good cartridge bad, before it is allowed
 to block anything. Nothing in this plan powers a cartridge that is in back to front.
 
-The tools are on the service screen: Status / diagnostics, then Z.
+The tools are on the service screen: Settings, Status / diagnostics, then Z.
 
 1. Empty socket: press A on the service screen ("check the cartridge now, no power"). Expected: OK.
    Note the voltage.

@@ -20,6 +20,7 @@
 #include "sn64_framelock.h"
 #include "sn64_mailbox.h"
 #include "sn64_mapping.h"
+#include "sn64_mapscreen.h"
 #include "sn64_resample.h"
 #include "sn64_splash.h"
 
@@ -27,13 +28,15 @@
 #define SN64_BOOTSTRAP_VERSION "0.1.0"
 #endif
 
-// Held on controller 1 for ~1 s while a cartridge runs: return to the menu.
-#define MENU_HOTKEY        (N64_BTN_Z | N64_BTN_L | N64_BTN_R)
-#define MENU_HOTKEY_FRAMES 60
+// While a cartridge runs, all four C buttons of controller 1 bring the menu back (owner,
+// 2026-10-01). They have to be down together for a tenth of a second, so that a controller
+// being plugged in does not do it; the game is given none of the four meanwhile
+// (sn64_map_strip_menu_chord).
+#define MENU_CHORD_FRAMES  6
 
 // The cartridge check (docs/design/reversed-cartridge-detection.md) is not a menu option (owner,
 // 2026-10-01): it runs whenever a cartridge is started and a cartridge that fails is not powered.
-// Its test tools are on the service screen: Status / diagnostics, then Z. There the mode can be
+// Its test tools are on the service screen: Settings, Status / diagnostics, then Z. There the mode can be
 // changed for the session, which is what to do if the check ever refuses a good cartridge before
 // its thresholds have been confirmed on real ones.
 #ifndef SN64_CHECK_MODE_DEFAULT
@@ -45,21 +48,27 @@
 // Compatibility mode (owner, 2026-10-01; docs/design/frame-lock.md): normally the console's
 // picture timing is set to a Super NES's while a game is shown. If a console or display does not
 // take that, this keeps the console's own timing and slows the game to match it instead. It is a
-// menu item with a confirmation screen that states the slowdown; off after every start-up.
+// row under Settings with a confirmation screen that states the slowdown; off after every start-up.
 #ifndef SN64_COMPAT_DEFAULT
 #define SN64_COMPAT_DEFAULT false
 #endif
 
 typedef enum { MODE_MENU, MODE_RUN, MODE_CHECK } run_mode_t;
-typedef enum { SCREEN_MAIN, SCREEN_MAPPING, SCREEN_STATUS, SCREEN_SERVICE, SCREEN_ALERT, SCREEN_COMPAT, SCREEN_CREDITS } screen_t;
-typedef enum { ITEM_START, ITEM_MAPPING, ITEM_COMPAT, ITEM_STATUS, ITEM_POWER_DOWN, ITEM_CREDITS, ITEM_COUNT } item_t;
+typedef enum { SCREEN_MAIN, SCREEN_SETTINGS, SCREEN_MAPPING, SCREEN_STATUS, SCREEN_SERVICE, SCREEN_ALERT,
+               SCREEN_COMPAT, SCREEN_CREDITS } screen_t;
+// The main menu has four rows (owner, 2026-10-01); everything else is under Settings.
+typedef enum { ITEM_PLAY, ITEM_MAPPING, ITEM_SETTINGS, ITEM_POWER_OFF, ITEM_COUNT } item_t;
+typedef enum { SET_COMPAT, SET_STATUS, SET_CREDITS, SET_COUNT } setting_t;
 
 static const char *const item_names[ITEM_COUNT] = {
-    "Start SNES cartridge",
+    "Play",
     "Controller mapping",
+    "Settings",
+    "Power off cartridge",
+};
+static const char *const setting_names[SET_COUNT] = {
     "Compatibility mode",
     "Status / diagnostics",
-    "Power down cartridge",
     "Credits",
 };
 
@@ -89,16 +98,20 @@ static sn64_map_t map;
 static bool       run_request;            // bootstrap-owned; default off after every reset
 static run_mode_t mode = MODE_MENU;
 static screen_t   screen = SCREEN_MAIN;
-static int        cursor;
-static int        hotkey_frames;
-static const char *message = "";
+static int        cursor, set_cursor;     // main menu, Settings
+static int        chord_frames;           // pictures the menu shortcut has been held
+static const char *message = "";          // one line under the menu ...
+static bool       message_bad;            // ... a plain note, or a refusal in the warning colour
 static unsigned   check_mode = SN64_CHECK_MODE_DEFAULT;   // enforce; the service screen can change it for the session
 static int        wait_frames;                            // frames spent waiting for a check-only result
 static sn64_alert_t alert = SN64_ALERT_NONE;              // what the alert screen shows ...
 static uint16_t   alert_fault, alert_check;               // ... and the words it was decided from
 static bool       compat_mode = SN64_COMPAT_DEFAULT;      // compatibility mode: the console keeps its own timing
 static uint32_t   compat_ppm;                             // what the confirmation screen states
-static uint16_t   pad1_n64, pad1_snes;                    // controller 1 as read and as mapped (mapping screen)
+static uint16_t   pad1_n64;                               // controller 1 as read, for the mapping screen ...
+static int8_t     pad1_x, pad1_y;                         // ... and its stick
+static sn64_mapscreen_t mapscreen;                        // the mapping screen: cursor, lists, which controllers are drawn
+static unsigned   frame_count;                            // pictures shown (the mapping screen's cursor blinks with it)
 static int        credits_pos;                            // how far the credits have risen, in half pixels
 
 static uint32_t col_text, col_dim, col_hi, col_warn, col_bg;
@@ -411,29 +424,57 @@ static bool game_frame_chunk(surface_t *d, unsigned chunk, uint32_t frame0)
 
 // ---- menu logic
 
+static void say(const char *text, bool bad)
+{
+    message = text;
+    message_bad = bad;
+}
+
+static void go_to(screen_t to)
+{
+    screen = to;
+    say("", false);
+}
+
 static void menu_select(item_t item)
 {
     switch (item) {
-    case ITEM_START:
+    case ITEM_PLAY:
         if (!mbox.present) {
-            message = "SN64 hardware not detected";
+            say("SN64 hardware not detected", true);
         } else if (mbox.status & SN64_STATUS_FAULT_LATCHED) {
-            message = "Power fault latched: not starting";
+            say("Power fault latched: not starting", true);
         } else {
-            run_request = true;
+            run_request = true;                 // or back to a cartridge that is still running
             mode = MODE_RUN;
-            message = "Running. Hold Z+L+R 1 s for menu";
+            say("", false);
         }
         break;
     case ITEM_MAPPING:
-        screen = SCREEN_MAPPING;
+        sn64_mapscreen_open(&mapscreen);
+        go_to(SCREEN_MAPPING);
         break;
-    case ITEM_COMPAT:
+    case ITEM_SETTINGS:
+        go_to(SCREEN_SETTINGS);
+        break;
+    case ITEM_POWER_OFF:
+        run_request = false;
+        say("Cartridge is off", false);
+        break;
+    default:
+        break;
+    }
+}
+
+static void settings_select(setting_t item)
+{
+    switch (item) {
+    case SET_COMPAT:
         if (compat_mode) {
             compat_mode = false;                // turning it off needs no confirmation
-            message = "Compatibility mode off";
+            say("Compatibility mode off", false);
         } else if (mbox.present && !(mbox.features & SN64_FEATURE_PACE)) {
-            message = "Not in this SN64 build";
+            say("Not in this SN64 build", true);
         } else {
             // The figure for this console, with a game of the console's own region.
             sn64_vi_timing_t own;
@@ -443,30 +484,26 @@ static void menu_select(item_t item)
             sn64_lock_plan(tv, &own, tv == SN64_TV_PAL, true, true, &plan);
             if (plan.lockable) {
                 compat_ppm = plan.slow_ppm;
-                screen = SCREEN_COMPAT;
+                go_to(SCREEN_COMPAT);
             } else {
-                message = "Console timing not readable";   // nothing to hold the game to: no figure to state
+                say("Console timing not readable", true);   // nothing to hold the game to: no figure to state
             }
         }
         break;
-    case ITEM_STATUS:
-        screen = SCREEN_STATUS;
+    case SET_STATUS:
+        go_to(SCREEN_STATUS);
         break;
-    case ITEM_POWER_DOWN:
-        run_request = false;
-        message = "Cartridge power request cleared";
-        break;
-    case ITEM_CREDITS:
+    case SET_CREDITS:
         credits_pos = 0;
-        screen = SCREEN_CREDITS;
+        go_to(SCREEN_CREDITS);
         break;
     default:
         break;
     }
 }
 
-// Service screen (Status / diagnostics, then Z): the cartridge check's test tools and the
-// frame lock's numbers.
+// Service screen (Settings, Status / diagnostics, then Z): the cartridge check's test tools
+// and the frame lock's numbers.
 static const char *service_note = "";
 
 static void service_input(joypad_buttons_t pressed)
@@ -495,30 +532,47 @@ static void service_input(joypad_buttons_t pressed)
     }
 }
 
+// The text screens. The mapping screen takes its own input (inputs_and_mailbox).
 static void menu_input(joypad_buttons_t pressed)
 {
-    if (screen == SCREEN_SERVICE) {
+    bool back = pressed.b || pressed.start;
+    switch (screen) {
+    case SCREEN_SERVICE:
         service_input(pressed);
-        return;
-    }
-    if (screen == SCREEN_COMPAT) {              // confirmation: A turns it on, B or Start leaves it off
+        break;
+    case SCREEN_COMPAT:                         // confirmation: A turns it on, B or Start leaves it off
         if (pressed.a) {
             compat_mode = true;
-            message = "Compatibility mode on";
-            screen = SCREEN_MAIN;
-        } else if (pressed.b || pressed.start) {
-            screen = SCREEN_MAIN;
+            screen = SCREEN_SETTINGS;
+            say("Compatibility mode on", false);
+        } else if (back) {
+            go_to(SCREEN_SETTINGS);
         }
-        return;
+        break;
+    case SCREEN_STATUS:
+        if (back)           go_to(SCREEN_SETTINGS);
+        else if (pressed.z) screen = SCREEN_SERVICE;
+        break;
+    case SCREEN_CREDITS:
+        if (back) go_to(SCREEN_SETTINGS);
+        break;
+    case SCREEN_ALERT:
+        if (back || pressed.a) go_to(SCREEN_MAIN);
+        break;
+    case SCREEN_SETTINGS:
+        if (pressed.d_up)   set_cursor = (set_cursor + SET_COUNT - 1) % SET_COUNT;
+        if (pressed.d_down) set_cursor = (set_cursor + 1) % SET_COUNT;
+        if (pressed.a)      settings_select((setting_t)set_cursor);
+        else if (back)      go_to(SCREEN_MAIN);
+        break;
+    case SCREEN_MAIN:
+        if (pressed.d_up)   cursor = (cursor + ITEM_COUNT - 1) % ITEM_COUNT;
+        if (pressed.d_down) cursor = (cursor + 1) % ITEM_COUNT;
+        if (pressed.a)      menu_select((item_t)cursor);
+        break;
+    default:
+        break;
     }
-    if (screen != SCREEN_MAIN) {
-        if (pressed.b || pressed.start || (screen == SCREEN_ALERT && pressed.a)) screen = SCREEN_MAIN;
-        else if (screen == SCREEN_STATUS && pressed.z) screen = SCREEN_SERVICE;
-        return;
-    }
-    if (pressed.d_up)   cursor = (cursor + ITEM_COUNT - 1) % ITEM_COUNT;
-    if (pressed.d_down) cursor = (cursor + 1) % ITEM_COUNT;
-    if (pressed.a)      menu_select((item_t)cursor);
 }
 
 // ---- cartridge supervision: a latched power fault or a finished check ends the request and
@@ -539,7 +593,7 @@ static void cartridge_stop(sn64_alert_t why)
     run_request = false;
     mode = MODE_MENU;
     screen = SCREEN_ALERT;
-    message = "";
+    say("", false);
 }
 
 static void cartridge_supervise(void)
@@ -559,7 +613,7 @@ static void cartridge_supervise(void)
     }
 }
 
-// Controllers, menu or hotkey, one mailbox update and read-back, supervision: once per picture.
+// Controllers, menu or shortcut, one mailbox update and read-back, supervision: once per picture.
 static void inputs_and_mailbox(void)
 {
     joypad_poll();
@@ -569,26 +623,36 @@ static void inputs_and_mailbox(void)
 
     uint16_t n1 = n64_word(in1.btn);
     uint16_t n2 = n64_word(in2.btn);
-    uint16_t s1 = sn64_map_buttons(&map, n1, in1.stick_x, in1.stick_y);
+    uint16_t went_down = n1 & (uint16_t)~pad1_n64, came_up = pad1_n64 & (uint16_t)~n1;   // since the last picture
+    // The menu shortcut of controller 1 is not the game's business: with all four C buttons
+    // down, none of them is passed on.
+    uint16_t s1 = sn64_map_buttons(&map, sn64_map_strip_menu_chord(n1), in1.stick_x, in1.stick_y);
     uint16_t s2 = sn64_map_buttons(&map, n2, in2.stick_x, in2.stick_y);
     uint16_t stick = sn64_pack_stick(in1.stick_x, in1.stick_y);
     pad1_n64 = n1;
-    pad1_snes = s1;
+    pad1_x = in1.stick_x;
+    pad1_y = in1.stick_y;
 
     if (mode == MODE_RUN) {
-        if ((n1 & MENU_HOTKEY) == MENU_HOTKEY) {
-            if (++hotkey_frames >= MENU_HOTKEY_FRAMES) {
+        if ((n1 & N64_BTN_C_ALL) == N64_BTN_C_ALL) {
+            if (++chord_frames >= MENU_CHORD_FRAMES) {
                 mode = MODE_MENU;
                 screen = SCREEN_MAIN;
-                hotkey_frames = 0;
-                message = "Menu (cartridge still running)";
+                cursor = ITEM_PLAY;             // Play goes back to the game
+                chord_frames = 0;
+                say("Cartridge still running", false);
             }
         } else {
-            hotkey_frames = 0;
+            chord_frames = 0;
         }
         if (!run_request) mode = MODE_MENU;
     } else if (mode == MODE_MENU) {
-        menu_input(pressed);
+        if (screen == SCREEN_MAPPING) {
+            if (sn64_mapscreen_input(&mapscreen, &map, went_down, came_up))
+                go_to(SCREEN_MAIN);
+        } else {
+            menu_input(pressed);
+        }
     }
 
     // Unless a cartridge is being played, the SNES sees a neutral pad.
@@ -667,34 +731,50 @@ static void draw_header(surface_t *d)
         line(d, 1, col_warn, "SN64 not detected (MAGIC %04X)", mbox.magic);
 }
 
+// The cartridge in a word, for the main menu.
+static const char *cartridge_text(void)
+{
+    if (!run_request)        return "off";
+    if (cartridge_running()) return "running";
+    return "starting";
+}
+
+// Never silently: the service screen relaxed the check, or compatibility mode is on.
+static void draw_warnings(surface_t *d, int row)
+{
+    if (check_mode != SN64_CHECK_MODE_ENFORCE)
+        line(d, row, col_warn, "Cartridge check: %s", sn64_check_mode_name(check_mode));
+    if (compat_mode)
+        line(d, row + 1, col_warn, "Compatibility mode: games run slower");
+}
+
 static void draw_main(surface_t *d)
 {
     draw_header(d);
-    if (mbox.present) {
-        line(d, 2, col_text, "Status 0x%04X  seq %u  %s", mbox.status, mbox.seq,
-             seq_state_names[(mbox.status & SN64_STATUS_SEQ_STATE_MASK) >> SN64_STATUS_SEQ_STATE_SHIFT]);
-        if (mbox.status & SN64_STATUS_FAULT_LATCHED)
-            line(d, 3, col_warn, "POWER FAULT LATCHED");
-    }
-    line(d, 4, col_text, "Cartridge: %s%s", run_request ? "run requested" : "off",
-         (mbox.status & SN64_STATUS_BUS_PERMIT) ? ", permitted" : "");
-    if (mbox.present) {
-        char rt[40];
-        region_text(rt, sizeof(rt));
-        line(d, 5, col_text, "Region: %s", rt);
-    }
-    for (int i = 0; i < ITEM_COUNT; i++) {
-        uint32_t c = i == cursor ? col_hi : col_text;
-        if (i == ITEM_COMPAT)
-            line(d, 6 + i, c, "%c %s: %s", i == cursor ? '>' : ' ', item_names[i], compat_mode ? "ON" : "off");
+    line(d, 3, col_text, "Cartridge: %s", cartridge_text());
+    if (mbox.present && (mbox.status & SN64_STATUS_FAULT_LATCHED))
+        line(d, 4, col_warn, "POWER FAULT LATCHED");
+    for (int i = 0; i < ITEM_COUNT; i++)
+        line(d, 6 + i, i == cursor ? col_hi : col_text, "%c %s", i == cursor ? '>' : ' ', item_names[i]);
+    line(d, 11, message_bad ? col_warn : col_text, "%s", message);
+    draw_warnings(d, 13);
+    line(d, 19, col_dim, "In a game: all four C buttons = menu");
+    line(d, 20, col_dim, "Up/Down select  A choose");
+}
+
+static void draw_settings(surface_t *d)
+{
+    draw_header(d);
+    line(d, 3, col_hi, "Settings");
+    for (int i = 0; i < SET_COUNT; i++) {
+        uint32_t c = i == set_cursor ? col_hi : col_text;
+        if (i == SET_COMPAT)
+            line(d, 5 + i, c, "%c %s: %s", i == set_cursor ? '>' : ' ', setting_names[i], compat_mode ? "ON" : "off");
         else
-            line(d, 6 + i, c, "%c %s", i == cursor ? '>' : ' ', item_names[i]);
+            line(d, 5 + i, c, "%c %s", i == set_cursor ? '>' : ' ', setting_names[i]);
     }
-    line(d, 13, col_warn, "%s", message);
-    if (check_mode != SN64_CHECK_MODE_ENFORCE)          // never silently: the service screen relaxed the check
-        line(d, 15, col_warn, "Cartridge check: %s", sn64_check_mode_name(check_mode));
-    if (compat_mode)                                    // never silently either
-        line(d, 16, col_warn, "Compatibility mode: games run slower");
+    line(d, 9, message_bad ? col_warn : col_text, "%s", message);
+    draw_warnings(d, 13);
     line(d, 20, col_dim, "Up/Down select  A choose  B back");
 }
 
@@ -767,7 +847,7 @@ static void draw_wait(surface_t *d)
     else if (check_mode == SN64_CHECK_MODE_REPORT)
         line(d, 8, col_dim, "Check is set to report only.");
     if (mode == MODE_RUN)
-        line(d, 20, col_dim, "Hold Z+L+R 1 s for the menu");
+        line(d, 20, col_dim, "All four C buttons: back to the menu");
 }
 
 static void draw_alert(surface_t *d)
@@ -786,19 +866,18 @@ static void draw_alert(surface_t *d)
     line(d, 20, col_dim, "A or B: back to the menu");
 }
 
-static void draw_mapping(surface_t *d, uint16_t n1, uint16_t s1)
+// The mapping screen (src/sn64_mapscreen.c) draws its pictures straight into the screen buffer
+// and hands its text back to be drawn with the console font.
+static void mapping_text(void *ctx, int x, int y, uint16_t colour, const char *text)
 {
-    char name[40];
-    line(d, 0, col_hi, "Controller mapping (default)");
-    line(d, 1, col_dim, "N64 button   -> SNES");
-    for (int i = 0; i < SN64_MAP_ENTRIES; i++)
-        line(d, 2 + i, col_text, "%-12s -> %s", map.entry[i].n64_name,
-             sn64_snes_mask_name(map.entry[i].snes, name, sizeof(name)));
-    line(d, 16, col_text, "Stick |x|,|y| >= %d -> D-pad", map.stick_threshold);
-    line(d, 17, col_dim, "Up+Down / Left+Right cancel");
-    line(d, 19, col_hi, "Live P1: N64 %04X -> SNES %04X", n1, s1);
-    line(d, 20, col_text, "%s", sn64_snes_mask_name(s1, name, sizeof(name)));
-    line(d, 22, col_dim, "B: back");
+    graphics_set_color(((uint32_t)colour << 16) | colour, 0);
+    graphics_draw_text((surface_t *)ctx, x, y, text);
+}
+
+static void draw_mapping(surface_t *d)
+{
+    sn64_canvas_t c = { (uint16_t *)d->buffer, d->width, d->height, d->stride / 2 };
+    sn64_mapscreen_draw(&mapscreen, &map, &c, mapping_text, d, pad1_n64, pad1_x, pad1_y, frame_count);
 }
 
 static void draw_status(surface_t *d)
@@ -861,6 +940,9 @@ int main(void)
     pi_dom2_fast();
     joypad_init();
     sn64_map_default(&map);
+    // The mapping screen starts with the original controller on the left and, on the right, the
+    // Super NES controller of the console's own part of the world (the PAL one has four colours).
+    sn64_mapscreen_init(&mapscreen, SN64_PAD_N64, get_tv_type() == TV_PAL ? SN64_PAD_SFC : SN64_PAD_SNES);
 
     col_bg   = graphics_make_color(0x10, 0x18, 0x30, 0xFF);
     col_text = graphics_make_color(0xE0, 0xE0, 0xE0, 0xFF);
@@ -884,14 +966,15 @@ int main(void)
         if (!game_display) {
             inputs_and_mailbox();
             graphics_fill_screen(d, col_bg);
-            if (mode != MODE_MENU)             draw_wait(d);
-            else if (screen == SCREEN_MAPPING) draw_mapping(d, pad1_n64, pad1_snes);
-            else if (screen == SCREEN_STATUS)  draw_status(d);
-            else if (screen == SCREEN_SERVICE) draw_service(d);
-            else if (screen == SCREEN_ALERT)   draw_alert(d);
-            else if (screen == SCREEN_COMPAT)  draw_compat(d);
-            else if (screen == SCREEN_CREDITS) draw_credits(d);
-            else                               draw_main(d);
+            if (mode != MODE_MENU)              draw_wait(d);
+            else if (screen == SCREEN_SETTINGS) draw_settings(d);
+            else if (screen == SCREEN_MAPPING)  draw_mapping(d);
+            else if (screen == SCREEN_STATUS)   draw_status(d);
+            else if (screen == SCREEN_SERVICE)  draw_service(d);
+            else if (screen == SCREEN_ALERT)    draw_alert(d);
+            else if (screen == SCREEN_COMPAT)   draw_compat(d);
+            else if (screen == SCREEN_CREDITS)  draw_credits(d);
+            else                                draw_main(d);
         } else {
             // Game: the SNES picture and sound go to the console's own output. The SNES is a few
             // lines into the picture it is drawing now; that picture is fetched quarter by
@@ -916,5 +999,6 @@ int main(void)
             game_frames_shown++;
         }
         display_show(d);
+        frame_count++;
     }
 }

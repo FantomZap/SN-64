@@ -24,7 +24,8 @@ CFLAGS += -ffile-prefix-map="$(SRC_DIR)"=sn64_bootstrap
 OBJS = $(BUILD_DIR)/main.o $(BUILD_DIR)/sn64_mapping.o $(BUILD_DIR)/sn64_cartcheck.o \
        $(BUILD_DIR)/sn64_splash.o $(BUILD_DIR)/sn64_splash_data.o \
        $(BUILD_DIR)/sn64_framelock.o $(BUILD_DIR)/sn64_resample.o $(BUILD_DIR)/sn64_audioout.o \
-       $(BUILD_DIR)/sn64_credits.o $(BUILD_DIR)/sn64_credits_data.o
+       $(BUILD_DIR)/sn64_credits.o $(BUILD_DIR)/sn64_credits_data.o \
+       $(BUILD_DIR)/sn64_padview.o $(BUILD_DIR)/sn64_mapscreen.o
 
 # Standard libdragon header: libdragon IPL3 (signed for CIC-6102), title below.
 sn64_bootstrap.z64: N64_ROM_TITLE = "SN64 BOOTSTRAP"

@@ -4,7 +4,7 @@ Implemented 2026-09-29. This is the first version of the program the N64 or M64 
 
 ## Plain-language summary
 
-When the console powers on, it runs whatever program the cartridge holds. For SN64, that program is a small menu. It shows the adapter's version and power status, and offers four items: start the SNES cartridge, show the controller mapping, show diagnostics, and power the cartridge down. Every frame it reads the N64 controllers, converts the buttons to SNES buttons, and hands them to the FPGA through the mailbox registers. A default mapping is built in: the D-pad and Start go straight across, Z becomes Select, and the face and C buttons form the SNES A/B/X/Y diamond. Nothing is written to the adapter unless it first answers with the SN64 signature, and the cartridge stays unpowered until the user chooses to start it.
+When the console powers on, it runs whatever program the cartridge holds. For SN64, that program is a small menu. It shows the adapter's version and power status, and offers four items: play, controller mapping, settings, and power off the cartridge (the menu as reworked on 2026-10-01, see the last section). Every frame it reads the N64 controllers, converts the buttons to SNES buttons, and hands them to the FPGA through the mailbox registers. A default mapping is built in: the D-pad and Start go straight across, Z becomes Select, and the face and C buttons form the SNES A/B/X/Y diamond. Nothing is written to the adapter unless it first answers with the SN64 signature, and the cartridge stays unpowered until the user chooses to start it.
 
 ## Files
 
@@ -13,12 +13,15 @@ When the console powers on, it runs whatever program the cartridge holds. For SN
 | [firmware/bootstrap/src/main.c](../../firmware/bootstrap/src/main.c) | Menu, 60 Hz controller/mailbox loop, screens |
 | [firmware/bootstrap/src/sn64_mailbox.h](../../firmware/bootstrap/src/sn64_mailbox.h) | Register map, 32-bit pairing rule, provisional STATUS layout |
 | [firmware/bootstrap/src/sn64_mapping.c](../../firmware/bootstrap/src/sn64_mapping.c) / `.h` | Default N64 to SNES table and mapping function; no libdragon dependency |
+| [firmware/bootstrap/src/sn64_padview.c](../../firmware/bootstrap/src/sn64_padview.c) / `.h` | Controller pictures with buttons that light, and the single-button pictures; no libdragon dependency |
+| [firmware/bootstrap/src/sn64_mapscreen.c](../../firmware/bootstrap/src/sn64_mapscreen.c) / `.h` | The controller mapping screen: cursor, lists, choices, drawing; no libdragon dependency |
 | [firmware/bootstrap/Makefile](../../firmware/bootstrap/Makefile), `rom.mk` | Build, check, convert, test, fault-injection targets |
 | [firmware/bootstrap/tools/setup_libdragon.sh](../../firmware/bootstrap/tools/setup_libdragon.sh) | Pinned toolchain install with SHA-256 check |
 | [firmware/bootstrap/tools/n64_cic_check.py](../../firmware/bootstrap/tools/n64_cic_check.py) | CIC-6102 boot check (IPL2 hash of the IPL3 block) |
 | [firmware/bootstrap/tools/z64_to_rom_words.py](../../firmware/bootstrap/tools/z64_to_rom_words.py) | `.z64` to ROM-window word image, with a hard size check |
 | [firmware/bootstrap/tools/test_rom_tools.py](../../firmware/bootstrap/tools/test_rom_tools.py) | Self-checking tool test with `--inject-fault` |
 | [firmware/bootstrap/tests/test_mapping.c](../../firmware/bootstrap/tests/test_mapping.c) | Host mapping test; `-DSN64_FAULT_SWAP_AB` injects a wrong table |
+| [firmware/bootstrap/tests/test_padview.c](../../firmware/bootstrap/tests/test_padview.c), [test_mapscreen.c](../../firmware/bootstrap/tests/test_mapscreen.c) | Host tests of the controller pictures and of the mapping screen; each has a fault build |
 | [firmware/bootstrap/tests/tb_bootstrap_rom_window.sv](../../firmware/bootstrap/tests/tb_bootstrap_rom_window.sv) | Verilator bench: converted image into `sn64_n64_endpoint`, PI read-back, per-frame mailbox traffic; `+corrupt_load` injects a fault |
 | [firmware/bootstrap/tools/run_rom_window_sim.ps1](../../firmware/bootstrap/tools/run_rom_window_sim.ps1) | Builds and runs that bench plus its negative run |
 
@@ -46,7 +49,7 @@ The CPU makes only 32-bit PI accesses; libdragon's `io_write` waits for the PI t
 2. Reads `{STATUS,SEQ}` at `0x04` and reads back `{JOY1,JOY2}` and `{STICK,CONTROL}`.
 3. Writes `{JOY1,JOY2}` to `0x10`, `{JOY1_STICK,CONTROL}` to `0x14`, then `0x0001_0000` to `0x18`. That last write is COMMIT at `0x18`; the RTL ignores the `0x1A` half, so SEQ goes up exactly once per frame.
 
-After every boot the bootstrap writes `CONTROL = 0` before anything else, in line with the default-off rule. While the menu is on screen it sends a neutral pad. **Start** sets `run_request` and forwards both controllers. Holding **Z+L+R for 60 frames** returns to the menu while the cartridge keeps running. **Power down** clears `run_request`. Start is refused while STATUS shows a latched fault.
+After every boot the bootstrap writes `CONTROL = 0` before anything else, in line with the default-off rule. While the menu is on screen it sends a neutral pad. **Play** (called Start SNES cartridge until 2026-10-01) sets `run_request` and forwards both controllers. **All four C buttons together** return to the menu while the cartridge keeps running (until 2026-10-01: Z+L+R held for 60 frames). **Power off cartridge** clears `run_request`. Play is refused while STATUS shows a latched fault.
 
 **STATUS layout is provisional.** The RTL passes `status_flags` through with no defined layout. `sn64_mailbox.h` proposes one, taken from the `sn64_power_sequencer` ports:
 
@@ -66,6 +69,8 @@ After every boot the bootstrap writes `CONTROL = 0` before anything else, in lin
 The top level still has to wire it.
 
 ## Default mapping
+
+**The table below is the first proposal (2026-09-29) and no longer what the program does.** The owner set the defaults on 2026-10-01: every button to the Super NES button of the same name and Z to Select. The table in force is in the last section, "Menu rework and the controller mapping screen".
 
 The SNES image uses the shift order: bit 0 = B, then Y, Select, Start, Up, Down, Left, Right, A, X, L, R. **1 = pressed.** Bits 15:12 are 0.
 
@@ -132,7 +137,7 @@ Options, not yet decided:
 2. **ROM storage decision** (above), and set `ROM_ADDR_BITS` in the top level to match. The endpoint default is still 12.
 3. **STATUS wiring:** adopt or replace the provisional layout in the top level and record it in the endpoint note.
 4. **Fault clear:** the power sequencer has a `fault_clear` input but no mailbox bit reaches it. A proposed `CONTROL` bit 1 (pulse) would need an RTL change, and then a menu item.
-5. **Configurable mapping (SN64-06-03):** add runtime editing and persistence; there is no save storage yet. The table is data-driven, so the editor is UI work.
+5. **Configurable mapping (SN64-06-03):** runtime editing is built (2026-10-01, the mapping screen in the last section). **Persistence is still missing:** there is no save storage yet, so the mapping is the default again after every power-up.
 6. **Telemetry (SN64-08-13):** voltage/current/temperature registers do not exist in the mailbox yet.
 7. **SNES serializer:** `joy1_buttons` to `JOY1_DI`/`JOY2_DI` is not in the RTL. It must follow the polarity above (1 = pressed in the image).
 8. **Controller-2 menu input** and GameCube-style pads on the M64 are untested. libdragon reports them through the same `joypad` API.
@@ -147,8 +152,8 @@ When a cartridge runs, the boot program no longer draws a status page: it switch
 
 For the owner's idea of catching a cartridge that is in back to front ([reversed-cartridge-detection.md](reversed-cartridge-detection.md)). The check itself is in the FPGA; the menu chooses its mode, shows its result, and says so on the screen.
 
-- No item on the main menu (owner, later the same day: "the 2 check things should be hiden and just be there and work upon clicking the start game option"). "Start SNES cartridge" asks for the check in enforce mode (`SN64_CHECK_MODE_DEFAULT`); a cartridge that fails is not powered.
-- The test tools are on a service screen the main menu does not show: Status / diagnostics, then Z. A runs the check alone and shows the result; L or R steps the mode through enforce, report only and off until the console is reset. While the mode is not enforce the main menu says so in red.
+- No item on the main menu (owner, later the same day: "the 2 check things should be hiden and just be there and work upon clicking the start game option"). "Start SNES cartridge" (the row called Play since the menu rework) asks for the check in enforce mode (`SN64_CHECK_MODE_DEFAULT`); a cartridge that fails is not powered.
+- The test tools are on a service screen the main menu does not show: Status / diagnostics, then Z (under Settings since the menu rework). A runs the check alone and shows the result; L or R steps the mode through enforce, report only and off until the console is reset. While the mode is not enforce the main menu says so in red.
 - The mode travels in `CONTROL` bits 5:4 with every frame's write. The result comes back in `CART_CHECK`, read with `FAULT` as the 32-bit pair at `0x08`.
 - New alert screen. A latched fault or a finished check ends the request and shows the reason; the fault word is copied first, because dropping the request clears the latch. The reversed-cartridge text is "WHOA. WRONG WAY ROUND. / That cartridge is in backwards. / We don't do that around here. / Nothing was powered, so no harm done. Take it out, turn the label to the front, and try again." A rail that does not rise at all is reported as a short. In report-only mode a failed check followed by a power fault says that the check had warned.
 - The game display is entered only once the sequencer reports RUNNING with the SNES clock on. Until then a text screen shows "Checking the cartridge..." or "Starting the cartridge...". Before this change a start that ended in a power fault left the program waiting in the frame copy for lines that never came.
@@ -181,9 +186,9 @@ Owner: keep the console's own picture rate in the menu and switch only when a ga
 
 - **Game loop.** Paced by the console's vertical interrupt. Each picture: frame lock, sound, first quarter of the picture, controllers, the other three quarters. The controllers are read after the first quarter, so the Super NES sees them at the end of the same picture and not a picture later. A fetch that sees no progress for 40 ms gives up, so a stopped game clock no longer hangs the program.
 - **Frame lock** (`src/sn64_framelock.c`, pure C). Normal mode writes the Super NES's picture shape to the console's three timing registers when the game display starts (262 lines of 3093 video clocks on a 60 Hz console) and libdragon's values come back when it ends. In both modes a control loop reads `FRAME_PHASE` once a picture and steers `PACE` so the game stays a fixed distance ahead of the console's picture swap.
-- **Compatibility mode.** A fifth row on the main menu. Choosing it shows the confirmation (0.45 % slower on a 60 Hz console, 0.18 % on a 50 Hz one); A turns it on; choosing it again turns it off. It is off after every start-up: the menu has nowhere to keep settings. While it is on the main menu says so in red.
+- **Compatibility mode.** A fifth row on the main menu (a row under Settings since the menu rework). Choosing it shows the confirmation (0.45 % slower on a 60 Hz console, 0.18 % on a 50 Hz one); A turns it on; choosing it again turns it off. It is off after every start-up: the menu has nowhere to keep settings. While it is on the main menu says so in red.
 - **Sound** (`src/sn64_resample.c`, `src/sn64_audioout.c`, pure C). libdragon's audio queue is no longer used. The program sets the console's sound divider itself, fits the game's samples with a four-point cubic resampler, and hands the console one block per picture.
-- **Service screen** (Status / diagnostics, then Z): the lock's state, the slowdown in force, the position error and the pictures lost; C-up switches on a one-line readout above the game picture.
+- **Service screen** (Settings, Status / diagnostics, then Z): the lock's state, the slowdown in force, the position error and the pictures lost; C-up switches on a one-line readout above the game picture.
 - **Mailbox:** `FEATURES` at 0x0C, the pair `{FRAME_PHASE, PACE}` at 0x24. An FPGA build without them reads 0 and the program runs free, as before but with the new sound path.
 
 ![Mock-up of the compatibility mode screens](img/compat-screens.png)
@@ -203,7 +208,7 @@ Owner: a credits section that names everyone the repository credits, then Claude
 
 - **One source.** The roll is [CREDITS.md](../../CREDITS.md) put on the screen. `tools/make_credits.py` reads its tables in order (project, then who made it), the tools paragraph, and its last section, "The SN64 crew", and writes `src/sn64_credits_data.c` (`make credits`). The opening lines are the credit line "SN64 by FantomZap" and the source location from `NOTICE`, which the licence terms ask every notice shown by the program to keep. A row added to CREDITS.md appears in the roll; `make test` fails if the roll was not regenerated.
 - **The owner's name is not in it.** The credit line carries his handle, as it does everywhere else in the project.
-- **Sixth row of the main menu, "Credits".** The text rises half a pixel a picture (about 30 seconds for the 77 lines at 60 Hz); holding A makes it eight times as quick; B or Start goes back. It stops with the crew in the middle of the screen.
+- **Sixth row of the main menu, "Credits"** (a row under Settings since the menu rework). The text rises half a pixel a picture (about 30 seconds for the 77 lines at 60 Hz); holding A makes it eight times as quick; B or Start goes back. It stops with the crew in the middle of the screen.
 - **36 columns, not the menu's 38**, so nobody's name stands at the very edge of the screen, where a television may cut it off. Titles in the highlight colour, project names dim, people white.
 - **Drawing.** `src/sn64_credits.c` (pure C) says which lines are on screen at a scroll position. Only lines that lie wholly inside the window are drawn: libdragon's text drawing does not clip.
 - Host test `tests/test_credits.c` (in `make test`): 25 checks on the text (fits, plain 7-bit, opens with the credit line, closes with the crew in the owner's words, everyone named in CREDITS.md present) and on the geometry at every scroll position. `make test-negative` builds it with a line allowed to hang out of the window and requires it to fail.
@@ -213,3 +218,87 @@ Owner: a credits section that names everyone the repository credits, then Claude
 Main menu layout with six rows: the message moved one row down (row 13), the two warnings to rows 15 and 16.
 
 ROM: 147,456 bytes, SHA-256 `0b0f9f14a336bf9d24659761761e26e4349481ccaa4ae9158c68f13ddbd64d49`, CIC-6102 check OK; 133,234 bytes used, 128,910 free in the v2 board's 256 KiB window. Host tests 368 checks in eight sets, nine fault builds rejected; co-simulation with the endpoint passes. Not run on a console or an emulator.
+
+## Menu rework and the controller mapping screen (2026-10-01)
+
+Owner: "the main menu should be play, controller mapping, settings and power off cartridge", with the rest in a Settings sub-menu. For the mapping: "an n64 controller and a snes controller side by side with light up buttons corresponding to button presses", "a dropdown list of controllers for m64 input sake and another dropdown for snes compatible controllers", "each should have their buttons light up and also images of their singular buttons in the mapping part". Defaults: "the normal buttons should be mapped to their counterpart on the snes controller and the z button to the select button". "To bring up the sn64 menu they press all 4 c buttons together." And: "no actual nintendo logos on anything".
+
+![Mock-up of the main menu and Settings](img/menu-screens.png)
+
+### The menus
+
+- **Main menu, four rows:** Play, Controller mapping, Settings, Power off cartridge. One line above them says whether the cartridge is off, starting or running. Play starts the cartridge, or goes back to a cartridge that is still running.
+- **Settings:** Compatibility mode (with its confirmation screen, as before), Status / diagnostics (the service screen is behind Z there, as before), Credits. B goes back one level everywhere.
+- **Notes and refusals.** The line under the rows is white for a plain note ("Cartridge is off") and red for a refusal ("Power fault latched: not starting"). The two standing warnings (cartridge check relaxed, compatibility mode on) show on both menus.
+- **The technical lines** that stood on the main menu (STATUS word, sequence count, region) are on the Status screen, where they already were.
+
+### The shortcut: all four C buttons
+
+While a cartridge runs, all four C buttons of controller 1 pressed together bring the menu back. The cartridge keeps running and Play returns to it. This replaces Z+L+R held for a second.
+
+- The four have to be seen together on 6 pictures in a row, a tenth of a second (`MENU_CHORD_FRAMES`). That is an addition of mine, so that a controller being plugged in or one bad read does not open the menu. The figure is an assumption until it is tried by hand.
+- While all four are down the game is given none of them (`sn64_map_strip_menu_chord`). Up to that moment the buttons already down are passed on as usual: holding them back would delay every C press in every game.
+- Controller 2 cannot open the menu, and its four C buttons are ordinary buttons.
+- The main menu, the screen shown while a cartridge starts and the mapping screen each say what the shortcut is.
+
+### Default mapping in force
+
+| N64 | Super NES | Basis |
+|---|---|---|
+| A, B, L, R, Start, D-pad | the button of the same name | owner |
+| Z | Select | owner |
+| C-Up, C-Left, C-Down, C-Right | X, Y, B, A | my choice: X and Y have no namesake on an N64 controller, and the C diamond sits like the Super NES diamond |
+| Stick beyond +/-40 | D-pad | as before |
+
+Opposite directions still cancel. One table serves both controllers.
+
+### The mapping screen
+
+![Mock-up of the controller mapping screen](img/mapping-screens.png)
+
+- **Two pictures side by side.** Left: the controller in the player's hands. Right: the controller the game sees. What is held lights on the left; what the game is given lights on the right. Pressing Z lights Z on the left and Select on the right, and after a change the new button lights instead. The stick's cap moves with the stick, and past its threshold the D-pad on the right lights.
+- **The right side shows what the game gets.** Up and Down together light nothing on the right. Nor do the four C buttons while they make the menu shortcut; the screen then says "All four C: in a game, the menu".
+- **A list over each picture.** Left, for the M64's sake, the controllers ModRetro lists as working with it: N64 controller, M64 Pro, Hyperkin Captain, Switch N64 pad, Brawler64, 8BitDo 64. Right: Super NES (purple and lavender buttons) and Super Famicom (four colours, which is also the Super NES of the PAL countries). On a PAL console the right list starts on the four-colour one.
+- **The lists change the picture and nothing else.** Every controller in the left list reports the same 14 buttons and the stick to the console, and both in the right list have the same 12 buttons.
+- **The mapping, 14 rows** in two columns: a small picture of the single button, its name, an arrow, a small picture of the Super NES button it gives, and that button's name. The small pictures light too.
+- **Changing a row.** A on a row opens its 13 choices (the 12 Super NES buttons and "nothing"), each with its small picture, in the place of the rows, so both controllers stay in view. The choice under the cursor is marked on the right-hand controller. A takes it, B gives it up.
+- **Restore defaults** is a field under the rows.
+- **Buttons no row gives any more are reported** in red under the rows ("No button gives Select"), so a change that leaves Start out of reach is seen before a game is started.
+- **Only the D-pad, A and B do anything here,** so every other button can be tried freely. B leaves when it is let go, so it can be seen to light first.
+- **The row under the cursor is marked** in both pictures: its button blinks white.
+
+### No logos
+
+The pictures are diagrams the program draws from discs and bars (`src/sn64_padview.c`). They show where each button is. They carry no maker's logo and no maker's lettering: the letters on the buttons are five-by-seven dot letters drawn for SN64, and the names in the two lists are plain text in the console font. The body colours only tell the entries apart and do not claim to be a product's colour. `NOTICE` names the trademarks. A search of the repository on the same day found no Nintendo logo in it: the only logos are the SN64 one, which is original artwork, and the owner's FantomZap one.
+
+### How it is built
+
+| File | Role |
+|---|---|
+| `src/sn64_mapping.c` | the table, the defaults, the shortcut, the choices in the order the screen offers them, the buttons nothing gives |
+| `src/sn64_padview.c` | the controller pictures, the single-button pictures and plain shapes, drawn into the 16-bit screen buffer |
+| `src/sn64_mapscreen.c` | the screen: cursor, the two lists, the choices, restore, leaving, and where everything is drawn |
+| `src/main.c` | the two menus, the shortcut, and the mapping screen's text in the console font |
+
+The three modules are pure C with no libdragon dependency, so the host tests run the code the ROM runs.
+
+### Evidence, all on the PC
+
+- `tests/test_mapping.c`: 49 checks (defaults, stick, cancelling, the shortcut, changing the table, the choices, the buttons nothing gives).
+- `tests/test_padview.c`: 408 checks. For each of the six controllers and both colour sets: every button lights its own place and no other pixel, no two buttons share a pixel, the cursor's mark, the stick, nothing outside the picture's box. The 14 and 13 single-button pictures are there, differ from one another and light. Pictures drawn across the edge of the screen are cut off there.
+- `tests/test_mapscreen.c`: 84 checks. The cursor's path, both lists, the choices (every one can be reached), restore, leaving on B let go, the buttons that do nothing. On the drawn screen: each button lights itself, the button it gives and the two small pictures of its row, and nothing else changes; all text stays on the screen.
+- `make test-negative`: a build in which A lights B's place and a build in which B takes a choice are each rejected. 11 fault builds in all.
+- All host tests: 882 checks in ten sets.
+- ROM: 147,456 bytes, SHA-256 `cd157a7235badb71fab0208b63fe89a824c156e2b2a8faf2ced7974f57297cbf`, CIC-6102 check OK; 146,141 bytes used, 116,003 free in the v2 board's 256 KiB window. The pictures and the screen took 12.9 KB of the compressed program.
+- Co-simulation with the FPGA endpoint passes with the new image; its first frame now carries the new default (A and Start give 0x0108).
+- The mock-ups above are made from the pixels and the text positions the code under test produced (`make test-mapscreen`, then `tools/mock_screens.py`). Only the font differs from the console's.
+
+### Limits and what is assumed
+
+- **Not run on a console or an emulator.** How the pictures look on a television, and whether this screen keeps 60 pictures a second, are not known. A count on the PC gives 45,000 to 65,000 pixels drawn a picture besides the text and the cleared screen. If that is too much for one picture, the lights follow the buttons one picture later and nothing else changes.
+- **Nothing is kept when the console is switched off.** The mapping, the two lists and compatibility mode go back to their defaults. The SN64 has nowhere yet for the menu to store settings.
+- **One mapping for both controllers,** and the pictures show controller 1.
+- **The controller list is my reading** of ModRetro's list of compatible controllers. The two-handled picture is the same for the Brawler64 and the 8BitDo 64, both drawn with two Z triggers. None of these controllers was measured: the positions follow published pictures and are approximate.
+- **The tenth of a second for the shortcut and the C-diamond defaults are my choices.**
+
+Sources for the controller list: [M64](https://modretro.com/products/m64) and [M64 Pro Controller](https://modretro.com/products/m64-pro-controller) product pages, [ModRetro x Hyperkin Captain+](https://modretro.com/products/hyperkin-captain-plus-wired-controller), [Hyperkin Captain](https://www.hyperkinstore.com/products/captain-premium-controller), [8BitDo 64 review, Nintendo Life](https://www.nintendolife.com/reviews/8bitdo-64-controller-for-switch-1-and-2-a-worthy-alternative-to-nintendos-n64-pad), [Brawler64 review, Nintendo Life](https://www.nintendolife.com/news/2019/06/hardware_review_retro_fighters_brawler64_controller_-_a_crowdfunded_upgrade_to_your_battered_original), [Brawler64, Retro Fighters](https://retrofighters.com/our-collection/brawler64-nextgen-n64-controller-original-v2/). Read 2026-10-01.

@@ -52,9 +52,15 @@ Active-high (1 = pressed), in the order the pad shifts its bits out. It is the s
 
 The mailbox resets to `0x0000` (no buttons), so before the bootstrap writes anything the games see two connected pads with nothing pressed.
 
-## Default N64 → SNES mapping (bootstrap default table, v1, frozen)
+## Default N64 → SNES mapping
 
-The mapping runs in the N64 bootstrap, not the FPGA. This table is the bootstrap's default for SN64-06-03. Users can change it; editing and persisting it are bootstrap work.
+**In force since 2026-10-01 (owner's decision):** every N64 button gives the Super NES button of the same name (A, B, L, R, Start, the D-pad) and Z gives Select. X and Y have no namesake, so the C buttons give the Super NES diamond in its own positions: C-Up X, C-Left Y, C-Down B, C-Right A. The stick also presses the D-pad beyond a threshold. A player can change any row on the boot menu's mapping screen; nothing is kept after power-off yet. Details: [n64-bootstrap.md](n64-bootstrap.md), last section.
+
+The mapping runs in the N64 bootstrap, not the FPGA, so this change touched no logic.
+
+### The first table (2026-09-29), replaced
+
+Kept for the record, with its reasoning. It mapped by position; the owner chose mapping by name. The C buttons are the same in both tables, so the by-position layout of the four Super NES face buttons is still there on the C diamond.
 
 | N64 button | SNES button | Mailbox bit | Rationale |
 |---|---|---|---|
@@ -125,5 +131,5 @@ Commands are run from the repo root with the OSS CAD Suite environment. Build di
 1. **Integration:** instantiate the block in the SN64 top level between the endpoint and the core, and add the four runs above to `fpga/tools/evaluate.py`.
 2. **Presence bit:** assign a mailbox bit for `pad_present`. One proposal is a `PAD_ABSENT` flag, active-high so the reset value means "present", in a new register or in reserved bit 15 of JOYn_BUTTONS. This means changing the endpoint register map.
 3. **Stale-input policy:** if the bootstrap stops updating the mailbox (host crash), buttons stay held. Consider clearing both images after a timeout without a mailbox SEQ change, and record the chosen policy in SN64-06-02.
-4. **Bootstrap:** implement the default table, remapping, persistence and the opposite-direction rule, and measure the poll-to-latch latency on N64 and M64 (SN64-06-03, SN64-13-09).
+4. **Bootstrap:** the default table, remapping on the menu's mapping screen and the opposite-direction rule are built (2026-10-01, PC tests only). Still open: persistence, and measuring the poll-to-latch latency on N64 and M64 (SN64-06-03, SN64-13-09).
 5. **Virtual mouse (deferred):** a mouse on a port needs a different serial device (signature `0001`, 32 bits, speed cycling, per the protocol page linked in [snes-peripherals](../research/snes-peripherals.md)). It would replace the adapter on that port and reuse JOY1_STICK.

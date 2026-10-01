@@ -133,13 +133,13 @@ module tb_bootstrap_rom_window #(
         if (v !== 32'h0000_7002) begin errors=errors+1; $display("  FAIL COMMIT/REGION_INFO pair %h", v); end
         io_read32(32'h1FFF_001C, v);
         if (v !== 32'h0016_0000) begin errors=errors+1; $display("  FAIL REGION_SOURCE pair %h", v); end
-        // Frame 1: P1 A+Start (SNES B|Start = 0x0009), P2 idle, stick (x=-40,y=40), run_request with
+        // Frame 1: P1 A+Start (SNES A|Start = 0x0108 with the default mapping), P2 idle, stick (x=-40,y=40), run_request with
         // the cartridge check enforced, which is the menu's mode (CONTROL = 0x0001).
-        io_write32(32'h1FFF_0010, {16'h0009, 16'h0000});
+        io_write32(32'h1FFF_0010, {16'h0108, 16'h0000});
         io_write32(32'h1FFF_0014, {8'd40, 8'hD8, 16'h0001});
         io_write32(32'h1FFF_0018, 32'h0001_0000);
         repeat(4) @(negedge clk);
-        if (j1!==16'h0009 || j2!==16'h0000 || sx!==8'hD8 || sy!==8'd40 || run!==1'b1 || cm!==2'd0 || seq!==16'd1) begin
+        if (j1!==16'h0108 || j2!==16'h0000 || sx!==8'hD8 || sy!==8'd40 || run!==1'b1 || cm!==2'd0 || seq!==16'd1) begin
             errors=errors+1; $display("  FAIL frame 1: j1=%h j2=%h sx=%h sy=%h run=%b check=%0d seq=%0d", j1, j2, sx, sy, run, cm, seq);
         end
         // Frame 2: new buttons on both pads; the 0x1A half of COMMIT must not count.
@@ -152,7 +152,7 @@ module tb_bootstrap_rom_window #(
         end
         io_read32(32'h1FFF_0014, v);
         if (v !== 32'h0000_0001) begin errors=errors+1; $display("  FAIL STICK/CONTROL readback %h", v); end
-        // Frame 3: "Power down cartridge" clears run_request.
+        // Frame 3: "Power off cartridge" clears run_request.
         io_write32(32'h1FFF_0010, 32'h0);
         io_write32(32'h1FFF_0014, 32'h0000_0000);
         io_write32(32'h1FFF_0018, 32'h0001_0000);

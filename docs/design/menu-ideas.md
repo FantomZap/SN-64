@@ -1,6 +1,6 @@
 # Menu ideas
 
-**Status (2026-10-01): a list to choose from. Nothing here is decided or built, except where a row says so** (the frame lock and the sound rate lock were built later the same day, with a compatibility mode row on the main menu). The owner asked what features and options the menu should get, and said the menu system could be repackaged. What exists today is in [n64-bootstrap.md](n64-bootstrap.md): a text menu with Start, Controller mapping (view only), Status / diagnostics and Power down, two splash screens before it, and a hidden service screen.
+**Status (2026-10-01): a list to choose from. Nothing here is decided or built, except where a row says so** (the frame lock and the sound rate lock were built later the same day, with a compatibility mode row; then the owner set the main menu to four rows, Play, Controller mapping, Settings and Power off cartridge, asked for a controller mapping screen with pictures that light up, and moved the in-game shortcut to all four C buttons: all built the same day, see [n64-bootstrap.md](n64-bootstrap.md)). The owner asked what features and options the menu should get, and said the menu system could be repackaged. What exists today is in [n64-bootstrap.md](n64-bootstrap.md): a text menu with Play, Controller mapping, Settings (Compatibility mode, Status / diagnostics, Credits) and Power off cartridge, two splash screens before it, and a hidden service screen.
 
 "Needs" says what each idea touches: **menu** is the N64 program only; **FPGA** needs logic and a simulation as well; **board** would need a hardware change, which is the owner's call.
 
@@ -9,9 +9,9 @@
 | Idea | What the player gets | Needs |
 |---|---|---|
 | Quick start | Power on, logos, and the game starts by itself. Hold a button during the logos to get the menu instead | menu |
-| Cartridge name on the home screen | "SUPER MARIO WORLD, USA" read from the cartridge before it starts, instead of "Start SNES cartridge" | FPGA (the header reader already runs; it has to hand the title over) and menu |
-| Pause menu in the game | The hotkey opens a small overlay: Resume, Reset game, Controls, Quit to menu. Today it only jumps back to the menu | menu; Reset game uses the soft reset the FPGA already has |
-| Controller mapping editor | Change any button, pick a preset, set the stick threshold. The spec asks for a configurable mapping; today it can only be looked at | menu |
+| Cartridge name on the home screen | "SUPER MARIO WORLD, USA" read from the cartridge before it starts, instead of "Play" | FPGA (the header reader already runs; it has to hand the title over) and menu |
+| Pause menu in the game | The shortcut (all four C buttons since 2026-10-01) opens a small overlay: Resume, Reset game, Controls, Quit to menu. Today it only jumps back to the menu | menu; Reset game uses the soft reset the FPGA already has |
+| Controller mapping editor | Change any button, pick a preset, set the stick threshold. The spec asks for a configurable mapping. **Built 2026-10-01:** any button can be changed and the defaults restored, on a screen with two controller pictures that light up. Presets and the stick threshold are not built, and nothing is kept after power-off | menu |
 | Settings that stay | Mapping and options survive power-off, on a Controller Pak if one is in the pad | menu |
 | Region choice | Auto, NTSC or PAL. The FPGA has the switch; the menu has no item for it | menu |
 | Picture options | Sharp or smooth, full screen or exact pixels, picture position for a CRT | menu |
@@ -50,8 +50,8 @@
 | Turbo | Auto-fire per button | menu |
 | Swap players | Controller 1 and 2 trade places | menu |
 | Port 2 device | Pad or mouse. The stick as a Super NES mouse is already on the list for a later update | FPGA and menu |
-| Controller test | Live picture of what each pad sends. The mapping screen shows it as numbers today | menu |
-| Hotkey choice | Which button combination opens the pause menu | menu |
+| Controller test | Live picture of what each pad sends. **Built 2026-10-01 for controller 1:** the mapping screen's two pictures light up. Controllers 2 to 4 are not shown | menu |
+| Hotkey choice | Which button combination opens the pause menu. Today it is fixed: all four C buttons (owner, 2026-10-01) | menu |
 
 ## Saves
 
@@ -77,7 +77,7 @@ The menu is plain text in the console's built-in 8-pixel font. A repackaged one 
 
 - **Look**: black background as on the splash screens, the SN64 logo small at the top, the four button colours for highlights, a real font in two sizes, panels with rounded corners like the logo's ring.
 - **Home screen**: one large Start with the cartridge's name under it, and three or four entries below: Settings, Tools, About.
-- **Settings**: Picture, Sound, Controllers, System (region, quick start, logos, hotkey).
+- **Settings**: Picture, Sound, Controllers, System (region, quick start, logos, hotkey). A Settings sub-menu exists since 2026-10-01 with Compatibility mode, Status / diagnostics and Credits.
 - **Tools**: Save backup, Tests, Diagnostics. The service screen stays hidden behind Diagnostics.
 - **In the game**: the pause overlay instead of a jump to the full menu.
 - **Moving around**: stick or D-pad, A to choose, B back, Start to play from anywhere, and holding a button to confirm anything that removes power.
@@ -86,7 +86,7 @@ What limits it:
 
 | Limit | Today | Meaning |
 |---|---|---|
-| ROM space | The program is 147,456 bytes since 2026-10-01 and no longer fits a 128 KiB window; the v2 board's window is 256 KiB, with about 129 KB free | A font and graphics fit on v2 |
+| ROM space | The program is 147,456 bytes since 2026-10-01 and no longer fits a 128 KiB window; the v2 board's window is 256 KiB, with about 116 KB free since the controller pictures | A font and graphics fit on v2 |
 | Settings storage | None on the board that the menu can write | Controller Pak first; writing the board's flash from the menu would need FPGA work |
 | Not yet run on a console | The whole menu has only been compiled and tested on the PC | The first real run may change what is worth polishing |
 

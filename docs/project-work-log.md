@@ -389,3 +389,30 @@ The owner asked for a credits section: everyone the repository credits, then Cla
 - Names are kept two columns off the screen's edge.
 
 ROM 147,456 bytes, SHA-256 `0b0f9f14a336bf9d24659761761e26e4349481ccaa4ae9158c68f13ddbd64d49`. Host tests 368 checks in eight sets, nine fault builds rejected, co-simulation passes. Mock-up: [credits-screens.png](design/img/credits-screens.png). Not run on a console.
+
+## 2026-10-01 — main menu in four rows, a mapping screen with controllers that light up, all four C for the menu
+
+The owner set the menu's shape: "the main menu should be play, controller mapping, settings and power off cartridge", the rest in a Settings sub-menu. For the mapping he asked for "an n64 controller and a snes controller side by side with light up buttons corresponding to button presses", "a dropdown list of controllers for m64 input sake and another dropdown for snes compatible controllers", buttons that light on each, "and also images of their singular buttons in the mapping part". Defaults: "the normal buttons should be mapped to their counterpart on the snes controller and the z button to the select button". "To bring up the sn64 menu they press all 4 c buttons together." While it was being built he added: "no actual nintendo logos on anything". All of it is built. Write-up: the last section of [n64-bootstrap.md](design/n64-bootstrap.md).
+
+What was decided on the way, and why:
+
+- **One screen, not a test mode and a change mode.** Only the D-pad, A and B do anything on the mapping screen, so every other button can be tried freely, and B leaves when it is let go, so it is seen to light first.
+- **The choices for a row take the place of the rows,** not of a picture, so both controllers stay in view and the choice under the cursor can be marked on the right-hand one.
+- **The right-hand controller shows what the game is given.** Up and Down together light nothing there, and neither do the four C buttons while they make the shortcut.
+- **The two lists change the picture and nothing else.** Every controller the M64 accepts reports the same 14 buttons and the stick, so there is nothing else for the left list to change.
+- **The pictures are diagrams the program draws** from discs and bars, with its own five-by-seven dot letters on the buttons. No maker's logo or lettering. The repository was searched for Nintendo logos the same day: there are none. The rule is recorded in `CLAUDE.md`, and `NOTICE` now names the controller makers' trademarks.
+- **A tenth of a second for the shortcut.** All four C buttons have to be seen together on six pictures in a row before the menu opens. An addition of mine, so that plugging a controller in does not open the menu; to be tried by hand.
+- **X and Y have no namesake on an N64 controller.** The C buttons give the Super NES diamond in its own positions (C-Up X, C-Left Y, C-Down B, C-Right A), so every Super NES button can be reached with the defaults. My choice.
+- **A warning when a change leaves a Super NES button without any button.** "No button gives Start" under the rows, before a game is started.
+- **The main menu lost its technical lines** (STATUS word, sequence count, region). They are on the Status screen, where they already were. One line says whether the cartridge is off, starting or running.
+- **Notes are white, refusals red.** "Cartridge is off" is not a warning.
+- **The co-simulation's first frame** now carries the new default (A and Start give 0x0108, not 0x0009).
+
+Evidence (PC only): host tests 882 checks in ten sets (mapping 49, controller pictures 408, mapping screen 84, and the earlier seven), 11 fault builds rejected, among them a picture in which A lights B's place and a screen in which B takes a choice. ROM 147,456 bytes, SHA-256 `cd157a7235badb71fab0208b63fe89a824c156e2b2a8faf2ced7974f57297cbf`, 146,141 bytes used, 116,003 free in the v2 board's window; CIC-6102 check OK; ROM and endpoint co-simulation passes. Mock-ups made from the pixels the code under test drew: [mapping-screens.png](design/img/mapping-screens.png), [menu-screens.png](design/img/menu-screens.png); the other four sheets were redrawn for the new menu.
+
+Open:
+
+- **Not run on a console or an emulator.** How the pictures look on a television and whether the mapping screen keeps 60 pictures a second are not known (45,000 to 65,000 pixels are drawn a picture).
+- **Nothing is kept when the console is switched off:** the mapping, the two lists and compatibility mode start from their defaults. The board has nowhere yet for the menu to store settings.
+- **One mapping for both controllers; the pictures show controller 1.**
+- **The controller list is my reading of ModRetro's compatibility list,** and none of those controllers was measured; the two-handled picture serves both the Brawler64 and the 8BitDo 64.

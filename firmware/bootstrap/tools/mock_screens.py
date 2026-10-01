@@ -1,5 +1,6 @@
-"""Draw mock-ups of the boot menu's screens: the two splash screens, the cartridge-check screens,
-the compatibility-mode screens and the credits roll.
+"""Draw mock-ups of the boot menu's screens: the two splash screens, the main menu and Settings,
+the controller mapping screen, the cartridge-check screens, the compatibility-mode screens and
+the credits roll.
 
 The splash pictures are read from src/sn64_splash_data.c, pixel for pixel as the ROM holds them.
 The texts are read from src/sn64_cartcheck.c, so the picture cannot drift from the wording; the
@@ -12,8 +13,14 @@ the menu has not run on a console or an emulator yet, and the console's own font
 The credits roll is read from src/sn64_credits_data.c, text and line kinds, and laid out as
 src/sn64_credits.c lays it out.
 
+The controller mapping screen is not copied by hand at all: `make test-mapscreen` runs the code
+the ROM runs (src/sn64_mapscreen.c, src/sn64_padview.c) and writes each screen's pixels and its
+text with positions to build/n64-bootstrap/host/screens/; here the pixels are enlarged and the
+text is set in this tool's font.
+
   python tools/mock_screens.py        writes docs/design/img/cart-check-screens.png, splash-screens.png,
-                                      compat-screens.png and credits-screens.png
+                                      menu-screens.png, mapping-screens.png, compat-screens.png and
+                                      credits-screens.png
 """
 import argparse
 import re
@@ -49,12 +56,14 @@ class Screen:
         self.d = ImageDraw.Draw(self.im)
         self.f = font()
 
+    def text(self, x, y, colour, text):
+        """Text in 8 x 8 cells with the top left corner at (x, y), as graphics_draw_text places it."""
+        for i, ch in enumerate(text):
+            self.d.text(((x + i * CELL + CELL / 2) * SCALE, (y + CELL / 2) * SCALE), ch, font=self.f, fill=colour, anchor='mm')
+
     def line(self, row, colour, text):
         assert len(text) <= 38, (len(text), text)        # 38 columns fit the screen from x = 16
-        for i, ch in enumerate(text):
-            x = (16 + i * CELL + CELL / 2) * SCALE
-            y = (12 + row * ROW + CELL / 2) * SCALE
-            self.d.text((x, y), ch, font=self.f, fill=colour, anchor='mm')
+        self.text(16, 12 + row * ROW, colour, text)
 
     def header(self):
         self.line(0, HI, 'SN64 bootstrap v0.1.0')
@@ -111,9 +120,7 @@ def credits(title, roll, scroll):
         y = CREDITS_BOTTOM + i * ROW - scroll
         if y < CREDITS_TOP or y + CELL > CREDITS_BOTTOM or not text:
             continue
-        colour = HI if kind == 1 else DIM if kind == 2 else TEXT
-        for k, ch in enumerate(text):
-            s.d.text(((16 + k * CELL + CELL / 2) * SCALE, (y + CELL / 2) * SCALE), ch, font=s.f, fill=colour, anchor='mm')
+        s.text(16, y, HI if kind == 1 else DIM if kind == 2 else TEXT, text)
     s.line(22, DIM, 'A: faster   B: back')
     return s
 
@@ -135,20 +142,57 @@ def sheet_of(screens, cols):
     return sheet
 
 
-def main_menu(check_summary, summary_colour, cursor=0, compat=False, message=''):
-    s = Screen('Main menu')
-    s.header()
-    s.line(2, TEXT, 'Status 0x0003  seq 512  OFF')
-    s.line(4, TEXT, 'Cartridge: off')
-    s.line(5, TEXT, 'Region: not decided yet')
-    items = ['Start SNES cartridge', 'Controller mapping', 'Compatibility mode: ' + ('ON' if compat else 'off'),
-             'Status / diagnostics', 'Power down cartridge', 'Credits']
-    for i, name in enumerate(items):
-        s.line(6 + i, HI if i == cursor else TEXT, ('> ' if i == cursor else '  ') + name)
-    s.line(13, WARN, message)
+def warnings(s, compat):
     if compat:
-        s.line(16, WARN, 'Compatibility mode: games run slower')
+        s.line(14, WARN, 'Compatibility mode: games run slower')
+
+
+def main_menu(title='Main menu', cursor=0, cartridge='off', compat=False, message='', bad=False):
+    """draw_main(): four rows; everything else is under Settings."""
+    s = Screen(title)
+    s.header()
+    s.line(3, TEXT, 'Cartridge: ' + cartridge)
+    for i, name in enumerate(['Play', 'Controller mapping', 'Settings', 'Power off cartridge']):
+        s.line(6 + i, HI if i == cursor else TEXT, ('> ' if i == cursor else '  ') + name)
+    s.line(11, WARN if bad else TEXT, message)         # a refusal, or a plain note
+    warnings(s, compat)
+    s.line(19, DIM, 'In a game: all four C buttons = menu')
+    s.line(20, DIM, 'Up/Down select  A choose')
+    return s
+
+
+def settings(title='Settings', cursor=0, compat=False, message='', bad=False):
+    """draw_settings()."""
+    s = Screen(title)
+    s.header()
+    s.line(3, HI, 'Settings')
+    items = ['Compatibility mode: ' + ('ON' if compat else 'off'), 'Status / diagnostics', 'Credits']
+    for i, name in enumerate(items):
+        s.line(5 + i, HI if i == cursor else TEXT, ('> ' if i == cursor else '  ') + name)
+    s.line(9, WARN if bad else TEXT, message)
+    warnings(s, compat)
     s.line(20, DIM, 'Up/Down select  A choose  B back')
+    return s
+
+
+def waiting(title):
+    """draw_wait() while a cartridge is being started."""
+    s = Screen(title)
+    s.header()
+    s.line(4, HI, 'Starting the cartridge...')
+    s.line(6, TEXT, 'Sequencer: 5V RAMP')
+    s.line(20, DIM, 'All four C buttons: back to the menu')
+    return s
+
+
+def mapping(title, made, name):
+    """A controller mapping screen as the code under test drew it: pixels from <name>.ppm, text from <name>.txt."""
+    s = Screen(title)
+    s.im = Image.open(made / (name + '.ppm')).convert('RGB').resize((W * SCALE, H * SCALE), Image.NEAREST)
+    s.d = ImageDraw.Draw(s.im)
+    for row in (made / (name + '.txt')).read_text(encoding='utf-8').splitlines():
+        x, y, colour, text = row.split(' ', 3)
+        s.text(int(x), int(y), tuple(int(colour[i:i + 2], 16) for i in (0, 2, 4)), text)
     return s
 
 
@@ -163,7 +207,7 @@ def compat_confirm(title, lines):
 
 
 def service(check_summary, summary_colour, lock=('no game shown yet', 'Slow 0.00 %  off +0  lost 0', '-')):
-    s = Screen('Service screen (Status / diagnostics, then Z)')
+    s = Screen('Service screen (Settings, Status, then Z)')
     s.header()
     s.line(3, HI, 'Service: cartridge check')
     s.line(5, TEXT, 'The check runs whenever a cartridge')
@@ -199,10 +243,11 @@ def main():
     ap.add_argument('--out-dir', type=Path, default=HERE.parents[2] / 'docs/design/img')
     args = ap.parse_args()
     args.out_dir.mkdir(parents=True, exist_ok=True)
+    host = HERE.parents[2] / 'build/n64-bootstrap/host'
     src = (HERE.parent / 'src/sn64_cartcheck.c').read_text(encoding='utf-8')
     screens = [
-        main_menu('none yet', DIM),
-        alert('After Start with the cartridge in backwards', alert_lines(src, 'lines_backwards'), False, 'Rail test 0.43 V, check enforce', 'Fault code 0x01'),
+        main_menu(),
+        alert('After Play with the cartridge in backwards', alert_lines(src, 'lines_backwards'), False, 'Rail test 0.43 V, check enforce', 'Fault code 0x01'),
         service('ok, 0.79 V', TEXT),
         alert('Short on the supply', alert_lines(src, 'lines_short'), False, 'Rail test 0.00 V, check enforce', 'Fault code 0x01'),
     ]
@@ -212,14 +257,40 @@ def main():
     pictures = splash_pictures((HERE.parent / 'src/sn64_splash_data.c').read_text(encoding='utf-8'))
     order = [splash('1. At start-up: SN64 logo', pictures['sn64']),
              splash('2. Then: FantomZap logo', pictures['fantomzap']),
-             main_menu('none yet', DIM)]
-    order[2].title = '3. Then the menu'
+             main_menu('3. Then the menu')]
     sheet = sheet_of(order, 3)
     sheet.save(args.out_dir / 'splash-screens.png')
     print('wrote splash-screens.png', sheet.size)
-    # Compatibility mode: the menu row, the confirmation with its figures, the menu with it on, and
-    # the service screen's frame-lock lines as they would read after a game in normal mode.
-    made = HERE.parents[2] / 'build/n64-bootstrap/host/compat-screen.txt'
+    # The main menu and what is under Settings; what Play shows; the menu brought up from a game.
+    screens = [
+        main_menu('Main menu: four rows'),
+        settings('Settings holds the rest'),
+        waiting('After Play'),
+        main_menu('All four C in a game: the menu again', cartridge='running', message='Cartridge still running'),
+    ]
+    sheet = sheet_of(screens, 2)
+    sheet.save(args.out_dir / 'menu-screens.png')
+    print('wrote menu-screens.png', sheet.size)
+    # Controller mapping: drawn by the code under test.
+    made = host / 'screens'
+    if not (made / 'map-open.ppm').exists():
+        raise SystemExit('run `make test-mapscreen` first: it writes ' + str(made))
+    screens = [
+        mapping('Controller mapping as it opens', made, 'map-open'),
+        mapping('A held: A lights on both', made, 'map-a'),
+        mapping('Cursor on Z, Z held: Select lights', made, 'map-z'),
+        mapping('A on a row: what should Z give?', made, 'map-choices'),
+        mapping('The list of controllers', made, 'map-list'),
+        mapping('Another controller, the other colours', made, 'map-other'),
+        mapping('A changed mapping, C-Up held', made, 'map-changed'),
+        mapping('All four C held: the menu shortcut', made, 'map-shortcut'),
+    ]
+    sheet = sheet_of(screens, 2)
+    sheet.save(args.out_dir / 'mapping-screens.png')
+    print('wrote mapping-screens.png', sheet.size)
+    # Compatibility mode: the Settings row, the confirmation with its figures, Settings with it on,
+    # and the service screen's frame-lock lines as they would read after a game in normal mode.
+    made = host / 'compat-screen.txt'
     if not made.exists():
         raise SystemExit('run `make test-framelock` first: it writes ' + str(made))
     text = {}
@@ -227,30 +298,27 @@ def main():
         key, _, body = row.partition('|')
         text.setdefault(key, []).append(body)
     screens = [
-        main_menu('none yet', DIM, cursor=2),
+        settings('Settings: the row'),
         compat_confirm('Choosing it asks first (N64 or M64, 60 Hz)', text['ntsc']),
-        main_menu('none yet', DIM, cursor=2, compat=True, message='Compatibility mode on'),
+        settings('After A: it is on, and says so', compat=True, message='Compatibility mode on'),
         compat_confirm('The same on a 50 Hz console', text['pal']),
         service('ok, 0.79 V', TEXT, ('locked', 'Slow 0.04 %  off +1  lost 0', 'Super NES')),
         service('ok, 0.79 V', TEXT, ('locked', 'Slow 0.45 %  off -1  lost 0', 'its own')),
     ]
-    screens[0].title = 'Main menu: the new row'
-    screens[2].title = 'After A: it is on, and says so'
     screens[4].title = 'Service screen after a game, normal'
     screens[5].title = 'Service screen after a game, compatibility'
     sheet = sheet_of(screens, 2)
     sheet.save(args.out_dir / 'compat-screens.png')
     print('wrote compat-screens.png', sheet.size)
-    # Credits roll: the menu row, the roll as it opens, part of the way through, and where it stops.
+    # Credits roll: the Settings row, the roll as it opens, part of the way through, and where it stops.
     roll = credits_roll((HERE.parent / 'src/sn64_credits_data.c').read_text(encoding='utf-8'))
     end = credits_end(roll)
     screens = [
-        main_menu('none yet', DIM, cursor=5),
+        settings('Settings: Credits', cursor=2),
         credits('The roll opens', roll, CREDITS_BOTTOM - CREDITS_TOP),
         credits('Part of the way through', roll, CREDITS_BOTTOM - CREDITS_TOP + 37 * ROW),
         credits('Where it stops', roll, end),
     ]
-    screens[0].title = 'Main menu: Credits'
     sheet = sheet_of(screens, 2)
     sheet.save(args.out_dir / 'credits-screens.png')
     print('wrote credits-screens.png', sheet.size)
