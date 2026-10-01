@@ -1,0 +1,49 @@
+SN64 by FantomZap
+Copyright (c) 2026 FantomZap
+Source location: https://github.com/FantomZap/SN-64
+
+SN64 is an FPGA-based adapter that runs Super NES / Super Famicom cartridges in the
+cartridge slot of a Nintendo 64 or ModRetro M64.
+
+Licences
+--------
+Code written for SN64 (FPGA logic, test benches, firmware, build and check scripts under
+fpga/ and firmware/):
+    GNU General Public License, version 3 or (at your option) any later version.
+    Text: LICENSE-GPL-3.0-or-later.txt
+
+Hardware written for SN64 (schematics, board layouts, symbols, footprints, enclosure and
+other mechanical design files, the scripts that generate them, under hardware/ and
+mechanical/) and the documentation under docs/:
+    CERN Open Hardware Licence Version 2 - Strongly Reciprocal.
+    Text: LICENSE-CERN-OHL-S-2.0.txt
+
+A file that carries its own licence line (for example an SPDX-License-Identifier header)
+is under that licence. Third-party material keeps its own licence and notices: see
+CREDITS.md and the notice beside each vendored or derived file.
+
+Attribution
+-----------
+1. Code. Additional terms under section 7 of the GNU General Public License, version 3:
+   (b) you must preserve the author attribution "SN64 by FantomZap" and the source
+   location above in the source files that carry them and in the Appropriate Legal
+   Notices displayed by works containing this material; (c) modified versions must be
+   marked as changed and must not be presented as the original SN64.
+
+2. Hardware. This file is a Notice under the CERN Open Hardware Licence Version 2 -
+   Strongly Reciprocal. Keep it with the design files. As section 4 of that licence
+   provides, a Product made from this design must visibly and securely display the
+   source location above: on the board's silkscreen as the design files provide it, or,
+   where that is not practicable, on its packaging or in its documentation.
+
+3. Names. The names "SN64" and "SN 64" and any SN64 logo are not licensed by the above.
+   Describe a modified design as "based on SN64".
+
+No warranty
+-----------
+SN64 is provided without any warranty, to the extent the law allows. See the licence
+texts for the disclaimers.
+
+Nintendo 64, Super NES, Super Famicom and M64 are trademarks of their respective owners.
+SN64 is not affiliated with or endorsed by Nintendo, ModRetro, or any project or person
+named in CREDITS.md.

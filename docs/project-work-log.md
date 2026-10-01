@@ -155,3 +155,7 @@ Built by parallel helper agents with self-checking and fault-injection tests, th
 ## Remaining work
 
 Select and validate the FPGA/storage and physical-cartridge bridge, complete system/cartridge power and protection, N64 endpoint, controller/firmware functions, clocks, A/V and diagnostics. Retain PAL and the required M64 single-HDMI target; its supported integration mechanism remains unresolved. Complete PCB placement/routing and the FreeCAD enclosure, then perform electrical, programming, compatibility and fit tests on prototypes before producing a PCBWay release. No working SN 64 hardware or fabrication-ready package exists yet.
+
+## 2026-10-01 — licences, attribution notice and credits
+
+Owner decision: code is GPL-3.0-or-later, hardware and docs are CERN-OHL-S-2.0, credit line "SN64 by FantomZap" with this repository as the source location. Added at the top level: the two licence texts, [LICENSING.md](../LICENSING.md), [NOTICE](../NOTICE) and [CREDITS.md](../CREDITS.md), which lists everyone the project borrows from. Current design work is on the `v2` branch; its work log has the details.
