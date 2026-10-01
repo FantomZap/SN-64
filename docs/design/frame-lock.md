@@ -189,7 +189,7 @@ Simulated or computed on the PC. Not hardware.
 
 The resampler's 9 % at 8 kHz is its treble loss between samples: a four-point curve is about 1 dB down at 8 kHz when the output falls midway between two input samples, and not at all when it falls on one. As the step is a hair off 1.0 that level drifts slowly up and down. Below 4 kHz it is under 0.1 dB. Not listened to yet; a longer filter is the remedy if it is heard.
 
-The menu program is 147,456 bytes now and no longer fits a 128 KiB window (it is 357 bytes over). `ROM_ADDR_BITS` is 17 in the build files, as on the v2 board, whose window is 256 KiB with 130 KB to spare.
+The menu program is 147,456 bytes now and no longer fits a 128 KiB window (it was 357 bytes over with the frame lock, and is 2 KB over since the credits roll). `ROM_ADDR_BITS` is 17 in the build files, as on the v2 board, whose window is 256 KiB with about 129 KB to spare.
 
 ## To check on real hardware
 

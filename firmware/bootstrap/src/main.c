@@ -16,6 +16,7 @@
 
 #include "sn64_audioout.h"
 #include "sn64_cartcheck.h"
+#include "sn64_credits.h"
 #include "sn64_framelock.h"
 #include "sn64_mailbox.h"
 #include "sn64_mapping.h"
@@ -50,8 +51,8 @@
 #endif
 
 typedef enum { MODE_MENU, MODE_RUN, MODE_CHECK } run_mode_t;
-typedef enum { SCREEN_MAIN, SCREEN_MAPPING, SCREEN_STATUS, SCREEN_SERVICE, SCREEN_ALERT, SCREEN_COMPAT } screen_t;
-typedef enum { ITEM_START, ITEM_MAPPING, ITEM_COMPAT, ITEM_STATUS, ITEM_POWER_DOWN, ITEM_COUNT } item_t;
+typedef enum { SCREEN_MAIN, SCREEN_MAPPING, SCREEN_STATUS, SCREEN_SERVICE, SCREEN_ALERT, SCREEN_COMPAT, SCREEN_CREDITS } screen_t;
+typedef enum { ITEM_START, ITEM_MAPPING, ITEM_COMPAT, ITEM_STATUS, ITEM_POWER_DOWN, ITEM_CREDITS, ITEM_COUNT } item_t;
 
 static const char *const item_names[ITEM_COUNT] = {
     "Start SNES cartridge",
@@ -59,7 +60,14 @@ static const char *const item_names[ITEM_COUNT] = {
     "Compatibility mode",
     "Status / diagnostics",
     "Power down cartridge",
+    "Credits",
 };
+
+// Credits roll (owner, 2026-10-01): CREDITS.md on the screen, the SN64 crew and the cats last.
+// It rises half a pixel a picture; holding A makes it eight times as quick.
+#define CREDITS_TOP        22
+#define CREDITS_BOTTOM     228
+#define CREDITS_FAST       8
 
 static const char *const seq_state_names[16] = {
     "OFF", "RESET", "5V RAMP", "IFACE RAIL", "RUNNING", "SHUTDOWN", "FAULT",
@@ -91,6 +99,7 @@ static uint16_t   alert_fault, alert_check;               // ... and the words i
 static bool       compat_mode = SN64_COMPAT_DEFAULT;      // compatibility mode: the console keeps its own timing
 static uint32_t   compat_ppm;                             // what the confirmation screen states
 static uint16_t   pad1_n64, pad1_snes;                    // controller 1 as read and as mapped (mapping screen)
+static int        credits_pos;                            // how far the credits have risen, in half pixels
 
 static uint32_t col_text, col_dim, col_hi, col_warn, col_bg;
 
@@ -447,6 +456,10 @@ static void menu_select(item_t item)
         run_request = false;
         message = "Cartridge power request cleared";
         break;
+    case ITEM_CREDITS:
+        credits_pos = 0;
+        screen = SCREEN_CREDITS;
+        break;
     default:
         break;
     }
@@ -677,12 +690,29 @@ static void draw_main(surface_t *d)
         else
             line(d, 6 + i, c, "%c %s", i == cursor ? '>' : ' ', item_names[i]);
     }
-    line(d, 12, col_warn, "%s", message);
+    line(d, 13, col_warn, "%s", message);
     if (check_mode != SN64_CHECK_MODE_ENFORCE)          // never silently: the service screen relaxed the check
-        line(d, 14, col_warn, "Cartridge check: %s", sn64_check_mode_name(check_mode));
+        line(d, 15, col_warn, "Cartridge check: %s", sn64_check_mode_name(check_mode));
     if (compat_mode)                                    // never silently either
-        line(d, 15, col_warn, "Compatibility mode: games run slower");
+        line(d, 16, col_warn, "Compatibility mode: games run slower");
     line(d, 20, col_dim, "Up/Down select  A choose  B back");
+}
+
+// The credits roll: section titles and the credit line in the highlight colour, the projects
+// dim, the people in white, the crew at the end in white too.
+static void draw_credits(surface_t *d)
+{
+    int index[32], y[32];
+    const int end = 2 * sn64_credits_end(CREDITS_TOP, CREDITS_BOTTOM);
+    credits_pos += (pad1_n64 & N64_BTN_A) ? CREDITS_FAST : 1;
+    if (credits_pos > end) credits_pos = end;           // it stops with the last line in the middle
+    int n = sn64_credits_visible(credits_pos / 2, CREDITS_TOP, CREDITS_BOTTOM, index, y, 32);
+    for (int i = 0; i < n; i++) {
+        unsigned kind = sn64_credits_kind[index[i]];
+        graphics_set_color(kind == SN64_CREDIT_TITLE ? col_hi : kind == SN64_CREDIT_PROJECT ? col_dim : col_text, 0);
+        graphics_draw_text(d, 16, y[i], sn64_credits_lines[index[i]]);
+    }
+    line(d, 22, col_dim, "A: faster   B: back");
 }
 
 // Compatibility mode: the confirmation, with the slowdown stated.
@@ -860,6 +890,7 @@ int main(void)
             else if (screen == SCREEN_SERVICE) draw_service(d);
             else if (screen == SCREEN_ALERT)   draw_alert(d);
             else if (screen == SCREEN_COMPAT)  draw_compat(d);
+            else if (screen == SCREEN_CREDITS) draw_credits(d);
             else                               draw_main(d);
         } else {
             // Game: the SNES picture and sound go to the console's own output. The SNES is a few

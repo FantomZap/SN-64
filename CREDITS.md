@@ -46,3 +46,14 @@ build123d and FreeCAD.
 Exact revisions, hashes and what was changed are recorded beside the material: `fpga/vendor/*/provenance.json`,
 `hardware/sn64/THIRD_PARTY.md`, `hardware/sn64/libraries/*provenance.json`, `mechanical/README.md` and
 `docs/dimensions.md`.
+
+## The SN64 crew
+
+| Role | Who |
+|---|---|
+| Engineer | Claude (AI by Anthropic) |
+| Manager | Scout (Cat) |
+| Arbitrary code execution | Ash & Aurora (More cats) |
+
+The boot program shows this file as a credits roll (main menu, Credits). It is generated from the
+tables above by `firmware/bootstrap/tools/make_credits.py`, so a row added here appears there.

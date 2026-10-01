@@ -378,3 +378,14 @@ Evidence (PC only): FPGA suite 88 runs pass, 24 of them fault runs; the whole de
 Also answered: there is no simulated game cartridge and no simulated N64 with a screen. The tests are a tiny stand-in cartridge, the real FPGA design, a model of the N64's cartridge-slot wiring, and the menu program's logic run as PC tests; the menu ROM itself has never run. Two ways to close some of that gap before hardware were offered (an N64 emulator for the menu ROM, a free test cartridge in the FPGA simulation); neither is started.
 
 **Nothing here has run on a console, a television or an M64.** The hardware checks are listed at the end of the design note; the reading to look at first is the slowdown the lock settles on, which measures how far a real console's clock is from the board's.
+
+## 2026-10-01 — credits roll in the menu
+
+The owner asked for a credits section: everyone the repository credits, then Claude, then his cats at the very end, and not his own name. His wording for the cats: "Manager: Scout (Cat)" and "Arbitrary code execution: Ash & Aurora (More cats)". The second is earned: during the frame lock work three messages made only of plus signs arrived, one of them in the middle of a build. They were not acted on. It turned out the cats had been on the number pad, where plus and Enter sit side by side.
+
+- [CREDITS.md](../CREDITS.md) has a last section, "The SN64 crew": Engineer: Claude (AI by Anthropic), then the cats.
+- The boot menu has a sixth row, "Credits", that rolls CREDITS.md up the screen. The text is generated from the file (`tools/make_credits.py`), so the two cannot drift; `make test` checks it. It opens with "SN64 by FantomZap" and the source location, as the notice terms ask of anything the program displays.
+- His name is nowhere in it. The handle is the credit, as on the board and the splash screen.
+- Names are kept two columns off the screen's edge.
+
+ROM 147,456 bytes, SHA-256 `0b0f9f14a336bf9d24659761761e26e4349481ccaa4ae9158c68f13ddbd64d49`. Host tests 368 checks in eight sets, nine fault builds rejected, co-simulation passes. Mock-up: [credits-screens.png](design/img/credits-screens.png). Not run on a console.

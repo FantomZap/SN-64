@@ -1,5 +1,5 @@
-"""Draw mock-ups of the boot menu's screens: the two splash screens, the cartridge-check screens
-and the compatibility-mode screens.
+"""Draw mock-ups of the boot menu's screens: the two splash screens, the cartridge-check screens,
+the compatibility-mode screens and the credits roll.
 
 The splash pictures are read from src/sn64_splash_data.c, pixel for pixel as the ROM holds them.
 The texts are read from src/sn64_cartcheck.c, so the picture cannot drift from the wording; the
@@ -9,8 +9,11 @@ host test writes with the code under test (`make test-framelock` ->
 build/n64-bootstrap/host/compat-screen.txt), numbers included. This is a drawing, not a capture:
 the menu has not run on a console or an emulator yet, and the console's own font looks different.
 
-  python tools/mock_screens.py        writes docs/design/img/cart-check-screens.png, splash-screens.png
-                                      and compat-screens.png
+The credits roll is read from src/sn64_credits_data.c, text and line kinds, and laid out as
+src/sn64_credits.c lays it out.
+
+  python tools/mock_screens.py        writes docs/design/img/cart-check-screens.png, splash-screens.png,
+                                      compat-screens.png and credits-screens.png
 """
 import argparse
 import re
@@ -84,6 +87,37 @@ def splash(title, picture):
     return s
 
 
+def credits_roll(source):
+    """[(text, kind), ...] from the generated C file."""
+    block = re.search(r'sn64_credits_lines\[\]\s*=\s*\{(.*?)\n\};', source, re.S).group(1)
+    lines = [m.group(1).replace('\\"', '"') for m in re.finditer(r'^\s*"((?:[^"\\]|\\.)*)",', block, re.M)]
+    kinds = [int(v) for v in re.findall(r'\d+', re.search(r'sn64_credits_kind\[\]\s*=\s*\{(.*?)\};', source, re.S).group(1))]
+    assert len(lines) == len(kinds), (len(lines), len(kinds))
+    return list(zip(lines, kinds))
+
+
+CREDITS_TOP, CREDITS_BOTTOM = 22, 228              # src/main.c
+
+
+def credits_end(roll):
+    middle = CREDITS_TOP + (CREDITS_BOTTOM - CREDITS_TOP - CELL) // 2
+    return CREDITS_BOTTOM + (len(roll) - 1) * ROW - middle
+
+
+def credits(title, roll, scroll):
+    """The roll at one scroll position, as draw_credits() and sn64_credits_visible() place it."""
+    s = Screen(title)
+    for i, (text, kind) in enumerate(roll):
+        y = CREDITS_BOTTOM + i * ROW - scroll
+        if y < CREDITS_TOP or y + CELL > CREDITS_BOTTOM or not text:
+            continue
+        colour = HI if kind == 1 else DIM if kind == 2 else TEXT
+        for k, ch in enumerate(text):
+            s.d.text(((16 + k * CELL + CELL / 2) * SCALE, (y + CELL / 2) * SCALE), ch, font=s.f, fill=colour, anchor='mm')
+    s.line(22, DIM, 'A: faster   B: back')
+    return s
+
+
 def sheet_of(screens, cols):
     gap, cap = 30, 60
     rows = (len(screens) + cols - 1) // cols
@@ -108,12 +142,12 @@ def main_menu(check_summary, summary_colour, cursor=0, compat=False, message='')
     s.line(4, TEXT, 'Cartridge: off')
     s.line(5, TEXT, 'Region: not decided yet')
     items = ['Start SNES cartridge', 'Controller mapping', 'Compatibility mode: ' + ('ON' if compat else 'off'),
-             'Status / diagnostics', 'Power down cartridge']
+             'Status / diagnostics', 'Power down cartridge', 'Credits']
     for i, name in enumerate(items):
         s.line(6 + i, HI if i == cursor else TEXT, ('> ' if i == cursor else '  ') + name)
-    s.line(12, WARN, message)
+    s.line(13, WARN, message)
     if compat:
-        s.line(15, WARN, 'Compatibility mode: games run slower')
+        s.line(16, WARN, 'Compatibility mode: games run slower')
     s.line(20, DIM, 'Up/Down select  A choose  B back')
     return s
 
@@ -207,6 +241,19 @@ def main():
     sheet = sheet_of(screens, 2)
     sheet.save(args.out_dir / 'compat-screens.png')
     print('wrote compat-screens.png', sheet.size)
+    # Credits roll: the menu row, the roll as it opens, part of the way through, and where it stops.
+    roll = credits_roll((HERE.parent / 'src/sn64_credits_data.c').read_text(encoding='utf-8'))
+    end = credits_end(roll)
+    screens = [
+        main_menu('none yet', DIM, cursor=5),
+        credits('The roll opens', roll, CREDITS_BOTTOM - CREDITS_TOP),
+        credits('Part of the way through', roll, CREDITS_BOTTOM - CREDITS_TOP + 37 * ROW),
+        credits('Where it stops', roll, end),
+    ]
+    screens[0].title = 'Main menu: Credits'
+    sheet = sheet_of(screens, 2)
+    sheet.save(args.out_dir / 'credits-screens.png')
+    print('wrote credits-screens.png', sheet.size)
 
 
 if __name__ == '__main__':

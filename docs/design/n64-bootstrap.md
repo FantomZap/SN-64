@@ -196,3 +196,20 @@ Evidence, all on the PC:
 - Co-simulation with the FPGA endpoint at `ROM_ADDR_BITS = 17`: the image reads back, and the lock's traffic (`FEATURES`, the `FRAME_PHASE`/`PACE` pair read and written) arrives as written; the corrupted-load run fails as required.
 
 **Not run on a console or an emulator.** The first things to look at on hardware are in the table at the end of [frame-lock.md](frame-lock.md).
+
+## Credits roll (2026-10-01)
+
+Owner: a credits section that names everyone the repository credits, then Claude, then his cats at the very end, without his own name: "Manager: Scout (Cat)" and "Arbitrary code execution: Ash & Aurora (More cats)". The last line is a record of how this session went: three messages of nothing but plus signs arrived while the frame lock was being built, sent from the number pad by the cats.
+
+- **One source.** The roll is [CREDITS.md](../../CREDITS.md) put on the screen. `tools/make_credits.py` reads its tables in order (project, then who made it), the tools paragraph, and its last section, "The SN64 crew", and writes `src/sn64_credits_data.c` (`make credits`). The opening lines are the credit line "SN64 by FantomZap" and the source location from `NOTICE`, which the licence terms ask every notice shown by the program to keep. A row added to CREDITS.md appears in the roll; `make test` fails if the roll was not regenerated.
+- **The owner's name is not in it.** The credit line carries his handle, as it does everywhere else in the project.
+- **Sixth row of the main menu, "Credits".** The text rises half a pixel a picture (about 30 seconds for the 77 lines at 60 Hz); holding A makes it eight times as quick; B or Start goes back. It stops with the crew in the middle of the screen.
+- **36 columns, not the menu's 38**, so nobody's name stands at the very edge of the screen, where a television may cut it off. Titles in the highlight colour, project names dim, people white.
+- **Drawing.** `src/sn64_credits.c` (pure C) says which lines are on screen at a scroll position. Only lines that lie wholly inside the window are drawn: libdragon's text drawing does not clip.
+- Host test `tests/test_credits.c` (in `make test`): 25 checks on the text (fits, plain 7-bit, opens with the credit line, closes with the crew in the owner's words, everyone named in CREDITS.md present) and on the geometry at every scroll position. `make test-negative` builds it with a line allowed to hang out of the window and requires it to fail.
+
+![Mock-up of the credits roll](img/credits-screens.png)
+
+Main menu layout with six rows: the message moved one row down (row 13), the two warnings to rows 15 and 16.
+
+ROM: 147,456 bytes, SHA-256 `0b0f9f14a336bf9d24659761761e26e4349481ccaa4ae9158c68f13ddbd64d49`, CIC-6102 check OK; 133,234 bytes used, 128,910 free in the v2 board's 256 KiB window. Host tests 368 checks in eight sets, nine fault builds rejected; co-simulation with the endpoint passes. Not run on a console or an emulator.

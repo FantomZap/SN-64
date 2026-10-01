@@ -15,7 +15,7 @@
 | Settings that stay | Mapping and options survive power-off, on a Controller Pak if one is in the pad | menu |
 | Region choice | Auto, NTSC or PAL. The FPGA has the switch; the menu has no item for it | menu |
 | Picture options | Sharp or smooth, full screen or exact pixels, picture position for a CRT | menu |
-| About screen | Versions, "SN64 by FantomZap", where the source is, credits for the projects it builds on | menu |
+| About screen | Versions, "SN64 by FantomZap", where the source is, credits for the projects it builds on. **The credits part was built 2026-10-01** as a "Credits" row: `CREDITS.md` as a roll ([n64-bootstrap.md](n64-bootstrap.md)). Versions are still only on the status screens | menu |
 
 ## Playing
 
@@ -86,7 +86,7 @@ What limits it:
 
 | Limit | Today | Meaning |
 |---|---|---|
-| ROM space | The program is 147,456 bytes since 2026-10-01 and no longer fits a 128 KiB window; the v2 board's window is 256 KiB, with 130 KB free | A font and graphics fit on v2 |
+| ROM space | The program is 147,456 bytes since 2026-10-01 and no longer fits a 128 KiB window; the v2 board's window is 256 KiB, with about 129 KB free | A font and graphics fit on v2 |
 | Settings storage | None on the board that the menu can write | Controller Pak first; writing the board's flash from the menu would need FPGA work |
 | Not yet run on a console | The whole menu has only been compiled and tested on the PC | The first real run may change what is worth polishing |
 

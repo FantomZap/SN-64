@@ -4,8 +4,9 @@
 #   make check      verify the ROM header and its CIC-6102 IPL2 checksum
 #   make words      convert the ROM to the FPGA ROM-window word image (.mem)
 #   make test       host tests: mapping table, cartridge-check screens, splash screens, frame lock,
-#                   sound resampler, sound output queue + ROM tools
+#                   sound resampler, sound output queue, credits roll + ROM tools
 #   make splash     regenerate src/sn64_splash_data.c from the logo files (needs PyMuPDF and Pillow)
+#   make credits    regenerate src/sn64_credits_data.c (the credits roll) from CREDITS.md and NOTICE
 #   make test-negative  the same tests with injected faults: every run must fail
 #   make clean      remove build/n64-bootstrap
 #
@@ -24,7 +25,7 @@ HOST_CC       ?= gcc
 ROM_ADDR_BITS ?= 17
 
 all: rom
-.PHONY: all rom check words splash test test-mapping test-cartcheck test-splash test-framelock test-resample test-audioout test-tools test-negative clean
+.PHONY: all rom check words splash credits test test-mapping test-cartcheck test-splash test-framelock test-resample test-audioout test-credits test-tools test-negative clean
 
 rom:
 	mkdir -p $(OUT)
@@ -37,10 +38,21 @@ words: rom
 	$(PYTHON) tools/z64_to_rom_words.py $(ROM) --rom-addr-bits $(ROM_ADDR_BITS) \
 	    --out $(OUT)/sn64_bootstrap_words.mem --manifest $(OUT)/sn64_bootstrap_words.json
 
-test: test-mapping test-cartcheck test-splash test-framelock test-resample test-audioout test-tools
+test: test-mapping test-cartcheck test-splash test-framelock test-resample test-audioout test-credits test-tools
 
 splash:
 	$(PYTHON) tools/make_splash.py
+
+credits:
+	$(PYTHON) tools/make_credits.py
+
+# Credits roll: the generated text is what CREDITS.md gives now, it fits the screen, the crew and the
+# cats come last, and no line is ever drawn across the edge of the window.
+test-credits:
+	mkdir -p $(OUT)/host
+	$(PYTHON) tools/make_credits.py --check
+	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -Isrc -o $(OUT)/host/test_credits tests/test_credits.c src/sn64_credits.c src/sn64_credits_data.c
+	$(OUT)/host/test_credits
 
 test-splash:
 	mkdir -p $(OUT)/host
@@ -93,6 +105,8 @@ test-negative:
 	if $(OUT)/host/test_resample_fault; then echo "NOT DETECTED: resampler loses its carry"; exit 1; fi
 	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -DSN64_FAULT_AOUT_NO_CARRY -Isrc -o $(OUT)/host/test_audioout_fault tests/test_audioout.c src/sn64_audioout.c src/sn64_resample.c -lm
 	if $(OUT)/host/test_audioout_fault; then echo "NOT DETECTED: sound queue loses the pairs it holds back"; exit 1; fi
+	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -DSN64_FAULT_CREDITS_OVERRUN -Isrc -o $(OUT)/host/test_credits_fault tests/test_credits.c src/sn64_credits.c src/sn64_credits_data.c
+	if $(OUT)/host/test_credits_fault; then echo "NOT DETECTED: credits line drawn across the window edge"; exit 1; fi
 	if $(PYTHON) tools/test_rom_tools.py --rom $(ROM) --work $(OUT)/tooltest-fault1 --inject-fault size-guard; then echo "NOT DETECTED: size guard"; exit 1; fi
 	if $(PYTHON) tools/test_rom_tools.py --rom $(ROM) --work $(OUT)/tooltest-fault2 --inject-fault checksum; then echo "NOT DETECTED: checksum"; exit 1; fi
 	@echo "NEGATIVE: all fault-injected runs failed as required"
