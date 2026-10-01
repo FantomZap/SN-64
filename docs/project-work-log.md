@@ -236,3 +236,9 @@ He had also asked whether the unit could be shorter with about 5 mm clear on eac
 Picture of both side by side: [compare-now-vs-short-60.png](../mechanical/sn64-v2-shell/compare-now-vs-short-60.png). Details and the before/after table: [v2-shell.md](design/v2-shell.md), "Shorter proposal".
 
 **The board is not changed.** The proposal needs the socket's fan-out routed again in 8 mm instead of 18 mm. Measured on the routed board: at most 24 of the 56 translator nets have to pass any one point sideways, which three routing layers hold in 8 mm, so it is expected to route but is not proven. Waiting for the owner's decision before touching the board.
+
+## 2026-10-01 — logo options drawn (the owner chooses)
+
+The owner asked for a simple logo that uses Nintendo-style design elements, with one-colour versions that can be embossed later. [assets/logo/make_logo.py](../assets/logo/make_logo.py) writes four options as SVG, each in colour and in one colour: buttons (four coloured buttons on two slanted pads that read SN over 64), a wordmark (heavy slanted letters over a four-colour bar), the two together, and a badge (the letters in a ring). The characters are drawn in the script as outlines, so no font is used. Preview sheet: [sn64-logo-options.png](../assets/logo/sn64-logo-options.png); notes, smallest feature sizes for embossing and the trademark position: [assets/logo/README.md](../assets/logo/README.md).
+
+Original artwork: it copies no Nintendo logo, typeface or trademark. Nothing is chosen yet, so the logo is not in the README, on the board or on the shell.

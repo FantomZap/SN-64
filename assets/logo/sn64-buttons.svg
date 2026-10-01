@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-12 -12 188 156" width="188" height="156">
+<title>SN64</title>
+<path d="M44.114,88.899 L98.114,50.899 A28,28 0 0 0 65.886,5.101 L11.886,43.101 A28,28 0 0 0 44.114,88.899 Z" fill="#D8D6DD" fill-rule="evenodd"/>
+<path d="M98.114,126.899 L152.114,88.899 A28,28 0 0 0 119.886,43.101 L65.886,81.101 A28,28 0 0 0 98.114,126.899 Z" fill="#D8D6DD" fill-rule="evenodd"/>
+<circle cx="28" cy="66" r="22" fill="#1E9B55"/>
+<path d="M60,0 H30 A30,30 0 0 0 30,60 A10,10 0 0 1 30,80 H0 V100 H30 A30,30 0 0 0 30,40 A10,10 0 0 1 30,20 H60 Z" fill="#FFFFFF" fill-rule="evenodd" transform="matrix(0.27 0 0 0.27 19.9 52.5)"/>
+<circle cx="82" cy="28" r="22" fill="#2449B8"/>
+<path d="M0,0 H24 L50,56.522 V0 H70 V100 H46 L20,43.478 V100 H0 Z" fill="#FFFFFF" fill-rule="evenodd" transform="matrix(0.27 0 0 0.27 72.55 14.5)"/>
+<circle cx="82" cy="104" r="22" fill="#F4B400"/>
+<path d="M54,0 V20 H30 A10,10 0 0 0 20,30 V41.716 A30,30 0 1 1 0,70 V30 A30,30 0 0 1 30,0 Z M30,60 A10,10 0 1 0 30,80 A10,10 0 1 0 30,60 Z" fill="#25252C" fill-rule="evenodd" transform="matrix(0.27 0 0 0.27 73.9 90.5)"/>
+<circle cx="136" cy="66" r="22" fill="#E0352B"/>
+<path d="M36,0 H60 V58 H68 V78 H60 V100 H40 V78 H0 V58 Z M40,32.222 V58 H24 Z" fill="#FFFFFF" fill-rule="evenodd" transform="matrix(0.27 0 0 0.27 126.82 52.5)"/>
+</svg>
