@@ -6,7 +6,7 @@
     {
       "label": "verilator-version",
       "argv": [
-        "C:\\Users\\RyanB\\.codex\\tools\\oss-cad-suite-20260928\\oss-cad-suite\\bin\\verilator_bin.EXE",
+        "%USERPROFILE%\\.codex\\tools\\oss-cad-suite-20260928\\oss-cad-suite\\bin\\verilator_bin.EXE",
         "--version"
       ],
       "exit_code": 0,
@@ -15,7 +15,7 @@
     {
       "label": "simulation-build",
       "argv": [
-        "C:\\Users\\RyanB\\.codex\\tools\\oss-cad-suite-20260928\\oss-cad-suite\\bin\\verilator_bin.EXE",
+        "%USERPROFILE%\\.codex\\tools\\oss-cad-suite-20260928\\oss-cad-suite\\bin\\verilator_bin.EXE",
         "--binary",
         "--timing",
         "--build-jobs",
@@ -24,7 +24,7 @@
         "--top-module",
         "tb_console_boot",
         "--Mdir",
-        "C:/Users/RyanB/.codex/tools/sn64-build/cartridge-bus",
+        "%USERPROFILE%/.codex/tools/sn64-build/cartridge-bus",
         "-Ibuild/generated/snestang/src",
         "-Ibuild/generated/snestang/src/spc700",
         "-Ibuild/generated/snestang/src/65C816",
@@ -39,7 +39,7 @@
     {
       "label": "ntsc-mode",
       "argv": [
-        "C:\\Users\\RyanB\\.codex\\tools\\sn64-build\\cartridge-bus\\Vtb_console_boot.exe"
+        "%USERPROFILE%\\.codex\\tools\\sn64-build\\cartridge-bus\\Vtb_console_boot.exe"
       ],
       "exit_code": 0,
       "log_sha256": "1e61e914ac16758abdfd84f4252a92c56f87651f7f9ccd0b35cdb621660f91a7"
@@ -47,7 +47,7 @@
     {
       "label": "pal-mode-bit",
       "argv": [
-        "C:\\Users\\RyanB\\.codex\\tools\\sn64-build\\cartridge-bus\\Vtb_console_boot.exe",
+        "%USERPROFILE%\\.codex\\tools\\sn64-build\\cartridge-bus\\Vtb_console_boot.exe",
         "+pal"
       ],
       "exit_code": 0,
@@ -56,7 +56,7 @@
     {
       "label": "corrupt-cartridge-read",
       "argv": [
-        "C:\\Users\\RyanB\\.codex\\tools\\sn64-build\\cartridge-bus\\Vtb_console_boot.exe",
+        "%USERPROFILE%\\.codex\\tools\\sn64-build\\cartridge-bus\\Vtb_console_boot.exe",
         "+corrupt_read"
       ],
       "exit_code": 1,
@@ -65,7 +65,7 @@
     {
       "label": "wram-build",
       "argv": [
-        "C:\\Users\\RyanB\\.codex\\tools\\oss-cad-suite-20260928\\oss-cad-suite\\bin\\verilator_bin.EXE",
+        "%USERPROFILE%\\.codex\\tools\\oss-cad-suite-20260928\\oss-cad-suite\\bin\\verilator_bin.EXE",
         "--binary",
         "--timing",
         "--build-jobs",
@@ -74,7 +74,7 @@
         "--top-module",
         "tb_wram_bus",
         "--Mdir",
-        "C:/Users/RyanB/.codex/tools/sn64-build/cartridge-bus/wram-bus",
+        "%USERPROFILE%/.codex/tools/sn64-build/cartridge-bus/wram-bus",
         "-Ibuild/generated/snestang/src",
         "-Ibuild/generated/snestang/src/spc700",
         "-Ibuild/generated/snestang/src/65C816",
@@ -89,7 +89,7 @@
     {
       "label": "wram-bus",
       "argv": [
-        "C:\\Users\\RyanB\\.codex\\tools\\sn64-build\\cartridge-bus\\wram-bus\\Vtb_wram_bus.exe"
+        "%USERPROFILE%\\.codex\\tools\\sn64-build\\cartridge-bus\\wram-bus\\Vtb_wram_bus.exe"
       ],
       "exit_code": 0,
       "log_sha256": "f5526d61d7ef1d4db69214cec2c451587a25bbde3575ab52a56af3fa12b086d1"
@@ -97,7 +97,7 @@
     {
       "label": "yosys-version",
       "argv": [
-        "C:\\Users\\RyanB\\.codex\\tools\\oss-cad-suite-20260928\\oss-cad-suite\\bin\\yosys.EXE",
+        "%USERPROFILE%\\.codex\\tools\\oss-cad-suite-20260928\\oss-cad-suite\\bin\\yosys.EXE",
         "-V"
       ],
       "exit_code": 0,
@@ -106,7 +106,7 @@
     {
       "label": "synthesis",
       "argv": [
-        "C:\\Users\\RyanB\\.codex\\tools\\oss-cad-suite-20260928\\oss-cad-suite\\bin\\yosys.EXE",
+        "%USERPROFILE%\\.codex\\tools\\oss-cad-suite-20260928\\oss-cad-suite\\bin\\yosys.EXE",
         "-Q",
         "-T",
         "-p",
@@ -118,7 +118,7 @@
     {
       "label": "nextpnr-version",
       "argv": [
-        "C:\\Users\\RyanB\\.codex\\tools\\oss-cad-suite-20260928\\oss-cad-suite\\bin\\nextpnr-ecp5.EXE",
+        "%USERPROFILE%\\.codex\\tools\\oss-cad-suite-20260928\\oss-cad-suite\\bin\\nextpnr-ecp5.EXE",
         "--version"
       ],
       "exit_code": 0,
@@ -127,7 +127,7 @@
     {
       "label": "placement-route",
       "argv": [
-        "C:\\Users\\RyanB\\.codex\\tools\\oss-cad-suite-20260928\\oss-cad-suite\\bin\\nextpnr-ecp5.EXE",
+        "%USERPROFILE%\\.codex\\tools\\oss-cad-suite-20260928\\oss-cad-suite\\bin\\nextpnr-ecp5.EXE",
         "--85k",
         "--package",
         "CABGA381",

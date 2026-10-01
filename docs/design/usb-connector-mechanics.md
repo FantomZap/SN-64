@@ -8,7 +8,7 @@ Use **JAE DX07S016JA3R1500** as the connector baseline for the side-facing USB 2
 - [Official JAE release][jae-release] identifies JA1/JA3 variants. JAE engineering drawing **SJ122205, revision 2, 18 December 2020**, was obtained as a [manufacturer-authored PDF on distributor Comet's server][jae-drawing]; both pages were visually checked. It is not hosted on JAE's own domain. The drawing title is `DX07S016JA3`; the full orderable suffix comes from the source BOM value/release family.
 - [JAE brochure MB-0350-2][jae-brochure], also distributor-hosted, corroborates the family dimensions. Referenced handling document `JAHL-30413` was not obtained.
 
-Local evidence lives in the original workspace, `C:/Users/RyanB/Documents/Codex/SN 64 Project/.local/usb-research/`: `JAE-SJ122205-rev2-JA3.pdf`, rendered pages `JA3-1.png`/`JA3-2.png`, `sc64v2.xml`, and `sc64-usb-source.json`. These are scratch evidence, not packaged manufacturing deliverables.
+Local evidence lives in the original workspace, `%USERPROFILE%/Documents/Codex/SN 64 Project/.local/usb-research/`: `JAE-SJ122205-rev2-JA3.pdf`, rendered pages `JA3-1.png`/`JA3-2.png`, `sc64v2.xml`, and `sc64-usb-source.json`. These are scratch evidence, not packaged manufacturing deliverables.
 
 The downloaded drawing is 360,983 bytes; SHA-256: `1472b5aeb53034e2ba96b989faafaebd5e9defc49b932e70ab029df6f92d6bbf`.
 

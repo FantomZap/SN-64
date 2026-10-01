@@ -33,7 +33,7 @@ When the console powers on, it runs whatever program the cartridge holds. For SN
 
 Toolchain SHA-256: `bd201c35afee4aceb9d2a80c6dc9d25eb2a4d426b1b26ef38e33881641b4d1d0`, matching the digest GitHub publishes for the asset. Install locations:
 
-- toolchain: `C:\Users\RyanB\.codex\tools\libdragon-gcc-toolchain-20260915\n64inst` (this is `N64_INST`)
+- toolchain: `%USERPROFILE%\.codex\tools\libdragon-gcc-toolchain-20260915\n64inst` (this is `N64_INST`)
 - libdragon source: `...\libdragon-trunk-e356bf3`
 
 Everything runs from Git Bash and w64devkit 2.10.0 with no admin rights, Docker, WSL or MSYS2. libdragon's tools Makefile asks `pacman` for an MSYS2 date; the setup script passes `MSYS2_AGE=20260101`, which turns on libdragon's own `strndup` fallback. The libdragon build shows only upstream deprecation warnings. No code was vendored into `fpga/vendor/`.

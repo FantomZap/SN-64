@@ -1,7 +1,7 @@
 (export
 	(version "E")
 	(design
-		(source "C:\\Users\\RyanB\\.claude\\projects\\SN64\\hardware\\sn64-socket\\sn64-socket.kicad_sch")
+		(source "%USERPROFILE%\\.claude\\projects\\SN64\\hardware\\sn64-socket\\sn64-socket.kicad_sch")
 		(date "2026-09-29T20:49:18")
 		(tool "Eeschema 10.0.6")
 		(sheet

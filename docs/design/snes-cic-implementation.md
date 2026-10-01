@@ -101,7 +101,7 @@ Integration notes:
 Commands (repository root, tool environment as in `CLAUDE.local.md`):
 
 ```powershell
-verilator_bin --binary --timing --build-jobs 4 -Wno-fatal --top-module tb_snes_cic_lock --Mdir C:/Users/RyanB/.claude/projects/SN64/build/verilator-snes-cic fpga/rtl/sn64_snes_cic_lock.sv fpga/tests/tb_snes_cic_lock.sv
+verilator_bin --binary --timing --build-jobs 4 -Wno-fatal --top-module tb_snes_cic_lock --Mdir %USERPROFILE%/.claude/projects/SN64/build/verilator-snes-cic fpga/rtl/sn64_snes_cic_lock.sv fpga/tests/tb_snes_cic_lock.sv
 build/verilator-snes-cic/Vtb_snes_cic_lock.exe
 # fault injection: same with +define+SN64_FAULT_CIC_NO_COMPARE (Mdir build/verilator-snes-cic-fault)
 #                  and +define+SN64_FAULT_CIC_MANGLE (Mdir build/verilator-snes-cic-mangle)

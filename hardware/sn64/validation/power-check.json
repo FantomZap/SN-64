@@ -2,7 +2,7 @@
   "status": "pass",
   "generated_at_utc": "2026-09-30T03:28:40.242388+00:00",
   "scope": "independent power-sheet static connectivity and divider arithmetic review",
-  "project_checked": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\hardware\\sn64",
+  "project_checked": "%USERPROFILE%\\.claude\\projects\\SN64\\hardware\\sn64",
   "checks_passed": 23,
   "checks_failed": 0,
   "inputs_sha256": {

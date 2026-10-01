@@ -15,7 +15,7 @@
 # Override locations with SN64_TOOLS / W64DEVKIT_BIN if needed.
 set -euo pipefail
 
-TOOLS="${SN64_TOOLS:-/c/Users/RyanB/.codex/tools}"
+TOOLS="${SN64_TOOLS:-$HOME/.codex/tools}"
 W64="${W64DEVKIT_BIN:-$TOOLS/w64devkit-2.10.0/w64devkit/bin}"
 
 TC_TAG="toolchain-continuous-prerelease"

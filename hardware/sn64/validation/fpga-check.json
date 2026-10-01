@@ -3,10 +3,10 @@
   "tool": "hardware/sn64/tools/verify_fpga_sheet.py",
   "scope": "static netlist/LPF/CSV consistency of the FPGA sheet; not electrical, timing or hardware validation",
   "inputs": {
-    "project": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\hardware\\sn64",
-    "board_top": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\fpga\\rtl\\sn64_board_top.sv",
-    "lpf": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\fpga\\constraints\\sn64_board.lpf",
-    "csv": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\hardware\\sn64\\interfaces\\fpga-pin-map.csv",
+    "project": "%USERPROFILE%\\.claude\\projects\\SN64\\hardware\\sn64",
+    "board_top": "%USERPROFILE%\\.claude\\projects\\SN64\\fpga\\rtl\\sn64_board_top.sv",
+    "lpf": "%USERPROFILE%\\.claude\\projects\\SN64\\fpga\\constraints\\sn64_board.lpf",
+    "csv": "%USERPROFILE%\\.claude\\projects\\SN64\\hardware\\sn64\\interfaces\\fpga-pin-map.csv",
     "lattice_csv": "build\\fpga-sheet\\datasheets\\ECP5U-85-pinout.csv"
   },
   "result": "pass",

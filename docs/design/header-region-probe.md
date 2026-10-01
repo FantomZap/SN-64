@@ -120,7 +120,7 @@ That is 17 cycles per byte and 64 reads (two passes), about 44 µs per cartridge
 Commands, from the repo root, after the tool environment in `CLAUDE.local.md`:
 
 ```powershell
-verilator_bin --binary --timing --build-jobs 4 -Wno-fatal --top-module tb_header_probe --Mdir C:/Users/RyanB/.claude/projects/SN64/build/hdrprobe-sim fpga/rtl/sn64_header_probe.sv fpga/tests/tb_header_probe.sv
+verilator_bin --binary --timing --build-jobs 4 -Wno-fatal --top-module tb_header_probe --Mdir %USERPROFILE%/.claude/projects/SN64/build/hdrprobe-sim fpga/rtl/sn64_header_probe.sv fpga/tests/tb_header_probe.sv
 build/hdrprobe-sim/Vtb_header_probe.exe
 # fault builds (each must FAIL): add +define+SN64_FAULT_SKIP_CHECKSUM or +define+TB_SHORT_ACCESS
 yosys -Q -T -p "plugin -i slang; read_slang --top sn64_header_probe fpga/rtl/sn64_header_probe.sv; scratchpad -set abc9.xaiger 1; synth_ecp5 -top sn64_header_probe -json build/hdrprobe-sn64_header_probe.json; stat; check -assert"

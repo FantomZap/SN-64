@@ -60,6 +60,7 @@ Original carts, Super EverDrive X5/X6 and FXPAK Pro are first-class targets. Man
   - ULX3S MIT plus a silkscreen-logo condition.
 - **KiCad:** edit the native files. Never rerun `create_interface_draft.py` or `add_usb_programmer.py` with `--force`; they regenerate whole sheets.
 - Never send files to PCBWay or place orders without the user's explicit go-ahead.
+- **No local paths in the repository (owner, 2026-10-01; the repository is public).** KiCad netlists, check reports and notes pick up absolute paths that contain the Windows user folder. Run `python tools/scrub_local_paths.py` before committing: it rewrites that prefix to `%USERPROFILE%`, `$env:USERPROFILE` or `$HOME`, and `--check` only reports. A local pre-commit hook refuses commits that still contain it. Tool locations for this PC belong in `CLAUDE.local.md`, which is not committed.
 
 ## Checks to run after changes (from repo root)
 
@@ -94,6 +95,6 @@ Baselines (2026-09-29, after the HDMI removal; all five child sheets attached): 
    - (`docs/design/power-architecture.md`)
 4. Add bridge and host logic to the synthesis/route evaluation, then fix the FPGA package, pins and memory.
 5. Complete the protected schematic, then PCB layout (six layers preferred to evaluate), then the FreeCAD enclosure with the side USB-C opening, then the PCBWay prototype package.
-6. **PCB routing, next steps:** loosen the translator row (the congested area), finish the 75 open nets and 219 plane pads by hand in KiCad or with KiCadRoutingTools (`C:\Users\RyanB\Tools\KiCadRoutingTools`, venv `C:\Users\RyanB\Tools\krt-venv`; pin it with `hardware/sn64/tools/fab-pcbway.txt`), settle PCBWay annular ring (6 mil) and spacing (5 mil) against the board's 0.125 / 0.1 mm rules with the quote. Freerouting is the fallback, not the default.
+6. **PCB routing, next steps:** loosen the translator row (the congested area), finish the 75 open nets and 219 plane pads by hand in KiCad or with KiCadRoutingTools (`%USERPROFILE%\Tools\KiCadRoutingTools`, venv `%USERPROFILE%\Tools\krt-venv`; pin it with `hardware/sn64/tools/fab-pcbway.txt`), settle PCBWay annular ring (6 mil) and spacing (5 mil) against the board's 0.125 / 0.1 mm rules with the quote. Freerouting is the fallback, not the default.
 
 Key docs: `README.md` (index), `docs/architecture.md`, `docs/superpowers/plans/2026-09-28-sn64-engineering-plan.md`, `docs/project-work-log.md`, `fpga/README.md`, `hardware/sn64/README.md`, `mechanical/README.md`.

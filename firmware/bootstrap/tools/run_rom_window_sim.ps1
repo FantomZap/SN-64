@@ -11,9 +11,9 @@ param(
     [string]$Mdir = 'build/n64-bootstrap/verilator'
 )
 $ErrorActionPreference = 'Stop'
-. 'C:\Users\RyanB\.codex\tools\oss-cad-suite-20260928\oss-cad-suite\environment.ps1'
-$env:PATH = 'C:\Users\RyanB\.codex\tools\w64devkit-2.10.0\w64devkit\bin;' + $env:PATH
-$env:VERILATOR_ROOT = 'C:\Users\RyanB\.codex\tools\oss-cad-suite-20260928\oss-cad-suite\share\verilator'
+. "$env:USERPROFILE\.codex\tools\oss-cad-suite-20260928\oss-cad-suite\environment.ps1"
+$env:PATH = "$env:USERPROFILE\.codex\tools\w64devkit-2.10.0\w64devkit\bin;" + $env:PATH
+$env:VERILATOR_ROOT = "$env:USERPROFILE\.codex\tools\oss-cad-suite-20260928\oss-cad-suite\share\verilator"
 
 $serv = Get-ChildItem fpga/vendor/summercart64/fw/rtl/serv/*.v | ForEach-Object { 'fpga/vendor/summercart64/fw/rtl/serv/' + $_.Name }
 $src = @('fpga/vendor/summercart64/fw/rtl/memory/mem_bus.sv', 'fpga/rtl/sn64_n64_reg_bus.sv',

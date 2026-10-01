@@ -118,7 +118,7 @@ The SNESTang default makes the DSP 0.56 % fast. `dsp.vh` keeps the original 4096
 Commands, from the repo root with the tool environment in `CLAUDE.local.md`. `evaluate.py --mode sim` runs all of these.
 
 ```powershell
-verilator_bin --binary --timing --build-jobs 4 -Wno-fatal --top-module tb_audio_mix --Mdir C:/Users/RyanB/.claude/projects/SN64/build/r3-audio/mix fpga/rtl/sn64_cdc.sv fpga/rtl/sn64_i2s_rx.sv fpga/rtl/sn64_audio_mix.sv fpga/tests/tb_audio_mix.sv
+verilator_bin --binary --timing --build-jobs 4 -Wno-fatal --top-module tb_audio_mix --Mdir %USERPROFILE%/.claude/projects/SN64/build/r3-audio/mix fpga/rtl/sn64_cdc.sv fpga/rtl/sn64_i2s_rx.sv fpga/rtl/sn64_audio_mix.sv fpga/tests/tb_audio_mix.sv
 build/r3-audio/mix/Vtb_audio_mix.exe +adc_ppm=500
 build/r3-audio/mix/Vtb_audio_mix.exe +adc_ppm=-500 +duty=35
 build/r3-audio/mix/Vtb_audio_mix.exe +adc_ppm=0 +snes_rate=32180

@@ -55,7 +55,7 @@ from build123d import *
 
 # sourced
 SC64_REL = "references/downloads/summercart64/hw/shell/injection mold/sc64_shell.stp"
-SC64_ROOTS = ("", "../../", "C:/Users/RyanB/.claude/projects/SN64/")   # cwd, script folder, this PC
+SC64_ROOTS = ("", "../../")             # repository root (cwd) or the script folder
 DZ = 0.6                                # SummerCart64 shell frame -> board mid-plane at z = 0
 BOARD_T, TONGUE_W, TONGUE_H, BOARD_W_SLOT = 1.2, 64.5, 10.5, 101.8
 SOCK_L, SOCK_D, EAR_X, EAR_HOLE, ROW_Z, PIN_SPAN = 99.0, 11.25, 47.5, 3.2, 3.5, 85.0

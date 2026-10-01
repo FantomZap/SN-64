@@ -40,7 +40,7 @@
     }
   },
   "logs": [
-    "C:\\Users\\RyanB\\.claude\\projects\\SN64\\build\\route-board-v2\\synth.log",
-    "C:\\Users\\RyanB\\.claude\\projects\\SN64\\build\\route-board-v2\\pnr.log"
+    "%USERPROFILE%\\.claude\\projects\\SN64\\build\\route-board-v2\\synth.log",
+    "%USERPROFILE%\\.claude\\projects\\SN64\\build\\route-board-v2\\pnr.log"
   ]
 }
