@@ -277,3 +277,19 @@ Two things found on the way:
 - Imported faces keep the importer's own placement, so scaling them moves them unless it is done before measuring and centring. The shell script does it in that order.
 
 Open: at this size the characters on the buttons have 0.58 mm strokes and a 0.46 mm opening, which a filament printer will not hold. The plain-button logo file is the fallback (one constant in the script).
+
+## 2026-10-01 — shell in two halves with mounting for the board
+
+The owner asked whether the shell has proper mounting holes for the board, and whether the screw posts are shouldered so the board is held between the two halves. It had neither: the shell was one fused piece, and only the two lower board holes had posts (SummerCart64's own).
+
+[sn64_v2_shell.py](../mechanical/sn64-v2-shell/sn64_v2_shell.py) now builds two halves, like an N64 cartridge:
+
+- The label-side half carries the board; the back half closes over it. They part at the board's back face, where SummerCart64's halves part.
+- At board holes H1, H2, H5 and H6 a post on each side ends flat against the board, so the screw clamps the board between two shoulders at a fixed height. H1 and H2 keep SummerCart64's posts.
+- Two pins on the label-side half go through board holes H3 and H4 and locate the board sideways.
+- Two more screws go through the back half into the brackets under the socket ears. The brackets now belong to the label-side half.
+- Six screws, all from the back. Hole sizes are for M2 x 8 thread-forming screws (assumed): SummerCart64's 2.5 mm pilot would need a screw too thick to pass the board's 2.5 mm holes. Its post dimensions are recorded in [dimensions.md](dimensions.md).
+
+Checked in the model: each half is one valid solid; they do not overlap; the back half lifts straight off; the real board with its socket lifts straight out of the label-side half; every screw axis is open down to its pilot, has a full seat under the head and plastic for the thread; all six board holes have a full shoulder on both faces; no board part touches or comes within 0.3 mm of a post, pin or bracket. Pictures: [halves-open.png](../mechanical/sn64-v2-shell/halves-open.png), [half-front-with-board.png](../mechanical/sn64-v2-shell/half-front-with-board.png), [section-screw-post.png](../mechanical/sn64-v2-shell/section-screw-post.png).
+
+Not done: a lip along the seam above the N64 body, any print or physical trial, and the socket leg forming, which waits for a sample (see the open list in [v2-shell.md](design/v2-shell.md)).

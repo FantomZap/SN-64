@@ -110,3 +110,17 @@ Measured by the owner on an original N64 and on a ModRetro M64: **30 mm** from t
 Derived: the bottom face of the SummerCart64 shell is 12.31 mm below the board's tongue shoulders (its STEP), so the console's top surface is **17.7 mm above the shoulders** (17.69 in the shell model). This replaces the assumed 25 mm (28 mm before that). Cross-check: SummerCart64's own USB-C opening spans 25.8 to 39.2 mm above the shoulders, 8.1 mm above this surface, and that port is made to be used while the cartridge sits in the console.
 
 Not measured: the shape of the top surface around the hole and how far a part wider than the hole can come down before it meets the console. The shell starts to widen toward its cap 26 mm above the surface (40 mm before the board was shortened on 2026-10-01; `docs/design/v2-shell.md`).
+
+## SummerCart64 shell screw posts (measured on its STEP, 2026-10-01)
+
+Measured on `references/downloads/summercart64/hw/shell/injection mold/sc64_shell.stp` at its two mounting holes, in our frame (board mid-plane at z = 0, board faces at -0.6 and +0.6):
+
+| Feature | Value (mm) |
+|---|---|
+| Label-side post | 5.0 diameter, from the inside of the wall (z -6.4) to the board's front face (z -0.6) |
+| Hole in it | 2.5 diameter, blind, the full 5.8 length |
+| Back post | starts at the board's back face (z +0.6); hole tapering from 3.25 to about 2.7 |
+| Screw head seat | flat ring at z 3.1, 2.5 above the board |
+| Head well | 5.57 at the seat widening to 5.83, open to the back of the shell |
+
+So in SummerCart64 the board is clamped between the two post ends and the screw head sits deep in a well, as on a Nintendo cartridge. Its build guide gives M2 x 10 and M2 x 8 screws for its 3D-printed shell ([docs/06_build_guide.md](https://github.com/Polprzewodnikowy/SummerCart64/blob/main/docs/06_build_guide.md), read 2026-10-01). The 2.5 mm hole of the injection-mould model would need a screw of about 3 mm, which cannot pass a 2.5 mm board hole, so the SN64 shell keeps the shape of these posts and sizes the holes for M2 (assumed values in `docs/design/v2-shell.md`).

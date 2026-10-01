@@ -5,7 +5,7 @@ like an N64 cartridge (rounded front corners, grooves, the real port opening), a
 holds the SNES cartridge must be smooth and round, in Nintendo's own design language.
 
 How it is built
-  lower body   the real N64-shaped shell of SummerCart64, both halves fused, from its bottom up to
+  lower body   the real N64-shaped shell of SummerCart64, its two halves, from its bottom up to
                24.5 mm above the board's shoulders: port opening, feet, board ledges and the two
                mounting bosses exactly as SummerCart64 has them. One support post that would sit
                under our FPGA and 1.3 mm of the right locating post are removed.
@@ -16,6 +16,11 @@ How it is built
   cap          same outline language (9 mm front corners, 6 mm back corners), 5 mm walls around a
                pocket for the SNES cartridge, rim arched like the top of an N64 cartridge and
                filleted.
+  halves       the shell is two parts, like an N64 cartridge: the label-side half carries the board,
+               the back half closes over it. They part at the board's back face, where SummerCart64's
+               halves part. Six screws from the back hold them: SummerCart64's own two at the lower
+               board holes, two more through the board's upper holes, two into the brackets under
+               the socket ears. Two pins on the label-side half go through the remaining board holes.
   logo         the SN64 logo stamped into the front of the cap the way a Game Boy cartridge has its
                logo (owner, 2026-10-01): a pill-shaped pocket 19 mm high and 0.6 mm deep, which is
                the inside of the logo's ring, with the buttons and letters of
@@ -124,14 +129,35 @@ LOGO_H = 19.0                           # height of the pocket; the flat face is
 LOGO_UP = 12.25                         # its centre above the board's top edge: the middle of the flat face
 LOGO_DEPTH = 0.6                        # depth of the pocket
 BOARD_W_WIDE, NECK_W = 111.0, 88.0
+# two halves and their fasteners (2026-10-01). The parting plane is the board's back face, as in
+# SummerCart64's shell.
+PART_Z = DZ
+# Screw posts shaped like SummerCart64's own at the two lower board holes (measured on its STEP): on the
+# label side a 5.0 post that ends against the board's front face, on the back a post that ends against
+# its back face, with the screw head in a well 2.5 above the board. The board is clamped between the
+# two post ends, so its height in the shell is fixed. Hole sizes are for M2 thread-forming screws, the
+# size SummerCart64's build guide uses, because the board's holes are 2.5: SummerCart64's own 2.5 pilot
+# would need a screw too thick to pass them. ASSUMED until a screw is chosen: pilot 1.7, clearance 2.4,
+# well 4.6 for a pan head up to 4.0.
+PILOT_D, PILOT_DEPTH, POST_F_D = 1.7, 5.0, 5.0
+SHANK_D, WELL_D, SEAT_UP, POST_B_D = 2.4, 4.6, 2.5, 7.0
+LOWER_HOLES = [(-47.5, -3.25), (47.5, -3.25)]   # board holes H1 and H2: SummerCart64's posts, pilot made smaller
+HOLE56_X = 52.4                         # board holes H5 and H6 (their height depends on the variant)
+PIN_HOLES = [(-47.5, 6.5), (47.5, 9.5)]     # board holes H3 and H4 take locating pins
+PIN_D, PIN_UP = 2.3, 0.4                # pin in a 2.5 hole, standing this far above the board's back face
+CAP_SCREW_X, CAP_POST_D = 57.5, 8.0     # two screws through the back half into the socket ear brackets
+BRACKET_Z = 7.0                         # the ear brackets reach this far each side of the board's mid-plane
+BRACKET_GAP = 0.25                      # between the brackets (label-side half) and the back half's wall
 
 VARIANT = "board-60"                    # "board-60": the board as it is; "board-70": the taller one before 2026-10-01
 if VARIANT == "board-60":               # hardware/sn64-v2 today
     USB_CLEAR = 5.0                     # plain wall above the USB-C window before the flare starts (owner)
     Y_BOARD_TOP, Y_WIDE0, Y_WIDE1, Y_USB = 60.0, 26.4, 50.0, 32.5
+    Y_HOLE56 = 44.5
     Y_F0 = Y_USB + PLUG_W / 2 + USB_CLEAR   # 44.0
 elif VARIANT == "board-70":             # before the refit of 2026-10-01
     Y_BOARD_TOP, Y_WIDE0, Y_WIDE1, Y_USB = 70.0, 32.0, 60.0, 50.0
+    Y_HOLE56 = 38.0
     Y_F0 = 57.5                         # S-curve flare starts 1 mm above the USB-C window
 else:
     raise ValueError(f"unknown VARIANT {VARIANT!r}")
@@ -171,6 +197,16 @@ def box(x, y0, y1, z, w, t):
 def y_cyl(x, y0, y1, z, d):
     """Cylinder of diameter d along Y."""
     return Pos(x, (y0 + y1) / 2, z) * Cylinder(d / 2, y1 - y0, rotation=(90, 0, 0))
+
+
+def z_cyl(x, y, z0, z1, d):
+    """Cylinder of diameter d along Z."""
+    return Pos(x, y, (z0 + z1) / 2) * Cylinder(d / 2, z1 - z0)
+
+
+def inset(pts, d):
+    """Outline control points moved d toward the middle in X."""
+    return [(x - d, z) for x, z in pts]
 
 
 def outline(y, pts):
@@ -283,11 +319,20 @@ def build():
     halves = [Pos(0, 0, DZ) * s for s in sc.solids()]
     n64 = halves[0] + halves[1]
     y_bot = n64.bounding_box().min.Y
+    back_sc, front_sc = sorted(halves, key=lambda h: h.bounding_box().max.Z, reverse=True)
 
-    # lower body: the real N64-shaped shell up to Y_CUT
-    lower = n64 & box(0, y_bot - 1, Y_CUT, 0, 130, 30)
-    lower = lower - box(-8.5, 17.5, Y_CUT + 0.1, 0.6, 7.0, 13.8)      # support post under our FPGA (both halves)
-    lower = lower - box(50.15, 20.4, 21.95, 0.0, 1.6, 1.6)            # right locating post: our notch starts 1.3 mm higher
+    # lower body: the two real halves of the N64-shaped shell up to Y_CUT
+    keep = box(0, y_bot - 1, Y_CUT, 0, 130, 30)
+    drop = (box(-8.5, 17.5, Y_CUT + 0.1, 0.6, 7.0, 13.8)             # support post under our FPGA (both halves)
+            + box(50.15, 20.4, 21.95, 0.0, 1.6, 1.6))                 # right locating post: our notch starts 1.3 mm higher
+    front = (front_sc & keep) - drop
+    back = (back_sc & keep) - drop
+    for x, y in LOWER_HOLES:                                          # SummerCart64's posts at H1, H2: pilot for our screw
+        front = front + z_cyl(x, y, -6.4, -BOARD_T / 2, 2.6) - z_cyl(x, y, -BOARD_T / 2 - PILOT_DEPTH, 0, PILOT_D)
+    for x, y in PIN_HOLES:                                            # locating pins through board holes H3, H4
+        front = front + z_cyl(x, y, -6.5, -BOARD_T / 2, POST_F_D) + z_cyl(x, y, -BOARD_T / 2, BOARD_T / 2 + PIN_UP, PIN_D)
+        back = back + z_cyl(x, y, BOARD_T / 2, 7.7, POST_F_D)
+        back = back - z_cyl(x, y, 0, BOARD_T / 2 + PIN_UP + 0.4, PIN_D + 0.4)
 
     # stem: the shell's own outline at Y_CUT (grooves and all) extruded to the flare
     ring = sorted(bd.section(n64, section_by=Plane(origin=(0, Y_CUT, 0), x_dir=(1, 0, 0), z_dir=(0, 1, 0))).faces(),
@@ -301,24 +346,50 @@ def build():
     upper = outer - inner - pocket
     upper = upper - box(0, Y_TOP - WALL - 1, Y_TOP + 1, 0, SOCK_L + 0.5, SOCK_D + 0.5)          # socket opening
     upper = upper - box(W_STEM / 2 - 1.0, Y_USB - PLUG_W / 2, Y_USB + PLUG_W / 2, USB_ZC, 5.0, PLUG_T)  # USB-C window
-    # brackets under the socket ears, reaching out to the flared wall
-    x0, x1 = NECK_W / 2 + 0.5, CAP_HW
-    brackets = None
-    for s in (-1, 1):
-        b = box(s * (x0 + x1) / 2, Y_SOCK0 - 10, Y_SOCK0, 0, x1 - x0, 14.0)
-        b = b - y_cyl(s * EAR_X, Y_SOCK0 - 8, Y_SOCK0 + 1, 0, 2.5)                               # ear screw pilot
-        brackets = b if brackets is None else brackets + b
-    upper = upper + (brackets & outer)
     logo = logo_recess(ZC - CAP_HT)
     if logo is not None:
         upper = upper - logo[0] + logo[1]
-    shell = lower + upper
+
+    # the two halves part at the board's back face
+    front_space = Pos(0, 60, PART_Z - 100) * Box(400, 400, 200)
+    back_space = Pos(0, 60, PART_Z + 100) * Box(400, 400, 200)
+    upper_front, upper_back = upper & front_space, upper & back_space
+
+    # brackets under the socket ears, part of the label-side half: below the parting plane they run into
+    # the flared wall, above it they stand free of the back half's wall
+    x0, x1 = NECK_W / 2 + 0.5, CAP_HW
+    blocks = None
+    for s in (-1, 1):
+        blk = box(s * (x0 + x1) / 2, Y_SOCK0 - 10, Y_SOCK0, 0, x1 - x0, 2 * BRACKET_Z)
+        blk = blk - y_cyl(s * EAR_X, Y_SOCK0 - 8, Y_SOCK0 + 1, 0, 2.5)                           # ear screw pilot
+        blocks = blk if blocks is None else blocks + blk
+    room = (prism(Y_CUT, Y_F0 + 1, inset(STEM_I, BRACKET_GAP))
+            + flare(Y_F0 + 1, Y_F1 + 1, inset(STEM_I, BRACKET_GAP), inset(CAP_I, BRACKET_GAP))
+            + prism(Y_F1 + 1, Y_TOP - WALL, inset(CAP_I, BRACKET_GAP)))
+    upper_front = upper_front + (blocks & outer & front_space) + (blocks & room & back_space)
+
+    # screws from the back: through board holes H5 and H6, and into the ear brackets
+    for s in (-1, 1):
+        x, zb = s * HOLE56_X, BOARD_T / 2
+        upper_front = upper_front + (z_cyl(x, Y_HOLE56, -14, -zb, POST_F_D) & outer)
+        upper_front = upper_front - z_cyl(x, Y_HOLE56, -zb - PILOT_DEPTH, 0, PILOT_D)
+        upper_back = upper_back + (z_cyl(x, Y_HOLE56, zb, 16, POST_B_D) & outer)
+        upper_back = upper_back - z_cyl(x, Y_HOLE56, 0, zb + SEAT_UP + 0.05, SHANK_D) - z_cyl(x, Y_HOLE56, zb + SEAT_UP, 30, WELL_D)
+        x, y = s * CAP_SCREW_X, Y_SOCK0 - 5
+        upper_front = upper_front - z_cyl(x, y, BRACKET_Z - 6, BRACKET_Z + 0.1, PILOT_D)
+        upper_back = upper_back + (z_cyl(x, y, BRACKET_Z, 20, CAP_POST_D) & outer)
+        upper_back = (upper_back - z_cyl(x, y, BRACKET_Z - 0.1, BRACKET_Z + SEAT_UP + 0.05, SHANK_D)
+                      - z_cyl(x, y, BRACKET_Z + SEAT_UP, 30, WELL_D))
+    front, back = front + upper_front, back + upper_back
+    NOTES.append("two halves parting at the board's back face; 6 screws from the back, 2 locating pins")
 
     board = (box(0, -TONGUE_H, 0, 0, TONGUE_W, BOARD_T) + box(0, 0, Y_WIDE0, 0, BOARD_W_SLOT, BOARD_T)
              + box(0, Y_WIDE0, Y_WIDE1, 0, BOARD_W_WIDE, BOARD_T)
              + box(0, Y_WIDE1, Y_BOARD_TOP, 0, NECK_W, BOARD_T))
     for s in (-1, 1):                                                 # SummerCart64 shell notches in the board
         board = board - box(s * 50.15, 21.9, 24.9, 0, 1.5, 2) - box(s * 48.9, 24.9, 26.4, 0, 4.0, 2)
+    for x, y in LOWER_HOLES + PIN_HOLES + [(-HOLE56_X, Y_HOLE56), (HOLE56_X, Y_HOLE56)]:    # mounting holes H1 to H6
+        board = board - z_cyl(x, y, -1, 1, 2.5)
 
     socket = box(0, Y_SOCK0, Y_TOP, 0, SOCK_L, SOCK_D) + box(0, Y_TOP, Y_TOP + NOSE_H, 0, NOSE_L, NOSE_D)
     slot_y0 = Y_TOP + CART_EDGE_RECESS                                                          # the PCB edge bottoms here
@@ -337,8 +408,8 @@ def build():
     console = (box(0, Y_LINE - 1, Y_LINE, DZ, 200, 90)
                - box(0, Y_LINE - 2, Y_LINE + 1, DZ, W_STEM + 2, 18.06 + 2))                      # console top surface (measured)
 
-    return {"shell": shell, "board": board, "socket": socket, "cartridge": cart, "cart_pcb": cart_pcb,
-            "usbc": usb, "console_top": console}
+    return {"shell_front": front, "shell_back": back, "board": board, "socket": socket, "cartridge": cart,
+            "cart_pcb": cart_pcb, "usbc": usb, "console_top": console}
 
 
 def us_cartridge(y0):
@@ -400,14 +471,16 @@ def export_all(parts, out_dir):
     export_step(asm, f"{out_dir}/sn64-v2-shell{TAG}-assembly.step")
     # 0.03 mm chord tolerance: well below print resolution, a fraction of the default file size
     export_stl(asm, f"{out_dir}/sn64-v2-shell{TAG}-assembly.stl", tolerance=0.03, angular_tolerance=0.2)
-    export_stl(rotated["shell"], f"{out_dir}/sn64-v2-shell{TAG}-only.stl", tolerance=0.03, angular_tolerance=0.2)
+    for half in ("front", "back"):
+        export_stl(rotated["shell_" + half], f"{out_dir}/sn64-v2-shell{TAG}-{half}.stl", tolerance=0.03, angular_tolerance=0.2)
 
 
 def report(parts):
-    sh = parts["shell"]
-    bb = sh.bounding_box()
-    print(f"variant {VARIANT}: shell {bb.size.X:.1f} x {bb.size.Y:.1f} x {bb.size.Z:.1f} mm, bottom {bb.min.Y:.2f}, "
-          f"solids {len(sh.solids())}, volume {sh.volume / 1000:.1f} cm3, valid {sh.is_valid}")
+    front, back = parts["shell_front"], parts["shell_back"]
+    bb = Compound(children=[front, back]).bounding_box()
+    print(f"variant {VARIANT}: shell {bb.size.X:.1f} x {bb.size.Y:.1f} x {bb.size.Z:.1f} mm, bottom {bb.min.Y:.2f}")
+    for name, h in (("label-side half", front), ("back half", back)):
+        print(f"  {name}: solids {len(h.solids())}, volume {h.volume / 1000:.1f} cm3, valid {h.is_valid}")
     print(f"console top {Y_LINE:.2f} above the shoulders (measured: 30 mm hole), USB-C centre {Y_USB} (window {Y_USB - PLUG_W / 2 - Y_LINE:.1f} above the console top, flare {Y_F0 - Y_USB - PLUG_W / 2:.1f} above the window), "
           f"real N64 shell to {Y_CUT}, flare {Y_F0}..{Y_F1}, cartridge seat {Y_TOP}, rim {RIM_C} at the centre and "
           f"{RIM_C - RIM_SAG} at the ends, cap {2 * CAP_HW:.1f} x {2 * CAP_HT:.1f}, cartridge top {Y_TOP + CART_MID_H}")

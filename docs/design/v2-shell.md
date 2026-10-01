@@ -1,8 +1,9 @@
-# SN64 v2 shell: N64 cartridge body with a rounded mushroom cap (look-and-fit model)
+# SN64 v2 shell: N64 cartridge body with a rounded mushroom cap
 
-**Status (2026-10-01): look-and-fit model. Not a manufacturable enclosure. The console's top surface
-is a measured height. The owner approved a 10 mm shorter geometry on 2026-10-01 and the board was
-refitted to it the same day, so shell and board agree.**
+**Status (2026-10-01): two halves with screw posts for the board, checked in CAD only. Nothing has
+been printed or tried on parts, and several sizes are still assumptions (see "Open"). The console's
+top surface is a measured height. The owner approved a 10 mm shorter geometry on 2026-10-01 and the
+board was refitted to it the same day, so shell and board agree.**
 
 Owner's direction, in order: one continuous vertical item with the SNES cartridge upright on top (a
 first model with the cartridge flat on a shelf was rejected on sight); a mushroom cap so the shell
@@ -13,12 +14,15 @@ have "smoother rounder edges" in line with Nintendo's own design choices.
 ## Model
 
 `mechanical/sn64-v2-shell/sn64_v2_shell.py` (build123d, code-first, diffable). Outputs in the same
-folder: `sn64-v2-shell-assembly.step` (named bodies: shell, board, socket, cartridge, usbc,
-console_top), `sn64-v2-shell-only.stl` (the assembly STL and the 39 MB board fit assembly are generated
-locally and kept out of git), renders taken in FreeCAD:
+folder: `sn64-v2-shell-assembly.step` (named bodies: shell_front, shell_back, board, socket, cartridge,
+usbc, console_top), `sn64-v2-shell-front.stl` and `sn64-v2-shell-back.stl` for the two halves (the
+assembly STL and the 41 MB board fit assembly are generated locally and kept out of git), renders
+taken in FreeCAD:
 `shell-front` (label side, what the player sees), `shell-back`, `shell-right`, `shell-bottom` and
 `shell-port` (the port), `shell-iso`, `shell-iso-back`, `shell-low`, `shell-pocket` (looking into the empty
-pocket), `shell-logo` (the logo on the cap, close up) and `section-centre` (cut through the middle). FreeCAD opens the STEP
+pocket), `shell-logo` (the logo on the cap, close up), `halves-open` (both halves, insides up),
+`half-front-with-board` (the board in the label-side half), `section-screw-post` (cut through a screw
+post) and `section-centre` (cut through the middle). FreeCAD opens the STEP
 directly; Blender imports the STL (File > Import > STL).
 
 The script draws two geometries, picked by `VARIANT` near its top: `board-60`, the board as it is
@@ -67,6 +71,17 @@ CERN-OHL-S-2.0), so the shell model is CERN-OHL-S-2.0 too (`mechanical/README.md
   too.
 - **USB-C** in the right wall of the stem, centre 32.5 mm above the shoulders: 8 mm above the
   console's top surface and 5 mm below the flare.
+- **Two halves**, like an N64 cartridge: the label-side half carries the board and the back half
+  closes over it. They part at the board's back face, where SummerCart64's halves part. The
+  brackets under the socket ears belong to the label-side half and stand 0.25 mm clear of the back
+  half's wall.
+- **Board mounting**: at four board holes (H1, H2 at the bottom, H5, H6 at 44.5 mm) a post on the
+  label side ends flat against the front of the board and a post in the back half ends flat against
+  the back of it, so the screw clamps the board between two shoulders and its height in the shell is
+  fixed: 8.4 mm from the label face and 9.6 mm from the back face, which is where the N64 slot needs
+  it. H1 and H2 use SummerCart64's own posts. Two pins on the label-side half go through board holes
+  H3 and H4 and set the board's position sideways. Two more screws go through the back half into the
+  ear brackets and hold the halves together under the cap. All six screws go in from the back.
 - **Logo** stamped into the front of the cap the way a Game Boy cartridge carries its logo (owner,
   2026-10-01: "I dont want it proud of the surface"): a pill-shaped pocket, which is the inside of
   the logo's ring, with the button pads and the letters standing in it level with the face. The
@@ -91,7 +106,11 @@ CERN-OHL-S-2.0), so the shell model is CERN-OHL-S-2.0 too (`mechanical/README.md
 | USB-C window | 13 x 7 in the right wall at 32.5, 8.3 above the console top | plug envelope 12.35 x 6.5 **assumed** |
 | Logo pocket | 64.7 x 19.0, 0.6 deep, centred on the cap's front face 12.25 above the board's top edge; 4.4 of wall left behind it | owner's choice of logo and style; size fitted to the flat face (25 high), depth **assumed** |
 | Logo detail at this size | letters 12.3 tall with 2.45 strokes; characters on the buttons 2.9 tall with 0.58 strokes; narrowest opening 0.46 (inside the 4 on its button) | derived from the logo file |
-| Overall shell | 146.6 x 100.3 x 30.5, one valid solid | derived |
+| Parting plane | the board's back face, 0.6 behind its mid-plane | SummerCart64 shell (sourced) |
+| Screw posts | label side 5.0 post; back 7.0 post (8.0 at the brackets) with the head 2.5 above the board in a well | shape from SummerCart64's posts (sourced, measured on its STEP) |
+| Screw holes | pilot 1.7 x 5 deep, clearance 2.4, head well 4.6: six M2 x 8 thread-forming screws | **assumed**: M2 is what SummerCart64's build guide uses and what passes the board's 2.5 holes; SummerCart64's own 2.5 pilot would need a screw too thick for them |
+| Locating pins | 2.3 in the board's 2.5 holes H3 and H4, 0.4 proud of the board | **assumed** fit |
+| Overall shell | 146.6 x 100.3 x 30.5, two valid solids | derived |
 
 Fit check with this shell: the KiCad board STEP with every part model, plus an envelope for the
 FPGA (its model is missing from the STEP), has no interference with the shell or the cartridge.
@@ -247,7 +266,15 @@ groups, which carry the cartridge audio inputs (pins 31 and 62, used by FXPAK Pr
   strokes and a 0.46 mm opening. Moulding or resin printing holds that; a filament printer does not.
   `LOGO_REL` in the script switches to `sn64-logo-mono-plain.svg` (no characters on the buttons,
   finest detail 0.64 mm).
-- Split line (SummerCart64's halves part at the board's back face), screws for the upper part (the
-  part that was replaced needs its own), bosses for H3 to H6, the ear screw detail.
+- Screws: the hole sizes are for M2 thread-forming screws and are assumptions. Choose the screw, then
+  try the pilot size in the plastic and process actually used.
+- Seam: above the N64 body the two halves meet on a plain flat face. A lip along the seam would align
+  them and keep it closed between the screws. Whether six screws hold the cap shut against a cartridge
+  being rocked in the pocket is untested.
+- Socket legs: the two rows are 7.0 mm apart and the pads are on the faces of a 1.2 mm board, so each
+  row has to come in 2.9 mm. The owner plans a double bend. That takes about 5 to 6 mm of leg, and
+  the leg length is unknown until a sample is measured.
+- The ear screws go in from above through the cartridge pocket; their size and the ears' own shape
+  wait for the sample.
 - Board: the right side notch is 1.3 mm higher than SummerCart64's; correct the outline so an
   unmodified SummerCart64 lower shell fits, or keep the trimmed post.
