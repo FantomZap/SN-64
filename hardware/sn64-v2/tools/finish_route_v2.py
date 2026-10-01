@@ -44,6 +44,9 @@ def main():
     ap.add_argument('--board', type=Path, default=PCB, help='board to finish (default: the tracked main board)')
     ap.add_argument('--no-import', action='store_true', help='board already carries the routing (e.g. KiCadRoutingTools output)')
     ap.add_argument('--no-pour', action='store_true')
+    ap.add_argument('--refill-only', action='store_true',
+                    help='keep the pours that are there and only refill every zone (after a change such as a hole size); '
+                         'removing zones first breaks later lookups in KiCad 10 python')
     a = ap.parse_args()
     board = pcbnew.LoadBoard(str(a.board))
     before = len(list(board.GetTracks()))
@@ -68,12 +71,13 @@ def main():
         if t.GetDrillValue() != drill:
             t.SetDrill(drill); fixed += 1
     print(f'via geometry corrected on {fixed} vias')
-    for z in list(board.Zones()):
-        if z.GetZoneName().startswith(TAG):
-            board.Remove(z)
-    if not a.no_pour:
-        pour(board, pcbnew.F_Cu, 'gnd_fcu')
-        pour(board, pcbnew.B_Cu, 'gnd_bcu')
+    if not a.refill_only:
+        for z in list(board.Zones()):
+            if z.GetZoneName().startswith(TAG):
+                board.Remove(z)
+        if not a.no_pour:
+            pour(board, pcbnew.F_Cu, 'gnd_fcu')
+            pour(board, pcbnew.B_Cu, 'gnd_bcu')
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
     pcbnew.SaveBoard(str(a.board), board)
     print('saved', a.board)

@@ -293,3 +293,16 @@ The owner asked whether the shell has proper mounting holes for the board, and w
 Checked in the model: each half is one valid solid; they do not overlap; the back half lifts straight off; the real board with its socket lifts straight out of the label-side half; every screw axis is open down to its pilot, has a full seat under the head and plastic for the thread; all six board holes have a full shoulder on both faces; no board part touches or comes within 0.3 mm of a post, pin or bracket. Pictures: [halves-open.png](../mechanical/sn64-v2-shell/halves-open.png), [half-front-with-board.png](../mechanical/sn64-v2-shell/half-front-with-board.png), [section-screw-post.png](../mechanical/sn64-v2-shell/section-screw-post.png).
 
 Not done: a lip along the seam above the N64 body, any print or physical trial, and the socket leg forming, which waits for a sample (see the open list in [v2-shell.md](design/v2-shell.md)).
+
+## 2026-10-01 — board posts redone the owner's way; registration pins; 4.0 mm board holes
+
+The owner corrected the mounting: he did not want the board merely pinched between two flat post ends. He wants what a Nintendo cartridge has: the post on one half goes through the board so the board sits in place and cannot move, and the other half's post is shorter. He also asked for registration so the board cannot be put in backward. In a follow-up he set the through-hole part at 1.1 mm so the other post still presses the board down.
+
+- Shell ([sn64_v2_shell.py](../mechanical/sn64-v2-shell/sn64_v2_shell.py)): at H1, H2, H5 and H6 the label-side post is 6.5 mm with a shelf at the board's front face and a hollow through-hole section 3.8 mm across and 1.1 mm high; the back post lands on the board. The screw runs through both; it cuts thread only below the shelf. SummerCart64's own posts at H1 and H2 are replaced by these.
+- Board: a hollow post around an M2 screw does not fit a 2.5 mm hole, so H1, H2, H5 and H6 are now 4.0 mm ([set_mounting_holes_v2.py](../hardware/sn64-v2/tools/set_mounting_holes_v2.py)). No copper is within 4.5 mm of them. Zones refilled, checks unchanged: 6 single-spoke thermal reliefs, the same 6 open items. Board renders, copper picture and STEP regenerated.
+- Registration: two solid pins through H3 and H4, which are 3 mm apart in height left and right. Checked with the real board model turned back to front: it is stopped at both pins, rests 3.2 mm above the shelves, and the back half cannot close over it. The right way round it drops in and lifts out freely.
+- `finish_route_v2.py` got a `--refill-only` option because its pour removal breaks KiCad 10's python on a board that already has pours.
+
+Checked in CAD only. Pictures: [section-screw-post.png](../mechanical/sn64-v2-shell/section-screw-post.png), [halves-open.png](../mechanical/sn64-v2-shell/halves-open.png), [half-front-with-board.png](../mechanical/sn64-v2-shell/half-front-with-board.png).
+
+Still open on the same theme: the SNES cartridge can go into the cap's pocket back to front (see the open list in [v2-shell.md](design/v2-shell.md)).

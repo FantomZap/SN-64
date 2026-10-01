@@ -75,13 +75,20 @@ CERN-OHL-S-2.0), so the shell model is CERN-OHL-S-2.0 too (`mechanical/README.md
   closes over it. They part at the board's back face, where SummerCart64's halves part. The
   brackets under the socket ears belong to the label-side half and stand 0.25 mm clear of the back
   half's wall.
-- **Board mounting**: at four board holes (H1, H2 at the bottom, H5, H6 at 44.5 mm) a post on the
-  label side ends flat against the front of the board and a post in the back half ends flat against
-  the back of it, so the screw clamps the board between two shoulders and its height in the shell is
-  fixed: 8.4 mm from the label face and 9.6 mm from the back face, which is where the N64 slot needs
-  it. H1 and H2 use SummerCart64's own posts. Two pins on the label-side half go through board holes
-  H3 and H4 and set the board's position sideways. Two more screws go through the back half into the
-  ear brackets and hold the halves together under the cap. All six screws go in from the back.
+- **Board mounting**, the way a Nintendo cartridge mounts its board (owner, 2026-10-01). At the four
+  screw holes (H1, H2 at the bottom, H5, H6 at 44.5 mm) the label-side post has a shelf the board
+  sits on and a hollow through-hole section, 3.8 mm across and 1.1 mm high, that passes through the
+  board's 4.0 mm hole. The board therefore sits in one place and cannot shift. The through-hole
+  section is 0.1 mm shorter than the board is thick, so the back half's post lands on the board and
+  holds it on the shelf. The board sits 8.4 mm from the label face and 9.6 mm from the back face,
+  which is where the N64 slot needs it. The screw runs through the middle of both posts.
+- **Registration** (owner, 2026-10-01: nobody should be able to put the board in backward). Two solid
+  2.3 mm pins on the label-side half go through board holes H3 and H4, which sit 6.5 mm and 9.5 mm
+  above the shoulders, one left and one right. A board turned back to front has no holes under the
+  pins: it stops on their tips 3.2 mm above the shelves and the back half cannot close. The pins
+  stand 2 mm beyond the board and enter sockets in the back half, so they also line up the halves.
+- **Screws**: six, all from the back. Four go through the board posts; two go through the back half
+  into the ear brackets and hold the halves together under the cap.
 - **Logo** stamped into the front of the cap the way a Game Boy cartridge carries its logo (owner,
   2026-10-01: "I dont want it proud of the surface"): a pill-shaped pocket, which is the inside of
   the logo's ring, with the button pads and the letters standing in it level with the face. The
@@ -107,9 +114,10 @@ CERN-OHL-S-2.0), so the shell model is CERN-OHL-S-2.0 too (`mechanical/README.md
 | Logo pocket | 64.7 x 19.0, 0.6 deep, centred on the cap's front face 12.25 above the board's top edge; 4.4 of wall left behind it | owner's choice of logo and style; size fitted to the flat face (25 high), depth **assumed** |
 | Logo detail at this size | letters 12.3 tall with 2.45 strokes; characters on the buttons 2.9 tall with 0.58 strokes; narrowest opening 0.46 (inside the 4 on its button) | derived from the logo file |
 | Parting plane | the board's back face, 0.6 behind its mid-plane | SummerCart64 shell (sourced) |
-| Screw posts | label side 5.0 post; back 7.0 post (8.0 at the brackets) with the head 2.5 above the board in a well | shape from SummerCart64's posts (sourced, measured on its STEP) |
-| Screw holes | pilot 1.7 x 5 deep, clearance 2.4, head well 4.6: six M2 x 8 thread-forming screws | **assumed**: M2 is what SummerCart64's build guide uses and what passes the board's 2.5 holes; SummerCart64's own 2.5 pilot would need a screw too thick for them |
-| Locating pins | 2.3 in the board's 2.5 holes H3 and H4, 0.4 proud of the board | **assumed** fit |
+| Screw posts | label side 6.5 post with a shelf and a 3.8 x 1.1 through-hole section; back 7.0 post (8.0 at the brackets) that lands on the board, the screw head 2.5 above the board in a well | owner's design (2026-10-01); head well as in SummerCart64's posts (sourced) |
+| Board holes | H1, H2, H5, H6: 4.0 for the through-hole section; H3, H4: 2.5 for the registration pins | set on the board by `hardware/sn64-v2/tools/set_mounting_holes_v2.py` |
+| Screw holes | pilot 1.7 x 5 deep below the shelf, 2.2 through the through-hole section (0.8 wall, no thread cut in it), clearance 2.4, head well 4.6: six M2 x 8 thread-forming screws | **assumed**: M2 is what SummerCart64's build guide uses |
+| Registration pins | 2.3 in the board's 2.5 holes H3 and H4, standing 2.0 beyond the board, sockets 2.7 in the back half | **assumed** fit |
 | Overall shell | 146.6 x 100.3 x 30.5, two valid solids | derived |
 
 Fit check with this shell: the KiCad board STEP with every part model, plus an envelope for the
@@ -268,6 +276,8 @@ groups, which carry the cartridge audio inputs (pins 31 and 62, used by FXPAK Pr
   finest detail 0.64 mm).
 - Screws: the hole sizes are for M2 thread-forming screws and are assumptions. Choose the screw, then
   try the pilot size in the plastic and process actually used.
+- Board thickness: the through-hole section is 1.1 mm for a 1.2 mm board. A board at the thin end of
+  the fabricator's tolerance (about 1.08 mm) would sit level with it and be held less firmly.
 - Seam: above the N64 body the two halves meet on a plain flat face. A lip along the seam would align
   them and keep it closed between the screws. Whether six screws hold the cap shut against a cartridge
   being rocked in the pocket is untested.

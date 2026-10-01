@@ -1,7 +1,7 @@
 {
  "date": "2026-10-01",
  "board": "sn64-v2.kicad_pcb",
- "note": "single vertical board refitted to the shorter mushroom-cap tower shell (2026-10-01): top edge 60 mm above the shoulders, SNES socket J2 straddling it (pins 1-31 on B.Cu), USB-C 32.5 mm above the shoulders; DRC errors are single-spoke thermal reliefs",
+ "note": "single vertical board for the shorter mushroom-cap tower shell: top edge 60 mm above the shoulders, SNES socket J2 straddling it (pins 1-31 on B.Cu), USB-C 32.5 mm above the shoulders; mounting holes H1, H2, H5, H6 are 4.0 mm for the shell's through-hole posts, H3 and H4 are 2.5 mm for its registration pins; DRC errors are single-spoke thermal reliefs",
  "tracks": 3603,
  "vias": 1066,
  "track_length_mm": 7617,
@@ -76,7 +76,7 @@
    ],
    "items": [
     "Pad C12 [USB_DP_F] of U1 on F.Cu",
-    "Via [USB_DP_F] on F.Cu - B.Cu"
+    "Pad 2 [USB_DP_F] of R19 on B.Cu"
    ],
    "from": {
     "x": -1.2,
@@ -93,7 +93,7 @@
    ],
    "items": [
     "Pad C14 [USB_PU] of U1 on F.Cu",
-    "Via [USB_PU] on F.Cu - B.Cu"
+    "Pad 1 [USB_PU] of R21 on B.Cu"
    ],
    "from": {
     "x": -2.8,

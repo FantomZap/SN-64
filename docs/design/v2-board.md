@@ -106,6 +106,7 @@ footprint exposed-pad size; USB pull-up switched only after PLL lock.
 
 - Routing after the refit to the shorter shell: 3,603 tracks, 1,066 vias, 213 of 218 signal nets fully connected, 6 unconnected items (FLASH_D2, FPGA_3V3, N64_AD6, N64_JOYBUS, USB_DP_F, USB_PU); DRC errors: 6 starved_thermal. Remaining items are listed in `validation/pcb-open-connections.json` for hand routing in KiCad.
 - Shell: envelope model only (`docs/design/v2-shell.md`, `mechanical/sn64-v2-shell/`): upright tower, socket ears screwed to brackets in the shell. The board was refitted to it on 2026-09-30 (socket on the top edge, outline widened for the USB-C, USB-C above the console's top) and to the 10 mm shorter shell on 2026-10-01 (top edge at 60 mm, USB-C at 32.5 mm).
+- Mounting holes (2026-10-01): H1, H2, H5 and H6 are 4.0 mm (KiCad `MountingHole_4mm`, set by `tools/set_mounting_holes_v2.py`) because the shell's screw posts pass through the board there; H3 and H4 stay 2.5 mm for the shell's two registration pins, which sit at different heights so the board cannot go in back to front. No copper is within 4.5 mm of the four larger holes; the checks are unchanged (6 starved thermals, 6 open items).
 - PCBWay: annular ring (6 mil) and spacing (5 mil) against the 0.125 / 0.1 mm rules, as in v1.
 - Four-layer trial: with 210 fan-out vias and signals on the outer rings a four-layer stack may
   route; not tried yet.

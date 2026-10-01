@@ -18,9 +18,16 @@ How it is built
                filleted.
   halves       the shell is two parts, like an N64 cartridge: the label-side half carries the board,
                the back half closes over it. They part at the board's back face, where SummerCart64's
-               halves part. Six screws from the back hold them: SummerCart64's own two at the lower
-               board holes, two more through the board's upper holes, two into the brackets under
-               the socket ears. Two pins on the label-side half go through the remaining board holes.
+               halves part. Six screws from the back hold them: four through the board, two into
+               the brackets under the socket ears.
+  board        mounted the way a Nintendo cartridge mounts its board (owner, 2026-10-01): at the four
+               screw holes the label-side post has a shelf the board sits on and a hollow spigot that
+               goes through the board, 1.1 high, a little less than the board is thick, so the back
+               post lands on the board and holds it down. The board cannot shift and is not held by
+               the screws alone.
+  registration two solid pins on the label-side half go through the other two board holes, which are
+               at different heights left and right: a board turned back to front cannot seat, and
+               the shell will not close on it.
   logo         the SN64 logo stamped into the front of the cap the way a Game Boy cartridge has its
                logo (owner, 2026-10-01): a pill-shaped pocket 19 mm high and 0.6 mm deep, which is
                the inside of the logo's ring, with the buttons and letters of
@@ -132,19 +139,25 @@ BOARD_W_WIDE, NECK_W = 111.0, 88.0
 # two halves and their fasteners (2026-10-01). The parting plane is the board's back face, as in
 # SummerCart64's shell.
 PART_Z = DZ
-# Screw posts shaped like SummerCart64's own at the two lower board holes (measured on its STEP): on the
-# label side a 5.0 post that ends against the board's front face, on the back a post that ends against
-# its back face, with the screw head in a well 2.5 above the board. The board is clamped between the
-# two post ends, so its height in the shell is fixed. Hole sizes are for M2 thread-forming screws, the
-# size SummerCart64's build guide uses, because the board's holes are 2.5: SummerCart64's own 2.5 pilot
-# would need a screw too thick to pass them. ASSUMED until a screw is chosen: pilot 1.7, clearance 2.4,
-# well 4.6 for a pan head up to 4.0.
-PILOT_D, PILOT_DEPTH, POST_F_D = 1.7, 5.0, 5.0
+# Board mounting the way a Nintendo cartridge does it (owner, 2026-10-01). On the label-side half each
+# screw post has a shelf the board rests on and a hollow spigot that passes through the board's hole, so
+# the board sits in one place and cannot shift. The spigot is 1.1 high, 0.1 less than the board is
+# thick, so the back half's post lands on the board and holds it on the shelf. The four screw holes in
+# the board are 4.0 for this (hardware/sn64-v2/tools/set_mounting_holes_v2.py); 2.5 could not take a
+# hollow post. The screw head sits in a well 2.5 above the board, as in SummerCart64's shell.
+BOARD_HOLE_D, SPIGOT_D, SPIGOT_H, SHELF_D = 4.0, 3.8, 1.1, 6.5
+# ASSUMED until a screw is chosen: M2 thread-forming, the size SummerCart64's build guide uses. Pilot
+# 1.7 below the shelf; 2.2 through the spigot so no thread is cut in its 0.8 wall; clearance 2.4 and a
+# 4.6 well (pan head up to 4.0) in the back post.
+PILOT_D, PILOT_DEPTH, RELIEF_D = 1.7, 5.0, 2.2
 SHANK_D, WELL_D, SEAT_UP, POST_B_D = 2.4, 4.6, 2.5, 7.0
-LOWER_HOLES = [(-47.5, -3.25), (47.5, -3.25)]   # board holes H1 and H2: SummerCart64's posts, pilot made smaller
+LOWER_HOLES = [(-47.5, -3.25), (47.5, -3.25)]   # board holes H1 and H2 (SummerCart64's positions)
 HOLE56_X = 52.4                         # board holes H5 and H6 (their height depends on the variant)
-PIN_HOLES = [(-47.5, 6.5), (47.5, 9.5)]     # board holes H3 and H4 take locating pins
-PIN_D, PIN_UP = 2.3, 0.4                # pin in a 2.5 hole, standing this far above the board's back face
+# Registration (owner, 2026-10-01): two solid pins on the label-side half go through board holes H3 and
+# H4, which are at different heights left and right. A board turned back to front has no holes under
+# the pins, sits on their tips and the shell cannot close.
+PIN_HOLES = [(-47.5, 6.5), (47.5, 9.5)]
+PIN_D, PIN_UP, PIN_POST_D = 2.3, 2.0, 5.0   # pin in a 2.5 hole, standing 2.0 beyond the board's back face
 CAP_SCREW_X, CAP_POST_D = 57.5, 8.0     # two screws through the back half into the socket ear brackets
 BRACKET_Z = 7.0                         # the ear brackets reach this far each side of the board's mid-plane
 BRACKET_GAP = 0.25                      # between the brackets (label-side half) and the back half's wall
@@ -202,6 +215,24 @@ def y_cyl(x, y0, y1, z, d):
 def z_cyl(x, y, z0, z1, d):
     """Cylinder of diameter d along Z."""
     return Pos(x, y, (z0 + z1) / 2) * Cylinder(d / 2, z1 - z0)
+
+
+def front_post(x, y, envelope=None):
+    """Label-side screw post: (what to add, what to cut). Shelf at the board's front face, spigot
+    through the board, pilot hole below the shelf. envelope clips the post to the outside of the shell."""
+    zb = BOARD_T / 2
+    body = (z_cyl(x, y, -14, -zb, SHELF_D) & envelope) if envelope is not None else z_cyl(x, y, -6.5, -zb, SHELF_D)
+    add = body + z_cyl(x, y, -zb, -zb + SPIGOT_H, SPIGOT_D)
+    cut = z_cyl(x, y, -zb - PILOT_DEPTH, -zb + 0.01, PILOT_D) + z_cyl(x, y, -zb, zb + 0.5, RELIEF_D)
+    return add, cut
+
+
+def back_post(x, y, z0, d, envelope=None):
+    """Back screw post from z0 to the back wall: (what to add, what to cut). Hole for the screw and a
+    well in which its head sits SEAT_UP above z0."""
+    body = (z_cyl(x, y, z0, 16, d) & envelope) if envelope is not None else z_cyl(x, y, z0, 9.6, d)
+    cut = z_cyl(x, y, z0 - 0.6, z0 + SEAT_UP + 0.05, SHANK_D) + z_cyl(x, y, z0 + SEAT_UP, 30, WELL_D)
+    return body, cut
 
 
 def inset(pts, d):
@@ -327,12 +358,16 @@ def build():
             + box(50.15, 20.4, 21.95, 0.0, 1.6, 1.6))                 # right locating post: our notch starts 1.3 mm higher
     front = (front_sc & keep) - drop
     back = (back_sc & keep) - drop
-    for x, y in LOWER_HOLES:                                          # SummerCart64's posts at H1, H2: pilot for our screw
-        front = front + z_cyl(x, y, -6.4, -BOARD_T / 2, 2.6) - z_cyl(x, y, -BOARD_T / 2 - PILOT_DEPTH, 0, PILOT_D)
-    for x, y in PIN_HOLES:                                            # locating pins through board holes H3, H4
-        front = front + z_cyl(x, y, -6.5, -BOARD_T / 2, POST_F_D) + z_cyl(x, y, -BOARD_T / 2, BOARD_T / 2 + PIN_UP, PIN_D)
-        back = back + z_cyl(x, y, BOARD_T / 2, 7.7, POST_F_D)
-        back = back - z_cyl(x, y, 0, BOARD_T / 2 + PIN_UP + 0.4, PIN_D + 0.4)
+    zb = BOARD_T / 2
+    for x, y in LOWER_HOLES:                                          # H1, H2: our posts in place of SummerCart64's
+        add, cut = front_post(x, y)
+        front = front + add - cut
+        add, cut = back_post(x, y, zb, POST_B_D)
+        back = back + add - cut
+    for x, y in PIN_HOLES:                                            # registration pins through board holes H3, H4
+        front = front + z_cyl(x, y, -6.5, -zb, PIN_POST_D) + z_cyl(x, y, -zb, zb + PIN_UP, PIN_D)
+        back = back + z_cyl(x, y, zb, 7.7, PIN_POST_D)
+        back = back - z_cyl(x, y, 0, zb + PIN_UP + 0.4, PIN_D + 0.4)
 
     # stem: the shell's own outline at Y_CUT (grooves and all) extruded to the flare
     ring = sorted(bd.section(n64, section_by=Plane(origin=(0, Y_CUT, 0), x_dir=(1, 0, 0), z_dir=(0, 1, 0))).faces(),
@@ -370,25 +405,26 @@ def build():
 
     # screws from the back: through board holes H5 and H6, and into the ear brackets
     for s in (-1, 1):
-        x, zb = s * HOLE56_X, BOARD_T / 2
-        upper_front = upper_front + (z_cyl(x, Y_HOLE56, -14, -zb, POST_F_D) & outer)
-        upper_front = upper_front - z_cyl(x, Y_HOLE56, -zb - PILOT_DEPTH, 0, PILOT_D)
-        upper_back = upper_back + (z_cyl(x, Y_HOLE56, zb, 16, POST_B_D) & outer)
-        upper_back = upper_back - z_cyl(x, Y_HOLE56, 0, zb + SEAT_UP + 0.05, SHANK_D) - z_cyl(x, Y_HOLE56, zb + SEAT_UP, 30, WELL_D)
+        add, cut = front_post(s * HOLE56_X, Y_HOLE56, outer)
+        upper_front = upper_front + add - cut
+        add, cut = back_post(s * HOLE56_X, Y_HOLE56, zb, POST_B_D, outer)
+        upper_back = upper_back + add - cut
         x, y = s * CAP_SCREW_X, Y_SOCK0 - 5
         upper_front = upper_front - z_cyl(x, y, BRACKET_Z - 6, BRACKET_Z + 0.1, PILOT_D)
-        upper_back = upper_back + (z_cyl(x, y, BRACKET_Z, 20, CAP_POST_D) & outer)
-        upper_back = (upper_back - z_cyl(x, y, BRACKET_Z - 0.1, BRACKET_Z + SEAT_UP + 0.05, SHANK_D)
-                      - z_cyl(x, y, BRACKET_Z + SEAT_UP, 30, WELL_D))
+        add, cut = back_post(x, y, BRACKET_Z, CAP_POST_D, outer)
+        upper_back = upper_back + add - cut
     front, back = front + upper_front, back + upper_back
-    NOTES.append("two halves parting at the board's back face; 6 screws from the back, 2 locating pins")
+    NOTES.append("two halves parting at the board's back face; 6 screws from the back; board on shelves with "
+                 f"{SPIGOT_H} mm spigots through 4 holes; 2 registration pins")
 
     board = (box(0, -TONGUE_H, 0, 0, TONGUE_W, BOARD_T) + box(0, 0, Y_WIDE0, 0, BOARD_W_SLOT, BOARD_T)
              + box(0, Y_WIDE0, Y_WIDE1, 0, BOARD_W_WIDE, BOARD_T)
              + box(0, Y_WIDE1, Y_BOARD_TOP, 0, NECK_W, BOARD_T))
     for s in (-1, 1):                                                 # SummerCart64 shell notches in the board
         board = board - box(s * 50.15, 21.9, 24.9, 0, 1.5, 2) - box(s * 48.9, 24.9, 26.4, 0, 4.0, 2)
-    for x, y in LOWER_HOLES + PIN_HOLES + [(-HOLE56_X, Y_HOLE56), (HOLE56_X, Y_HOLE56)]:    # mounting holes H1 to H6
+    for x, y in LOWER_HOLES + [(-HOLE56_X, Y_HOLE56), (HOLE56_X, Y_HOLE56)]:               # screw holes H1, H2, H5, H6
+        board = board - z_cyl(x, y, -1, 1, BOARD_HOLE_D)
+    for x, y in PIN_HOLES:                                                                # registration holes H3, H4
         board = board - z_cyl(x, y, -1, 1, 2.5)
 
     socket = box(0, Y_SOCK0, Y_TOP, 0, SOCK_L, SOCK_D) + box(0, Y_TOP, Y_TOP + NOSE_H, 0, NOSE_L, NOSE_D)
