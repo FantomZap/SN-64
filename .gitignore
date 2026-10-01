@@ -55,5 +55,5 @@ output_files/
 mechanical/sn64-v2-shell/sn64-v2-fit-assembly.step
 mechanical/sn64-v2-shell/sn64-v2-shell-assembly.stl
 
-# derived: the shorter shell proposal (VARIANT = "short-60" in sn64_v2_shell.py); its pictures are tracked
-mechanical/sn64-v2-shell/sn64-v2-shell-short-*
+# derived: the taller shell of before 2026-10-01 (VARIANT = "board-70" in sn64_v2_shell.py)
+mechanical/sn64-v2-shell/sn64-v2-shell-board-70-*

@@ -49,16 +49,16 @@ Assumed, to be measured before anything is cut
   USB-C plug overmold 12.35 x 6.5 (window 13 x 7)
 
 Two geometries, picked by VARIANT below
-  "board-70"  the board in hardware/sn64-v2 as it is: top edge 70 above the shoulders, USB-C centre
-      50, flare 57.5-70. The tracked STEP, STL and shell-*.png show this one.
-  "short-60"  proposal of 2026-10-01 (owner: shorter, with about 5 mm clear on each side of the USB
-      port). NOT applied to the board. 10 mm shorter:
+  "board-60"  the board in hardware/sn64-v2 as it is since 2026-10-01 (owner: shorter, with about
+      5 mm clear on each side of the USB port): top edge 60 above the shoulders.
         USB-C centre 32.5: the lowest the board allows (its side notches for the shell's locating
             posts end at 26.4) and the height of SummerCart64's own port; window 26.0-39.0, 8.3 above
             the console top
         flare from 44.0 (5 above the window) to the board top
         board top 60.0: translator row (top at 47.7), 8 mm of fan-out, then the socket pads
-      Its files carry "short-60" in the name; the STEP and STL are not tracked.
+      The tracked STEP, STL and shell-*.png show this one.
+  "board-70"  the geometry before that: top edge 70, USB-C centre 50, flare 57.5-70. Kept for
+      comparison; its files carry "board-70" in the name and are not tracked.
 
 In the build123d MCP session: execute_file this script. Elsewhere (Python with build123d), run it
 from the repository root: python mechanical/sn64-v2-shell/sn64_v2_shell.py
@@ -114,18 +114,18 @@ RIM_FILLETS, LIP_CHAMFERS = (2.5, 2.0, 1.5, 1.2), (0.8, 0.5)
 FLARE_U = (0.0, 0.12, 0.25, 0.4, 0.5, 0.6, 0.75, 0.88, 1.0)
 BOARD_W_WIDE, NECK_W = 111.0, 88.0
 
-VARIANT = "board-70"                    # "board-70": the board as it is; "short-60": the shorter proposal
-if VARIANT == "board-70":               # hardware/sn64-v2 today
-    Y_BOARD_TOP, Y_WIDE0, Y_WIDE1, Y_USB = 70.0, 32.0, 60.0, 50.0
-    Y_F0 = 57.5                         # S-curve flare starts 1 mm above the USB-C window
-elif VARIANT == "short-60":             # proposal, not applied to the board
+VARIANT = "board-60"                    # "board-60": the board as it is; "board-70": the taller one before 2026-10-01
+if VARIANT == "board-60":               # hardware/sn64-v2 today
     USB_CLEAR = 5.0                     # plain wall above the USB-C window before the flare starts (owner)
     Y_BOARD_TOP, Y_WIDE0, Y_WIDE1, Y_USB = 60.0, 26.4, 50.0, 32.5
     Y_F0 = Y_USB + PLUG_W / 2 + USB_CLEAR   # 44.0
+elif VARIANT == "board-70":             # before the refit of 2026-10-01
+    Y_BOARD_TOP, Y_WIDE0, Y_WIDE1, Y_USB = 70.0, 32.0, 60.0, 50.0
+    Y_F0 = 57.5                         # S-curve flare starts 1 mm above the USB-C window
 else:
     raise ValueError(f"unknown VARIANT {VARIANT!r}")
 Y_F1 = Y_BOARD_TOP                      # the flare ends at the board's top edge
-TAG = "" if VARIANT == "board-70" else "-" + VARIANT     # in the names of exported files
+TAG = "" if VARIANT == "board-60" else "-" + VARIANT     # in the names of exported files
 
 # derived
 Y_SOCK0 = Y_BOARD_TOP + 0.5             # socket body underside

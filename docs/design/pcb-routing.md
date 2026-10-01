@@ -118,3 +118,5 @@ works: **lock every existing track and via** (`PCB_TRACK.SetLocked(True)`, see
 copper. Also keep BGA escape copper in place when re-routing nets that start at the FPGA, and never
 adopt the `.kicad_pro` the router writes beside its output (it lowers the copper-to-hole floor to
 what it used); run DRC against the board's own project file.
+
+The second v2 refit (shorter shell, 2026-10-01) used the same recipe on 64 nets, with the socket nets squeezed into 8 mm between the translator row and the socket pads. With the default `--ordering mps` the router finished 63 and left the corner pad's net (the cartridge master clock) boxed in by its six neighbours. `--ordering bus` routed all 64 on the same three layers (157 new vias); `--ordering inside_out` also routed all 64 (173 vias), and so did `mps` with In4.Cu added as a fourth layer (102 vias). The `bus` result is the one on the board. Each run takes under a minute, so trying the orderings costs nothing. Scratch DRC runs need the board's `.kicad_dru` copied beside the board as well as its `.kicad_pro`; without it the USB-C receptacle's edge rule is missing and a false edge-clearance error appears.

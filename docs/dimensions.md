@@ -109,4 +109,4 @@ Measured by the owner on an original N64 and on a ModRetro M64: **30 mm** from t
 
 Derived: the bottom face of the SummerCart64 shell is 12.31 mm below the board's tongue shoulders (its STEP), so the console's top surface is **17.7 mm above the shoulders** (17.69 in the shell model). This replaces the assumed 25 mm (28 mm before that). Cross-check: SummerCart64's own USB-C opening spans 25.8 to 39.2 mm above the shoulders, 8.1 mm above this surface, and that port is made to be used while the cartridge sits in the console.
 
-Not measured: the shape of the top surface around the hole and how far a part wider than the hole can come down before it meets the console. The shell starts to widen toward its cap 40 mm above the surface with the board as it is, 26 mm in the shorter proposal (`docs/design/v2-shell.md`).
+Not measured: the shape of the top surface around the hole and how far a part wider than the hole can come down before it meets the console. The shell starts to widen toward its cap 26 mm above the surface (40 mm before the board was shortened on 2026-10-01; `docs/design/v2-shell.md`).

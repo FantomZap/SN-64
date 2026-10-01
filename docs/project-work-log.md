@@ -233,7 +233,7 @@ He had also asked whether the unit could be shorter with about 5 mm clear on eac
 - `board-70`: the board as it is. Nothing moved except the console line; the USB-C window turns out to be 25.8 mm above the console top.
 - `short-60`: USB-C centre at 32.5 mm (the lowest the board's side notches allow, and the height of SummerCart64's own port), 5 mm of plain wall above its window, flare from 44 to the board's top edge at 60. Shell 100.3 mm tall instead of 110.3; the cartridge sits 10 mm lower. One valid solid, no interference, cartridge and socket checks unchanged.
 
-Picture of both side by side: [compare-now-vs-short-60.png](../mechanical/sn64-v2-shell/compare-now-vs-short-60.png). Details and the before/after table: [v2-shell.md](design/v2-shell.md), "Shorter proposal".
+Picture of both side by side: [compare-70-vs-60.png](../mechanical/sn64-v2-shell/compare-70-vs-60.png) (relabelled and renamed when the board was refitted later that day). Details and the before/after table: [v2-shell.md](design/v2-shell.md), "Shorter proposal".
 
 **The board is not changed.** The proposal needs the socket's fan-out routed again in 8 mm instead of 18 mm. Measured on the routed board: at most 24 of the 56 translator nets have to pass any one point sideways, which three routing layers hold in 8 mm, so it is expected to route but is not proven. Waiting for the owner's decision before touching the board.
 
@@ -250,3 +250,17 @@ The owner picked the buttons together with the letters and asked for the ring of
 Files in [assets/logo](../assets/logo/README.md): the logo in colour, for dark backgrounds, in one colour, and in one colour with plain buttons for small embossing; the same parts on their own (without the ring, buttons alone, letters alone). The badge option was removed; the earlier options stay in the history (commit `b71e1d2`). The README there lists the finest detail of each one-colour file and the size at which it reaches 1 mm: the full logo needs 147 mm of width, the plain-button logo 106 mm, the letters alone 45 mm.
 
 The logo is not yet in the top-level README, on the board or on the shell.
+
+## 2026-10-01 — board refitted to the shorter shell
+
+The owner looked at the two shells side by side and approved the shorter one, so the routed board was refitted to it with the same script as the first refit ([refit_tower_v2.py](../hardware/sn64-v2/tools/refit_tower_v2.py), geometry `short-60`):
+
+- Top edge from 70 to 60 mm above the shoulders; 111 mm wide from 26.4 to 50 mm, the 88 mm neck from 50 to 60.
+- USB-C and its ESD part from 50 to 32.5 mm, the VBUS capacitor above them, mounting holes H5/H6 from 38 to 44.5 mm, the silkscreen credit line to 50.5 mm.
+- 64 nets routed again (59 socket nets, 5 USB nets) with all other copper locked. The first run finished 63; the cartridge master clock on the corner pad was boxed in. The router's `bus` ordering finished all 64 on the same three layers. Notes in [pcb-routing.md](design/pcb-routing.md).
+
+Result: 3,603 tracks, 1,066 vias, 213 of 218 signal nets fully connected, the same 6 open items as before, DRC errors 6 single-spoke thermal reliefs (5 before; the new one is a shield leg of the USB-C receptacle). The board STEP with all part models has no interference with the shorter shell, the cartridge or its PCB. Board renders, copper picture, STEP and check reports regenerated.
+
+Shell model: `board-60` is now the default geometry and matches the board; `board-70` stays in the script for comparison. Before and after: [compare-70-vs-60.png](../mechanical/sn64-v2-shell/compare-70-vs-60.png).
+
+Not changed: the schematic and the FPGA pin plan (no net moved), and `build_v2_pcb.py`, which still generates the earlier placement.

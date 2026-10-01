@@ -20,8 +20,16 @@ Stage "place":
     that was already there cannot be disturbed (a first run without the lock broke 7 good nets).
 Stage "unlock": unlocks every track and via after routing.
 
-  python refit_tower_v2.py clear IN OUT
-  python refit_tower_v2.py place IN OUT
+Two geometries (last argument, default tower-70):
+  tower-70  the first refit, described above: top edge 70 mm above the shoulders, USB-C at 50.
+  short-60  the shorter shell the owner approved on 2026-10-01, applied to the tower-70 board:
+            111 mm wide from 26.4 to 50, the 88 mm neck from 50 to 60, top edge and socket pads
+            10 mm lower, USB-C with its ESD part at 32.5, the VBUS capacitor above them, top
+            mounting holes at 44.5. The same five USB nets are cut on the right side of the board
+            and routed again with the socket nets.
+
+  python refit_tower_v2.py clear IN OUT [GEOMETRY]
+  python refit_tower_v2.py place IN OUT [GEOMETRY]
   python refit_tower_v2.py unlock IN OUT
 """
 import json
@@ -41,14 +49,32 @@ PLANE_NETS = {'GND', 'FPGA_3V3', 'FPGA_1V1'}
 USB_CUT = {'USB_DP', 'USB_DN', 'USB_CC1', 'USB_CC2', 'USB_VBUS'}   # nets that reach the moved parts
 USB_MOVE = ('J101', 'U4', 'C301')
 Y_CLEAR = -47.8                        # translator top pads end at -47.55
-USB_BOX = (41.0, -32.0, 57.0, -10.0)   # x0, y0, x1, y1: the old connector and ESD part, right of R19-R21
 POUR_TAG = 'sn64_finish_route'
+CREDIT = 'SN64 by FantomZap'           # start of the silkscreen credit line (add_credit_silk.py)
 
-OUTLINE = [(-50.9, -26.4), (-50.9, -32.0), (-55.5, -32.0), (-55.5, -60.0), (-44.0, -60.0), (-44.0, -70.0),
-           (44.0, -70.0), (44.0, -60.0), (55.5, -60.0), (55.5, -32.0), (50.9, -32.0), (50.9, -26.4)]
-MOVES = {'J101': (52.4, -50.0, 90), 'U4': (45.5, -50.0, 180), 'C301': (45.5, -45.3, 0),
-         'H5': (-52.4, -38.0, 0), 'H6': (52.4, -38.0, 0)}
-J2_AT = (0.0, -70.0)
+GEOMETRIES = {
+    'tower-70': {
+        # x0, y0, x1, y1: the old connector and ESD part, right of R19-R21
+        'usb_box': (41.0, -32.0, 57.0, -10.0),
+        'outline': [(-50.9, -26.4), (-50.9, -32.0), (-55.5, -32.0), (-55.5, -60.0), (-44.0, -60.0), (-44.0, -70.0),
+                    (44.0, -70.0), (44.0, -60.0), (55.5, -60.0), (55.5, -32.0), (50.9, -32.0), (50.9, -26.4)],
+        'moves': {'J101': (52.4, -50.0, 90), 'U4': (45.5, -50.0, 180), 'C301': (45.5, -45.3, 0),
+                  'H5': (-52.4, -38.0, 0), 'H6': (52.4, -38.0, 0)},
+        'j2_at': (0.0, -70.0),
+        'credit_y': -61.0,
+    },
+    'short-60': {
+        # the right side of the board from above the series resistors up to the old connector
+        'usb_box': (41.0, -58.0, 57.0, -24.5),
+        'outline': [(-50.9, -26.4), (-55.5, -26.4), (-55.5, -50.0), (-44.0, -50.0), (-44.0, -60.0),
+                    (44.0, -60.0), (44.0, -50.0), (55.5, -50.0), (55.5, -26.4), (50.9, -26.4)],
+        'moves': {'J101': (52.4, -32.5, 90), 'U4': (45.5, -32.5, 180), 'C301': (45.5, -37.0, 0),
+                  'H5': (-52.4, -44.5, 0), 'H6': (52.4, -44.5, 0)},
+        'j2_at': (0.0, -60.0),
+        'credit_y': -50.5,
+    },
+}
+G = GEOMETRIES['tower-70']
 
 
 def xy(v):
@@ -84,7 +110,7 @@ def stage_clear(src, dst):
         if n in j2nets and min(s[1], e[1]) < Y_CLEAR:
             gone.add(i)
         elif n in USB_CUT:
-            x0, y0, x1, y1 = USB_BOX
+            x0, y0, x1, y1 = G['usb_box']
             if any(x0 <= x <= x1 and y0 <= y <= y1 for x, y in (s, e)):
                 gone.add(i)
     first = len(gone)
@@ -169,7 +195,8 @@ def stage_clear(src, dst):
 def stage_place(src, dst):
     b = pcbnew.LoadBoard(str(src))
     info = json.loads(Path(str(src) + '.json').read_text(encoding='utf-8'))
-    for (x0, y0), (x1, y1) in zip(OUTLINE, OUTLINE[1:]):
+    outline, moves = G['outline'], G['moves']
+    for (x0, y0), (x1, y1) in zip(outline, outline[1:]):
         s = pcbnew.PCB_SHAPE(b)
         s.SetShape(pcbnew.SHAPE_T_SEGMENT)
         s.SetLayer(pcbnew.Edge_Cuts)
@@ -183,7 +210,7 @@ def stage_place(src, dst):
     fp.SetReference('J2')
     fp.SetValue('SNES cartridge socket 62')
     b.Add(fp)
-    fp.SetPosition(V(mm(J2_AT[0]), mm(J2_AT[1])))
+    fp.SetPosition(V(mm(G['j2_at'][0]), mm(G['j2_at'][1])))
     missing = []
     for p in fp.Pads():
         n = info['j2_pin_net'].get(p.GetNumber())
@@ -192,10 +219,13 @@ def stage_place(src, dst):
             missing.append(p.GetNumber())
         else:
             p.SetNet(net)
-    for ref, (x, y, rot) in MOVES.items():
+    for ref, (x, y, rot) in moves.items():
         f = b.FindFootprintByReference(ref)
         f.SetOrientationDegrees(rot)
         f.SetPosition(V(mm(x), mm(y)))
+    for d in b.GetDrawings():                   # the silkscreen credit line stays on the board
+        if d.GetClass() == 'PCB_TEXT' and d.GetText().startswith(CREDIT):
+            d.SetPosition(V(d.GetPosition().x, mm(G['credit_y'])))
 
     for z in b.Zones():
         if z.GetIsRuleArea():
@@ -215,8 +245,8 @@ def stage_place(src, dst):
             locked += 1
     pcbnew.SaveBoard(str(dst), b)
     Path(str(dst) + '.json').write_text(json.dumps(info, indent=1), encoding='utf-8')
-    print(f'placed J2 ({len(list(fp.Pads()))} pads, unmatched {missing}), moved {len(MOVES)} parts, '
-          f'outline {len(OUTLINE) - 1} segments, locked {locked} tracks/vias')
+    print(f'placed J2 ({len(list(fp.Pads()))} pads, unmatched {missing}), moved {len(moves)} parts, '
+          f'outline {len(outline) - 1} segments, locked {locked} tracks/vias')
 
 
 def stage_unlock(src, dst):
@@ -232,5 +262,7 @@ def stage_unlock(src, dst):
 
 if __name__ == '__main__':
     stage, src, dst = sys.argv[1], Path(sys.argv[2]), Path(sys.argv[3])
+    if len(sys.argv) > 4:
+        G = GEOMETRIES[sys.argv[4]]
     {'clear': stage_clear, 'place': stage_place, 'unlock': stage_unlock}[stage](src, dst)
     sys.stdout.flush()

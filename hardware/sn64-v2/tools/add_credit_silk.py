@@ -13,7 +13,7 @@ import pcbnew
 
 PCB = Path(__file__).resolve().parents[1] / 'sn64-v2.kicad_pcb'
 TEXT = 'SN64 by FantomZap   github.com/FantomZap/SN-64   CERN-OHL-S-2.0'
-AT = (0.0, -61.0)          # mm: centred, 9 mm below the top edge, clear of J2's reference
+AT = (0.0, -50.5)          # mm: centred between the translator row and the socket pads, clear of J2's reference
 SIZE, THICK = 1.0, 0.15
 mm = pcbnew.FromMM
 

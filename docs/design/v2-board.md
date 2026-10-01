@@ -1,8 +1,9 @@
 # SN64 v2 board: schematic write-up and rationale
 
-**Status (2026-09-30): draft 0.1 on branch `v2`. One board. Schematic complete (ERC 0 errors), FPGA
+**Status (2026-10-01): draft 0.1 on branch `v2`. One board. Schematic complete (ERC 0 errors), FPGA
 logic simulated and routed with timing met, board refitted to the upright tower shell with the
-socket on its top edge (213 of 218 signal nets fully connected). Not fabrication-ready: see "Open items".**
+socket on its top edge and shortened by 10 mm on 2026-10-01 (213 of 218 signal nets fully connected).
+Not fabrication-ready: see "Open items".**
 
 v1 (`hardware/sn64/`) turned every line of the specification into its own chip: six window
 comparators, a temperature switch, a USB-C controller, three eFuses, a clock synthesiser, two
@@ -39,10 +40,13 @@ History: the board was first drawn with the socket through-hole on its face and 
 flat over the console; the owner rejected that when he saw it in 3D. The same day the routed board
 was refitted to the tower shell (`tools/refit_tower_v2.py`, details in v2-shell.md): socket on the
 top edge, outline widened for the USB-C, USB-C moved above the console line; only the socket and
-USB nets were routed again.
+USB nets were routed again. On 2026-10-01 the owner measured the console (its top is 17.7 mm above
+the shoulders) and approved a shorter shell, and the board was refitted again the same way: top edge
+from 70 to 60 mm, USB-C from 50 to 32.5 mm. The board is now 111 mm wide and 70.5 mm from the
+tongue tip to the top edge.
 
 Layout is the horizontal v2 layout turned 180 degrees: FPGA banks 0/1 face the N64 edge, the
-translator row sits between the FPGA and the socket edge, USB-C on the right edge 50 mm above the
+translator row sits between the FPGA and the socket edge, USB-C on the right edge 32.5 mm above the
 shoulders (the player's left), power lower left.
 
 ## What moved into the FPGA (LFE5U-85F-8BG381I, the grade in stock)
@@ -100,8 +104,8 @@ footprint exposed-pad size; USB pull-up switched only after PLL lock.
 
 ## Open items
 
-- Routing after the tower refit: 3,551 tracks, 1,034 vias, 213 of 218 signal nets fully connected, 6 unconnected items (FLASH_D2, FPGA_3V3, N64_AD6, N64_JOYBUS, USB_DP_F, USB_PU); DRC errors: 5 starved_thermal. Remaining items are listed in `validation/pcb-open-connections.json` for hand routing in KiCad.
-- Shell: envelope model only (`docs/design/v2-shell.md`, `mechanical/sn64-v2-shell/`): upright tower, socket ears screwed to brackets in the shell. The board was refitted to it on 2026-09-30 (socket on the top edge, outline widened for the USB-C, USB-C above the console's top). A 10 mm shorter variant (top edge at 60 mm, USB-C at 32.5 mm) is drawn there as a proposal and has not been applied to the board.
+- Routing after the refit to the shorter shell: 3,603 tracks, 1,066 vias, 213 of 218 signal nets fully connected, 6 unconnected items (FLASH_D2, FPGA_3V3, N64_AD6, N64_JOYBUS, USB_DP_F, USB_PU); DRC errors: 6 starved_thermal. Remaining items are listed in `validation/pcb-open-connections.json` for hand routing in KiCad.
+- Shell: envelope model only (`docs/design/v2-shell.md`, `mechanical/sn64-v2-shell/`): upright tower, socket ears screwed to brackets in the shell. The board was refitted to it on 2026-09-30 (socket on the top edge, outline widened for the USB-C, USB-C above the console's top) and to the 10 mm shorter shell on 2026-10-01 (top edge at 60 mm, USB-C at 32.5 mm).
 - PCBWay: annular ring (6 mil) and spacing (5 mil) against the 0.125 / 0.1 mm rules, as in v1.
 - Four-layer trial: with 210 fan-out vias and signals on the outer rings a four-layer stack may
   route; not tried yet.
