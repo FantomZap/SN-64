@@ -90,3 +90,11 @@ These directories describe the intended outputs. Cartridge/USB schematics, the c
 PCBWay is the intended manufacturing provider. Release deliverables include editable KiCad sources, schematic PDFs, Gerbers and NC drills, stack-up/fabrication notes, BOM with manufacturer part numbers and approved alternates, placement files, assembly drawings, programming/test instructions, and test-point/JTAG documentation. Enclosure deliverables include editable CAD, STEP/STL parts, dimensioned drawings, material/finish/fastener notes, and verified interface dimensions.
 
 Manufacturing and compatibility claims will follow prototype bring-up, physical fit checks, and recorded validation on both hosts.
+
+## Licensing
+
+SN64 is open hardware and free software: [GPL-3.0-or-later](LICENSE-GPL-3.0-or-later.txt) for the FPGA logic, firmware and scripts, and [CERN-OHL-S-2.0](LICENSE-CERN-OHL-S-2.0.txt) for the hardware design files and documentation. [LICENSING.md](LICENSING.md) says what applies to what and what you may and must do; [NOTICE](NOTICE) holds the attribution terms. Credit line: **SN64 by FantomZap**, source at <https://github.com/FantomZap/SN-64>.
+
+## Credits
+
+SN64 is built on other people's open work, above all [SNESTang](https://github.com/nand2mario/snestang) by nand2mario (a port of the SNES core by srg320 and gyurco) and [SummerCart64](https://github.com/Polprzewodnikowy/SummerCart64) by Mateusz Faderewski. The full list, with what each project contributed and its licence, is in [CREDITS.md](CREDITS.md).

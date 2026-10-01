@@ -36968,6 +36968,17 @@
 		(layer "Edge.Cuts")
 		(uuid "3454623d-6aaa-420e-88f7-73cbe3cc0c5f")
 	)
+	(gr_text "SN64 by FantomZap   github.com/FantomZap/SN-64   CERN-OHL-S-2.0"
+		(at 0 -61 0)
+		(layer "F.SilkS")
+		(uuid "4edb143c-4ae7-47cb-8f44-097dac0c04c5")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
 	(segment
 		(start -34 -6.8)
 		(end -35.3 -6.8)

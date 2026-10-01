@@ -76,7 +76,7 @@
    ],
    "items": [
     "Pad C12 [USB_DP_F] of U1 on F.Cu",
-    "Via [USB_DP_F] on F.Cu - B.Cu"
+    "Pad 2 [USB_DP_F] of R19 on B.Cu"
    ],
    "from": {
     "x": -1.2,
@@ -93,7 +93,7 @@
    ],
    "items": [
     "Pad C14 [USB_PU] of U1 on F.Cu",
-    "Via [USB_PU] on F.Cu - B.Cu"
+    "Pad 1 [USB_PU] of R21 on B.Cu"
    ],
    "from": {
     "x": -2.8,
