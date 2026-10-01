@@ -16,6 +16,10 @@ How it is built
   cap          same outline language (9 mm front corners, 6 mm back corners), 5 mm walls around a
                pocket for the SNES cartridge, rim arched like the top of an N64 cartridge and
                filleted.
+  logo         the SN64 logo stamped into the front of the cap the way a Game Boy cartridge has its
+               logo (owner, 2026-10-01): a pill-shaped pocket 19 mm high and 0.6 mm deep, which is
+               the inside of the logo's ring, with the buttons and letters of
+               assets/logo/sn64-logo-mono.svg standing in it level with the face. Nothing is proud.
 
 License: the lower body and the outline are derived from SummerCart64's shell
 (references/downloads/summercart64/hw/shell/injection mold/sc64_shell.stp, commit a1e7996d,
@@ -112,6 +116,13 @@ CART_HOLE_UP, NOTCH_D = 13.0, 3.0       # how far the hole and the rear notches 
 RIM_ABOVE_SEAT, RIM_SAG = 21.5, 6.0     # arched rim: height at the centre, drop at the ends
 RIM_FILLETS, LIP_CHAMFERS = (2.5, 2.0, 1.5, 1.2), (0.8, 0.5)
 FLARE_U = (0.0, 0.12, 0.25, 0.4, 0.5, 0.6, 0.75, 0.88, 1.0)
+# logo stamped into the front (label side) of the cap like the logo on a Game Boy cartridge: owner,
+# 2026-10-01. The inside of the logo's ring is a pocket; what is black inside it stays level with the
+# face. sn64-logo-mono-plain.svg is the same without the characters on the buttons, for a coarse process.
+LOGO_REL = "assets/logo/sn64-logo-mono.svg"
+LOGO_H = 19.0                           # height of the pocket; the flat face is about 25 high
+LOGO_UP = 12.25                         # its centre above the board's top edge: the middle of the flat face
+LOGO_DEPTH = 0.6                        # depth of the pocket
 BOARD_W_WIDE, NECK_W = 111.0, 88.0
 
 VARIANT = "board-60"                    # "board-60": the board as it is; "board-70": the taller one before 2026-10-01
@@ -230,6 +241,43 @@ def cap_with_rim():
     return cap, pocket
 
 
+def logo_recess(z_face):
+    """The logo stamped into the cap's front face the way a Game Boy cartridge carries its logo: a
+    pill-shaped pocket LOGO_DEPTH deep (the inside of the logo's ring) with the button pads and the
+    letters standing in it, level with the face. Nothing is proud of the surface.
+    Returns (pocket to cut, islands to put back), or None if the logo file is missing."""
+    faces = []
+    for root in SC64_ROOTS:
+        try:
+            faces = [f for f in import_svg(root + LOGO_REL) if isinstance(f, Face)]
+            break
+        except Exception:               # try the next place
+            pass
+    if not faces:
+        NOTES.append("logo file not found: no logo on the cap")
+        return None
+    ring = max(faces, key=lambda f: f.bounding_box().size.X)
+    inside = ring.inner_wires()[0].bounding_box()
+    k = LOGO_H / inside.size.Y
+    width = k * inside.size.X
+    # imported faces carry the importer's own placement, so scale first (all about the same point),
+    # then measure and centre
+    centre = ring.scale(k).bounding_box().center()
+    front = Plane(origin=(0, Y_F1 + LOGO_UP, z_face), x_dir=(-1, 0, 0), z_dir=(0, 0, -1))
+    # seen from the front the board's +X is on the left, so the logo's own x runs toward -X
+    pocket = extrude(front.from_local_coords(Pos(0, 0, 0.2) * SlotOverall(width, LOGO_H)),
+                     amount=LOGO_DEPTH + 0.2, dir=(0, 0, 1))
+    islands = []
+    for f in faces:
+        if f is ring:
+            continue
+        g = front.from_local_coords(f.scale(k).translate((-centre.X, -centre.Y, 0)))
+        islands.append(extrude(g, amount=LOGO_DEPTH + 0.2, dir=(0, 0, 1)))
+    NOTES.append(f"logo recess {width:.1f} x {LOGO_H:.1f} mm on the cap front, {LOGO_DEPTH} mm deep, "
+                 f"{len(islands)} pieces standing in it level with the face")
+    return pocket, islands[0].fuse(*islands[1:])
+
+
 def build():
     sc = load_sc64()
     halves = [Pos(0, 0, DZ) * s for s in sc.solids()]
@@ -261,6 +309,9 @@ def build():
         b = b - y_cyl(s * EAR_X, Y_SOCK0 - 8, Y_SOCK0 + 1, 0, 2.5)                               # ear screw pilot
         brackets = b if brackets is None else brackets + b
     upper = upper + (brackets & outer)
+    logo = logo_recess(ZC - CAP_HT)
+    if logo is not None:
+        upper = upper - logo[0] + logo[1]
     shell = lower + upper
 
     board = (box(0, -TONGUE_H, 0, 0, TONGUE_W, BOARD_T) + box(0, 0, Y_WIDE0, 0, BOARD_W_SLOT, BOARD_T)

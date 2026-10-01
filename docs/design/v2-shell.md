@@ -18,7 +18,7 @@ console_top), `sn64-v2-shell-only.stl` (the assembly STL and the 39 MB board fit
 locally and kept out of git), renders taken in FreeCAD:
 `shell-front` (label side, what the player sees), `shell-back`, `shell-right`, `shell-bottom` and
 `shell-port` (the port), `shell-iso`, `shell-iso-back`, `shell-low`, `shell-pocket` (looking into the empty
-pocket) and `section-centre` (cut through the middle). FreeCAD opens the STEP
+pocket), `shell-logo` (the logo on the cap, close up) and `section-centre` (cut through the middle). FreeCAD opens the STEP
 directly; Blender imports the STL (File > Import > STL).
 
 The script draws two geometries, picked by `VARIANT` near its top: `board-60`, the board as it is
@@ -67,6 +67,10 @@ CERN-OHL-S-2.0), so the shell model is CERN-OHL-S-2.0 too (`mechanical/README.md
   too.
 - **USB-C** in the right wall of the stem, centre 32.5 mm above the shoulders: 8 mm above the
   console's top surface and 5 mm below the flare.
+- **Logo** stamped into the front of the cap the way a Game Boy cartridge carries its logo (owner,
+  2026-10-01: "I dont want it proud of the surface"): a pill-shaped pocket, which is the inside of
+  the logo's ring, with the button pads and the letters standing in it level with the face. The
+  shapes come from `assets/logo/sn64-logo-mono.svg`.
 
 | Item | Value (mm) | Basis |
 |---|---|---|
@@ -85,6 +89,8 @@ CERN-OHL-S-2.0), so the shell model is CERN-OHL-S-2.0 too (`mechanical/README.md
 | Board top edge | 60 | socket underside 0.5 above it |
 | Cartridge | US shape: 135.4 wide, middle 92.2 x 19.9 x 87.5, sides 17.0 x 84.2; seat at 66.5, top at 154.0 | NESdev forum measurements (community, "a little rough") |
 | USB-C window | 13 x 7 in the right wall at 32.5, 8.3 above the console top | plug envelope 12.35 x 6.5 **assumed** |
+| Logo pocket | 64.7 x 19.0, 0.6 deep, centred on the cap's front face 12.25 above the board's top edge; 4.4 of wall left behind it | owner's choice of logo and style; size fitted to the flat face (25 high), depth **assumed** |
+| Logo detail at this size | letters 12.3 tall with 2.45 strokes; characters on the buttons 2.9 tall with 0.58 strokes; narrowest opening 0.46 (inside the 4 on its button) | derived from the logo file |
 | Overall shell | 146.6 x 100.3 x 30.5, one valid solid | derived |
 
 Fit check with this shell: the KiCad board STEP with every part model, plus an envelope for the
@@ -237,6 +243,10 @@ groups, which carry the cartridge audio inputs (pins 31 and 62, used by FXPAK Pr
   measured; what a part wider than the hole can meet on the way down is not.
 - SFC and PAL cartridges are 130 mm wide against the 136.6 mm pocket: guide ribs to centre them.
 - Pocket depth against grip: the cartridge must still be easy to pull out by its top.
+- Logo detail against the process that makes the shell: the characters on the buttons have 0.58 mm
+  strokes and a 0.46 mm opening. Moulding or resin printing holds that; a filament printer does not.
+  `LOGO_REL` in the script switches to `sn64-logo-mono-plain.svg` (no characters on the buttons,
+  finest detail 0.64 mm).
 - Split line (SummerCart64's halves part at the board's back face), screws for the upper part (the
   part that was replaced needs its own), bosses for H3 to H6, the ear screw detail.
 - Board: the right side notch is 1.3 mm higher than SummerCart64's; correct the outline so an

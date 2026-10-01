@@ -17,6 +17,7 @@ embossing, silkscreen or a stamp. The "plain" logo leaves the characters off the
 be embossed small.
 """
 import math
+import re
 from pathlib import Path
 
 OUT = Path(__file__).resolve().parent
@@ -86,9 +87,84 @@ GLYPHS = [glyph_s, glyph_n, glyph_6, glyph_4]
 GAPS = [8.0, 8.0, 7.0]                    # after S, N, 6 (7 % of the letter height is the tightest gap)
 
 
+_TOKEN = re.compile(r'[MHVLAZ]|-?\d+(?:\.\d+)?')
+
+
+def _arc(p0, p1, r, large, sweep):
+    """Circular SVG arc from p0 to p1 as cubic Bezier pieces of at most 90 degrees: [(c1, c2, end), ...]."""
+    (x1, y1), (x2, y2) = p0, p1
+    dx, dy = (x1 - x2) / 2, (y1 - y2) / 2
+    d2 = dx * dx + dy * dy
+    r = max(r, math.sqrt(d2))
+    f = math.sqrt(max(0.0, r * r - d2) / d2)
+    if large == sweep:
+        f = -f
+    cx, cy = f * dy + (x1 + x2) / 2, -f * dx + (y1 + y2) / 2
+    a0, a1 = math.atan2(y1 - cy, x1 - cx), math.atan2(y2 - cy, x2 - cx)
+    da = a1 - a0
+    if sweep and da < 0:
+        da += 2 * math.pi
+    elif not sweep and da > 0:
+        da -= 2 * math.pi
+    pieces = max(1, math.ceil(abs(da) / (math.pi / 2) - 1e-9))
+    out = []
+    for i in range(pieces):
+        b0, b1 = a0 + da * i / pieces, a0 + da * (i + 1) / pieces
+        k = 4 / 3 * math.tan((b1 - b0) / 4) * r
+        q0 = (cx + r * math.cos(b0), cy + r * math.sin(b0))
+        q3 = p1 if i == pieces - 1 else (cx + r * math.cos(b1), cy + r * math.sin(b1))
+        q1 = (q0[0] - k * math.sin(b0), q0[1] + k * math.cos(b0))
+        q2 = (q3[0] + k * math.sin(b1), q3[1] - k * math.cos(b1))
+        out.append((q1, q2, q3))
+    return out
+
+
+def absolute(d, m):
+    """Letter path (M, H, V, L, circular A, Z) -> absolute M, L, C, Z mapped by the matrix m = (a b c d e f).
+
+    The letters are written out in final coordinates, with arcs as Bezier curves and no transform
+    attribute: a slanted arc is an ellipse piece, which CAD importers handle badly."""
+    a, b, c, dd, e, f = m
+
+    def fmt(p):
+        return f'{n(a * p[0] + c * p[1] + e)},{n(b * p[0] + dd * p[1] + f)}'
+    tok = _TOKEN.findall(d)
+    i, cur, start, out = 0, (0.0, 0.0), (0.0, 0.0), []
+    while i < len(tok):
+        cmd = tok[i]
+        i += 1
+        if cmd == 'M':
+            cur = start = (float(tok[i]), float(tok[i + 1]))
+            i += 2
+            out.append('M' + fmt(cur))
+        elif cmd == 'L':
+            cur = (float(tok[i]), float(tok[i + 1]))
+            i += 2
+            out.append('L' + fmt(cur))
+        elif cmd == 'H':
+            cur = (float(tok[i]), cur[1])
+            i += 1
+            out.append('L' + fmt(cur))
+        elif cmd == 'V':
+            cur = (cur[0], float(tok[i]))
+            i += 1
+            out.append('L' + fmt(cur))
+        elif cmd == 'A':
+            end = (float(tok[i + 5]), float(tok[i + 6]))
+            for q1, q2, q3 in _arc(cur, end, float(tok[i]), int(tok[i + 3]), int(tok[i + 4])):
+                out.append(f'C{fmt(q1)} {fmt(q2)} {fmt(q3)}')
+            cur = end
+            i += 7
+        else:                                   # Z
+            out.append('Z')
+            cur = start
+    return ' '.join(out)
+
+
 def path(d, fill, matrix=None):
-    t = '' if matrix is None else ' transform="matrix(' + ' '.join(n(v) for v in matrix) + ')"'
-    return f'<path d="{d}" fill="{fill}" fill-rule="evenodd"{t}/>'
+    if matrix is not None:
+        d = absolute(d, matrix)
+    return f'<path d="{d}" fill="{fill}" fill-rule="evenodd"/>'
 
 
 def rect_skew(x, y, w, h, fill, k, base):

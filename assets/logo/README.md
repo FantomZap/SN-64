@@ -29,6 +29,12 @@ Finest detail, as a share of the height of the piece, and the size at which that
 
 The characters on the buttons are what limits the full logo, which is why the plain version exists. At 22 mm tall the plain logo is 68 mm wide and its finest detail is 0.64 mm. Where even that is too fine, use the letters alone.
 
+## On the shell
+
+The v2 shell carries the logo on the front of its cap, stamped in the way a Game Boy cartridge carries its logo (owner, 2026-10-01): the inside of the ring is a pill-shaped pocket 64.7 x 19.0 mm and 0.6 mm deep, and the buttons and letters stand in it level with the surface, so nothing is proud. `mechanical/sn64-v2-shell/sn64_v2_shell.py` reads `sn64-logo-mono.svg` for this. At that size the letters are 12.3 mm tall with 2.45 mm strokes, the characters on the buttons have 0.58 mm strokes and the narrowest opening is 0.46 mm; `sn64-logo-mono-plain.svg` is the fallback for a process that cannot hold that.
+
+The letters in every file are written in final coordinates with their arcs as Bezier curves and no `transform` attribute. A slanted arc is a piece of an ellipse, and the CAD importer used for the shell broke the S and the 6 when they were written as transformed arcs.
+
 ## How the files are made
 
 [make_logo.py](make_logo.py) writes every SVG (pure Python). The four characters are drawn in the script as outlines, so no font is needed or embedded. [render_previews.py](render_previews.py) builds the preview sheet and needs PyMuPDF and Pillow.

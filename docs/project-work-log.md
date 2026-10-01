@@ -264,3 +264,16 @@ Result: 3,603 tracks, 1,066 vias, 213 of 218 signal nets fully connected, the sa
 Shell model: `board-60` is now the default geometry and matches the board; `board-70` stays in the script for comparison. Before and after: [compare-70-vs-60.png](../mechanical/sn64-v2-shell/compare-70-vs-60.png).
 
 Not changed: the schematic and the FPGA pin plan (no net moved), and `build_v2_pcb.py`, which still generates the earlier placement.
+
+## 2026-10-01 — logo stamped into the shell's cap
+
+The owner asked for the logo on the front of the mushroom cap, then made clear it must not stand proud of the surface and suggested doing it like a Game Boy cartridge. [sn64_v2_shell.py](../mechanical/sn64-v2-shell/sn64_v2_shell.py) now cuts a pill-shaped pocket into the cap's front face (the inside of the logo's ring, 64.7 x 19.0 mm, 0.6 mm deep) and leaves the button pads and the letters standing in it, level with the face. The shapes are read from [sn64-logo-mono.svg](../assets/logo/sn64-logo-mono.svg). The shell is still one valid solid of the same outside size, with 4.4 mm of wall behind the pocket. Close-up: [shell-logo.png](../mechanical/sn64-v2-shell/shell-logo.png).
+
+A first version with the logo raised 0.6 mm was built and replaced before it was committed.
+
+Two things found on the way:
+
+- The CAD importer broke the slanted S and 6 of the logo file, because a slanted arc is a piece of an ellipse. [make_logo.py](../assets/logo/make_logo.py) now writes every letter in final coordinates with Bezier curves and no transform; the pictures are unchanged to within a few edge pixels.
+- Imported faces keep the importer's own placement, so scaling them moves them unless it is done before measuring and centring. The shell script does it in that order.
+
+Open: at this size the characters on the buttons have 0.58 mm strokes and a 0.46 mm opening, which a filament printer will not hold. The plain-button logo file is the fallback (one constant in the script).
