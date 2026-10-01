@@ -7,9 +7,14 @@ letters, an italic slant, four button colours, a controller's slanted button pad
 Nintendo logo, typeface or trademark. The letters S, N, 6 and 4 are drawn here as outlines, so the
 files need no font.
 
-Every design has a colour version and a one-colour version. One-colour files use a single black
+The logo (the choice of the owner, 2026-10-01) is the button pads and the letters inside a ring,
+with the pads about the height of the letters. The lockup (no ring), the buttons and the wordmark
+are the same parts on their own.
+
+Every piece has a colour version and a one-colour version. One-colour files use a single black
 fill on a transparent background: black is the raised (or printed) part, so they can be used for
-embossing, silkscreen or a stamp.
+embossing, silkscreen or a stamp. The "plain" logo leaves the characters off the buttons so it can
+be embossed small.
 """
 import math
 from pathlib import Path
@@ -134,8 +139,9 @@ def circle(c, r):
             f'A{n(r)},{n(r)} 0 1 0 {n(c[0] - r)},{n(c[1])} Z')
 
 
-def buttons(x, y, size, mono=None, pad=PAL['pad']):
+def buttons(x, y, size, mono=None, pad=PAL['pad'], letters=True):
     """Button pads with their box's top-left at (x, y) and height `size`. mono: None or one colour.
+    letters=False leaves the characters off the buttons (one colour only, for small embossing).
     Returns (elements, width, height)."""
     half_w, half_h = PX + R_PAD, PY + R_PAD
     sc = size / (2 * half_h)
@@ -151,25 +157,12 @@ def buttons(x, y, size, mono=None, pad=PAL['pad']):
         d, w = GLYPHS[i]()
         m = (letter, 0, 0, letter, c[0] - letter * w / 2, c[1] - letter * H / 2)
         if mono:
-            out.append(path(d, mono, m))
+            if letters:
+                out.append(path(d, mono, m))
         else:
             out.append(f'<circle cx="{n(c[0])}" cy="{n(c[1])}" r="{n(sc * R_BTN)}" fill="{PAL[ORDER[i]]}"/>')
             out.append(path(d, PAL['ink'] if ORDER[i] == 'yellow' else PAL['white'], m))
     return out, sc * 2 * half_w, size
-
-
-# ---------------------------------------------------------------- badge (letters in a ring)
-def badge(x, y, size, ring, fills, bar=None):
-    """Ring of height `size` around the letters."""
-    t = size * 0.075                         # ring thickness
-    cap = size * 0.46
-    els, w, h = wordmark(0, 0, cap, fills, bar=bar)
-    width = w + size * 0.62
-    r_out, r_in = size / 2, size / 2 - t
-    c1, c2 = (x + r_out, y + r_out), (x + width - r_out, y + r_out)
-    d = stadium(c1, c2, r_out) + ' ' + stadium(c1, c2, r_in)
-    els2, _, _ = wordmark(x + (width - w) / 2, y + (size - h) / 2, cap, fills, bar=bar)
-    return [path(d, ring)] + els2, width, size
 
 
 # ---------------------------------------------------------------- files
@@ -183,14 +176,37 @@ def svg(els, w, h, margin=0.0, bg=None):
             f'<title>SN64</title>\n{body}\n</svg>\n')
 
 
-def lockup(mono=None, ink=PAL['ink']):
-    """Button pads with the letters to their right."""
-    size = 128.0
-    b, bw, bh = buttons(0, 0, size, mono=mono)
-    cap = 76.0
+CAP_H = 100.0             # letter height in the logo
+BTN_RATIO = 1.15          # height of the button pads as a multiple of the letter height
+LOCKUP_GAP = 24.0         # between the pads and the letters
+RING_T, RING_PAD_V, RING_CLEAR = 12.0, 20.0, 20.0
+
+
+def lockup(x=0.0, y=0.0, mono=None, ink=PAL['ink'], ratio=None, letters=True):
+    """Button pads with the letters to their right, top-left at (x, y). Returns (elements, width, height)."""
+    ratio = BTN_RATIO if ratio is None else ratio
+    bh = ratio * CAP_H
+    h = max(bh, CAP_H)
+    b, bw, _ = buttons(x, y + (h - bh) / 2, bh, mono=mono, letters=letters)
     fills = [mono or ink] * 4
-    wm, ww, wh = wordmark(bw + 26, (size - cap) / 2, cap, fills)
-    return b + wm, bw + 26 + ww, size
+    wm, ww, _ = wordmark(x + bw + LOCKUP_GAP, y + (h - CAP_H) / 2, CAP_H, fills)
+    return b + wm, bw + LOCKUP_GAP + ww, h
+
+
+def logo(mono=None, ink=PAL['ink'], ratio=None, letters=True):
+    """The SN64 logo (owner's choice, 2026-10-01): the button pads and the letters inside a ring."""
+    _, w, h = lockup(mono=mono, ink=ink, ratio=ratio, letters=letters)
+    r_in = h / 2 + RING_PAD_V
+    r_out = r_in + RING_T
+    # the letters' top right corner is half a letter height above the centre line, where the round
+    # end of the ring has already come in by `inset`
+    inset = r_in - math.sqrt(r_in ** 2 - (CAP_H / 2) ** 2)
+    pad_l, pad_r = RING_CLEAR, RING_CLEAR + inset
+    width = 2 * RING_T + pad_l + w + pad_r
+    c1, c2 = (r_out, r_out), (width - r_out, r_out)
+    ring = path(stadium(c1, c2, r_out) + ' ' + stadium(c1, c2, r_in), mono or ink)
+    els, _, _ = lockup(RING_T + pad_l, RING_T + RING_PAD_V, mono=mono, ink=ink, ratio=ratio, letters=letters)
+    return [ring] + els, width, 2 * r_out
 
 
 def build():
@@ -199,6 +215,13 @@ def build():
     files = {}
     for tag, mono, text in (('', None, ink), ('-mono', '#000000', '#000000'), ('-on-dark', None, '#F2F1F5')):
         m = 12.0
+        els, w, h = logo(mono=mono, ink=text)
+        files[f'sn64-logo{tag}.svg'] = svg(els, w, h, m)
+        if mono:                                # plain buttons: no characters on them, for small embossing
+            els, w, h = logo(mono=mono, ink=text, letters=False)
+            files[f'sn64-logo{tag}-plain.svg'] = svg(els, w, h, m)
+        els, w, h = lockup(mono=mono, ink=text)
+        files[f'sn64-lockup{tag}.svg'] = svg(els, w, h, m)
         if tag != '-on-dark':
             els, w, h = buttons(0, 0, 132.0, mono=mono)
             files[f'sn64-buttons{tag}.svg'] = svg(els, w, h, m)
@@ -206,10 +229,6 @@ def build():
         if mono:
             els, w, h = wordmark(0, 0, 100.0, [text] * 4, bar=[text] * 4)
         files[f'sn64-wordmark{tag}.svg'] = svg(els, w, h, m)
-        els, w, h = badge(0, 0, 150.0, text, [text] * 4)
-        files[f'sn64-badge{tag}.svg'] = svg(els, w, h, m)
-        els, w, h = lockup(mono=mono, ink=text)
-        files[f'sn64-lockup{tag}.svg'] = svg(els, w, h, m)
     for name, text in files.items():
         (OUT / name).write_text(text, encoding='utf-8', newline='\n')
     return sorted(files)

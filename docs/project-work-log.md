@@ -242,3 +242,11 @@ Picture of both side by side: [compare-now-vs-short-60.png](../mechanical/sn64-v
 The owner asked for a simple logo that uses Nintendo-style design elements, with one-colour versions that can be embossed later. [assets/logo/make_logo.py](../assets/logo/make_logo.py) writes four options as SVG, each in colour and in one colour: buttons (four coloured buttons on two slanted pads that read SN over 64), a wordmark (heavy slanted letters over a four-colour bar), the two together, and a badge (the letters in a ring). The characters are drawn in the script as outlines, so no font is used. Preview sheet: [sn64-logo-options.png](../assets/logo/sn64-logo-options.png); notes, smallest feature sizes for embossing and the trademark position: [assets/logo/README.md](../assets/logo/README.md).
 
 Original artwork: it copies no Nintendo logo, typeface or trademark. Nothing is chosen yet, so the logo is not in the README, on the board or on the shell.
+
+## 2026-10-01 — logo chosen: buttons and letters in a ring
+
+The owner picked the buttons together with the letters and asked for the ring of the badge option around both. He also pointed out that the symbol should be about the height of the letters; it had been 1.7 times taller. The buttons now measure 1.15 times the letter height, which looks equal because their tips are rounded.
+
+Files in [assets/logo](../assets/logo/README.md): the logo in colour, for dark backgrounds, in one colour, and in one colour with plain buttons for small embossing; the same parts on their own (without the ring, buttons alone, letters alone). The badge option was removed; the earlier options stay in the history (commit `b71e1d2`). The README there lists the finest detail of each one-colour file and the size at which it reaches 1 mm: the full logo needs 147 mm of width, the plain-button logo 106 mm, the letters alone 45 mm.
+
+The logo is not yet in the top-level README, on the board or on the shell.

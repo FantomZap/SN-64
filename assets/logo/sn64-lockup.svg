@@ -1,17 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-12 -12 438.745 152" width="438.745" height="152">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-12 -12 493.134 139" width="493.134" height="139">
 <title>SN64</title>
-<path d="M42.777,86.205 L95.141,49.356 A27.152,27.152 0 0 0 63.89,4.947 L11.526,41.795 A27.152,27.152 0 0 0 42.777,86.205 Z" fill="#D8D6DD" fill-rule="evenodd"/>
-<path d="M95.141,123.053 L147.504,86.205 A27.152,27.152 0 0 0 116.253,41.795 L63.89,78.644 A27.152,27.152 0 0 0 95.141,123.053 Z" fill="#D8D6DD" fill-rule="evenodd"/>
-<circle cx="27.152" cy="64" r="21.333" fill="#1E9B55"/>
-<path d="M60,0 H30 A30,30 0 0 0 30,60 A10,10 0 0 1 30,80 H0 V100 H30 A30,30 0 0 0 30,40 A10,10 0 0 1 30,20 H60 Z" fill="#FFFFFF" fill-rule="evenodd" transform="matrix(0.262 0 0 0.262 19.297 50.909)"/>
-<circle cx="79.515" cy="27.152" r="21.333" fill="#2449B8"/>
-<path d="M0,0 H24 L50,56.522 V0 H70 V100 H46 L20,43.478 V100 H0 Z" fill="#FFFFFF" fill-rule="evenodd" transform="matrix(0.262 0 0 0.262 70.352 14.061)"/>
-<circle cx="79.515" cy="100.848" r="21.333" fill="#F4B400"/>
-<path d="M54,0 V20 H30 A10,10 0 0 0 20,30 V41.716 A30,30 0 1 1 0,70 V30 A30,30 0 0 1 30,0 Z M30,60 A10,10 0 1 0 30,80 A10,10 0 1 0 30,60 Z" fill="#25252C" fill-rule="evenodd" transform="matrix(0.262 0 0 0.262 71.661 87.758)"/>
-<circle cx="131.879" cy="64" r="21.333" fill="#E0352B"/>
-<path d="M36,0 H60 V58 H68 V78 H60 V100 H40 V78 H0 V58 Z M40,32.222 V58 H24 Z" fill="#FFFFFF" fill-rule="evenodd" transform="matrix(0.262 0 0 0.262 122.977 50.909)"/>
-<path d="M60,0 H30 A30,30 0 0 0 30,60 A10,10 0 0 1 30,80 H0 V100 H30 A30,30 0 0 0 30,40 A10,10 0 0 1 30,20 H60 Z" fill="#25252C" fill-rule="evenodd" transform="matrix(0.76 0 -0.162 0.76 201.185 26)"/>
-<path d="M0,0 H24 L50,56.522 V0 H70 V100 H46 L20,43.478 V100 H0 Z" fill="#25252C" fill-rule="evenodd" transform="matrix(0.76 0 -0.162 0.76 252.865 26)"/>
-<path d="M54,0 V20 H30 A10,10 0 0 0 20,30 V41.716 A30,30 0 1 1 0,70 V30 A30,30 0 0 1 30,0 Z M30,60 A10,10 0 1 0 30,80 A10,10 0 1 0 30,60 Z" fill="#25252C" fill-rule="evenodd" transform="matrix(0.76 0 -0.162 0.76 312.145 26)"/>
-<path d="M36,0 H60 V58 H68 V78 H60 V100 H40 V78 H0 V58 Z M40,32.222 V58 H24 Z" fill="#25252C" fill-rule="evenodd" transform="matrix(0.76 0 -0.162 0.76 363.065 26)"/>
+<path d="M38.432,77.45 L85.478,44.343 A24.394,24.394 0 0 0 57.401,4.444 L10.355,37.55 A24.394,24.394 0 0 0 38.432,77.45 Z" fill="#D8D6DD" fill-rule="evenodd"/>
+<path d="M85.478,110.556 L132.523,77.45 A24.394,24.394 0 0 0 104.446,37.55 L57.401,70.657 A24.394,24.394 0 0 0 85.478,110.556 Z" fill="#D8D6DD" fill-rule="evenodd"/>
+<circle cx="24.394" cy="57.5" r="19.167" fill="#1E9B55"/>
+<path d="M60,0 H30 A30,30 0 0 0 30,60 A10,10 0 0 1 30,80 H0 V100 H30 A30,30 0 0 0 30,40 A10,10 0 0 1 30,20 H60 Z" fill="#FFFFFF" fill-rule="evenodd" transform="matrix(0.235 0 0 0.235 17.337 45.739)"/>
+<circle cx="71.439" cy="24.394" r="19.167" fill="#2449B8"/>
+<path d="M0,0 H24 L50,56.522 V0 H70 V100 H46 L20,43.478 V100 H0 Z" fill="#FFFFFF" fill-rule="evenodd" transform="matrix(0.235 0 0 0.235 63.206 12.633)"/>
+<circle cx="71.439" cy="90.606" r="19.167" fill="#F4B400"/>
+<path d="M54,0 V20 H30 A10,10 0 0 0 20,30 V41.716 A30,30 0 1 1 0,70 V30 A30,30 0 0 1 30,0 Z M30,60 A10,10 0 1 0 30,80 A10,10 0 1 0 30,60 Z" fill="#25252C" fill-rule="evenodd" transform="matrix(0.235 0 0 0.235 64.383 78.845)"/>
+<circle cx="118.485" cy="57.5" r="19.167" fill="#E0352B"/>
+<path d="M36,0 H60 V58 H68 V78 H60 V100 H40 V78 H0 V58 Z M40,32.222 V58 H24 Z" fill="#FFFFFF" fill-rule="evenodd" transform="matrix(0.235 0 0 0.235 110.487 45.739)"/>
+<path d="M60,0 H30 A30,30 0 0 0 30,60 A10,10 0 0 1 30,80 H0 V100 H30 A30,30 0 0 0 30,40 A10,10 0 0 1 30,20 H60 Z" fill="#25252C" fill-rule="evenodd" transform="matrix(1 0 -0.213 1 188.134 7.5)"/>
+<path d="M0,0 H24 L50,56.522 V0 H70 V100 H46 L20,43.478 V100 H0 Z" fill="#25252C" fill-rule="evenodd" transform="matrix(1 0 -0.213 1 256.134 7.5)"/>
+<path d="M54,0 V20 H30 A10,10 0 0 0 20,30 V41.716 A30,30 0 1 1 0,70 V30 A30,30 0 0 1 30,0 Z M30,60 A10,10 0 1 0 30,80 A10,10 0 1 0 30,60 Z" fill="#25252C" fill-rule="evenodd" transform="matrix(1 0 -0.213 1 334.134 7.5)"/>
+<path d="M36,0 H60 V58 H68 V78 H60 V100 H40 V78 H0 V58 Z M40,32.222 V58 H24 Z" fill="#25252C" fill-rule="evenodd" transform="matrix(1 0 -0.213 1 401.134 7.5)"/>
 </svg>

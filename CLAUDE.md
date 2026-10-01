@@ -40,6 +40,7 @@ Original carts, Super EverDrive X5/X6 and FXPAK Pro are first-class targets. Man
   - build123d (code-first, diffable) is the likely enclosure tool, exporting STEP/STL. The FreeCAD references remain.
   - Record any tool change in the work log.
 - **Licensing and credit (owner, 2026-10-01).** Code is GPL-3.0-or-later, hardware and docs are CERN-OHL-S-2.0 (`LICENSING.md`, `NOTICE`, the two `LICENSE-*` texts at the top level). Credit line: "SN64 by FantomZap" with the repository as source location, also on the v2 board's silkscreen (`hardware/sn64-v2/tools/add_credit_silk.py`). Upstream credits live in `CREDITS.md`: add a row whenever something new is borrowed. The GitHub repository is public; only the owner's account can write to it.
+- **Logo (owner, 2026-10-01).** Four coloured buttons on two slanted pads that read SN over 64, the name in heavy slanted letters beside them, and a ring around both; the buttons are about the height of the letters. Original artwork that copies no Nintendo logo or typeface. Files, one-colour versions for embossing and the script that draws them: `assets/logo/` (see its `README.md`). Not yet placed in the top-level README, on the board or on the shell.
 
 ## v2 rules (branch `v2`)
 
