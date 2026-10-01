@@ -31,21 +31,34 @@ label side).
 
 Sourced
   SummerCart64 shell geometry and frame (file above; measured in this session)
-  SummerCart64's own USB-C opening spans 25.8-39.2 mm above the shoulders, so the console top line
-      is below about 25 mm
+  console top surface: the owner measured 30 mm from it down to the plastic floor of the cartridge
+      hole, where the cartridge shell rests, the same on the N64 and the M64 (2026-10-01). The shell
+      bottom is 12.31 below the shoulders, so the console top is 17.7 above them.
+  SummerCart64's own USB-C opening spans 25.8-39.2 mm above the shoulders (8 mm above that top)
   board 1.2 thick, tongue 64.5 wide and 10.5 below the shoulders, outline as hardware/sn64-v2
   socket, console-replacement family (OpenSFC CartSlot, docs/dimensions.md): body 99.0 x 11.25,
       ear holes 3.2 at +-47.5, rows 7.0 apart, 85.0 first to last
   USB-C receptacle J101 body 8.94 x 6.9 x 3.16 (its footprint)
-  cartridge shell 136 x 88 x 20 (North American; Wikipedia, unverified; SFC/PAL 130 x 86 x 20)
+  US cartridge: caliper measurements by rainwarrior (NESdev forum t=23890), listed with the constants
 
 Assumed, to be measured before anything is cut
-  console top line drawn at 25; the M64 opening is unknown
-  socket base 6.0 and nose 9.0 high, nose 88 x 9 (one listing: 21 mm overall with tails)
+  socket base 6.0 high (one listing: 21 mm overall with tails); nose from the SNES Jr connector
   cartridge seats with its bottom face on the socket shoulder
-  cap: 5 mm walls, 0.3 mm pocket clearance, rim 21.5 mm above the seat at the centre and 6 mm
-      lower at the ends, flare from 57.5 to 70
+  cap: 5 mm walls, pocket clearance 0.6 / 0.3, rim 21.5 mm above the seat at the centre and 6 mm
+      lower at the ends
   USB-C plug overmold 12.35 x 6.5 (window 13 x 7)
+
+Two geometries, picked by VARIANT below
+  "board-70"  the board in hardware/sn64-v2 as it is: top edge 70 above the shoulders, USB-C centre
+      50, flare 57.5-70. The tracked STEP, STL and shell-*.png show this one.
+  "short-60"  proposal of 2026-10-01 (owner: shorter, with about 5 mm clear on each side of the USB
+      port). NOT applied to the board. 10 mm shorter:
+        USB-C centre 32.5: the lowest the board allows (its side notches for the shell's locating
+            posts end at 26.4) and the height of SummerCart64's own port; window 26.0-39.0, 8.3 above
+            the console top
+        flare from 44.0 (5 above the window) to the board top
+        board top 60.0: translator row (top at 47.7), 8 mm of fan-out, then the socket pads
+      Its files carry "short-60" in the name; the STEP and STL are not tracked.
 
 In the build123d MCP session: execute_file this script. Elsewhere (Python with build123d), run it
 from the repository root: python mechanical/sn64-v2-shell/sn64_v2_shell.py
@@ -79,8 +92,13 @@ NOSE_L, NOSE_D, NOSE_H = 94.9, 8.75, 10.55
 # point, parting notch, front-corner mid, front-corner end. Back corners 1 mm, front corners 9 mm.
 STEM_O = [(56.78, 9.60), (57.476, 9.318), (57.78, 8.63), (58.06, 0.60), (58.00, 0.40), (55.297, -5.830), (49.00, -8.40)]
 
+CART_HOLE_DEPTH = 30.0                  # console top surface down to the plastic floor the cartridge rests on
+                                        # (owner's measurement, N64 and M64, 2026-10-01)
+N64_SHELL_BOTTOM = -12.31               # SummerCart64 shell bottom below the shoulders (its STEP)
+Y_LINE = N64_SHELL_BOTTOM + CART_HOLE_DEPTH   # console top surface above the shoulders: 17.69
+
 # assumed
-WALL, Y_LINE = 2.0, 25.0
+WALL = 2.0
 Y_CUT = 24.5                            # real SummerCart64 shell below, extruded outline above
 SOCK_BASE_H = 6.0
 TAIL_T, TAIL_LAP = 0.5, 3.0
@@ -91,13 +109,23 @@ CART_BACK_TO_PCB = 8.5                  # back face to the PCB mid-plane (ASSUME
                                         # back face flat, the middle section proud on the label side)
 CART_EDGE_RECESS = 2.0                  # bottom face up to the PCB edge (ASSUMED)
 CART_HOLE_UP, NOTCH_D = 13.0, 3.0       # how far the hole and the rear notches go in (ASSUMED)
-Y_F0, Y_F1 = 57.5, 70.0                 # S-curve flare, above the USB-C window
 RIM_ABOVE_SEAT, RIM_SAG = 21.5, 6.0     # arched rim: height at the centre, drop at the ends
 RIM_FILLETS, LIP_CHAMFERS = (2.5, 2.0, 1.5, 1.2), (0.8, 0.5)
 FLARE_U = (0.0, 0.12, 0.25, 0.4, 0.5, 0.6, 0.75, 0.88, 1.0)
+BOARD_W_WIDE, NECK_W = 111.0, 88.0
 
-# board proposal already applied to hardware/sn64-v2 (2026-09-30)
-Y_BOARD_TOP, Y_WIDE0, Y_WIDE1, BOARD_W_WIDE, NECK_W, Y_USB = 70.0, 32.0, 60.0, 111.0, 88.0, 50.0
+VARIANT = "board-70"                    # "board-70": the board as it is; "short-60": the shorter proposal
+if VARIANT == "board-70":               # hardware/sn64-v2 today
+    Y_BOARD_TOP, Y_WIDE0, Y_WIDE1, Y_USB = 70.0, 32.0, 60.0, 50.0
+    Y_F0 = 57.5                         # S-curve flare starts 1 mm above the USB-C window
+elif VARIANT == "short-60":             # proposal, not applied to the board
+    USB_CLEAR = 5.0                     # plain wall above the USB-C window before the flare starts (owner)
+    Y_BOARD_TOP, Y_WIDE0, Y_WIDE1, Y_USB = 60.0, 26.4, 50.0, 32.5
+    Y_F0 = Y_USB + PLUG_W / 2 + USB_CLEAR   # 44.0
+else:
+    raise ValueError(f"unknown VARIANT {VARIANT!r}")
+Y_F1 = Y_BOARD_TOP                      # the flare ends at the board's top edge
+TAG = "" if VARIANT == "board-70" else "-" + VARIANT     # in the names of exported files
 
 # derived
 Y_SOCK0 = Y_BOARD_TOP + 0.5             # socket body underside
@@ -256,7 +284,7 @@ def build():
     usb = box(W_STEM / 2 - WALL - 0.06 - USB_D / 2, Y_USB - USB_W / 2, Y_USB + USB_W / 2, USB_ZC, USB_D, USB_H)
 
     console = (box(0, Y_LINE - 1, Y_LINE, DZ, 200, 90)
-               - box(0, Y_LINE - 2, Y_LINE + 1, DZ, W_STEM + 2, 18.06 + 2))                      # console top (assumed)
+               - box(0, Y_LINE - 2, Y_LINE + 1, DZ, W_STEM + 2, 18.06 + 2))                      # console top surface (measured)
 
     return {"shell": shell, "board": board, "socket": socket, "cartridge": cart, "cart_pcb": cart_pcb,
             "usbc": usb, "console_top": console}
@@ -318,18 +346,18 @@ def viewer_frame(parts):
 
 def export_all(parts, out_dir):
     asm, rotated = viewer_frame(parts)
-    export_step(asm, f"{out_dir}/sn64-v2-shell-assembly.step")
+    export_step(asm, f"{out_dir}/sn64-v2-shell{TAG}-assembly.step")
     # 0.03 mm chord tolerance: well below print resolution, a fraction of the default file size
-    export_stl(asm, f"{out_dir}/sn64-v2-shell-assembly.stl", tolerance=0.03, angular_tolerance=0.2)
-    export_stl(rotated["shell"], f"{out_dir}/sn64-v2-shell-only.stl", tolerance=0.03, angular_tolerance=0.2)
+    export_stl(asm, f"{out_dir}/sn64-v2-shell{TAG}-assembly.stl", tolerance=0.03, angular_tolerance=0.2)
+    export_stl(rotated["shell"], f"{out_dir}/sn64-v2-shell{TAG}-only.stl", tolerance=0.03, angular_tolerance=0.2)
 
 
 def report(parts):
     sh = parts["shell"]
     bb = sh.bounding_box()
-    print(f"shell {bb.size.X:.1f} x {bb.size.Y:.1f} x {bb.size.Z:.1f} mm, bottom {bb.min.Y:.2f}, "
+    print(f"variant {VARIANT}: shell {bb.size.X:.1f} x {bb.size.Y:.1f} x {bb.size.Z:.1f} mm, bottom {bb.min.Y:.2f}, "
           f"solids {len(sh.solids())}, volume {sh.volume / 1000:.1f} cm3, valid {sh.is_valid}")
-    print(f"console line {Y_LINE} (assumed), USB-C centre {Y_USB} ({Y_USB - Y_LINE:.0f} above the line), "
+    print(f"console top {Y_LINE:.2f} above the shoulders (measured: 30 mm hole), USB-C centre {Y_USB} (window {Y_USB - PLUG_W / 2 - Y_LINE:.1f} above the console top, flare {Y_F0 - Y_USB - PLUG_W / 2:.1f} above the window), "
           f"real N64 shell to {Y_CUT}, flare {Y_F0}..{Y_F1}, cartridge seat {Y_TOP}, rim {RIM_C} at the centre and "
           f"{RIM_C - RIM_SAG} at the ends, cap {2 * CAP_HW:.1f} x {2 * CAP_HT:.1f}, cartridge top {Y_TOP + CART_MID_H}")
     print("notes:", "; ".join(NOTES))

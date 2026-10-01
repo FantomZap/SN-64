@@ -102,3 +102,11 @@ US SNES cartridge, caliper measurements by rainwarrior, [NESdev forum t=23890](h
 The same thread gives a Super Famicom cartridge as 129 x 87 x 20 (jeffythedragonslayer). Not in the thread: which face the thicker middle section stands proud on, how far the PCB edge is from the bottom face, and where the PCB lies front to back; these need two caliper readings on a real cartridge.
 
 Console connector nose, from the SNES Jr connector model in [kicad-snn-cpu-01](https://github.com/qwertymodo/kicad-snn-cpu-01) (commit `a0018661`, CERN-OHL-S-2.0, `SNES_Cartridge_Connector_1pc.step`, SHA-256 `7621e92d...`; simplified, no slot or pins), sectioned 2026-10-01: base 151.8 x 15.0 up to 4.0, then 107.95 x 15.0 to 8.0, 107.95 x 8.75 to 13.0, and the nose 94.9 x 8.75 from 13.0 to 23.55 (10.55 high). The nose has 1.3 mm each side in width and 1.08 mm front to back in the measured 97.5 x 10.9 hole, so the two sources agree. It is a different connector from the SHVC replacement socket SN64 uses; its nose stands in for ours until the sample is measured.
+
+## Console cartridge hole depth (measured by the owner, 2026-10-01)
+
+Measured by the owner on an original N64 and on a ModRetro M64: **30 mm** from the console's top surface down to the plastic floor of the cartridge hole, which is the surface the bottom face of a cartridge shell rests on. The same on both consoles. The instrument and its tolerance were not recorded; treat the figure as good to about a millimetre until it is taken again with calipers.
+
+Derived: the bottom face of the SummerCart64 shell is 12.31 mm below the board's tongue shoulders (its STEP), so the console's top surface is **17.7 mm above the shoulders** (17.69 in the shell model). This replaces the assumed 25 mm (28 mm before that). Cross-check: SummerCart64's own USB-C opening spans 25.8 to 39.2 mm above the shoulders, 8.1 mm above this surface, and that port is made to be used while the cartridge sits in the console.
+
+Not measured: the shape of the top surface around the hole and how far a part wider than the hole can come down before it meets the console. The shell starts to widen toward its cap 40 mm above the surface with the board as it is, 26 mm in the shorter proposal (`docs/design/v2-shell.md`).

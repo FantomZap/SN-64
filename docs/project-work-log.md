@@ -223,3 +223,16 @@ The repository turned out to be public already (created public on 2026-09-29; on
 ## 2026-10-01 — local user-folder paths removed from the tracked files
 
 The repository is public and its notes, scripts, check reports and KiCad netlists carried absolute paths with the Windows user folder in them. No file from outside the project was ever uploaded; the exposure was the folder name inside those paths. `tools/scrub_local_paths.py` now replaces that prefix in every tracked text file (`%USERPROFILE%` in notes, reports and netlists, `$env:USERPROFILE` in PowerShell scripts, `$HOME` in shell scripts and snippets); it reads the name from the PC at run time, so the tool does not contain it. Scripts still resolve their tools; JSON and XML reports still parse. A local pre-commit hook refuses commits that contain the path. Applied to the tips of all public branches. Earlier commits still hold the old text until the history is rewritten, which is the owner's call.
+
+## 2026-10-01 — console top measured by the owner; shorter shell drawn as a proposal
+
+The owner measured the cartridge hole on an N64 and an M64: 30 mm from the console's top surface down to the plastic floor the cartridge shell rests on, the same on both. With the SummerCart64 shell bottom 12.31 mm below the shoulders, the console's top surface is 17.7 mm above the shoulders. The shell model had it at an assumed 25 mm. Recorded in [dimensions.md](dimensions.md).
+
+He had also asked whether the unit could be shorter with about 5 mm clear on each side of the USB port. [sn64_v2_shell.py](../mechanical/sn64-v2-shell/sn64_v2_shell.py) now draws two geometries, picked by `VARIANT`:
+
+- `board-70`: the board as it is. Nothing moved except the console line; the USB-C window turns out to be 25.8 mm above the console top.
+- `short-60`: USB-C centre at 32.5 mm (the lowest the board's side notches allow, and the height of SummerCart64's own port), 5 mm of plain wall above its window, flare from 44 to the board's top edge at 60. Shell 100.3 mm tall instead of 110.3; the cartridge sits 10 mm lower. One valid solid, no interference, cartridge and socket checks unchanged.
+
+Picture of both side by side: [compare-now-vs-short-60.png](../mechanical/sn64-v2-shell/compare-now-vs-short-60.png). Details and the before/after table: [v2-shell.md](design/v2-shell.md), "Shorter proposal".
+
+**The board is not changed.** The proposal needs the socket's fan-out routed again in 8 mm instead of 18 mm. Measured on the routed board: at most 24 of the 56 translator nets have to pass any one point sideways, which three routing layers hold in 8 mm, so it is expected to route but is not proven. Waiting for the owner's decision before touching the board.

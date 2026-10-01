@@ -1,6 +1,8 @@
 # SN64 v2 shell: N64 cartridge body with a rounded mushroom cap (look-and-fit model)
 
-**Status (2026-09-30): look-and-fit model for the owner's review. Not a manufacturable enclosure.**
+**Status (2026-10-01): look-and-fit model for the owner's review. Not a manufacturable enclosure.
+The console's top surface is now a measured height. A 10 mm shorter variant is drawn as a proposal
+and waits for the owner's decision; the board has not been changed for it.**
 
 Owner's direction, in order: one continuous vertical item with the SNES cartridge upright on top (a
 first model with the cartridge flat on a shelf was rejected on sight); a mushroom cap so the shell
@@ -18,6 +20,11 @@ locally and kept out of git), renders taken in FreeCAD:
 `shell-port` (the port), `shell-iso`, `shell-iso-back`, `shell-low`, `shell-pocket` (looking into the empty
 pocket) and `section-centre` (cut through the middle). FreeCAD opens the STEP
 directly; Blender imports the STL (File > Import > STL).
+
+The script draws two geometries, picked by `VARIANT` near its top: `board-70`, the board as it is
+(the tracked STEP, STL and `shell-*.png`), and `short-60`, the shorter proposal described below
+(`short-60-*.png`, `compare-now-vs-short-60.png`; its STEP and STL carry `short-60` in the name
+and are generated locally, not tracked).
 
 Frame: X across the board, Y up with 0 at the N64 tongue shoulders, Z out of the board's F.Cu
 face. This is SummerCart64's own shell frame moved 0.6 mm in Z; its two mounting bosses are at
@@ -70,13 +77,13 @@ CERN-OHL-S-2.0), so the shell model is CERN-OHL-S-2.0 too (`mechanical/README.md
 | Cartridge pocket | 136.6 x 20.5, floor at 76.5 (socket shoulder), 1.45 off-centre toward the label side | US cartridge 135.4 x 19.9 (measured, community) + 0.6 / 0.3 clearance; offset **assumed** |
 | Rim | 98.0 at the centre, 92.0 at the ends, fillet 2.5 | assumed |
 | Wall | 2.0 body and stem, 2.0 to 2.9 through the flare, 5.0 around the pocket | SummerCart64 2.0; rest assumed |
-| Console top line | drawn at 25 | **assumed**: SummerCart64's own USB-C opening starts at 25.8, so the console top is lower |
+| Console top surface | 17.7 above the shoulders | **measured by the owner (2026-10-01)**: 30 mm from the top surface down to the floor of the cartridge hole, N64 and M64; the shell bottom is 12.31 below the shoulders |
 | Socket body | 99.0 x 11.25, ear holes 3.2 at 95.0 | OpenSFC console footprint (sourced) |
 | Socket base | 6 high | **assumed**; a marketplace listing gives 21 mm overall |
 | Socket nose | 94.9 x 8.75, 10.55 high, slot 90.5 long with a key in each PCB gap | SNES Jr connector model (sourced, a different connector of the same family) |
 | Board top edge | 70 | socket underside 0.5 above it |
 | Cartridge | US shape: 135.4 wide, middle 92.2 x 19.9 x 87.5, sides 17.0 x 84.2; seat at 76.5, top at 164.0 | NESdev forum measurements (community, "a little rough") |
-| USB-C window | 13 x 7 in the right wall at 50 | plug envelope 12.35 x 6.5 **assumed** |
+| USB-C window | 13 x 7 in the right wall at 50, 25.8 above the console top | plug envelope 12.35 x 6.5 **assumed** |
 | Overall shell | 146.6 x 110.3 x 30.5, one valid solid | derived |
 
 Fit check with this shell: the KiCad board STEP with every part model, plus an envelope for the
@@ -114,6 +121,60 @@ Still assumed, and needing two caliper readings on a real US cartridge:
 2. From the cartridge's bottom face up to the PCB's edge (drawn 2.0 mm). This sets how far the
    contacts overlap the fingers.
 
+## Shorter proposal (2026-10-01, awaiting the owner's decision; the board is not changed)
+
+The owner asked whether the unit could be shorter while keeping about 5 mm clear on each side of the
+USB port, and measured the console: its top surface is 30 mm above the floor of the cartridge hole,
+17.7 mm above the board's shoulders. The script draws both geometries (`VARIANT` at the top:
+`board-70` is the board as it is, `short-60` the proposal). Picture of the two side by side:
+`compare-now-vs-short-60.png`; the proposal alone: `short-60-*.png`.
+
+| | Now (`board-70`) | Shorter (`short-60`) |
+|---|---|---|
+| Board top edge above the shoulders | 70 | 60 |
+| USB-C centre | 50 | 32.5 |
+| USB-C window | 43.5 to 56.5 | 26.0 to 39.0 |
+| Console top to the window | 25.8 | 8.3 |
+| Plain wall between the window and the flare | 1.0 | 5.0 |
+| Flare | 57.5 to 70 | 44 to 60 |
+| Cartridge seat | 76.5 | 66.5 |
+| Rim, centre / ends | 98 / 92 | 88 / 82 |
+| Shell height | 110.3 | 100.3 |
+| Top of a US cartridge above the console top | 146.3 | 136.3 |
+
+What sets each number in the proposal:
+
+- **USB-C at 32.5.** The receptacle needs the 111 mm wide part of the board, and that part cannot start
+  below 26.4 mm: under it the board keeps SummerCart64's 101.8 mm width and the notches for the
+  shell's two locating posts, which end at 26.4. 32.5 is also the height of SummerCart64's own USB-C
+  opening (25.8 to 39.2), which is used with the cartridge in the console.
+- **Flare from 44.** 5 mm of plain wall above the window, as asked.
+- **Top edge at 60.** The flare ends at the board's top edge, where the socket sits. The translator
+  row ends at 47.7 mm; the socket pads would take 56.0 to 59.5, which leaves about 8 mm for the
+  fan-out between them. Today that fan-out has 18 mm.
+
+Checked in the model: the shell is one valid solid; no interference between shell, board outline,
+socket, cartridge, cartridge PCB and USB receptacle; the cartridge and socket checks are unchanged.
+
+What the board would need (not done, and not proven):
+
+- Outline: 111 mm wide from 26.4 to 50, the 88 mm neck from 50 to 60, top edge at 60. J2's pads move
+  down 10 mm with it.
+- USB-C J101, its ESD part and VBUS capacitor to the right edge at 32.5; top mounting holes H5/H6 up
+  to about 44.5 so they clear the receptacle. Five USB nets routed again.
+- The socket nets routed again in the 8 mm band. Measured on the board as it is: 56 of the socket's
+  60 nets are signals that end on the translator row (the others are ground, 5 V and the two audio
+  inputs); the 18 mm band holds about 1.1 m of sideways copper and 96 vias on the socket's nets; and
+  with the chips where they are at most 24 of the 56 signals have to pass any one point sideways.
+  Three routing layers hold about 29 tracks each in 8 mm, so it is expected to route, but it is not
+  proven until the router has done it. If it does not finish at 60, the fallback is a top edge a few
+  millimetres higher.
+- Planes and pours to the new outline, then DRC, the open-connection report, the board STEP and the
+  fit check in the `short-60` shell.
+
+Going shorter than this means moving the translator row down or giving the translators' channels
+the socket's pin order (schematic, FPGA pin plan and a new route of that area). Neither is proposed.
+
 ## Board refit to this shell (done 2026-09-30)
 
 `hardware/sn64-v2/tools/refit_tower_v2.py` changed the routed board in place of a full re-layout:
@@ -125,7 +186,8 @@ Still assumed, and needing two caliper readings on a real US cartridge:
   pieces were removed and the socket nets routed again from the translators.
 - Outline: 101.8 mm wide to 32 mm above the shoulders, 111 mm to 60 mm, then an 88 mm neck to the
   top edge at 70 mm; the SummerCart64 part below 26.4 mm is unchanged.
-- USB-C J101 at the right edge 50 mm above the shoulders (22 mm above the assumed console line),
+- USB-C J101 at the right edge 50 mm above the shoulders (32 mm above the console's top surface as
+  measured on 2026-10-01; the line was assumed 10 mm higher when this was done),
   turned to face outward with the JAE reference 0.5 mm front overhang. Its ESD part and VBUS
   capacitor moved with it; the series and pull-up resistors stay beside the FPGA with their routing.
   The five nets that reach the moved parts were cut at the old connector and routed again.
@@ -169,7 +231,9 @@ groups, which carry the cartridge audio inputs (pins 31 and 62, used by FXPAK Pr
   Super Famicom or PAL cartridge.
 - Buy one sample socket and measure it: height, nose, tail length and section, ear shape and hole
   spacing, and how deep a cartridge seats.
-- Console top line (N64) and the M64 opening.
+- The owner's decision on the shorter proposal.
+- The shape of the console's top surface around the cartridge hole, N64 and M64. Its height is
+  measured; what a part wider than the hole can meet on the way down is not.
 - SFC and PAL cartridges are 130 mm wide against the 136.6 mm pocket: guide ribs to centre them.
 - Pocket depth against grip: the cartridge must still be easy to pull out by its top.
 - Split line (SummerCart64's halves part at the board's back face), screws for the upper part (the
