@@ -46,7 +46,7 @@ Impedance is not controlled in this draft; the USB pair width is a placeholder u
 
 ```powershell
 & 'C:\Program Files\KiCad\10.0\bin\python.exe' hardware/sn64/tools/prepare_route.py   # netclasses, fan-out, planes, DSN export
-# Freerouting 2.4.1 (local jar, C:\Users\RyanB\Tools\freerouting), through its local API / MCP:
+# Freerouting 2.4.1 (local jar, %USERPROFILE%\Tools\freerouting), through its local API / MCP:
 #   create_session -> enqueue_job -> upload build/route-pcb/sn64.dsn -> settings -> start_job -> download .ses
 & 'C:\Program Files\KiCad\10.0\bin\python.exe' hardware/sn64/tools/finish_route.py    # import .ses, outer GND pours, refill, save
 & 'C:\Program Files\KiCad\10.0\bin\kicad-cli.exe' pcb drc --format json --output hardware/sn64/validation/pcb-drc.json --severity-error --exit-code-violations hardware/sn64/sn64.kicad_pcb
@@ -64,12 +64,12 @@ Notes on the tools, found on the way:
 
 ## Second router: KiCadRoutingTools (2026-09-30)
 
-[drandyhaas/KiCadRoutingTools](https://github.com/drandyhaas/KiCadRoutingTools) (MIT, Rust A* core with a Python driver, reads and writes `.kicad_pcb` directly) is installed per user under `C:\Users\RyanB\Tools\KiCadRoutingTools` (prebuilt core v0.22.1 fetched by its `build_router.py`) with a Python 3.14 environment in `C:\Users\RyanB\Tools\krt-venv`. It attempts all 375 signal nets in about five minutes and spends the rest of a 30-60 minute run ripping up and retrying the hard ones, where Freerouting needed half an hour for its first pass alone. Both are single-threaded per net.
+[drandyhaas/KiCadRoutingTools](https://github.com/drandyhaas/KiCadRoutingTools) (MIT, Rust A* core with a Python driver, reads and writes `.kicad_pcb` directly) is installed per user under `%USERPROFILE%\Tools\KiCadRoutingTools` (prebuilt core v0.22.1 fetched by its `build_router.py`) with a Python 3.14 environment in `%USERPROFILE%\Tools\krt-venv`. It attempts all 375 signal nets in about five minutes and spends the rest of a 30-60 minute run ripping up and retrying the hard ones, where Freerouting needed half an hour for its first pass alone. Both are single-threaded per net.
 
 Command used (run 3, on the prepared board with plane vias; the project file must sit beside the board copy so the net classes are seen):
 
 ```powershell
-C:\Users\RyanB\Tools\krt-venv\Scripts\python.exe C:\Users\RyanB\Tools\KiCadRoutingTools\py_router\route.py build/route-pcb/krt-in3.kicad_pcb build/route-pcb/krt-out3.kicad_pcb `
+%USERPROFILE%\Tools\krt-venv\Scripts\python.exe %USERPROFILE%\Tools\KiCadRoutingTools\py_router\route.py build/route-pcb/krt-in3.kicad_pcb build/route-pcb/krt-out3.kicad_pcb `
   --nets '*' '!/GND' '!/FPGA_3V3' '!/FPGA_1V1' --keep-input-copper --layers F.Cu In2.Cu B.Cu `
   --clearance 0.125 --track-width 0.15 --via-size 0.5 --via-drill 0.2 `
   --fab-overrides hardware/sn64/tools/fab-pcbway.txt --escalation fab --hole-to-hole-clearance 0.25 --board-edge-clearance 0.3 --no-bga-zones `

@@ -20,7 +20,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
 Set-Location $repo
-$jar = 'C:\Users\RyanB\Tools\freerouting\freerouting-2.4.1.jar'
+$jar = "$env:USERPROFILE\Tools\freerouting\freerouting-2.4.1.jar"
 $state = "build\route-pcb\fr-$Port.json"
 $base = "http://127.0.0.1:$Port/v1"
 $hdr = @{ 'Freerouting-Profile-ID' = 'f980f25e-1d3e-4c34-802b-fa5c5b36567d'; 'Freerouting-Environment-Host' = 'sn64-variant/1.0'; 'Accept' = 'application/json' }

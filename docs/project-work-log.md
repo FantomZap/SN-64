@@ -159,3 +159,7 @@ Select and validate the FPGA/storage and physical-cartridge bridge, complete sys
 ## 2026-10-01 — licences, attribution notice and credits
 
 Owner decision: code is GPL-3.0-or-later, hardware and docs are CERN-OHL-S-2.0, credit line "SN64 by FantomZap" with this repository as the source location. Added at the top level: the two licence texts, [LICENSING.md](../LICENSING.md), [NOTICE](../NOTICE) and [CREDITS.md](../CREDITS.md), which lists everyone the project borrows from. Current design work is on the `v2` branch; its work log has the details.
+
+## 2026-10-01 — local user-folder paths removed from the tracked files
+
+The repository is public and its notes, scripts, check reports and KiCad netlists carried absolute paths with the Windows user folder in them. No file from outside the project was ever uploaded; the exposure was the folder name inside those paths. `tools/scrub_local_paths.py` now replaces that prefix in every tracked text file (`%USERPROFILE%` in notes, reports and netlists, `$env:USERPROFILE` in PowerShell scripts, `$HOME` in shell scripts and snippets); it reads the name from the PC at run time, so the tool does not contain it. Scripts still resolve their tools; JSON and XML reports still parse. A local pre-commit hook refuses commits that contain the path. Applied to the tips of all public branches. Earlier commits still hold the old text until the history is rewritten, which is the owner's call.

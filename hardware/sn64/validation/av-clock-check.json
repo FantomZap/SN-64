@@ -2,7 +2,7 @@
   "status": "pass",
   "scope": "static schematic/netlist check of the clock and cartridge-audio child sheet only (draft 0.2-av, no HDMI)",
   "generated_at_utc": "2026-09-30T03:28:46.568174+00:00",
-  "project_checked": "C:\\Users\\RyanB\\.claude\\projects\\SN64\\hardware\\sn64",
+  "project_checked": "%USERPROFILE%\\.claude\\projects\\SN64\\hardware\\sn64",
   "checks_passed": 27,
   "checks_failed": 0,
   "inputs": {

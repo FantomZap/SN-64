@@ -25,14 +25,14 @@ The small program an N64 or M64 boots from the SN64 cartridge. It shows the SN64
 
 ```bash
 bash firmware/bootstrap/tools/setup_libdragon.sh          # once, ~1 min
-export N64_INST=C:/Users/RyanB/.codex/tools/libdragon-gcc-toolchain-20260915/n64inst
-export PATH="/c/Users/RyanB/.codex/tools/libdragon-gcc-toolchain-20260915/n64inst/bin:$PATH"
+export N64_INST="$(cygpath -m "$HOME")/.codex/tools/libdragon-gcc-toolchain-20260915/n64inst"
+export PATH="$HOME/.codex/tools/libdragon-gcc-toolchain-20260915/n64inst/bin:$PATH"
 cd firmware/bootstrap
 make                 # -> build/n64-bootstrap/sn64_bootstrap.z64
 make check           # CIC-6102 boot checksum
 make words           # -> build/n64-bootstrap/sn64_bootstrap_words.mem (+ .json manifest)
-make test HOST_CC=/c/Users/RyanB/.codex/tools/w64devkit-2.10.0/w64devkit/bin/gcc.exe
-make test-negative HOST_CC=/c/Users/RyanB/.codex/tools/w64devkit-2.10.0/w64devkit/bin/gcc.exe
+make test HOST_CC=$HOME/.codex/tools/w64devkit-2.10.0/w64devkit/bin/gcc.exe
+make test-negative HOST_CC=$HOME/.codex/tools/w64devkit-2.10.0/w64devkit/bin/gcc.exe
 ```
 
 From the repository root in PowerShell, after `make words`:

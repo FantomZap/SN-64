@@ -3,7 +3,7 @@
   "recorded_date": "2026-09-29",
   "scope": "USB programmer child-sheet library sources and changes; not a manufacturing or functional-validation release. Paths in local assets are relative to hardware/sn64; source paths are relative to their stated root.",
   "source_roots": {
-    "original_workspace": "C:/Users/RyanB/Documents/Codex/SN 64 Project",
+    "original_workspace": "%USERPROFILE%/Documents/Codex/SN 64 Project",
     "installed_kicad_share": "C:/Program Files/KiCad/10.0/share/kicad"
   },
   "tool_version": "KiCad 10.0.6",
