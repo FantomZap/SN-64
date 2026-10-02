@@ -281,7 +281,7 @@ def main():
         mapping('Cursor on Z, Z held: Select lights', made, 'map-z'),
         mapping('A on a row: what should Z give?', made, 'map-choices'),
         mapping('The list of controllers', made, 'map-list'),
-        mapping('Another controller, the other colours', made, 'map-other'),
+        mapping('Another controller; the list scrolled', made, 'map-other'),
         mapping('A changed mapping, C-Up held', made, 'map-changed'),
         mapping('All four C held: the menu shortcut', made, 'map-shortcut'),
     ]

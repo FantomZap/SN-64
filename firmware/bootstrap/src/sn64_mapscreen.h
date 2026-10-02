@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // The controller mapping screen (owner, 2026-10-01): the player's controller and the
-// controller the game sees side by side, with buttons that light up as they are pressed;
-// a drop-down list over each to choose which controller is drawn; below them the mapping
-// as 14 rows with a small picture of each single button, every row changeable; and a
-// field that puts the defaults back.
+// controller the game sees side by side, in their real shapes, with buttons that light up
+// as they are pressed; a drop-down list over each that names the controller and chooses
+// which one is drawn; the mapping as a list of 14 rows with a small picture of each single
+// button, every row changeable; and a field that puts the defaults back.
+//
+// The list stands under the Super NES controller, which is a flat one and leaves the room.
+// It shows ten rows and scrolls (owner: "the button list below can be scrollable too if it
+// helps fit things"), so the player's controller can be as large as its half of the screen.
 //
 // Only the D-pad, A and B do anything on this screen, so every other button can be tried
 // freely, and B leaves when it is let go, so it can be seen to light first.
@@ -20,17 +24,19 @@
 #include "sn64_mapping.h"
 #include "sn64_padview.h"
 
-#define SN64_MS_ROWS       7                // mapping rows in each of the two columns
-// Cursor rows: the two lists on top, the seven mapping rows, the reset field below them.
+#define SN64_MS_VISIBLE    10               // rows of the mapping list on the screen at once
+// Cursor rows: the two lists on top, the 14 mapping rows, the reset field after them.
 #define SN64_MS_ROW_LISTS  (-1)
-#define SN64_MS_ROW_RESET  SN64_MS_ROWS
+#define SN64_MS_ROW_RESET  SN64_MAP_ENTRIES
 
 // What is open: nothing, one of the two controller lists, or the choices for a mapping row.
 enum { SN64_MS_CLOSED, SN64_MS_LIST_INPUT, SN64_MS_LIST_SNES, SN64_MS_TARGET };
 
 typedef struct {
     uint8_t input_pad, snes_pad;    // what the two lists are set to (SN64_PAD_*)
-    int8_t  col, row;               // the cursor: column 0 or 1, row -1 .. 7
+    int8_t  col;                    // which of the two lists the cursor is on, or was on last
+    int8_t  row;                    // the cursor: -1 the lists, 0 .. 13 a mapping row, 14 the reset field
+    uint8_t first;                  // the first mapping row on the screen (the list scrolls)
     uint8_t open;                   // SN64_MS_*
     int8_t  pick;                   // the highlighted line of what is open
     bool    b_armed;                // B went down with nothing open: letting it go leaves the screen

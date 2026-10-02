@@ -4,20 +4,21 @@
 #include <stdio.h>
 
 // ---- where things are on the 320 x 240 screen (16 pixels kept free left and right)
-#define X_LEFT     16               // the left column: the player's controller
-#define X_RIGHT    164              // the right column: what the game sees
-#define X_END      303              // the last pixel of the right column
-#define Y_CAPTION  8
-#define Y_LIST     18               // the two list boxes
+#define X_LEFT     16               // the left half: the player's controller
+#define X_RIGHT    164              // the right half: what the game sees, and the mapping under it
+#define X_END      303              // the last pixel of the right half
+#define Y_LIST     8                // the two list boxes: each names the controller drawn under it
 #define LIST_H     13
 #define LINE_H     11               // a line of an open list
-#define Y_PAD      33               // the two pictures, SN64_PAD_H high
-#define Y_GRID     124              // seven mapping rows
+#define Y_PAD      23               // the two pictures
+#define Y_ROWS     96               // the mapping rows, under the Super NES controller
 #define ROW_H      12
-#define Y_NOTE     211
-#define Y_FOOT     221              // the reset field and the help text
-#define CHOICE_W   70               // the choices for a row: four to a line
-#define CHOICE_H   15
+#define Y_TIP      163              // under the player's controller: the menu shortcut, in three lines
+#define Y_NOTE     202              // and one line of notes
+#define Y_FOOT     224              // the reset field and the help text
+#define CHOICE_ROWS 7               // the choices for a row: two columns of seven and six
+#define CHOICE_W   69
+#define CHOICE_H   13
 
 #define COL_TEXT   sn64_rgb(0xE0, 0xE0, 0xE0)
 #define COL_DIM    sn64_rgb(0x80, 0x88, 0x98)
@@ -38,6 +39,7 @@ void sn64_mapscreen_open(sn64_mapscreen_t *s)
 {
     s->col = 0;
     s->row = 0;
+    s->first = 0;
     s->open = SN64_MS_CLOSED;
     s->pick = 0;
     s->b_armed = false;
@@ -46,9 +48,7 @@ void sn64_mapscreen_open(sn64_mapscreen_t *s)
 
 int sn64_mapscreen_entry(const sn64_mapscreen_t *s)
 {
-    if (s->row < 0 || s->row >= SN64_MS_ROWS)
-        return -1;
-    return s->col * SN64_MS_ROWS + s->row;
+    return (s->row >= 0 && s->row < SN64_MAP_ENTRIES) ? s->row : -1;
 }
 
 static int wrap(int v, int n)
@@ -56,11 +56,10 @@ static int wrap(int v, int n)
     return ((v % n) + n) % n;
 }
 
-// The choices stand four to a line; the last line holds "nothing" alone.
-static int choice_line_length(int line)
+// The choices stand in two columns: seven in the first, the other six in the second.
+static int choice_column_length(int col)
 {
-    int n = SN64_MAP_CHOICES - line * 4;
-    return n > 4 ? 4 : n;
+    return col ? SN64_MAP_CHOICES - CHOICE_ROWS : CHOICE_ROWS;
 }
 
 bool sn64_mapscreen_input(sn64_mapscreen_t *s, sn64_map_t *map, uint16_t pressed, uint16_t released)
@@ -89,14 +88,12 @@ bool sn64_mapscreen_input(sn64_mapscreen_t *s, sn64_map_t *map, uint16_t pressed
             s->open = SN64_MS_CLOSED;           // the list goes away, the setting stays as it was
         }
     } else if (s->open == SN64_MS_TARGET) {
-        const int lines = (SN64_MAP_CHOICES + 3) / 4;
-        int col = s->pick % 4, line = s->pick / 4;
-        if (left)  col = wrap(col - 1, choice_line_length(line));
-        if (right) col = wrap(col + 1, choice_line_length(line));
-        if (up)    line = wrap(line - 1, lines);
-        if (down)  line = wrap(line + 1, lines);
-        if (col >= choice_line_length(line)) col = choice_line_length(line) - 1;
-        s->pick = (int8_t)(line * 4 + col);
+        int col = s->pick / CHOICE_ROWS, line = s->pick % CHOICE_ROWS;
+        if (left != right) col ^= 1;
+        if (line >= choice_column_length(col)) line = choice_column_length(col) - 1;
+        if (up)   line = wrap(line - 1, choice_column_length(col));
+        if (down) line = wrap(line + 1, choice_column_length(col));
+        s->pick = (int8_t)(col * CHOICE_ROWS + line);
 #ifdef SN64_FAULT_MAPSCREEN_CANCEL_SETS
         // Fault injection for the host test: B takes the choice as A does.
         if (b) a = true;
@@ -108,13 +105,19 @@ bool sn64_mapscreen_input(sn64_mapscreen_t *s, sn64_map_t *map, uint16_t pressed
             s->open = SN64_MS_CLOSED;           // the row stays as it was
         }
     } else {
-        if (s->row == SN64_MS_ROW_RESET) {
-            if (up)   s->row = SN64_MS_ROWS - 1;
-            if (down) s->row = SN64_MS_ROW_LISTS;
-        } else {
+        // Up and Down go through the lists, the 14 rows and the reset field, and round again.
+        if (s->row == SN64_MS_ROW_LISTS) {
             if (left != right) s->col ^= 1;
-            if (up)   s->row = (int8_t)(s->row == SN64_MS_ROW_LISTS ? SN64_MS_ROW_RESET : s->row - 1);
-            if (down) s->row++;                 // from the lists to the first row, from the last row to the reset field
+            if (up)        s->row = SN64_MS_ROW_RESET;
+            else if (down) s->row = 0;
+        } else {
+            if (up)        s->row--;
+            else if (down) s->row = (int8_t)(s->row == SN64_MS_ROW_RESET ? SN64_MS_ROW_LISTS : s->row + 1);
+        }
+        // the list scrolls to keep the row under the cursor among the ten that are shown
+        if (s->row >= 0 && s->row < SN64_MAP_ENTRIES) {
+            if (s->row < s->first)                    s->first = (uint8_t)s->row;
+            if (s->row >= s->first + SN64_MS_VISIBLE) s->first = (uint8_t)(s->row - SN64_MS_VISIBLE + 1);
         }
         if (a) {
             if (s->row == SN64_MS_ROW_LISTS) {
@@ -152,15 +155,16 @@ static void list_box(const out_t *o, int x, const char *name, bool at)
     sn64_pad_mark(o->c, x + SN64_PAD_W - 8, Y_LIST + 5, at ? COL_HI : COL_DIM);
 }
 
-// The 14 rows: the single button, its name, an arrow, the Super NES button it gives, its name.
+// Ten of the 14 rows: the single button, its name, an arrow, the Super NES button it gives,
+// its name. A small mark above or below says that there are more rows that way.
 static void draw_rows(const out_t *o, const sn64_mapscreen_t *s, const sn64_map_t *map,
                       uint16_t held, uint16_t passed, uint16_t snes)
 {
-    for (int e = 0; e < SN64_MAP_ENTRIES; e++) {
-        int col = e / SN64_MS_ROWS, row = e % SN64_MS_ROWS;
-        int x = col ? X_RIGHT : X_LEFT, y = Y_GRID + row * ROW_H;
+    for (int v = 0; v < SN64_MS_VISIBLE; v++) {
+        int e = s->first + v;
+        int x = X_RIGHT, y = Y_ROWS + v * ROW_H;
         int t = sn64_map_target(map, e);
-        bool at = s->open == SN64_MS_CLOSED && s->col == col && s->row == row;
+        bool at = s->open == SN64_MS_CLOSED && s->row == e;
         // the right-hand picture lights only if the game really gets the button (opposite
         // directions cancel, the menu shortcut is taken out)
         bool gives = (passed & sn64_map_n64_bit(e)) && t >= 0 && (snes & (1u << t));
@@ -172,25 +176,29 @@ static void draw_rows(const out_t *o, const sn64_mapscreen_t *s, const sn64_map_
         sn64_pad_icon_snes(o->c, x + 78, y, s->snes_pad, t, gives);
         o->text(o->ctx, x + 91, y + 2, t < 0 ? COL_DIM : at ? COL_HI : COL_TEXT, t < 0 ? "none" : sn64_snes_button_name(t));
     }
+    if (s->first > 0)
+        sn64_pad_mark_up(o->c, X_RIGHT + SN64_PAD_W / 2 - 2, Y_ROWS - 4, COL_HI);
+    if (s->first + SN64_MS_VISIBLE < SN64_MAP_ENTRIES)
+        sn64_pad_mark(o->c, X_RIGHT + SN64_PAD_W / 2 - 2, Y_ROWS + SN64_MS_VISIBLE * ROW_H + 1, COL_HI);
 }
 
-// The choices for the row under the cursor, in the place of the rows: both pictures stay in view.
+// The choices for the row under the cursor, in the place of the list: both pictures stay in view.
 static void draw_choices(const out_t *o, const sn64_mapscreen_t *s, uint16_t held)
 {
     int entry = sn64_mapscreen_entry(s);
     char head[24];
-    sn64_pad_fill(o->c, X_LEFT, Y_GRID, X_END, Y_GRID + SN64_MS_ROWS * ROW_H - 1, COL_PANEL);
-    sn64_pad_frame(o->c, X_LEFT, Y_GRID, X_END, Y_GRID + SN64_MS_ROWS * ROW_H - 1, COL_HI);
-    sn64_pad_icon_input(o->c, X_LEFT + 6, Y_GRID + 5, entry, (held & sn64_map_n64_bit(entry)) != 0);
+    sn64_pad_fill(o->c, X_RIGHT, Y_ROWS - 1, X_END, Y_ROWS + SN64_MS_VISIBLE * ROW_H - 1, COL_PANEL);
+    sn64_pad_frame(o->c, X_RIGHT, Y_ROWS - 1, X_END, Y_ROWS + SN64_MS_VISIBLE * ROW_H - 1, COL_HI);
+    sn64_pad_icon_input(o->c, X_RIGHT + 4, Y_ROWS + 3, entry, (held & sn64_map_n64_bit(entry)) != 0);
     snprintf(head, sizeof head, "%s gives:", sn64_map_n64_name(entry));
-    o->text(o->ctx, X_LEFT + 20, Y_GRID + 7, COL_HI, head);
+    o->text(o->ctx, X_RIGHT + 18, Y_ROWS + 5, COL_HI, head);
     for (int i = 0; i < SN64_MAP_CHOICES; i++) {
-        int x = X_LEFT + 6 + (i % 4) * CHOICE_W, y = Y_GRID + 22 + (i / 4) * CHOICE_H;
+        int x = X_RIGHT + 2 + (i / CHOICE_ROWS) * CHOICE_W, y = Y_ROWS + 20 + (i % CHOICE_ROWS) * CHOICE_H;
         int bit = sn64_map_choice(i);
         if (i == s->pick)
-            sn64_pad_fill(o->c, x - 2, y - 1, x + CHOICE_W - 5, y + SN64_ICON, COL_BAR);
+            sn64_pad_fill(o->c, x - 1, y - 1, x + CHOICE_W - 2, y + SN64_ICON, COL_BAR);
         sn64_pad_icon_snes(o->c, x, y, s->snes_pad, bit, false);
-        o->text(o->ctx, x + 14, y + 2, i == s->pick ? COL_HI : COL_TEXT, sn64_snes_button_name(bit));
+        o->text(o->ctx, x + 12, y + 2, i == s->pick ? COL_HI : COL_TEXT, sn64_snes_button_name(bit));
     }
 }
 
@@ -224,8 +232,6 @@ void sn64_mapscreen_draw(const sn64_mapscreen_t *s, const sn64_map_t *map, const
     int target = entry < 0 ? -1 : s->open == SN64_MS_TARGET ? sn64_map_choice(s->pick) : sn64_map_target(map, entry);
     bool closed = s->open == SN64_MS_CLOSED;
 
-    text(ctx, X_LEFT, Y_CAPTION, COL_HI, "Your controller");
-    text(ctx, X_RIGHT, Y_CAPTION, COL_HI, "The game sees");
     list_box(&o, X_LEFT, sn64_input_pad_name(s->input_pad),
              s->open == SN64_MS_LIST_INPUT || (closed && s->row == SN64_MS_ROW_LISTS && s->col == 0));
     list_box(&o, X_RIGHT, sn64_snes_pad_name(s->snes_pad),
@@ -239,25 +245,34 @@ void sn64_mapscreen_draw(const sn64_mapscreen_t *s, const sn64_map_t *map, const
     if (s->open == SN64_MS_TARGET) draw_choices(&o, s, n64_buttons);
     else                           draw_rows(&o, s, map, n64_buttons, passed, snes);
 
-    // One line of notes: the shortcut being held, buttons nothing gives any more, the reset.
+    // Under the player's controller: how the menu is reached from a game (it lights up while
+    // the four buttons are held), then one line of notes: the Super NES buttons that nothing
+    // gives any more, as their small pictures or their number, or the reset.
     {
+        uint16_t tip = chord ? COL_HI : COL_DIM;
         uint16_t missing = sn64_map_unreachable(map);
-        char note[48], names[24];
         int count = 0;
+        text(ctx, X_LEFT, Y_TIP, tip, "In a game, all");
+        text(ctx, X_LEFT, Y_TIP + 10, tip, "four C buttons");
+        text(ctx, X_LEFT, Y_TIP + 20, tip, "bring up the menu");
         for (unsigned bit = 0; bit < SNES_BUTTONS; bit++)
             if (missing & (1u << bit)) count++;
-        if (chord) {
-            text(ctx, X_LEFT, Y_NOTE, COL_HI, "All four C: in a game, the menu");
-        } else if (count > 2) {
-            snprintf(note, sizeof note, "No button gives %d Super NES buttons", count);
+        if (count > 5) {
+            char note[32];
+            snprintf(note, sizeof note, "Unmapped: %d/12", count);
             text(ctx, X_LEFT, Y_NOTE, COL_WARN, note);
         } else if (count) {
-            snprintf(note, sizeof note, "No button gives %s", sn64_snes_mask_name(missing, names, sizeof names));
-            text(ctx, X_LEFT, Y_NOTE, COL_WARN, note);
+            int x = X_LEFT + 9 * 8 + 3;
+            text(ctx, X_LEFT, Y_NOTE, COL_WARN, "Unmapped:");
+            for (int i = 0; i < SN64_MAP_CHOICES; i++) {
+                int bit = sn64_map_choice(i);
+                if (bit >= 0 && (missing & (1u << bit))) {
+                    sn64_pad_icon_snes(c, x, Y_NOTE - 2, s->snes_pad, bit, false);
+                    x += SN64_ICON + 1;
+                }
+            }
         } else if (s->restored) {
-            text(ctx, X_LEFT, Y_NOTE, COL_TEXT, "The defaults are back");
-        } else {
-            text(ctx, X_LEFT, Y_NOTE, COL_DIM, "In a game, all four C open the menu");
+            text(ctx, X_LEFT, Y_NOTE, COL_TEXT, "Defaults are back");
         }
     }
 

@@ -122,12 +122,13 @@ int main(void)
     expect(sn64_map_unreachable(&m) == (SNES_BTN_START | SNES_BTN_SELECT), "Start and Z set to nothing: Start and Select are reported");
     sn64_map_default(&m);
     {
-        // The rows of the mapping screen: seven and seven, and no name longer than its column.
+        // The rows of the mapping screen: 14, and no name longer than its column.
         int ok = 1;
         for (int i = 0; i < SN64_MAP_ENTRIES; i++)
             if (strlen(m.entry[i].n64_name) > 7) ok = 0;
         expect(SN64_MAP_ENTRIES == 14 && ok, "14 rows, names of at most 7 characters");
-        expect(SN64_IN_Z == 6 && SN64_IN_L == 7, "the left column ends with Z, the right one starts with L");
+        expect(SN64_IN_A == 0 && SN64_IN_Z == 6 && SN64_IN_L == 7 && SN64_IN_D_RIGHT == 13,
+               "the rows run from A through the C buttons and Z to the shoulders, Start and the D-pad");
     }
 
     // Names used on the mapping screen.

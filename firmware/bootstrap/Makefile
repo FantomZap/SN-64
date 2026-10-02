@@ -8,6 +8,7 @@
 #                   credits roll + ROM tools
 #   make splash     regenerate src/sn64_splash_data.c from the logo files (needs PyMuPDF and Pillow)
 #   make credits    regenerate src/sn64_credits_data.c (the credits roll) from CREDITS.md and NOTICE
+#   make padshapes  regenerate src/sn64_padshape_data.c (the controller outlines of the mapping screen)
 #   make test-negative  the same tests with injected faults: every run must fail
 #   make clean      remove build/n64-bootstrap
 #
@@ -26,7 +27,7 @@ HOST_CC       ?= gcc
 ROM_ADDR_BITS ?= 17
 
 all: rom
-.PHONY: all rom check words splash credits test test-mapping test-padview test-mapscreen test-cartcheck test-splash test-framelock test-resample test-audioout test-credits test-tools test-negative clean
+.PHONY: all rom check words splash credits padshapes test test-mapping test-padview test-mapscreen test-cartcheck test-splash test-framelock test-resample test-audioout test-credits test-tools test-negative clean
 
 rom:
 	mkdir -p $(OUT)
@@ -46,6 +47,9 @@ splash:
 
 credits:
 	$(PYTHON) tools/make_credits.py
+
+padshapes:
+	$(PYTHON) tools/make_padshapes.py
 
 # Credits roll: the generated text is what CREDITS.md gives now, it fits the screen, the crew and the
 # cats come last, and no line is ever drawn across the edge of the window.
@@ -88,17 +92,19 @@ test-mapping:
 	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -Isrc -o $(OUT)/host/test_mapping tests/test_mapping.c src/sn64_mapping.c
 	$(OUT)/host/test_mapping
 
-# Controller pictures of the mapping screen: every button lights its own place and no other.
+# Controller pictures of the mapping screen: the outlines are what tools/make_padshapes.py gives
+# now, the shapes are the right ones, and every button lights its own place and no other.
 test-padview:
 	mkdir -p $(OUT)/host
-	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -Isrc -o $(OUT)/host/test_padview tests/test_padview.c src/sn64_padview.c src/sn64_mapping.c
+	$(PYTHON) tools/make_padshapes.py --check
+	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -Isrc -o $(OUT)/host/test_padview tests/test_padview.c src/sn64_padview.c src/sn64_padshape_data.c src/sn64_mapping.c
 	$(OUT)/host/test_padview
 
 # The mapping screen: what the buttons do and what is drawn. Also writes the screens for
 # tools/mock_screens.py, pixels and text, with the code under test.
 test-mapscreen:
 	mkdir -p $(OUT)/host/screens
-	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -Isrc -o $(OUT)/host/test_mapscreen tests/test_mapscreen.c src/sn64_mapscreen.c src/sn64_padview.c src/sn64_mapping.c
+	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -Isrc -o $(OUT)/host/test_mapscreen tests/test_mapscreen.c src/sn64_mapscreen.c src/sn64_padview.c src/sn64_padshape_data.c src/sn64_mapping.c
 	$(OUT)/host/test_mapscreen --screens $(OUT)/host/screens
 
 test-tools:
@@ -109,9 +115,9 @@ test-negative:
 	mkdir -p $(OUT)/host
 	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -DSN64_FAULT_SWAP_AB -Isrc -o $(OUT)/host/test_mapping_fault tests/test_mapping.c src/sn64_mapping.c
 	if $(OUT)/host/test_mapping_fault; then echo "NOT DETECTED: swapped A/B table"; exit 1; fi
-	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -DSN64_FAULT_PAD_WRONG_BUTTON -Isrc -o $(OUT)/host/test_padview_fault tests/test_padview.c src/sn64_padview.c src/sn64_mapping.c
+	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -DSN64_FAULT_PAD_WRONG_BUTTON -Isrc -o $(OUT)/host/test_padview_fault tests/test_padview.c src/sn64_padview.c src/sn64_padshape_data.c src/sn64_mapping.c
 	if $(OUT)/host/test_padview_fault; then echo "NOT DETECTED: a button lights the wrong place"; exit 1; fi
-	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -DSN64_FAULT_MAPSCREEN_CANCEL_SETS -Isrc -o $(OUT)/host/test_mapscreen_fault tests/test_mapscreen.c src/sn64_mapscreen.c src/sn64_padview.c src/sn64_mapping.c
+	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -DSN64_FAULT_MAPSCREEN_CANCEL_SETS -Isrc -o $(OUT)/host/test_mapscreen_fault tests/test_mapscreen.c src/sn64_mapscreen.c src/sn64_padview.c src/sn64_padshape_data.c src/sn64_mapping.c
 	if $(OUT)/host/test_mapscreen_fault; then echo "NOT DETECTED: giving a choice up changes the mapping"; exit 1; fi
 	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -DSN64_FAULT_CHECK_LEVELS -Isrc -o $(OUT)/host/test_cartcheck_fault tests/test_cartcheck.c src/sn64_cartcheck.c
 	if $(OUT)/host/test_cartcheck_fault; then echo "NOT DETECTED: wrong short/backwards level"; exit 1; fi

@@ -416,3 +416,22 @@ Open:
 - **Nothing is kept when the console is switched off:** the mapping, the two lists and compatibility mode start from their defaults. The board has nowhere yet for the menu to store settings.
 - **One mapping for both controllers; the pictures show controller 1.**
 - **The controller list is my reading of ModRetro's compatibility list,** and none of those controllers was measured; the two-handled picture serves both the Brawler64 and the 8BitDo 64.
+
+## 2026-10-01 — the controller pictures redrawn in their real shapes; the mapping list scrolls
+
+The owner looked at the first mapping screen and asked: "can you please just make the graphics closer to the right shapes", "the controllers I mean". While it was being redone he added: "the button list below can be scrollable too if it helps fit things".
+
+What was wrong: every controller was built from discs and bars to my own idea of its shape. The N64 controller came out wide and squat with stubby handles; the Super NES controller had a waist it does not have.
+
+What was done:
+
+- **Reference photographs, measured.** A photograph of each controller lying flat was looked at in the browser and its outline measured with a small script: for the N64 controller and the Super NES controller the public-domain photographs by Evan-Amos on Wikimedia Commons, for the others the makers' product pictures. The N64 controller is 1.04 times as wide as it is tall; the first drawing was about one and a half times.
+- **Outlines from points, not from discs.** `tools/make_padshapes.py` holds each outline as a few dozen points, lays a smooth curve through them and writes pixel runs to `src/sn64_padshape_data.c`. The buttons are drawn at the places measured on the same photographs. Nothing of any photograph is in the repository.
+- **The M64 Pro Controller and the Hyperkin Captain** were checked against ModRetro's product pictures: both have the N64 controller's three-handled shape, so they share its outline.
+- **The Super NES controller** has its flat top, the shallow step along the bottom, the round hollow under the D-pad and the two slanted pads under the four buttons.
+- **A new layout, made possible by the scrolling list.** The N64 controller now fills its half of the screen (138 x 132 pixels; it was about 122 x 82, and the wrong shape). The Super NES controller is a flat one, so the mapping list moved under it: one column, ten of the 14 rows on the screen, scrolling with the cursor. The choices for a row open in the same place. Both controllers stay in view the whole time.
+- **Shoulder buttons and Z** are still shown where they can be seen and can light, which is not where they are on the controllers. That is said in the design note.
+
+Evidence (PC only): `test_padview` 416 checks, eight of them on the shapes themselves; `test_mapscreen` 94; all host tests 900 checks in ten sets; 11 fault builds rejected. ROM 147,456 bytes, SHA-256 `ce7b45db1fec11f20e36e0a5c212ef05e89dacd14e31689e1416bf880d8f12a3`, 146,622 bytes used; CIC-6102 check OK; ROM and endpoint co-simulation passes. Mock-up from the code under test: [mapping-screens.png](design/img/mapping-screens.png).
+
+Open: not run on a console. The 8BitDo 64 is the least certain shape: none of its maker's pictures is straight from the front. The Brawler64 was read by eye. Write-up: [n64-bootstrap.md](design/n64-bootstrap.md), "The right shapes".

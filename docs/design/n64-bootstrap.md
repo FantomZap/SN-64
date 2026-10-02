@@ -256,49 +256,71 @@ Opposite directions still cancel. One table serves both controllers.
 
 ![Mock-up of the controller mapping screen](img/mapping-screens.png)
 
-- **Two pictures side by side.** Left: the controller in the player's hands. Right: the controller the game sees. What is held lights on the left; what the game is given lights on the right. Pressing Z lights Z on the left and Select on the right, and after a change the new button lights instead. The stick's cap moves with the stick, and past its threshold the D-pad on the right lights.
-- **The right side shows what the game gets.** Up and Down together light nothing on the right. Nor do the four C buttons while they make the menu shortcut; the screen then says "All four C: in a game, the menu".
-- **A list over each picture.** Left, for the M64's sake, the controllers ModRetro lists as working with it: N64 controller, M64 Pro, Hyperkin Captain, Switch N64 pad, Brawler64, 8BitDo 64. Right: Super NES (purple and lavender buttons) and Super Famicom (four colours, which is also the Super NES of the PAL countries). On a PAL console the right list starts on the four-colour one.
+The screen was reworked the same day, after the owner had seen the first version: "can you please just make the graphics closer to the right shapes", "the controllers I mean", and "the button list below can be scrollable too if it helps fit things". What follows is the reworked screen.
+
+- **Two pictures side by side, in the controllers' real shapes.** Left: the controller in the player's hands, as large as its half of the screen allows. Right: the controller the game sees. A list box over each names it.
+- **What is held lights on the left; what the game is given lights on the right.** Pressing Z lights Z on the left and Select on the right, and after a change the new button lights instead. The stick's cap moves with the stick, and past its threshold the D-pad on the right lights.
+- **The right side shows what the game gets.** Up and Down together light nothing on the right. Nor do the four C buttons while they make the menu shortcut.
+- **The two lists.** Left, for the M64's sake, the controllers ModRetro lists as working with it: N64 controller, M64 Pro, Hyperkin Captain, Switch N64 pad, Brawler64, 8BitDo 64. Right: Super NES (purple and lavender buttons) and Super Famicom (four colours, which is also the Super NES of the PAL countries). On a PAL console the right list starts on the four-colour one.
 - **The lists change the picture and nothing else.** Every controller in the left list reports the same 14 buttons and the stick to the console, and both in the right list have the same 12 buttons.
-- **The mapping, 14 rows** in two columns: a small picture of the single button, its name, an arrow, a small picture of the Super NES button it gives, and that button's name. The small pictures light too.
-- **Changing a row.** A on a row opens its 13 choices (the 12 Super NES buttons and "nothing"), each with its small picture, in the place of the rows, so both controllers stay in view. The choice under the cursor is marked on the right-hand controller. A takes it, B gives it up.
-- **Restore defaults** is a field under the rows.
-- **Buttons no row gives any more are reported** in red under the rows ("No button gives Select"), so a change that leaves Start out of reach is seen before a game is started.
+- **The mapping list** stands under the Super NES controller, which is a flat one and leaves the room. One column: a small picture of the single button, its name, an arrow, a small picture of the Super NES button it gives, and that button's name. The small pictures light too. Ten of the 14 rows are on the screen and the list scrolls with the cursor; a small mark above or below it says that there are more rows that way.
+- **Changing a row.** A on a row opens its 13 choices (the 12 Super NES buttons and "nothing"), each with its small picture, in two columns in the place of the list, so both controllers stay in view. The choice under the cursor is marked on the right-hand controller. A takes it, B gives it up.
+- **Under the player's controller:** three lines that say how the menu is reached from a game; they light up while all four C buttons are held. Below them one line of notes.
+- **Buttons no row gives any more are shown** on that line in red, "Unmapped:" and their small pictures (their number if there are more than five), so a change that leaves Start out of reach is seen before a game is started.
+- **Restore defaults** is a field at the bottom left.
+- **Moving.** Up and Down go through the two lists, the 14 rows and the reset field, and round again; Left and Right change between the two lists.
 - **Only the D-pad, A and B do anything here,** so every other button can be tried freely. B leaves when it is let go, so it can be seen to light first.
 - **The row under the cursor is marked** in both pictures: its button blinks white.
 
+### The right shapes
+
+The first version drew every controller from discs and bars and got the shapes wrong: the N64 controller came out wide and squat with stubby handles. Now each picture follows a photograph of the controller lying flat.
+
+| Picture | Size on the screen | Where the shape comes from |
+|---|---|---|
+| N64 controller | 138 x 132 | Measured on a photograph: outline and the place and size of every button. [Nintendo-64-Controller-Gray-Flat.jpg](https://commons.wikimedia.org/wiki/File:Nintendo-64-Controller-Gray-Flat.jpg), Evan-Amos, public domain |
+| M64 Pro, Hyperkin Captain, Switch N64 pad | 138 x 132 | The same outline: the makers' pictures show the same three-handled shape. Another body colour each |
+| Super NES and Super Famicom | 132 x 57 | Measured on a photograph: two round ends, a flat top, a shallow step along the bottom, the round hollow of the D-pad, the darker round with its two slanted pads. [SNES-Controller-Flat.jpg](https://commons.wikimedia.org/wiki/File:SNES-Controller-Flat.jpg), Evan-Amos, public domain |
+| Brawler64 | 138 x 99 | Read by eye off Retro Fighters' product picture. Approximate |
+| 8BitDo 64 | 134 x 92 | Read by eye off 8BitDo's product pictures, none of which is straight from the front. The least certain of the six |
+
+- **How an outline is made.** `tools/make_padshapes.py` holds each outline as a few dozen points, as fractions of the controller's width and height. It lays a smooth closed curve through them, fills it, and writes one list of pixel runs per row to `src/sn64_padshape_data.c` (`make padshapes`). The picture code draws those runs and puts the buttons on them. `make test` fails if the file is not what the script writes now.
+- **Only proportions were taken.** No photograph, logo or lettering is in the repository.
+- **Where the pictures knowingly differ from the real things.** The shoulder buttons stand up above the top edge so that they can be seen and can light; on the controllers they are behind it. Z is shown on the middle handle of a three-handled controller; it is under it. The body colours only tell the entries apart.
+
 ### No logos
 
-The pictures are diagrams the program draws from discs and bars (`src/sn64_padview.c`). They show where each button is. They carry no maker's logo and no maker's lettering: the letters on the buttons are five-by-seven dot letters drawn for SN64, and the names in the two lists are plain text in the console font. The body colours only tell the entries apart and do not claim to be a product's colour. `NOTICE` names the trademarks. A search of the repository on the same day found no Nintendo logo in it: the only logos are the SN64 one, which is original artwork, and the owner's FantomZap one.
+The pictures carry no maker's logo and no maker's lettering: the letters on the buttons are five-by-seven dot letters drawn for SN64, and the names in the two lists are plain text in the console font. `NOTICE` names the trademarks. A search of the repository on the same day found no Nintendo logo in it: the only logos are the SN64 one, which is original artwork, and the owner's FantomZap one.
 
 ### How it is built
 
 | File | Role |
 |---|---|
 | `src/sn64_mapping.c` | the table, the defaults, the shortcut, the choices in the order the screen offers them, the buttons nothing gives |
-| `src/sn64_padview.c` | the controller pictures, the single-button pictures and plain shapes, drawn into the 16-bit screen buffer |
-| `src/sn64_mapscreen.c` | the screen: cursor, the two lists, the choices, restore, leaving, and where everything is drawn |
+| `tools/make_padshapes.py`, `src/sn64_padshape_data.c` | the outlines of the player's controllers: the points, and the pixel runs generated from them |
+| `src/sn64_padview.c` | the controller pictures (outline, buttons at their places, what is lit), the single-button pictures and plain shapes, drawn into the 16-bit screen buffer |
+| `src/sn64_mapscreen.c` | the screen: cursor, the list that scrolls, the two controller lists, the choices, restore, leaving, and where everything is drawn |
 | `src/main.c` | the two menus, the shortcut, and the mapping screen's text in the console font |
 
-The three modules are pure C with no libdragon dependency, so the host tests run the code the ROM runs.
+The modules are pure C with no libdragon dependency, so the host tests run the code the ROM runs.
 
 ### Evidence, all on the PC
 
 - `tests/test_mapping.c`: 49 checks (defaults, stick, cancelling, the shortcut, changing the table, the choices, the buttons nothing gives).
-- `tests/test_padview.c`: 408 checks. For each of the six controllers and both colour sets: every button lights its own place and no other pixel, no two buttons share a pixel, the cursor's mark, the stick, nothing outside the picture's box. The 14 and 13 single-button pictures are there, differ from one another and light. Pictures drawn across the edge of the screen are cut off there.
-- `tests/test_mapscreen.c`: 84 checks. The cursor's path, both lists, the choices (every one can be reached), restore, leaving on B let go, the buttons that do nothing. On the drawn screen: each button lights itself, the button it gives and the two small pictures of its row, and nothing else changes; all text stays on the screen.
+- `tests/test_padview.c`: 416 checks. The shapes: three handles side by side of which only the middle one reaches the bottom, a body about as tall as it is wide, two handles on the other two, a Super NES controller more than twice as wide as high with a flat top and a step along the bottom. For each of the six controllers and both colour sets: every button lights its own place and no other pixel, no two buttons share a pixel, the cursor's mark, the stick, nothing outside the picture's box. The 14 and 13 single-button pictures are there, differ from one another and light. Pictures drawn across the edge of the screen are cut off there.
+- `tests/test_mapscreen.c`: 94 checks. The cursor's path, the list scrolling and its marks, both controller lists, the choices (every one can be reached), restore, leaving on B let go, the buttons that do nothing. On the drawn screen: each button lights itself, the button it gives and the two small pictures of its row, and nothing else changes; all text stays on the screen.
 - `make test-negative`: a build in which A lights B's place and a build in which B takes a choice are each rejected. 11 fault builds in all.
-- All host tests: 882 checks in ten sets.
-- ROM: 147,456 bytes, SHA-256 `cd157a7235badb71fab0208b63fe89a824c156e2b2a8faf2ced7974f57297cbf`, CIC-6102 check OK; 146,141 bytes used, 116,003 free in the v2 board's 256 KiB window. The pictures and the screen took 12.9 KB of the compressed program.
-- Co-simulation with the FPGA endpoint passes with the new image; its first frame now carries the new default (A and Start give 0x0108).
+- All host tests: 900 checks in ten sets.
+- ROM: 147,456 bytes, SHA-256 `ce7b45db1fec11f20e36e0a5c212ef05e89dacd14e31689e1416bf880d8f12a3`, CIC-6102 check OK; 146,622 bytes used, 115,522 free in the v2 board's 256 KiB window.
+- Co-simulation with the FPGA endpoint passes with the new image; its first frame carries the new default (A and Start give 0x0108).
 - The mock-ups above are made from the pixels and the text positions the code under test produced (`make test-mapscreen`, then `tools/mock_screens.py`). Only the font differs from the console's.
 
 ### Limits and what is assumed
 
-- **Not run on a console or an emulator.** How the pictures look on a television, and whether this screen keeps 60 pictures a second, are not known. A count on the PC gives 45,000 to 65,000 pixels drawn a picture besides the text and the cleared screen. If that is too much for one picture, the lights follow the buttons one picture later and nothing else changes.
+- **Not run on a console or an emulator.** How the pictures look on a television, and whether this screen keeps 60 pictures a second, are not known. A count on the PC gives 44,000 to 81,000 pixels drawn a picture besides the text and the cleared screen. If that is too much for one picture, the lights follow the buttons one picture later and nothing else changes.
 - **Nothing is kept when the console is switched off.** The mapping, the two lists and compatibility mode go back to their defaults. The SN64 has nowhere yet for the menu to store settings.
 - **One mapping for both controllers,** and the pictures show controller 1.
-- **The controller list is my reading** of ModRetro's list of compatible controllers. The two-handled picture is the same for the Brawler64 and the 8BitDo 64, both drawn with two Z triggers. None of these controllers was measured: the positions follow published pictures and are approximate.
+- **The controller list is my reading** of ModRetro's list of compatible controllers. The Brawler64 and the 8BitDo 64 are both drawn with two Z triggers. Only the N64 and the Super NES controller were measured, and on photographs, not on the controllers themselves.
 - **The tenth of a second for the shortcut and the C-diamond defaults are my choices.**
 
-Sources for the controller list: [M64](https://modretro.com/products/m64) and [M64 Pro Controller](https://modretro.com/products/m64-pro-controller) product pages, [ModRetro x Hyperkin Captain+](https://modretro.com/products/hyperkin-captain-plus-wired-controller), [Hyperkin Captain](https://www.hyperkinstore.com/products/captain-premium-controller), [8BitDo 64 review, Nintendo Life](https://www.nintendolife.com/reviews/8bitdo-64-controller-for-switch-1-and-2-a-worthy-alternative-to-nintendos-n64-pad), [Brawler64 review, Nintendo Life](https://www.nintendolife.com/news/2019/06/hardware_review_retro_fighters_brawler64_controller_-_a_crowdfunded_upgrade_to_your_battered_original), [Brawler64, Retro Fighters](https://retrofighters.com/our-collection/brawler64-nextgen-n64-controller-original-v2/). Read 2026-10-01.
+Sources: [M64](https://modretro.com/products/m64), [M64 Pro Controller](https://modretro.com/products/m64-pro-controller) and [ModRetro x Hyperkin Captain+](https://modretro.com/products/hyperkin-captain-plus-wired-controller) product pages (the controller list, and the shape of those two controllers), [Hyperkin Captain](https://www.hyperkinstore.com/products/captain-premium-controller), [8BitDo 64 Controller](https://www.8bitdo.com/64-controller/), [8BitDo 64 review, Nintendo Life](https://www.nintendolife.com/reviews/8bitdo-64-controller-for-switch-1-and-2-a-worthy-alternative-to-nintendos-n64-pad), [Brawler64, Retro Fighters](https://retrofighters.com/our-collection/brawler64-nextgen-n64-controller-original-v2/), [Brawler64 review, Nintendo Life](https://www.nintendolife.com/news/2019/06/hardware_review_retro_fighters_brawler64_controller_-_a_crowdfunded_upgrade_to_your_battered_original), and the two photographs by Evan-Amos on Wikimedia Commons named in the table above. Read 2026-10-01.

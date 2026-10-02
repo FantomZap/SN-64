@@ -47,8 +47,8 @@
 #define SNES_BTN_ALL     0x0FFFu
 #define SNES_BUTTONS     12
 
-// Table order, which is also the order of the rows on the mapping screen: seven in the left
-// column (the face buttons and Z), seven in the right (shoulders, Start, the D-pad).
+// Table order, which is also the order of the rows on the mapping screen: the face buttons
+// and Z, then the shoulders, Start and the D-pad.
 enum {
     SN64_IN_A, SN64_IN_B, SN64_IN_C_UP, SN64_IN_C_DOWN, SN64_IN_C_LEFT, SN64_IN_C_RIGHT, SN64_IN_Z,
     SN64_IN_L, SN64_IN_R, SN64_IN_START, SN64_IN_D_UP, SN64_IN_D_DOWN, SN64_IN_D_LEFT, SN64_IN_D_RIGHT,

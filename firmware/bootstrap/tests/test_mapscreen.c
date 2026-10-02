@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // Host test for the controller mapping screen (src/sn64_mapscreen.c): what the buttons do
-// (the cursor, the two controller lists, the choices for a row, the reset, leaving), and what
-// is drawn (the right button lights in the right picture, the single-button pictures of the
-// row light, nothing else changes, text stays on the screen).
+// (the cursor, the list that scrolls, the two controller lists, the choices for a row, the
+// reset, leaving), and what is drawn (the right button lights in the right picture, the
+// single-button pictures of the row light, nothing else changes, text stays on the screen).
 //   test_mapscreen --screens <dir>   also writes the screens for tools/mock_screens.py:
 //                                    <name>.ppm (the pixels) and <name>.txt (the text: x y colour text)
 // Build with -DSN64_FAULT_MAPSCREEN_CANCEL_SETS (B takes a choice as A does): the test must fail.
@@ -49,32 +49,40 @@ static void test_cursor(void)
 {
     sn64_map_default(&map);
     sn64_mapscreen_init(&s, SN64_PAD_N64, SN64_PAD_SNES);
-    expect(s.col == 0 && s.row == 0 && s.open == SN64_MS_CLOSED && sn64_mapscreen_entry(&s) == SN64_IN_A,
-           "the screen opens with the cursor on the first row (A) and nothing open");
-    tap(N64_BTN_D_RIGHT);
-    expect(s.col == 1 && sn64_mapscreen_entry(&s) == SN64_IN_L, "Right goes to the other column (L)");
-    taps(N64_BTN_D_DOWN, 6);
-    expect(s.row == 6 && sn64_mapscreen_entry(&s) == SN64_IN_D_RIGHT, "six times Down: the last row (D-Right)");
-    tap(N64_BTN_D_LEFT);
-    expect(s.col == 0 && sn64_mapscreen_entry(&s) == SN64_IN_Z, "Left: the last row of the left column (Z)");
+    expect(s.row == 0 && s.first == 0 && s.open == SN64_MS_CLOSED && sn64_mapscreen_entry(&s) == SN64_IN_A,
+           "the screen opens with the cursor on the first row (A), the list at its top, nothing open");
+    taps(N64_BTN_D_DOWN, 9);
+    expect(s.row == 9 && s.first == 0 && sn64_mapscreen_entry(&s) == SN64_IN_START, "nine times Down: the tenth row (Start), still on the screen");
     tap(N64_BTN_D_DOWN);
-    expect(s.row == SN64_MS_ROW_RESET && sn64_mapscreen_entry(&s) == -1, "Down from the last row: the reset field");
+    expect(s.row == 10 && s.first == 1 && sn64_mapscreen_entry(&s) == SN64_IN_D_UP, "Down again: the list scrolls by one row");
+    taps(N64_BTN_D_DOWN, 3);
+    expect(s.row == 13 && s.first == 4 && sn64_mapscreen_entry(&s) == SN64_IN_D_RIGHT, "to the last row (D-Right): the last ten rows are shown");
     tap(N64_BTN_D_LEFT);
     tap(N64_BTN_D_RIGHT);
-    expect(s.row == SN64_MS_ROW_RESET && s.col == 0, "Left and Right do nothing on the reset field");
+    expect(s.row == 13 && s.first == 4, "Left and Right do nothing on a row");
+    tap(N64_BTN_D_DOWN);
+    expect(s.row == SN64_MS_ROW_RESET && sn64_mapscreen_entry(&s) == -1 && s.first == 4, "Down from the last row: the reset field");
     tap(N64_BTN_D_DOWN);
     expect(s.row == SN64_MS_ROW_LISTS && s.col == 0 && sn64_mapscreen_entry(&s) == -1, "Down from the reset field: round to the lists");
     tap(N64_BTN_D_RIGHT);
     expect(s.row == SN64_MS_ROW_LISTS && s.col == 1, "Right: the other list");
+    tap(N64_BTN_D_RIGHT);
+    tap(N64_BTN_D_LEFT);
+    expect(s.col == 1, "and back and forth");
     tap(N64_BTN_D_DOWN);
-    expect(s.row == 0 && s.col == 1, "Down from a list: the first row of its column");
+    expect(s.row == 0 && s.first == 0, "Down from a list: the first row, and the list is back at its top");
     tap(N64_BTN_D_UP);
+    expect(s.row == SN64_MS_ROW_LISTS && s.col == 1, "Up from the first row: the list the cursor was on last");
     tap(N64_BTN_D_UP);
     expect(s.row == SN64_MS_ROW_RESET, "Up from a list: round to the reset field");
     tap(N64_BTN_D_UP);
-    expect(s.row == 6 && s.col == 1, "Up from the reset field: the last row, the column as it was");
+    expect(s.row == 13 && s.first == 4, "Up from the reset field: the last row");
+    taps(N64_BTN_D_UP, 9);
+    expect(s.row == 4 && s.first == 4, "nine times Up: the first row shown");
+    tap(N64_BTN_D_UP);
+    expect(s.row == 3 && s.first == 3, "Up again: the list scrolls back by one row");
     sn64_mapscreen_open(&s);
-    expect(s.col == 0 && s.row == 0, "opening the screen again puts the cursor back on the first row");
+    expect(s.row == 0 && s.first == 0 && s.col == 0, "opening the screen again puts the cursor back on the first row");
 }
 
 static void test_choices(void)
@@ -83,36 +91,36 @@ static void test_choices(void)
     sn64_mapscreen_init(&s, SN64_PAD_N64, SN64_PAD_SNES);
     tap(N64_BTN_A);
     expect(s.open == SN64_MS_TARGET && sn64_map_choice(s.pick) == 8, "A on a row opens its choices, on what the row gives now (A)");
-    tap(N64_BTN_D_RIGHT);
+    tap(N64_BTN_D_DOWN);
     expect(sn64_map_choice(s.pick) == 0 && sn64_map_target(&map, SN64_IN_A) == 8, "moving in the choices changes nothing yet");
     tap(N64_BTN_A);
     expect(s.open == SN64_MS_CLOSED && sn64_map_target(&map, SN64_IN_A) == 0 &&
            sn64_map_buttons(&map, N64_BTN_A, 0, 0) == SNES_BTN_B, "A takes the choice: the A button now gives B");
-    expect(s.col == 0 && s.row == 0, "the cursor stays on the row");
+    expect(s.row == 0, "the cursor stays on the row");
     // B gives the choice up
     tap(N64_BTN_A);
-    tap(N64_BTN_D_DOWN);
-    expect(sn64_map_choice(s.pick) == 11, "one line down from B: R");
+    tap(N64_BTN_D_RIGHT);
+    expect(sn64_map_choice(s.pick) == 4, "Right from B: the second column, Up");
     expect(!tap(N64_BTN_B) && s.open == SN64_MS_CLOSED && sn64_map_target(&map, SN64_IN_A) == 0,
            "B closes the choices, the row stays as it was, and the screen is not left");
-    // the lines of four, with "nothing" alone on the last
+    // two columns, seven and six
     tap(N64_BTN_D_DOWN);                                       // row B, which gives B: the second choice
     tap(N64_BTN_A);
     expect(sn64_map_choice(s.pick) == 0 && s.pick == 1, "the choices open on B for the B row");
-    tap(N64_BTN_D_LEFT);
-    tap(N64_BTN_D_LEFT);
-    expect(s.pick == 3, "Left twice from the second: round to the fourth (Y)");
-    tap(N64_BTN_D_DOWN);
-    expect(s.pick == 7 && sn64_map_choice(s.pick) == 2, "Down: Select");
-    taps(N64_BTN_D_DOWN, 2);
-    expect(s.pick == 12 && sn64_map_choice(s.pick) == -1, "Down twice: the last line, where nothing stands alone");
     tap(N64_BTN_D_RIGHT);
-    tap(N64_BTN_D_LEFT);
-    expect(s.pick == 12, "Left and Right stay on nothing");
-    tap(N64_BTN_D_DOWN);
-    expect(s.pick == 0, "Down from the last line: round to the first (A)");
     tap(N64_BTN_D_UP);
-    expect(s.pick == 12, "Up from the first line: nothing");
+    expect(s.pick == 7 && sn64_map_choice(s.pick) == 2, "Right and Up: the top of the second column, Select");
+    tap(N64_BTN_D_UP);
+    expect(s.pick == 12 && sn64_map_choice(s.pick) == -1, "Up again: round to its last line, nothing");
+    tap(N64_BTN_D_LEFT);
+    expect(s.pick == 5 && sn64_map_choice(s.pick) == 11, "Left: the same line of the first column, R");
+    tap(N64_BTN_D_DOWN);
+    expect(s.pick == 6 && sn64_map_choice(s.pick) == 3, "Down: Start, the seventh line");
+    tap(N64_BTN_D_RIGHT);
+    expect(s.pick == 12, "Right from the seventh line: the second column has six, so its last, nothing");
+    tap(N64_BTN_D_DOWN);
+    expect(s.pick == 7, "Down from the last line: round to the first");
+    tap(N64_BTN_D_UP);
     tap(N64_BTN_A);
     expect(sn64_map_target(&map, SN64_IN_B) == -1 && sn64_map_buttons(&map, N64_BTN_B, 0, 0) == 0, "nothing can be chosen: B gives nothing");
     // every choice can be reached and taken
@@ -120,12 +128,12 @@ static void test_choices(void)
         int ok = 1;
         for (int i = 0; i < SN64_MAP_CHOICES; i++) {
             sn64_mapscreen_open(&s);
-            tap(N64_BTN_D_RIGHT);                              // row L
+            taps(N64_BTN_D_DOWN, 7);                           // row L
             tap(N64_BTN_A);
-            for (int guard = 0; guard < 4 && s.pick / 4 != i / 4; guard++) tap(N64_BTN_D_DOWN);
-            for (int guard = 0; guard < 4 && s.pick != i; guard++) tap(N64_BTN_D_RIGHT);
+            if ((s.pick / 7) != (i / 7)) tap(N64_BTN_D_RIGHT);
+            for (int guard = 0; guard < 7 && s.pick != i; guard++) tap(N64_BTN_D_DOWN);
             tap(N64_BTN_A);
-            if (sn64_map_target(&map, SN64_IN_L) != sn64_map_choice(i)) ok = 0;
+            if (sn64_mapscreen_entry(&s) != SN64_IN_L || sn64_map_target(&map, SN64_IN_L) != sn64_map_choice(i)) ok = 0;
         }
         expect(ok, "each of the 13 choices can be reached with the D-pad and taken");
     }
@@ -214,12 +222,15 @@ static void test_reset_and_leave(void)
 #define BH     (H + 2 * GUARD)
 #define SENTINEL 0xF81Eu
 #define BG     sn64_rgb(0x10, 0x18, 0x30)
+#define COL_DIM sn64_rgb(0x80, 0x88, 0x98)
+#define COL_HI  sn64_rgb(0xFF, 0xD8, 0x40)
 // where the screen puts things (src/sn64_mapscreen.c)
 #define X_LEFT   16
 #define X_RIGHT  164
-#define Y_PAD    33
-#define Y_GRID   124
+#define Y_PAD    23
+#define Y_ROWS   96
 #define ROW_H    12
+#define Y_NOTE   202
 
 typedef struct { int x, y; uint16_t colour; char s[48]; } text_t;
 typedef struct {
@@ -232,7 +243,7 @@ static void record(void *ctx, int x, int y, uint16_t colour, const char *str)
 {
     shot_t *f = ctx;
     int len = (int)strlen(str);
-    if (x < 16 || x + 8 * len > 304 || y < 8 || y + 8 > 236 || len > 47 || f->texts >= 200) {
+    if (x < 16 || x + 8 * len > 304 || y < 8 || y + 8 > 240 || len > 47 || f->texts >= 200) {
         f->bad_text++;
         return;
     }
@@ -248,12 +259,17 @@ static uint16_t *pixel(shot_t *f, int x, int y)
     return &f->buf[(y + GUARD) * BW + x + GUARD];
 }
 
-static void shoot(shot_t *f, const sn64_mapscreen_t *st, const sn64_map_t *m, uint16_t n64, int sx, int sy, unsigned frame)
+static void blank_shot(shot_t *f)
 {
     for (int i = 0; i < BW * BH; i++) f->buf[i] = SENTINEL;
     for (int y = 0; y < H; y++)
         for (int x = 0; x < W; x++) *pixel(f, x, y) = BG;
     f->texts = f->bad_text = 0;
+}
+
+static void shoot(shot_t *f, const sn64_mapscreen_t *st, const sn64_map_t *m, uint16_t n64, int sx, int sy, unsigned frame)
+{
+    blank_shot(f);
     sn64_canvas_t c = { pixel(f, 0, 0), W, H, BW };
     sn64_mapscreen_draw(st, m, &c, record, f, n64, (int8_t)sx, (int8_t)sy, frame);
 }
@@ -265,6 +281,13 @@ static int tidy(const shot_t *f)        // nothing outside the screen, no text o
             if ((x < GUARD || x >= GUARD + W || y < GUARD || y >= GUARD + H) && f->buf[y * BW + x] != SENTINEL)
                 return 0;
     return f->bad_text == 0;
+}
+
+static const text_t *find_text(const shot_t *f, const char *str)
+{
+    for (int i = 0; i < f->texts; i++)
+        if (strcmp(f->text[i].s, str) == 0) return &f->text[i];
+    return NULL;
 }
 
 static int has_text(const shot_t *f, const char *str)
@@ -302,36 +325,57 @@ static int diff_box(shot_t *a, shot_t *b, int ox, int oy, const sn64_box_t *box)
     return diff_in(a, b, ox + box->x0, oy + box->y0, ox + box->x1, oy + box->y1);
 }
 
-// The single-button pictures of a row: the player's button and what it gives.
-static int row_x(int entry) { return entry / SN64_MS_ROWS ? X_RIGHT : X_LEFT; }
-static int row_y(int entry) { return Y_GRID + (entry % SN64_MS_ROWS) * ROW_H; }
-static int diff_icon(shot_t *a, shot_t *b, int entry, bool snes)
+static int diff_snes_picture(shot_t *a, shot_t *b)
 {
-    int x = row_x(entry) + (snes ? 78 : 1), y = row_y(entry);
+    return diff_in(a, b, X_RIGHT, Y_PAD, X_RIGHT + SN64_PAD_W - 1, Y_PAD + SN64_PAD_SNES_H - 1);
+}
+
+// The single-button pictures of a row of the list, when `first` is the first row shown: the
+// player's button and what it gives.
+static int row_y(int entry, int first) { return Y_ROWS + (entry - first) * ROW_H; }
+static int diff_icon(shot_t *a, shot_t *b, int entry, int first, bool snes)
+{
+    int x = X_RIGHT + (snes ? 78 : 1), y = row_y(entry, first);
     return diff_in(a, b, x, y, x + SN64_ICON - 1, y + SN64_ICON - 1);
+}
+
+// How many of the note line's five places for a small picture hold one (compared with a
+// screen that has none).
+static int note_icons(shot_t *a, shot_t *none)
+{
+    int n = 0;
+    for (int i = 0; i < 5; i++) {
+        int x = X_LEFT + 9 * 8 + 3 + i * (SN64_ICON + 1);
+        if (diff_in(a, none, x, Y_NOTE - 2, x + SN64_ICON - 1, Y_NOTE - 2 + SN64_ICON - 1) >= 3) n++;
+    }
+    return n;
 }
 
 static void test_lighting(unsigned input_pad, unsigned snes_pad)
 {
-    static shot_t rest, lit;
+    static shot_t rest[2], lit;
     sn64_box_t in, in2, out;
     sn64_map_default(&map);
     sn64_mapscreen_init(&s, input_pad, snes_pad);
-    tap(N64_BTN_D_UP);
-    tap(N64_BTN_D_UP);                         // the cursor on the reset field: no button is marked
-    shoot(&rest, &s, &map, 0, 0, 0, 0);
-    expect(tidy(&rest), "%s / %s: nothing is drawn or written off the screen", sn64_input_pad_name(input_pad), sn64_snes_pad_name(snes_pad));
+    s.row = SN64_MS_ROW_RESET;                 // the cursor on the reset field: no button is marked
+    for (int k = 0; k < 2; k++) {              // the list at its top, and at its end
+        s.first = (uint8_t)(k ? SN64_MAP_ENTRIES - SN64_MS_VISIBLE : 0);
+        shoot(&rest[k], &s, &map, 0, 0, 0, 0);
+    }
+    expect(tidy(&rest[0]) && tidy(&rest[1]), "%s / %s: nothing is drawn or written off the screen",
+           sn64_input_pad_name(input_pad), sn64_snes_pad_name(snes_pad));
     int ok = 1;
     for (int e = 0; e < SN64_MAP_ENTRIES; e++) {
-        int t = sn64_map_target(&map, e);
+        int t = sn64_map_target(&map, e), k = e < SN64_MS_VISIBLE ? 0 : 1;
         bool two = sn64_pad_input_box(input_pad, e, true, &in2);
         sn64_pad_input_box(input_pad, e, false, &in);
         sn64_pad_snes_box(t, &out);
+        s.first = (uint8_t)(k ? SN64_MAP_ENTRIES - SN64_MS_VISIBLE : 0);
         shoot(&lit, &s, &map, sn64_map_n64_bit(e), 0, 0, 0);
-        int a = diff_box(&rest, &lit, X_LEFT, Y_PAD, &in), a2 = two ? diff_box(&rest, &lit, X_LEFT, Y_PAD, &in2) : 0;
-        int b = diff_box(&rest, &lit, X_RIGHT, Y_PAD, &out);
-        int c = diff_icon(&rest, &lit, e, false), d = diff_icon(&rest, &lit, e, true);
-        int all = diff_all(&rest, &lit);
+        int a = diff_box(&rest[k], &lit, X_LEFT, Y_PAD, &in), a2 = two ? diff_box(&rest[k], &lit, X_LEFT, Y_PAD, &in2) : 0;
+        int b = diff_box(&rest[k], &lit, X_RIGHT, Y_PAD, &out);
+        int c = diff_icon(&rest[k], &lit, e, s.first, false), d = diff_icon(&rest[k], &lit, e, s.first, true);
+        int all = diff_all(&rest[k], &lit);
         if (a < 12 || (two && a2 < 12) || b < 12 || c < 6 || d < 6 || all != a + a2 + b + c + d || !tidy(&lit)) {
             ok = 0;
             printf("    %s: %d + %d in its picture, %d in the other, %d + %d in its row, %d in all\n",
@@ -344,25 +388,52 @@ static void test_lighting(unsigned input_pad, unsigned snes_pad)
 
 static void test_drawing(void)
 {
-    static shot_t rest, f, g;
+    static shot_t rest, f, g, blank;
     sn64_box_t box;
     sn64_map_default(&map);
     sn64_mapscreen_init(&s, SN64_PAD_N64, SN64_PAD_SNES);
     shoot(&rest, &s, &map, 0, 0, 0, 0);
+    blank_shot(&blank);
 
-    // the text of the screen at rest
+    // the screen at rest: the two lists name the controllers, both are drawn, ten rows
     {
         int names = 0, gives = 0;
-        for (int e = 0; e < SN64_MAP_ENTRIES; e++) {
-            const text_t *n = text_at(&rest, row_x(e) + 14, row_y(e) + 2), *t = text_at(&rest, row_x(e) + 91, row_y(e) + 2);
+        for (int e = 0; e < SN64_MS_VISIBLE; e++) {
+            const text_t *n = text_at(&rest, X_RIGHT + 14, row_y(e, 0) + 2), *t = text_at(&rest, X_RIGHT + 91, row_y(e, 0) + 2);
             if (n && strcmp(n->s, sn64_map_n64_name(e)) == 0) names++;
             if (t && strcmp(t->s, sn64_snes_button_name(sn64_map_target(&map, e))) == 0) gives++;
         }
-        expect(names == 14 && gives == 14, "14 rows, each with the button's name and the name of what it gives (%d, %d)", names, gives);
-        expect(has_text(&rest, "Your controller") && has_text(&rest, "The game sees") && has_text(&rest, "N64 controller") &&
-               has_text(&rest, "Super NES") && has_text(&rest, "Restore defaults") && has_text(&rest, "A change   B back") &&
-               has_text(&rest, "In a game, all four C open the menu"), "captions, the two lists' settings, the reset field, the help and the shortcut");
-        expect(tidy(&rest) && rest.texts == 14 * 2 + 7, "all of it on the screen (%d pieces of text)", rest.texts);
+        expect(names == 10 && gives == 10, "ten rows, each with the button's name and the name of what it gives (%d, %d)", names, gives);
+        expect(has_text(&rest, "N64 controller") && has_text(&rest, "Super NES") && has_text(&rest, "Restore defaults") &&
+               has_text(&rest, "A change   B back") && has_text(&rest, "In a game, all") && has_text(&rest, "four C buttons") &&
+               has_text(&rest, "bring up the menu"), "the two lists name the two controllers; the reset field, the help and the shortcut");
+        expect(tidy(&rest) && rest.texts == 10 * 2 + 7, "all of it on the screen (%d pieces of text)", rest.texts);
+        expect(diff_in(&rest, &blank, X_LEFT, Y_PAD, X_LEFT + SN64_PAD_W - 1, Y_PAD + SN64_PAD_INPUT_H - 1) > 6000 &&
+               diff_snes_picture(&rest, &blank) > 4000 &&
+               diff_in(&rest, &blank, 0, Y_PAD, X_LEFT - 1, H - 1) == 0 &&
+               diff_in(&rest, &blank, X_LEFT + SN64_PAD_W, 0, X_RIGHT - 1, H - 1) == 0 &&
+               diff_in(&rest, &blank, X_RIGHT + SN64_PAD_W, 0, W - 1, H - 1) == 0,
+               "both controllers are drawn, each in its own half, with the margins left free");
+    }
+    // the list scrolls: a mark below while there are more rows below, one above when there are more above
+    {
+        int mx = X_RIGHT + SN64_PAD_W / 2 - 2, up = Y_ROWS - 4, down = Y_ROWS + SN64_MS_VISIBLE * ROW_H + 1;
+        const text_t *t;
+        expect(diff_in(&rest, &blank, mx, down, mx + 4, down + 2) == 9 && diff_in(&rest, &blank, mx, up, mx + 4, up + 2) == 0,
+               "at the top of the list: a mark below it, none above");
+        s.first = 2;
+        s.row = 5;
+        shoot(&f, &s, &map, 0, 0, 0, 0);
+        expect(diff_in(&f, &blank, mx, down, mx + 4, down + 2) == 9 && diff_in(&f, &blank, mx, up, mx + 4, up + 2) == 9,
+               "in the middle: a mark above and one below");
+        s.first = 4;
+        s.row = 13;
+        shoot(&f, &s, &map, 0, 0, 0, 0);
+        t = text_at(&f, X_RIGHT + 14, Y_ROWS + 2);
+        expect(diff_in(&f, &blank, mx, down, mx + 4, down + 2) == 0 && diff_in(&f, &blank, mx, up, mx + 4, up + 2) == 9 &&
+               t && strcmp(t->s, "C-Left") == 0 && has_text(&f, "D-Right") && !has_text(&f, "C-Up") && tidy(&f),
+               "at the end: a mark above only, and the rows from C-Left to D-Right");
+        sn64_mapscreen_open(&s);
     }
     // the cursor's mark blinks in both pictures and nowhere else
     {
@@ -376,25 +447,26 @@ static void test_drawing(void)
         expect(diff_all(&rest, &g) == 0, "and off again");
     }
     // opposite directions cancel: the game is given neither, and the screen shows that
+    s.first = 4;
+    shoot(&g, &s, &map, 0, 0, 0, 0);
     shoot(&f, &s, &map, N64_BTN_D_UP | N64_BTN_D_DOWN, 0, 0, 0);
-    expect(diff_in(&rest, &f, X_RIGHT, Y_PAD, X_RIGHT + SN64_PAD_W - 1, Y_PAD + SN64_PAD_H - 1) == 0 &&
-           diff_icon(&rest, &f, SN64_IN_D_UP, false) && diff_icon(&rest, &f, SN64_IN_D_DOWN, false) &&
-           !diff_icon(&rest, &f, SN64_IN_D_UP, true) && !diff_icon(&rest, &f, SN64_IN_D_DOWN, true),
+    expect(diff_snes_picture(&g, &f) == 0 &&
+           diff_icon(&g, &f, SN64_IN_D_UP, 4, false) && diff_icon(&g, &f, SN64_IN_D_DOWN, 4, false) &&
+           !diff_icon(&g, &f, SN64_IN_D_UP, 4, true) && !diff_icon(&g, &f, SN64_IN_D_DOWN, 4, true),
            "Up and Down together: both light on the left, nothing on the right");
+    s.first = 0;
     // the menu shortcut: all four C are held, the game is given none of them
     shoot(&f, &s, &map, N64_BTN_C_ALL, 0, 0, 0);
-    expect(diff_in(&rest, &f, X_RIGHT, Y_PAD, X_RIGHT + SN64_PAD_W - 1, Y_PAD + SN64_PAD_H - 1) == 0 &&
-           diff_icon(&rest, &f, SN64_IN_C_UP, false) && !diff_icon(&rest, &f, SN64_IN_C_UP, true) &&
-           has_text(&f, "All four C: in a game, the menu") && !has_text(&f, "In a game, all four C open the menu"),
-           "all four C: they light on the left, nothing on the right, and the screen says what they do");
+    expect(diff_snes_picture(&rest, &f) == 0 &&
+           diff_icon(&rest, &f, SN64_IN_C_UP, 0, false) && !diff_icon(&rest, &f, SN64_IN_C_UP, 0, true) &&
+           find_text(&f, "four C buttons")->colour == COL_HI && find_text(&rest, "four C buttons")->colour == COL_DIM,
+           "all four C: they light on the left, nothing on the right, and the line about the shortcut lights up");
     shoot(&f, &s, &map, N64_BTN_C_ALL & ~N64_BTN_C_UP, 0, 0, 0);
-    expect(diff_in(&rest, &f, X_RIGHT, Y_PAD, X_RIGHT + SN64_PAD_W - 1, Y_PAD + SN64_PAD_H - 1) > 0 &&
-           !has_text(&f, "All four C: in a game, the menu"), "three C buttons are ordinary buttons");
+    expect(diff_snes_picture(&rest, &f) > 0 && find_text(&f, "four C buttons")->colour == COL_DIM, "three C buttons are ordinary buttons");
     // the stick presses the D-pad of the Super NES controller
     sn64_pad_snes_box(7, &box);
     shoot(&f, &s, &map, 0, 80, 0, 0);
-    expect(diff_box(&rest, &f, X_RIGHT, Y_PAD, &box) >= 12 && !diff_icon(&rest, &f, SN64_IN_D_RIGHT, true),
-           "the stick to the right lights Right on the Super NES controller");
+    expect(diff_box(&rest, &f, X_RIGHT, Y_PAD, &box) >= 12, "the stick to the right lights Right on the Super NES controller");
     shoot(&f, &s, &map, 0, 30, 0, 0);
     expect(diff_box(&rest, &f, X_RIGHT, Y_PAD, &box) == 0, "below its threshold it does not");
 
@@ -404,34 +476,40 @@ static void test_drawing(void)
     shoot(&g, &s, &map, 0, 0, 0, 0);
     shoot(&f, &s, &map, N64_BTN_Z, 0, 0, 0);
     {
-        const text_t *t = text_at(&g, row_x(SN64_IN_Z) + 91, row_y(SN64_IN_Z) + 2);
+        const text_t *t = text_at(&g, X_RIGHT + 91, row_y(SN64_IN_Z, 0) + 2);
         expect(t && strcmp(t->s, "X") == 0 && diff_box(&g, &f, X_RIGHT, Y_PAD, &box) >= 12 &&
-               has_text(&g, "No button gives Select"), "Z changed to X: the row says X, X lights, and Select is reported as given by no button");
+               has_text(&g, "Unmapped:") && note_icons(&g, &rest) == 1,
+               "Z changed to X: the row says X, X lights, and Select is shown as a button nothing gives");
     }
     sn64_map_set_target(&map, SN64_IN_START, -1);
     shoot(&g, &s, &map, N64_BTN_START, 0, 0, 0);
     {
-        const text_t *t = text_at(&g, row_x(SN64_IN_START) + 91, row_y(SN64_IN_START) + 2);
-        expect(t && strcmp(t->s, "none") == 0 && has_text(&g, "No button gives Select+Start") &&
-               diff_in(&rest, &g, X_RIGHT, Y_PAD, X_RIGHT + SN64_PAD_W - 1, Y_PAD + SN64_PAD_H - 1) == 0,
-               "Start changed to nothing: the row says none, nothing lights on the right, both are reported");
+        const text_t *t = text_at(&g, X_RIGHT + 91, row_y(SN64_IN_START, 0) + 2);
+        expect(t && strcmp(t->s, "none") == 0 && has_text(&g, "Unmapped:") && note_icons(&g, &rest) == 2 &&
+               diff_snes_picture(&rest, &g) == 0,
+               "Start changed to nothing: the row says none, nothing lights on the right, both are shown");
     }
     sn64_map_set_target(&map, SN64_IN_L, -1);
+    sn64_map_set_target(&map, SN64_IN_R, -1);
+    sn64_map_set_target(&map, SN64_IN_D_UP, -1);
     shoot(&g, &s, &map, 0, 0, 0, 0);
-    expect(has_text(&g, "No button gives 3 Super NES buttons") && tidy(&g), "more than two are reported by their number");
+    expect(has_text(&g, "Unmapped:") && note_icons(&g, &rest) == 5 && tidy(&g), "up to five are shown as their small pictures");
+    sn64_map_set_target(&map, SN64_IN_D_DOWN, -1);
+    shoot(&g, &s, &map, 0, 0, 0, 0);
+    expect(has_text(&g, "Unmapped: 6/12") && note_icons(&g, &rest) == 0 && tidy(&g), "more than five by their number");
     for (int e = 0; e < SN64_MAP_ENTRIES; e++) sn64_map_set_target(&map, e, -1);
     shoot(&g, &s, &map, (uint16_t)(0xFFFF & ~N64_BTN_C_UP), 0, 0, 0);
-    expect(has_text(&g, "No button gives 12 Super NES buttons") && has_text(&g, "none") == 14 && tidy(&g),
-           "with every row on nothing the longest note still fits");
+    expect(has_text(&g, "Unmapped: 12/12") && has_text(&g, "none") == 10 && diff_snes_picture(&rest, &g) == 0 && tidy(&g),
+           "with every row on nothing, nothing lights on the right and the note still fits");
 
     // the reset note
     sn64_map_default(&map);
     s.restored = true;
     shoot(&g, &s, &map, 0, 0, 0, 0);
-    expect(has_text(&g, "The defaults are back"), "the note after a reset");
+    expect(has_text(&g, "Defaults are back"), "the note after a reset");
     s.restored = false;
 
-    // the choices take the place of the rows; both pictures stay, the mark follows the choice
+    // the choices take the place of the list; both pictures stay, the mark follows the choice
     tap(N64_BTN_D_DOWN);                                        // row B
     tap(N64_BTN_A);
     shoot(&f, &s, &map, 0, 0, 0, 16);
@@ -440,12 +518,15 @@ static void test_drawing(void)
         for (int i = 0; i < SN64_MAP_CHOICES; i++)
             if (has_text(&f, sn64_snes_button_name(sn64_map_choice(i)))) names++;
         expect(names == 13 && has_text(&f, "B gives:") && has_text(&f, "A pick   B cancel") && !has_text(&f, "C-Up") && tidy(&f),
-               "A on a row: its 13 choices with their names in the place of the rows (%d)", names);
+               "A on a row: its 13 choices with their names in the place of the list (%d)", names);
+        expect(diff_in(&f, &blank, X_LEFT, Y_PAD, X_LEFT + SN64_PAD_W - 1, Y_PAD + SN64_PAD_INPUT_H - 1) > 6000 &&
+               diff_snes_picture(&f, &blank) > 4000,
+               "both controllers stay in view beside and above the choices");
         sn64_pad_snes_box(0, &box);
         shoot(&g, &s, &map, 0, 0, 0, 0);
         expect(diff_box(&f, &g, X_RIGHT, Y_PAD, &box) >= 12, "the choice under the cursor (B) is marked on the Super NES controller");
-        tap(N64_BTN_D_DOWN);
-        tap(N64_BTN_D_DOWN);                                    // Down: one of the D-pad's
+        tap(N64_BTN_D_RIGHT);
+        tap(N64_BTN_D_DOWN);                                    // the second column: Up, then Down
         sn64_pad_snes_box(sn64_map_choice(s.pick), &box);
         shoot(&f, &s, &map, 0, 0, 0, 16);
         shoot(&g, &s, &map, 0, 0, 0, 0);
@@ -514,12 +595,12 @@ static int screens(const char *dir)
     bad |= save(dir, "map-open", &f);
     shoot(&f, &s, &map, N64_BTN_A, 0, 0, 0);
     bad |= save(dir, "map-a", &f);
-    tap(N64_BTN_D_DOWN);
-    taps(N64_BTN_D_DOWN, 5);                                    // row Z
+    taps(N64_BTN_D_DOWN, 6);                                    // row Z
     shoot(&f, &s, &map, N64_BTN_Z, 0, 0, 0);
     bad |= save(dir, "map-z", &f);
     tap(N64_BTN_A);                                             // Z's choices, on Select
-    tap(N64_BTN_D_UP);                                          // one line up: Y
+    tap(N64_BTN_D_LEFT);                                        // the first column: A
+    taps(N64_BTN_D_DOWN, 3);                                    // Y
     shoot(&f, &s, &map, 0, 0, 0, 16);
     bad |= save(dir, "map-choices", &f);
     tap(N64_BTN_B);
@@ -534,7 +615,7 @@ static int screens(const char *dir)
     tap(N64_BTN_A);
     tap(N64_BTN_D_DOWN);
     tap(N64_BTN_A);                                             // Super Famicom
-    tap(N64_BTN_D_DOWN);
+    taps(N64_BTN_D_DOWN, 12);                                   // down the list: it scrolls to D-Down
     shoot(&f, &s, &map, N64_BTN_C_LEFT | N64_BTN_R | N64_BTN_Z, 60, 60, 0);
     bad |= save(dir, "map-other", &f);
     sn64_mapscreen_init(&s, SN64_PAD_M64_PRO, SN64_PAD_SNES);
@@ -544,6 +625,8 @@ static int screens(const char *dir)
     taps(N64_BTN_D_DOWN, 2);
     shoot(&f, &s, &map, N64_BTN_C_UP, 0, 0, 0);
     bad |= save(dir, "map-changed", &f);
+    sn64_mapscreen_init(&s, SN64_PAD_8BITDO, SN64_PAD_SNES);
+    sn64_map_default(&map);
     shoot(&f, &s, &map, N64_BTN_C_ALL, 0, 0, 0);
     bad |= save(dir, "map-shortcut", &f);
     return bad;
@@ -566,7 +649,7 @@ int main(int argc, char **argv)
         printf("FAIL: controller mapping screen, %d of %d checks failed\n", failures, checks);
         return 1;
     }
-    printf("PASS: controller mapping screen, %d checks (cursor, the two controller lists, the choices for a row, reset, "
-           "leaving on B let go, buttons that do nothing; each button lights itself and what it gives and nothing else)\n", checks);
+    printf("PASS: controller mapping screen, %d checks (cursor, the list that scrolls, the two controller lists, the choices "
+           "for a row, reset, leaving on B let go, buttons that do nothing; each button lights itself and what it gives and nothing else)\n", checks);
     return 0;
 }

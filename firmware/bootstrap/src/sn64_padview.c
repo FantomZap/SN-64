@@ -4,6 +4,7 @@
 #include <stddef.h>
 
 #include "sn64_mapping.h"
+#include "sn64_padshape.h"
 
 // ---- colours
 
@@ -64,6 +65,12 @@ void sn64_pad_mark(const sn64_canvas_t *c, int x, int y, uint16_t colour)
         span(c, x + i, x + 4 - i, y + i, colour);
 }
 
+void sn64_pad_mark_up(const sn64_canvas_t *c, int x, int y, uint16_t colour)
+{
+    for (int i = 0; i < 3; i++)
+        span(c, x + 2 - i, x + 2 + i, y + i, colour);
+}
+
 void sn64_pad_arrow(const sn64_canvas_t *c, int x, int y, uint16_t colour)
 {
     span(c, x + 2, x + 2, y, colour);
@@ -101,11 +108,11 @@ static void round_rect(const sn64_canvas_t *c, int x0, int y0, int x1, int y1, i
     }
 }
 
-// A line with round ends: a disc every three pixels or so along it.
+// A line with round ends: a disc every two pixels or so along it.
 static void thick_line(const sn64_canvas_t *c, int x0, int y0, int x1, int y1, int r, uint16_t colour)
 {
     int len = (x1 > x0 ? x1 - x0 : x0 - x1) + (y1 > y0 ? y1 - y0 : y0 - y1);
-    int steps = len / 3 + 1;
+    int steps = len / 2 + 1;
     for (int i = 0; i <= steps; i++)
         disc(c, x0 + (x1 - x0) * i / steps, y0 + (y1 - y0) * i / steps, r, colour);
 }
@@ -215,35 +222,28 @@ static void draw_stick(const sn64_canvas_t *c, int x, int y, int r, int8_t sx, i
     if (dy < -3) dy = -3;
     disc(c, x, y, r + 1, px(edge));
     disc(c, x, y, r, px(well));
-    disc(c, x + dx, y + dy, r - 3, px(cap));
+    disc(c, x + dx, y + dy, r >= 12 ? 6 : 5, px(cap));
 }
 
-// The body of a controller: discs, bars with round ends and rectangles, all in one colour.
-// A dark body gets a lighter line round it first (everything one pixel bigger), so its shape
-// stands out on the dark screen; a light body does not need one.
-enum { S_DISC, S_LINE, S_RECT };
-typedef struct { uint8_t kind, x0, y0, x1, y1, r; } shape_t;
-
-static void draw_body(const sn64_canvas_t *c, int ox, int oy, const shape_t *s, int n, rgb_t tint)
+// A dark body gets a lighter line round it, so its shape stands out on the dark screen; a
+// light body does not need one.
+static rgb_t rim_of(rgb_t tint)
 {
     rgb_t rim = { (uint8_t)(tint.r + (255 - tint.r) / 2), (uint8_t)(tint.g + (255 - tint.g) / 2),
                   (uint8_t)(tint.b + (255 - tint.b) / 2) };
-    for (int pass = is_light(tint) ? 1 : 0; pass < 2; pass++) {
-        int g = pass ? 0 : 1;
-        uint16_t col = px(pass ? tint : rim);
-        for (int i = 0; i < n; i++) {
-            switch (s[i].kind) {
-            case S_DISC:
-                disc(c, ox + s[i].x0, oy + s[i].y0, s[i].r + g, col);
-                break;
-            case S_LINE:
-                thick_line(c, ox + s[i].x0, oy + s[i].y0, ox + s[i].x1, oy + s[i].y1, s[i].r + g, col);
-                break;
-            default:
-                round_rect(c, ox + s[i].x0 - g, oy + s[i].y0 - g, ox + s[i].x1 + g, oy + s[i].y1 + g, s[i].r + g, col);
-                break;
-            }
-        }
+    return rim;
+}
+
+// The body of the player's controller: an outline made of pixel runs (src/sn64_padshape_data.c).
+// `grow` draws every run one pixel bigger all round.
+static void draw_outline(const sn64_canvas_t *c, int ox, int oy, const sn64_padshape_t *s, uint16_t colour, int grow)
+{
+    const uint8_t *p = s->runs;
+    for (int row = 0; row < s->rows; row++) {
+        int n = *p++;
+        for (int i = 0; i < n; i++, p += 2)
+            for (int dy = -grow; dy <= grow; dy++)
+                span(c, ox + p[0] - grow, ox + p[1] + grow, oy + s->top + row + dy, colour);
     }
 }
 
@@ -274,67 +274,78 @@ static const control_t input_controls[SN64_MAP_ENTRIES] = {
 typedef struct { uint8_t x, y, r; } at_t;       // a disc's middle and radius; for a bar, r is half its width
 
 typedef struct {
+    const sn64_padshape_t *shape;               // the body's outline
     at_t    at[SN64_MAP_ENTRIES];               // discs and bars (the D-pad's four entries are not used)
     at_t    z2;                                 // the second Z trigger; r = 0: there is none
     at_t    dpad;                               // the D-pad's middle; r is the length of an arm
     at_t    stick;                              // the stick's well
-    uint8_t shapes;
-    shape_t body[4];
+    bool    z_behind;                           // the Z triggers peek over the top edge like L and R
 } input_layout_t;
 
-enum { LAYOUT_THREE_HANDLES, LAYOUT_TWO_HANDLES, LAYOUTS };
+enum { LAYOUT_THREE_HANDLES, LAYOUT_BRAWLER, LAYOUT_EIGHTBITDO, LAYOUTS };
 
+// Where the buttons are, in pixels of the picture box. The positions follow the same pictures
+// the outlines were measured on (tools/make_padshapes.py), so each button sits where it does on
+// the controller. The shoulder buttons are behind the top edge on the real things; here they
+// stand up above it so that they can be seen and can light. Z is under the middle handle of a
+// three-handled controller and is shown on it.
 static const input_layout_t layouts[LAYOUTS] = {
     [LAYOUT_THREE_HANDLES] = {
-        // D-pad on the left wing, the stick on the middle handle with Z behind it, Start in the
-        // middle, B and A with the four C buttons on the right wing, L and R on the top edge.
+        .shape = &sn64_padshape_trident,
         .at = {
-            [SN64_IN_A]       = { 104, 43,  5 },
-            [SN64_IN_B]       = {  95, 34,  5 },
-            [SN64_IN_C_UP]    = { 115, 18,  4 },
-            [SN64_IN_C_DOWN]  = { 115, 34,  4 },
-            [SN64_IN_C_LEFT]  = { 107, 26,  4 },
-            [SN64_IN_C_RIGHT] = { 123, 26,  4 },
-            [SN64_IN_Z]       = {  70, 70,  7 },
-            [SN64_IN_L]       = {  34,  9, 12 },
-            [SN64_IN_R]       = { 106,  9, 12 },
-            [SN64_IN_START]   = {  70, 26,  3 },
+            [SN64_IN_A]       = { 106, 53,  5 },
+            [SN64_IN_B]       = {  97, 43,  5 },
+            [SN64_IN_C_UP]    = { 117, 27,  4 },
+            [SN64_IN_C_DOWN]  = { 117, 43,  4 },
+            [SN64_IN_C_LEFT]  = { 109, 35,  4 },
+            [SN64_IN_C_RIGHT] = { 125, 35,  4 },
+            [SN64_IN_Z]       = {  70, 102, 8 },
+            [SN64_IN_L]       = {  25,  7, 11 },
+            [SN64_IN_R]       = { 115,  7, 11 },
+            [SN64_IN_START]   = {  71, 43,  5 },
         },
-        .z2     = { 0, 0, 0 },
-        .dpad   = { 31, 31, 8 },
-        .stick  = { 70, 49, 8 },
-        .shapes = 4,
-        .body   = {
-            { S_LINE,  24, 42,  17, 70,  9 },   // left handle
-            { S_LINE, 116, 42, 123, 70,  9 },   // right handle
-            { S_LINE,  70, 42,  70, 74, 11 },   // middle handle
-            { S_RECT,  10, 12, 130, 50, 19 },   // the two wings and what is between them
-        },
+        .z2       = { 0, 0, 0 },
+        .dpad     = { 28, 40, 9 },
+        .stick    = { 70, 71, 14 },
+        .z_behind = false,
     },
-    [LAYOUT_TWO_HANDLES] = {
-        // The stick top left with the D-pad below it, the buttons as before on the right, L and
-        // R on the top edge and a Z trigger beside each.
+    [LAYOUT_BRAWLER] = {
+        .shape = &sn64_padshape_brawler,
         .at = {
-            [SN64_IN_A]       = { 100, 46,  5 },
-            [SN64_IN_B]       = {  91, 37,  5 },
-            [SN64_IN_C_UP]    = { 112, 19,  4 },
-            [SN64_IN_C_DOWN]  = { 112, 35,  4 },
-            [SN64_IN_C_LEFT]  = { 104, 27,  4 },
-            [SN64_IN_C_RIGHT] = { 120, 27,  4 },
-            [SN64_IN_Z]       = {  54,  8,  7 },
-            [SN64_IN_L]       = {  33,  8, 10 },
-            [SN64_IN_R]       = { 106,  8, 10 },
-            [SN64_IN_START]   = {  70, 28,  3 },
+            [SN64_IN_A]       = { 100, 63,  5 },
+            [SN64_IN_B]       = {  89, 56,  5 },
+            [SN64_IN_C_UP]    = { 108, 31,  4 },
+            [SN64_IN_C_DOWN]  = { 108, 49,  4 },
+            [SN64_IN_C_LEFT]  = {  99, 40,  4 },
+            [SN64_IN_C_RIGHT] = { 117, 40,  4 },
+            [SN64_IN_Z]       = {  59, 11,  7 },
+            [SN64_IN_L]       = {  36, 11, 10 },
+            [SN64_IN_R]       = { 104, 11, 10 },
+            [SN64_IN_START]   = {  70, 47,  5 },
         },
-        .z2     = { 85, 8, 7 },
-        .dpad   = { 54, 44, 8 },
-        .stick  = { 31, 30, 8 },
-        .shapes = 3,
-        .body   = {
-            { S_LINE,  28, 46,  21, 72, 11 },   // left handle
-            { S_LINE, 111, 46, 118, 72, 11 },   // right handle
-            { S_RECT,  12, 12, 127, 58, 16 },
+        .z2       = { 81, 11, 7 },
+        .dpad     = { 47, 61, 7 },
+        .stick    = { 29, 37, 10 },
+        .z_behind = true,
+    },
+    [LAYOUT_EIGHTBITDO] = {
+        .shape = &sn64_padshape_eightbitdo,
+        .at = {
+            [SN64_IN_A]       = {  97, 62,  5 },
+            [SN64_IN_B]       = {  83, 54,  5 },
+            [SN64_IN_C_UP]    = { 109, 35,  4 },
+            [SN64_IN_C_DOWN]  = { 109, 51,  4 },
+            [SN64_IN_C_LEFT]  = { 101, 43,  4 },
+            [SN64_IN_C_RIGHT] = { 117, 43,  4 },
+            [SN64_IN_Z]       = {  57, 16,  7 },
+            [SN64_IN_L]       = {  34, 16, 10 },
+            [SN64_IN_R]       = { 106, 16, 10 },
+            [SN64_IN_START]   = {  70, 44,  5 },
         },
+        .z2       = { 83, 16, 7 },
+        .dpad     = { 51, 69, 7 },
+        .stick    = { 32, 45, 9 },
+        .z_behind = true,
     },
 };
 
@@ -343,10 +354,10 @@ typedef struct { const char *name; uint8_t layout; rgb_t tint; } input_pad_t;
 static const input_pad_t input_pads[SN64_PAD_INPUT_COUNT] = {
     [SN64_PAD_N64]     = { "N64 controller",   LAYOUT_THREE_HANDLES, { 172, 172, 180 } },
     [SN64_PAD_M64_PRO] = { "M64 Pro",          LAYOUT_THREE_HANDLES, { 134, 110, 188 } },
-    [SN64_PAD_CAPTAIN] = { "Hyperkin Captain", LAYOUT_THREE_HANDLES, {  84,  88, 104 } },
+    [SN64_PAD_CAPTAIN] = { "Hyperkin Captain", LAYOUT_THREE_HANDLES, { 104, 152,  72 } },
     [SN64_PAD_NSO]     = { "Switch N64 pad",   LAYOUT_THREE_HANDLES, { 118, 126, 150 } },
-    [SN64_PAD_BRAWLER] = { "Brawler64",        LAYOUT_TWO_HANDLES,   { 196,  64,  64 } },
-    [SN64_PAD_8BITDO]  = { "8BitDo 64",        LAYOUT_TWO_HANDLES,   { 226, 226, 232 } },
+    [SN64_PAD_BRAWLER] = { "Brawler64",        LAYOUT_BRAWLER,       { 196,  64,  64 } },
+    [SN64_PAD_8BITDO]  = { "8BitDo 64",        LAYOUT_EIGHTBITDO,    { 226, 226, 232 } },
 };
 
 const char *sn64_input_pad_name(unsigned which)
@@ -360,32 +371,43 @@ void sn64_pad_draw_input(const sn64_canvas_t *c, int x0, int y0, unsigned which,
     if (which >= SN64_PAD_INPUT_COUNT) which = 0;
     const input_pad_t *p = &input_pads[which];
     const input_layout_t *l = &layouts[p->layout];
-    draw_body(c, x0, y0, l->body, l->shapes, p->tint);
-    draw_cross(c, x0 + l->dpad.x, y0 + l->dpad.y, l->dpad.r);
-    draw_stick(c, x0 + l->stick.x, y0 + l->stick.y, l->stick.r, stick_x, stick_y);
-    for (int e = 0; e < SN64_MAP_ENTRIES; e++) {
-        const control_t *k = &input_controls[e];
-        const at_t *a = &l->at[e];
-        uint16_t bit = sn64_map_n64_bit(e);
+    // Two passes: the shoulder buttons and triggers that stand behind the top edge, then the
+    // body over their feet, then everything that sits on the body.
+    for (int pass = 0; pass < 2; pass++) {
+        if (pass == 1) {
+            if (!is_light(p->tint))
+                draw_outline(c, x0, y0, l->shape, px(rim_of(p->tint)), 1);
+            draw_outline(c, x0, y0, l->shape, px(p->tint), 0);
+            draw_cross(c, x0 + l->dpad.x, y0 + l->dpad.y, l->dpad.r);
+            draw_stick(c, x0 + l->stick.x, y0 + l->stick.y, l->stick.r, stick_x, stick_y);
+        }
+        for (int e = 0; e < SN64_MAP_ENTRIES; e++) {
+            const control_t *k = &input_controls[e];
+            const at_t *a = &l->at[e];
+            bool behind = k->kind == K_TAB && (e != SN64_IN_Z || l->z_behind);
+            if (behind != (pass == 0))
+                continue;
+            uint16_t bit = sn64_map_n64_bit(e);
 #ifdef SN64_FAULT_PAD_WRONG_BUTTON
-        // Fault injection for the host test: A lights where B is and B where A is.
-        if (e == SN64_IN_A) bit = N64_BTN_B;
-        else if (e == SN64_IN_B) bit = N64_BTN_A;
+            // Fault injection for the host test: A lights where B is and B where A is.
+            if (e == SN64_IN_A) bit = N64_BTN_B;
+            else if (e == SN64_IN_B) bit = N64_BTN_A;
 #endif
-        bool lit = (n64_buttons & bit) != 0, marked = blink && cursor == e;
-        look_t lk = look(k->rest, k->lit, lit, marked);
-        switch (k->kind) {
-        case K_DISC:
-            draw_disc(c, x0 + a->x, y0 + a->y, a->r, k->glyph, lk);
-            break;
-        case K_TAB:
-            draw_tab(c, x0 + a->x, y0 + a->y, a->r, k->glyph, lk);
-            if (e == SN64_IN_Z && l->z2.r)
-                draw_tab(c, x0 + l->z2.x, y0 + l->z2.y, l->z2.r, k->glyph, lk);
-            break;
-        default:
-            draw_arm(c, x0 + l->dpad.x, y0 + l->dpad.y, l->dpad.r, k->glyph, lit, marked);
-            break;
+            bool lit = (n64_buttons & bit) != 0, marked = blink && cursor == e;
+            look_t lk = look(k->rest, k->lit, lit, marked);
+            switch (k->kind) {
+            case K_DISC:
+                draw_disc(c, x0 + a->x, y0 + a->y, a->r, k->glyph, lk);
+                break;
+            case K_TAB:
+                draw_tab(c, x0 + a->x, y0 + a->y, a->r, k->glyph, lk);
+                if (e == SN64_IN_Z && l->z2.r)
+                    draw_tab(c, x0 + l->z2.x, y0 + l->z2.y, l->z2.r, k->glyph, lk);
+                break;
+            default:
+                draw_arm(c, x0 + l->dpad.x, y0 + l->dpad.y, l->dpad.r, k->glyph, lit, marked);
+                break;
+            }
         }
     }
 }
@@ -442,12 +464,23 @@ static const struct { uint8_t kind, glyph, face; } snes_controls[SNES_BUTTONS] =
     { K_TAB,     G_R,     0 },      // R
 };
 
+// The Super NES controller, measured on a photograph of one lying flat (Evan-Amos, public
+// domain, Wikimedia Commons "SNES-Controller-Flat.jpg"): 132 pixels wide and 57 high, two round
+// ends with a flat top between them and a shallow step up along the bottom. L and R stand
+// above the top edge.
+#define SNES_END_R   28                         // the two round ends
+#define SNES_LEFT_X  32
+#define SNES_RIGHT_X 108
+#define SNES_MID_Y   38
+#define SNES_TOP_Y   (SNES_MID_Y - SNES_END_R)
+#define SNES_STEP_Y  61                         // the last row of the part between the ends
+
 static const at_t snes_at[SNES_BUTTONS] = {
-    { 106, 66, 6 }, { 93, 53, 6 }, { 61, 58, 0 }, { 75, 58, 0 },
+    { 108, 48, 5 }, { 95, 38, 5 }, { 58, 42, 0 }, { 72, 42, 0 },
     { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 }, { 0, 0, 0 },
-    { 119, 53, 6 }, { 106, 40, 6 }, { 33, 22, 12 }, { 106, 22, 12 },
+    { 121, 38, 5 }, { 108, 28, 5 }, { 32, 5, 13 }, { 108, 5, 13 },
 };
-static const at_t snes_dpad = { 33, 53, 9 };
+static const at_t snes_dpad = { 32, 39, 8 };
 
 #define RGB_SNES_TAB      { 150, 152, 166 }
 #define RGB_SNES_CAPSULE  {  72,  74,  86 }
@@ -460,27 +493,31 @@ const char *sn64_snes_pad_name(unsigned which)
 void sn64_pad_draw_snes(const sn64_canvas_t *c, int x0, int y0, unsigned which, uint16_t snes_buttons,
                         int cursor, bool blink)
 {
-    // Two round ends and a lower middle between them; a darker round under the four buttons.
-    static const shape_t shapes[3] = {
-        { S_DISC, 33, 53, 0, 0, 27 }, { S_DISC, 106, 53, 0, 0, 27 }, { S_RECT, 33, 33, 106, 71, 0 },
-    };
-    static const rgb_t grey = { 200, 200, 208 }, under = { 132, 132, 146 };
+    static const rgb_t grey = { 200, 200, 208 }, hollow = { 186, 186, 196 }, under = { 128, 128, 142 };
     static const rgb_t tab = RGB_SNES_TAB, capsule = RGB_SNES_CAPSULE, glow = RGB_GLOW;
     if (which >= SN64_PAD_SNES_COUNT) which = 0;
     const snes_pad_t *p = &snes_pads[which];
-    draw_body(c, x0, y0, shapes, 3, grey);
-    disc(c, x0 + 106, y0 + 53, 22, px(under));
+    // L and R first: they stand behind the flat top edge.
+    for (int bit = 10; bit < SNES_BUTTONS; bit++)
+        draw_tab(c, x0 + snes_at[bit].x, y0 + snes_at[bit].y, snes_at[bit].r, snes_controls[bit].glyph,
+                 look(tab, glow, (snes_buttons & (1u << bit)) != 0, blink && cursor == bit));
+    // The body, the round hollow the D-pad sits in, and the darker round under the four
+    // buttons with its two slanted pads: Y and X on one, B and A on the other.
+    disc(c, x0 + SNES_LEFT_X, y0 + SNES_MID_Y, SNES_END_R, px(grey));
+    disc(c, x0 + SNES_RIGHT_X, y0 + SNES_MID_Y, SNES_END_R, px(grey));
+    sn64_pad_fill(c, x0 + SNES_LEFT_X, y0 + SNES_TOP_Y, x0 + SNES_RIGHT_X, y0 + SNES_STEP_Y, px(grey));
+    disc(c, x0 + snes_dpad.x, y0 + snes_dpad.y, 15, px(hollow));
+    disc(c, x0 + SNES_RIGHT_X, y0 + SNES_MID_Y, 25, px(under));
+    thick_line(c, x0 + snes_at[1].x, y0 + snes_at[1].y, x0 + snes_at[9].x, y0 + snes_at[9].y, 7, px(grey));
+    thick_line(c, x0 + snes_at[0].x, y0 + snes_at[0].y, x0 + snes_at[8].x, y0 + snes_at[8].y, 7, px(grey));
     draw_cross(c, x0 + snes_dpad.x, y0 + snes_dpad.y, snes_dpad.r);
-    for (int bit = 0; bit < SNES_BUTTONS; bit++) {
+    for (int bit = 0; bit < 10; bit++) {
         const at_t *a = &snes_at[bit];
         bool lit = (snes_buttons & (1u << bit)) != 0, marked = blink && cursor == bit;
         int face = snes_controls[bit].face, g = snes_controls[bit].glyph;
         switch (snes_controls[bit].kind) {
         case K_DISC:
             draw_disc(c, x0 + a->x, y0 + a->y, a->r, g, look(p->rest[face], p->lit[face], lit, marked));
-            break;
-        case K_TAB:
-            draw_tab(c, x0 + a->x, y0 + a->y, a->r, g, look(tab, glow, lit, marked));
             break;
         case K_CAPSULE:
             draw_capsule(c, x0 + a->x, y0 + a->y, look(capsule, glow, lit, marked));

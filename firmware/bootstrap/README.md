@@ -11,7 +11,8 @@ The small program an N64 or M64 boots from the SN64 cartridge. It shows the SN64
 | `src/main.c` | Menu, controller loop, mailbox access (libdragon `display`, `graphics`, `joypad`, `io_read`/`io_write`) |
 | `src/sn64_mailbox.h` | Register map at `0x1FFF_0000`, the 32-bit register pairing, and the provisional STATUS bit layout, REGION_INFO/REGION_SOURCE layouts |
 | `src/sn64_mapping.[ch]` | N64 to SNES mapping table and function, the menu shortcut, changing the table (pure C, host-testable) |
-| `src/sn64_padview.[ch]` | Controller pictures with buttons that light up and the single-button pictures of the mapping screen (pure C, host-testable). Diagrams drawn from discs and bars; no maker's logo |
+| `src/sn64_padview.[ch]` | Controller pictures in the controllers' real shapes, with buttons that light up, and the single-button pictures of the mapping screen (pure C, host-testable). No maker's logo |
+| `src/sn64_padshape.h`, `src/sn64_padshape_data.c`, `tools/make_padshapes.py` | The outlines of the player's controllers as pixel runs, generated from the outline points in the script (`make padshapes`); `make test` fails if the file is stale |
 | `src/sn64_mapscreen.[ch]` | The controller mapping screen: cursor, the two controller lists, the choices for a row, drawing (pure C, host-testable) |
 | `src/sn64_credits.[ch]`, `src/sn64_credits_data.c` | Credits roll: which lines are on screen (pure C, host-testable) and the text, generated from `CREDITS.md` by `tools/make_credits.py` (`make credits`) |
 | `src/sn64_framelock.[ch]` | Frame lock: timing numbers for each console and region, the compatibility-mode confirmation text, the control loop (pure C, host-testable) |
@@ -69,9 +70,9 @@ Build outputs stay under `build/n64-bootstrap/`. Do not commit ROM binaries.
 
 Defaults (owner, 2026-10-01): every button gives the Super NES button of the same name (A, B, L, R, Start, the D-pad) and Z gives Select. X and Y have no namesake, so the C buttons give the Super NES diamond: C-Up X, C-Left Y, C-Down B, C-Right A. The stick also presses the D-pad.
 
-The mapping screen shows the controller in the player's hands and the controller the game sees side by side. Buttons light up as they are pressed: on the left the button held, on the right the button the game is given. A list over each picture chooses which controller is drawn (left: N64 controller, M64 Pro, Hyperkin Captain, Switch N64 pad, Brawler64, 8BitDo 64; right: Super NES or Super Famicom colours); the lists change the picture only. Below are the 14 rows of the mapping, each with a small picture of the single button and of the button it gives. A on a row opens its choices, "Restore defaults" puts the defaults back. Only the D-pad, A and B do anything on this screen, so every other button can be tried; B leaves when it is let go.
+The mapping screen shows the controller in the player's hands and the controller the game sees side by side, in their real shapes. Buttons light up as they are pressed: on the left the button held, on the right the button the game is given. A list over each picture names the controller and chooses which one is drawn (left: N64 controller, M64 Pro, Hyperkin Captain, Switch N64 pad, Brawler64, 8BitDo 64; right: Super NES or Super Famicom colours); the lists change the picture only. Under the Super NES controller is the mapping: 14 rows, ten on the screen at a time, each with a small picture of the single button and of the button it gives; the list scrolls with the cursor. A on a row opens its choices, "Restore defaults" puts the defaults back. Only the D-pad, A and B do anything on this screen, so every other button can be tried; B leaves when it is let go.
 
-The pictures are diagrams drawn by `src/sn64_padview.c` and carry no maker's logo. Nothing is kept when the console is switched off. Mock-ups: `docs/design/img/mapping-screens.png` and `menu-screens.png` (`make test-mapscreen`, then `python tools/mock_screens.py`).
+The outlines follow photographs of the controllers lying flat (`tools/make_padshapes.py` says which); the pictures carry no maker's logo. Nothing is kept when the console is switched off. Mock-ups: `docs/design/img/mapping-screens.png` and `menu-screens.png` (`make test-mapscreen`, then `python tools/mock_screens.py`).
 
 ## Credits
 

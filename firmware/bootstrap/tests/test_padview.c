@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// Host test for the controller pictures (src/sn64_padview.c): every button lights its own
-// place and no other, nothing is drawn outside a picture's box or outside the screen, the
-// cursor's mark, the stick, the single-button pictures, the six controllers and the two
-// Super NES colour sets.
+// Host test for the controller pictures (src/sn64_padview.c): the shapes are the right ones,
+// every button lights its own place and no other, nothing is drawn outside a picture's box
+// or outside the screen, the cursor's mark, the stick, the single-button pictures, the six
+// controllers and the two Super NES colour sets.
 //   test_padview --dump <file.ppm>   also writes all the pictures on one sheet, to look at
 // Build with -DSN64_FAULT_PAD_WRONG_BUTTON (A lights where B is): the test must fail.
 #include <stdio.h>
@@ -34,7 +34,7 @@ static void expect(int ok, const char *fmt, ...)
 // colour has its lowest bit set), so anything drawn outside the box shows.
 #define GUARD    12
 #define CW       (SN64_PAD_W + 2 * GUARD)
-#define CH       (SN64_PAD_H + 2 * GUARD)
+#define CH       (SN64_PAD_INPUT_H + 2 * GUARD)     // the taller of the two picture boxes
 #define SENTINEL 0xF81Eu
 
 typedef struct { uint16_t px[CW * CH]; } frame_t;
@@ -105,13 +105,13 @@ static void test_input(unsigned which)
     const char *name = sn64_input_pad_name(which);
     int overlaps = 0;
     input_frame(&rest, which, 0, 0, 0, -1, false);
-    expect(margin_clean(&rest, SN64_PAD_W, SN64_PAD_H), "%s: nothing is drawn outside the picture's box", name);
+    expect(margin_clean(&rest, SN64_PAD_W, SN64_PAD_INPUT_H), "%s: nothing is drawn outside the picture's box", name);
     memset(owner, 0, sizeof owner);
     for (int e = 0; e < SN64_MAP_ENTRIES; e++) {
         sn64_box_t b1, b2;
         int outside, n;
         bool two = sn64_pad_input_box(which, e, true, &b2);
-        expect(sn64_pad_input_box(which, e, false, &b1) && b1.x0 >= 0 && b1.y0 >= 0 && b1.x1 < SN64_PAD_W && b1.y1 < SN64_PAD_H,
+        expect(sn64_pad_input_box(which, e, false, &b1) && b1.x0 >= 0 && b1.y0 >= 0 && b1.x1 < SN64_PAD_W && b1.y1 < SN64_PAD_INPUT_H,
                "%s: %s has a place inside the picture", name, sn64_map_n64_name(e));
         input_frame(&lit, which, sn64_map_n64_bit(e), 0, 0, -1, false);
         n = differ(&rest, &lit, &b1, two ? &b2 : NULL, &outside);
@@ -150,13 +150,65 @@ static void test_input(unsigned which)
                     if (p / CW > y1) y1 = p / CW;
                 }
             if (x1 - x0 > 18 || y1 - y0 > 18) small = 0;
-            if (!margin_clean(&f[i], SN64_PAD_W, SN64_PAD_H)) small = 0;
+            if (!margin_clean(&f[i], SN64_PAD_W, SN64_PAD_INPUT_H)) small = 0;
         }
         input_frame(&far, which, 0, 127, -128, -1, false);
         input_frame(&lit, which, 0, 80, -80, -1, false);
         expect(moved && distinct && small, "%s: the stick's cap moves four ways and stays in its well", name);
         expect(memcmp(&far, &lit, sizeof far) == 0, "%s: beyond a full throw the cap does not move further", name);
     }
+}
+
+// The body on one row of a picture: how many separate stretches it has, and how wide it is
+// from its first pixel to its last.
+static int body_runs(const frame_t *f, int row, int *width)
+{
+    int runs = 0, first = -1, last = -1;
+    for (int x = 0; x < CW; x++) {
+        bool on = f->px[(row + GUARD) * CW + x] != SENTINEL;
+        if (on && (x == 0 || f->px[(row + GUARD) * CW + x - 1] == SENTINEL)) runs++;
+        if (on) {
+            if (first < 0) first = x;
+            last = x;
+        }
+    }
+    if (width) *width = first < 0 ? 0 : last - first + 1;
+    return runs;
+}
+
+// The right shapes (owner, 2026-10-01): three handles of which the middle one is the longest,
+// two handles, and the Super NES controller's flat top and stepped underside.
+static void test_shapes_of_bodies(void)
+{
+    static frame_t f;
+    int w, wide, top, bottom;
+    input_frame(&f, SN64_PAD_N64, 0, 0, 0, -1, false);
+    wide = 0;
+    top = bottom = -1;
+    for (int row = 0; row < SN64_PAD_INPUT_H; row++)
+        if (body_runs(&f, row, &w)) {
+            if (top < 0) top = row;
+            bottom = row;
+            if (w > wide) wide = w;
+        }
+    expect(body_runs(&f, 93, NULL) == 3 && body_runs(&f, 125, &w) == 1 && w < 34,
+           "N64 controller: three handles side by side, and only the middle one reaches the bottom");
+    expect(body_runs(&f, 62, &w) == 1 && w == wide && wide >= 130, "N64 controller: one wide body above the handles (%d wide)", wide);
+    expect(bottom - top + 1 >= wide * 9 / 10 && bottom - top + 1 <= wide,
+           "N64 controller: nearly as tall as it is wide (%d by %d)", wide, bottom - top + 1);
+    expect(body_runs(&f, 1, &w) == 1 && w < 50, "N64 controller: the top rises in the middle (%d wide there)", w);
+    input_frame(&f, SN64_PAD_BRAWLER, 0, 0, 0, -1, false);
+    expect(body_runs(&f, 110, NULL) == 2 && body_runs(&f, 60, &w) == 1 && w >= 125, "Brawler64: one wide body, two handles below it");
+    input_frame(&f, SN64_PAD_8BITDO, 0, 0, 0, -1, false);
+    expect(body_runs(&f, 105, NULL) == 2 && body_runs(&f, 60, &w) == 1 && w >= 120, "8BitDo 64: one wide body, two handles below it");
+    snes_frame(&f, SN64_PAD_SNES, 0, -1, false);
+    wide = 0;
+    for (int row = 10; row <= 66; row++)
+        if (body_runs(&f, row, &w) && w > wide) wide = w;
+    expect(body_runs(&f, 38, &w) == 1 && w == wide && wide >= 130 && wide * 10 >= 57 * 22,
+           "Super NES controller: more than twice as wide as it is high (%d by 57)", wide);
+    expect(body_runs(&f, 10, &w) == 1 && w >= 76 && body_runs(&f, 64, NULL) == 2 && body_runs(&f, 67, NULL) == 0,
+           "Super NES controller: a flat top between two round ends, and a step up along the bottom");
 }
 
 static uint16_t face_colour(const frame_t *f, int snes_bit)
@@ -173,12 +225,12 @@ static void test_snes(unsigned which)
     const char *name = sn64_snes_pad_name(which);
     int overlaps = 0;
     snes_frame(&rest, which, 0, -1, false);
-    expect(margin_clean(&rest, SN64_PAD_W, SN64_PAD_H), "%s: nothing is drawn outside the picture's box", name);
+    expect(margin_clean(&rest, SN64_PAD_W, SN64_PAD_SNES_H), "%s: nothing is drawn outside the picture's box", name);
     memset(owner, 0, sizeof owner);
     for (int bit = 0; bit < SNES_BUTTONS; bit++) {
         sn64_box_t b;
         int outside, n;
-        expect(sn64_pad_snes_box(bit, &b) && b.x0 >= 0 && b.y0 >= 0 && b.x1 < SN64_PAD_W && b.y1 < SN64_PAD_H,
+        expect(sn64_pad_snes_box(bit, &b) && b.x0 >= 0 && b.y0 >= 0 && b.x1 < SN64_PAD_W && b.y1 < SN64_PAD_SNES_H,
                "%s: %s has a place inside the picture", name, sn64_snes_button_name(bit));
         snes_frame(&lit, which, (uint16_t)(1u << bit), -1, false);
         n = differ(&rest, &lit, &b, NULL, &outside);
@@ -315,14 +367,16 @@ static void test_shapes(void)
     sn64_pad_frame(&c, 30, 20, 34, 23, col);         // 5 x 4: 14 round the edge
     sn64_pad_mark(&c, 40, 20, col);                  // 5 + 3 + 1
     sn64_pad_arrow(&c, 50, 20, col);                 // 1 + 1 + 5 + 1 + 1
+    sn64_pad_mark_up(&c, 60, 20, col);               // 1 + 3 + 5
     for (int y = 0; y < CH; y++)
         for (int x = 0; x < CW; x++)
             if (f.px[y * CW + x] != SENTINEL) {
                 n++;
-                if (x < 20 || x > 54 || y < 20 || y > 24) stray++;
+                if (x < 20 || x > 64 || y < 20 || y > 24) stray++;
             }
-    expect(n == 6 + 14 + 9 + 9 && stray == 0 && f.px[22 * CW + 54] == col && f.px[20 * CW + 52] == col,
-           "the plain shapes: a block, a frame, the list mark and the arrow (%d pixels)", n);
+    expect(n == 6 + 14 + 9 + 9 + 9 && stray == 0 && f.px[22 * CW + 54] == col && f.px[20 * CW + 52] == col &&
+           f.px[20 * CW + 62] == col && f.px[22 * CW + 60] == col && f.px[20 * CW + 42] == col,
+           "the plain shapes: a block, a frame, the two marks and the arrow (%d pixels)", n);
     expect(sn64_rgb(255, 255, 255) == 0xFFFF && sn64_rgb(0, 0, 0) == 0x0001 && sn64_rgb(255, 0, 0) == 0xF801 &&
            sn64_rgb(0, 255, 0) == 0x07C1 && sn64_rgb(0, 0, 255) == 0x003F, "colours are 5 bits each and the alpha bit");
 }
@@ -338,7 +392,7 @@ static void put(uint8_t *rgb, int sw, int x, int y, uint16_t p)
 
 static int dump(const char *path)
 {
-    enum { COLS = 4, ROWS = 5, CELLW = SN64_PAD_W + 8, CELLH = SN64_PAD_H + 8, SW = COLS * CELLW, SH = ROWS * CELLH + 4 * 16 };
+    enum { COLS = 4, ROWS = 4, CELLW = SN64_PAD_W + 8, CELLH = SN64_PAD_INPUT_H + 8, SW = COLS * CELLW, SH = ROWS * CELLH + 4 * 16 };
     static uint16_t sheet[SW * SH];
     static uint8_t rgb[SW * SH * 3];
     sn64_canvas_t c = { sheet, SW, SH, SW };
@@ -418,6 +472,7 @@ int main(int argc, char **argv)
         a = face_colour(&sfc, 8); b = face_colour(&sfc, 0); x = face_colour(&sfc, 9); y = face_colour(&sfc, 1);
         expect(a != b && a != x && a != y && b != x && b != y && x != y, "Super Famicom: A, B, X and Y have four colours");
     }
+    test_shapes_of_bodies();
     test_icons();
     test_clipping();
     test_shapes();
@@ -428,7 +483,7 @@ int main(int argc, char **argv)
         printf("FAIL: controller pictures, %d of %d checks failed\n", failures, checks);
         return 1;
     }
-    printf("PASS: controller pictures, %d checks (six controllers and two colour sets: every button lights its own "
-           "place and no other, the cursor's mark, the stick, single buttons, nothing outside the box or the screen)\n", checks);
+    printf("PASS: controller pictures, %d checks (six controllers and two colour sets: the right shapes, every button lights "
+           "its own place and no other, the cursor's mark, the stick, single buttons, nothing outside the box or the screen)\n", checks);
     return 0;
 }

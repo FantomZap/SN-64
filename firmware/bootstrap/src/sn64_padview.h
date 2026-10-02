@@ -3,12 +3,14 @@
 // player's hands on the left, the controller the game sees on the right, each with buttons
 // that light up, and a small picture of every single button for the mapping list.
 //
-// The pictures are diagrams, drawn here from discs and bars: they show where each button
-// is, not what a product looks like, and they carry no maker's logo or lettering (owner,
-// 2026-10-01: no Nintendo logos on anything). The letters on the buttons are this file's
-// own five-by-seven dot letters. The controllers that can be chosen are the ones ModRetro
-// lists as working with the M64, which include the original Nintendo 64 controller: four
-// have three handles, two have two. The body colour only tells the entries apart.
+// The pictures are diagrams in the controllers' real proportions (owner, 2026-10-01: "make
+// the graphics closer to the right shapes"): each outline and each button's place follows a
+// photograph of the controller lying flat (src/sn64_padshape_data.c, tools/make_padshapes.py).
+// They carry no maker's logo or lettering (owner, 2026-10-01: no Nintendo logos on
+// anything); the letters on the buttons are this file's own five-by-seven dot letters. The
+// controllers that can be chosen are the ones ModRetro lists as working with the M64, which
+// include the original Nintendo 64 controller: four have its three-handled shape, two have
+// two handles. The body colour only tells the entries apart.
 //
 // Pure C, no libdragon dependency: everything is drawn into a 16-bit frame buffer (5 bits
 // red, 5 green, 5 blue, 1 alpha) and unit-tested on the host (tests/test_padview.c).
@@ -18,9 +20,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define SN64_PAD_W  140     // a controller picture's box
-#define SN64_PAD_H  88
-#define SN64_ICON   11      // a single button's picture is 11 x 11
+#define SN64_PAD_W        140   // a controller picture's box is this wide ...
+#define SN64_PAD_INPUT_H  134   // ... this high for the player's controller ...
+#define SN64_PAD_SNES_H   68    // ... and this high for the Super NES controller, which is a flat one
+#define SN64_ICON         11    // a single button's picture is 11 x 11
 
 typedef struct {
     uint16_t *fb;
@@ -50,14 +53,15 @@ enum {
 const char *sn64_input_pad_name(unsigned which);    // at most SN64_PAD_NAME_MAX characters
 const char *sn64_snes_pad_name(unsigned which);
 
-// The player's controller in a SN64_PAD_W x SN64_PAD_H box at (x0, y0). `n64_buttons` are the
-// buttons held (N64_BTN_*), which light up; the stick's cap moves with the stick. `cursor` is
-// the mapping entry (SN64_IN_*) to mark, or -1: its button is drawn white while `blink` is true.
+// The player's controller in a SN64_PAD_W x SN64_PAD_INPUT_H box at (x0, y0). `n64_buttons`
+// are the buttons held (N64_BTN_*), which light up; the stick's cap moves with the stick.
+// `cursor` is the mapping entry (SN64_IN_*) to mark, or -1: its button is drawn white while
+// `blink` is true.
 void sn64_pad_draw_input(const sn64_canvas_t *c, int x0, int y0, unsigned which, uint16_t n64_buttons,
                          int8_t stick_x, int8_t stick_y, int cursor, bool blink);
 
-// The controller the game sees. `snes_buttons` light up (SNES_BTN_*); `cursor` is a SNES
-// button's bit number to mark, or -1.
+// The controller the game sees, in a SN64_PAD_W x SN64_PAD_SNES_H box. `snes_buttons` light
+// up (SNES_BTN_*); `cursor` is a SNES button's bit number to mark, or -1.
 void sn64_pad_draw_snes(const sn64_canvas_t *c, int x0, int y0, unsigned which, uint16_t snes_buttons,
                         int cursor, bool blink);
 
@@ -74,11 +78,12 @@ bool sn64_pad_input_box(unsigned which, int entry, bool second, sn64_box_t *box)
 bool sn64_pad_snes_box(int snes_bit, sn64_box_t *box);
 
 // Plain shapes for the screen's own boxes: a filled rectangle and a one-pixel frame (corners
-// included), a small triangle pointing down (the mark of a drop-down list, 5 wide and 3 high)
-// and a small arrow pointing right (5 wide and 5 high).
+// included), a small triangle pointing down or up (the mark of a drop-down list, and of more
+// rows above or below; 5 wide and 3 high) and a small arrow pointing right (5 wide and 5 high).
 void sn64_pad_fill(const sn64_canvas_t *c, int x0, int y0, int x1, int y1, uint16_t colour);
 void sn64_pad_frame(const sn64_canvas_t *c, int x0, int y0, int x1, int y1, uint16_t colour);
 void sn64_pad_mark(const sn64_canvas_t *c, int x, int y, uint16_t colour);
+void sn64_pad_mark_up(const sn64_canvas_t *c, int x, int y, uint16_t colour);
 void sn64_pad_arrow(const sn64_canvas_t *c, int x, int y, uint16_t colour);
 
 // 5-5-5-1 colour from 8-bit parts.
