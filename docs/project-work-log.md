@@ -642,3 +642,9 @@ The owner: "i want my sn64 and fantomzap logos screenprinted on there somewhere"
 - Board rule check with the schematic comparison after it: no error, no open connection, no difference, the same 199 notes at the edge fingers. No copper, hole or part was touched, so the wiring check, the board run and the shell fit stand as they are.
 - Quote sheet and fabrication notes: solder mask red; inner copper 1 oz (PCBWay's form offers nothing thinner for inner layers; the sheet said 0.5 oz); the titles call the board v1, the file names keep `sn64-v2`.
 - Manufacturing files and the two board pictures remade. Nothing has been sent to PCBWay.
+
+## 2026-10-02 — the cartridge socket looked up again; PCBWay form filled
+
+- **Socket** (owner: "Look up the socket. Theres measurments out ther"). No drawing exists for the part on sale. Forum posts and a seller's listing give: 2.5 mm pitch (as on the board); leg rows about 4.5 to 5 mm apart on the part on sale against 6 to 7 mm on original console parts; 137 x 21 x 9 mm overall with ears. The listing's photograph shows the ears as tabs beyond the ends of the body, which the shell's brackets (holes 95 mm apart, from the original console footprint) do not match. Recorded in [design/v2-shell.md](design/v2-shell.md), "Looked up again 2026-10-02". The board's pads stand; the shell's socket brackets wait for a sample.
+- **PCBWay's quote form** filled in the owner's browser at his word: 111 x 70.5 mm, 5 pieces, 6 layers, 1.2 mm, red mask, white silkscreen, ENIG on board and fingers, 45 degree bevel, 1 oz copper inside and out, and the questions for their engineer in the remarks. No file attached, nothing in the cart, no price read yet.
+- The owner wants PCBWay to make the shell too. The two STL halves exist; nothing uploaded.

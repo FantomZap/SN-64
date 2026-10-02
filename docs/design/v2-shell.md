@@ -275,6 +275,19 @@ contacts, 31 per row, 2.5 mm pitch with two 7.5 mm gaps (between contacts 4-5 an
 A 75 mm figure would be 31 contacts at 2.5 mm with no gaps; that part would miss the outer contact
 groups, which carry the cartridge audio inputs (pins 31 and 62, used by FXPAK Pro MSU-1).
 
+### Looked up again 2026-10-02 (owner: "Look up the socket. Theres measurments out ther")
+
+No drawing and no 3D model of the socket that is on sale was found this time either. What was found, all of it **unverified on a part**:
+
+| Fact | Source | What it means here |
+|---|---|---|
+| Pitch 2.5 mm, not 2.54 | [NESdev forum, "SNES Edge Connector"](https://forums.nesdev.org/viewtopic.php?t=11389); [shmups forum](https://shmups.system11.org/viewtopic.php?t=53375) | agrees with the board's pads |
+| The sockets on sale have their two leg rows closer together than the original console part: "about 4.5 mm" against "about 6 mm" (one buyer, by ruler); a second buyer found the same and bent all 62 legs outward to fit a console | [AtariAge forum](https://forums.atariage.com/topic/291886-snes-solder-type-cartridge-slot-replacement/); shmups forum as above | agrees with Sanni's 5.0 mm footprint, which was drawn for the part on sale. The 7.0 mm of OpenSFC is the original SHVC console part, which is no longer made. On this board the legs go to pads on the two faces of a 1.2 mm board, so each row comes in about 1.9 mm, not 2.9 mm |
+| Overall size 137 x 21 x 9 mm with ears, 97 x 21 x 9 mm without | [Amazon B0H35742NX](https://www.amazon.com/SNES-Game-Slot-Connector-Replacement/dp/B0H35742NX), seller's figures | the 21 mm height is the figure already used |
+| The ears are flat tabs at the base that reach out about 19 mm beyond each end of the body, with their holes near the tips | the same listing's photograph | **the shell does not match this**: it has the ear holes at 95.0 mm (`EAR_X = 47.5`), inside the body's length, from the original console footprint. The brackets and the two cap screws at 57.5 have to be drawn again from a sample. The inner width at the board's top edge is 142.6 mm, so a 137 mm part goes in with 2.8 mm each side by the seller's rounded figure |
+
+Still not published anywhere found: the leg length, the ear holes' positions and size, the base height, how deep a cartridge seats. A sample is still needed for the shell. For the board the lookup is good news: the pad pattern agrees with both footprints and the legs need a smaller bend than was planned.
+
 ## Open
 
 - **Cartridge keying.** The pocket is a plain rectangle, so a cartridge can be put in back to
