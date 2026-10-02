@@ -444,3 +444,58 @@ A theme is nine colours: the screen, a panel, the bar under the cursor, the insi
 - **The bottom line of the screens stands close to the lower edge** (the menus' at rows 228 to 235, the text screens' at rows 232 to 239), where a television with a picture tube may cut it. That was so before, and it has not been seen on one.
 - **My choices, not the owner's:** the six themes, their names and colours, Midnight as the one to start in, the marks and their signs, the panel and the bar, the rule in four colours, and what About says. The names of five of the themes are colour names that N64 owners know from the console's see-through colours; they are plain words, and no logo or artwork is involved.
 - **The console's own 8-pixel font is still used.** A real font in two sizes is still only an idea ([menu-ideas.md](menu-ideas.md)).
+
+## First run in an emulator: ares (2026-10-01)
+
+Until this day the menu program had only been compiled, unit-tested on the PC and co-simulated with the FPGA endpoint. The owner tried the ROM in Project64 and got a black screen. It then ran in ares, and he drove the menus with an Xbox controller: "the menu works fine".
+
+| | |
+|---|---|
+| Emulator | ares v148 for Windows, `ares-windows-x64.zip` from the project's GitHub releases, SHA-256 `fa97958e1d359e3fe254353f87b6508f2762a959d7eb264c69965ad002037298` |
+| ROM of the first run | the build of the section before this one, SHA-256 `16bb2243...d5b297` |
+| What came up | the SN64 logo fading in, the FantomZap logo, then the main menu, at 60 pictures a second |
+| What the menu said | "SN64 hardware not found", which is right: ares has no SN64 behind the cartridge port. Play refuses |
+| Project64 3.0 | black screen. libdragon's own instructions name ares as the only emulator accurate enough for programs built with it |
+
+### What it is evidence of, and what not
+
+- **It is evidence** that the ROM boots through libdragon's own boot code, that the logos, the menus, the themes, the mapping screen, About and the credits draw as the mock-ups said they would, and that the menus follow a controller.
+- **It is not evidence** about anything behind the cartridge port: the mailbox, starting a cartridge, the game picture, the sound, the frame lock. ares has none of that hardware. It is not a run on a console either: colours on a television, the edges of a picture tube and real controllers are still unseen.
+
+### A fault it found: the top lines blinked
+
+In ares the top lines of the menu went blank for a fifth of a second every few seconds. In a run of 40 pictures taken from the emulator's window, 10 showed the top of the logo wiped.
+
+- **Cause.** The menu draws a whole picture every time and clears the screen first. With two picture buffers it drew into the buffer that had left the screen a moment before. libdragon hands that buffer back at the vertical interrupt. ares asks its graphics card for a picture of the buffer one line before that interrupt and does not wait for the answer (`scanoutAsync` in `ares/n64/vi/vi.cpp`), so the picture was sometimes taken after the menu had begun to clear the buffer.
+- **On a console** the buffer is no longer being read by then: the video chip has been given the other buffer at the same interrupt. That is my reading of how libdragon and the hardware work together, not something seen on a console.
+- **Fix.** The menu and the logos now have three picture buffers and take a new one only after the vertical interrupt that put the last one on the screen (`menu_show()` in `src/main.c`). The buffer drawn in left the screen a whole picture earlier. It costs 150 KB of memory and no time: a picture still goes on the screen at the first vertical interrupt after it is finished.
+- **After the fix:** 120 pictures in a row from the emulator's window, none wiped.
+- The game picture keeps two buffers. It is fetched in quarters right after the vertical interrupt and its timing is the frame lock's; it cannot run in ares.
+
+### How long a picture takes
+
+The service screen's readout (Settings, Status / diagnostics, Z, then C-Up) now also shows, on every menu screen, how long the picture before took: input, mailbox and drawing. A build with `SN64_READOUT_DEFAULT=true` turns it on from the start, and `SN64_START_SCREEN` opens the menu on another screen, so a screen can be timed in an emulator without a controller (`rom.mk`, `SN64_EXTRA_CFLAGS`).
+
+| Screen | In ares |
+|---|---|
+| A text screen (the credits roll) | 3.8 to 4.5 ms |
+| Main menu, mapping screen | ran at 60 pictures a second; not timed, another window covered the readout |
+
+A picture has 16.7 ms at 60 Hz. ares counts the processor's time only roughly, so a console may differ.
+
+### Evidence
+
+- Host tests unchanged: 1,063 checks in eleven sets; 13 fault builds rejected.
+- ROM: **163,840 bytes**, SHA-256 `977c1f5e4031186550530cb6b1bd0737cd5d26d102c6a078fdd1125746690eee`, CIC-6102 check OK; 157,527 bytes used, 104,617 free in the 256 KiB window.
+- Co-simulation with the FPGA endpoint passes with this image (last non-zero word 78,763); the corrupted-load run fails as required.
+- In ares: boots, logos, main menu; 0 of 120 pictures wiped. The owner's own run with a controller was on the build before the fix.
+
+### Running it in ares
+
+```
+ares --system "Nintendo 64" --no-file-prompt build/n64-bootstrap/sn64_bootstrap.z64
+```
+
+ares has no keys or buttons set when it is new: set them first under Settings, Input.
+
+Sources: [ares](https://github.com/ares-emulator/ares) v148, its [vi.cpp](https://github.com/ares-emulator/ares/blob/v148/ares/n64/vi/vi.cpp) for when the picture of the buffer is taken, and [libdragon's README](https://github.com/DragonMinded/libdragon) on emulators. Read 2026-10-01.

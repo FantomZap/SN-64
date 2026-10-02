@@ -4,7 +4,7 @@
 // SN64 mailbox, lets the user request (or drop) SNES cartridge power, and
 // shows the SNES picture and sound on the console's own output.
 //
-// Built with libdragon (Unlicense). Not yet run on hardware or an emulator;
+// Built with libdragon (Unlicense). Runs in the ares emulator; not yet run on a console;
 // see docs/design/n64-bootstrap.md for what has been verified.
 #include <stdarg.h>
 #include <stdbool.h>
@@ -85,7 +85,12 @@ static mailbox_t  mbox;
 static sn64_map_t map;
 static bool       run_request;            // bootstrap-owned; default off after every reset
 static run_mode_t mode = MODE_MENU;
-static screen_t   screen = SCREEN_MAIN;
+// -DSN64_START_SCREEN=SCREEN_... opens the menu on another screen, for looking at a screen or
+// timing it in an emulator without a controller.
+#ifndef SN64_START_SCREEN
+#define SN64_START_SCREEN SCREEN_MAIN
+#endif
+static screen_t   screen = SN64_START_SCREEN;
 static int        cursor, set_cursor;     // main menu, Settings
 static int        chord_frames;           // pictures the menu shortcut has been held
 static const char *message = "";          // one line under the menu ...
@@ -224,7 +229,14 @@ static sn64_pace_t      pacer;                 // the loop that holds the game t
 static uint32_t lock_slips;                    // pictures gained or lost while locked
 static int      lock_prev_starts = -1;
 static bool     lock_seen;                     // a game has been shown since start-up (the numbers mean something)
-static bool     lock_readout;                  // service: a line of lock numbers above the game picture
+// Service: a line of timing numbers at the top of every picture. Over a game the frame lock's;
+// on a menu screen how long the picture before took to make. -DSN64_READOUT_DEFAULT=true turns
+// it on from the start, for measuring.
+#ifndef SN64_READOUT_DEFAULT
+#define SN64_READOUT_DEFAULT false
+#endif
+static bool     lock_readout = SN64_READOUT_DEFAULT;
+static uint32_t menu_ticks;                    // processor ticks the last menu picture took: input, mailbox and drawing
 static volatile uint32_t vbl_ticks, vbl_period, vbl_count;   // the console's vertical interrupt: when, how far apart, how many
 static uint16_t aud_rptr;                      // next audio pair to fetch from the ring
 static int16_t *aud_in;                        // the ring's new pairs (uncached: filled by DMA)
@@ -248,6 +260,25 @@ static void vbl_handler(void)
     vbl_period = t - vbl_ticks;
     vbl_ticks = t;
     vbl_count++;
+}
+
+// The menu and the logos are drawn by the processor, a whole picture every time, and the first
+// thing drawn is the cleared screen. They have three picture buffers and take a new one only
+// after the vertical interrupt that put the last one on the screen, so the buffer being drawn in
+// left the screen a whole picture earlier.
+//
+// With two buffers the one drawn in is the one that left the screen a moment ago. A console has
+// stopped reading it by then. The ares emulator has not always: it takes its picture of the
+// buffer a little late, and showed the top lines of the menu wiped every few seconds (first run
+// in ares, 2026-10-01). Three buffers cost 150 KB of memory and no time: a picture still goes on
+// the screen at the first vertical interrupt after it is finished.
+#define MENU_BUFFERS 3
+
+static void menu_show(surface_t *d)
+{
+    uint32_t seen = vbl_count, t0 = TICKS_READ();
+    display_show(d);
+    while (vbl_count == seen && TICKS_SINCE(t0) < (int32_t)TICKS_FROM_MS(100)) { }
 }
 
 static void vi_timing_read(sn64_vi_timing_t *t)
@@ -378,7 +409,7 @@ static void display_mode(bool game)
     }
     display_close();
     if (game) display_init(RESOLUTION_256x240, DEPTH_16_BPP, 2, GAMMA_NONE, FILTERS_RESAMPLE);
-    else      display_init(RESOLUTION_320x240, DEPTH_16_BPP, 2, GAMMA_NONE, FILTERS_RESAMPLE);
+    else      display_init(RESOLUTION_320x240, DEPTH_16_BPP, MENU_BUFFERS, GAMMA_NONE, FILTERS_RESAMPLE);
     game_display = game;
     game_frames_shown = 0;
     if (game) game_start();
@@ -881,10 +912,10 @@ static void draw_service(surface_t *d)
     line(d, 15, col_text, "Slow %s %%  off %+d  lost %lu",
          sn64_ppm_percent(pace_ppm(pacer.pace), pct, sizeof(pct)), pacer.error, (unsigned long)lock_slips);
     line(d, 16, col_dim, "Console timing: %s", !lock_seen ? "-" : lock_plan.set_console ? "Super NES" : "its own");
-    line(d, 17, lock_readout ? col_warn : col_dim, "Readout over the game: %s", lock_readout ? "ON" : "off");
+    line(d, 17, lock_readout ? col_warn : col_dim, "Timing readout: %s", lock_readout ? "ON" : "off");
     line(d, 19, col_dim, "A: check the cartridge now, no power");
     line(d, 20, col_dim, "L or R: change the check mode");
-    line(d, 21, col_dim, "C-up: readout over the game");
+    line(d, 21, col_dim, "C-up: timing readout on every screen");
     line(d, 22, col_dim, "B: back");
 }
 
@@ -970,7 +1001,7 @@ static bool splash_one(const sn64_splash_image_t *img)
             return false;
         surface_t *d = display_get();
         sn64_splash_draw((uint16_t *)d->buffer, d->width, d->height, d->stride / 2, img, level);
-        display_show(d);
+        menu_show(d);
     }
 }
 
@@ -982,7 +1013,7 @@ static void splash(void)
 
 int main(void)
 {
-    display_init(RESOLUTION_320x240, DEPTH_16_BPP, 2, GAMMA_NONE, FILTERS_RESAMPLE);
+    display_init(RESOLUTION_320x240, DEPTH_16_BPP, MENU_BUFFERS, GAMMA_NONE, FILTERS_RESAMPLE);
     game_display = false;
     register_VI_handler(vbl_handler);
     pi_dom2_fast();
@@ -1008,6 +1039,7 @@ int main(void)
         surface_t *d = display_get();               // comes back just after the console's vertical interrupt
 
         if (!game_display) {
+            uint32_t t0 = TICKS_READ();
             inputs_and_mailbox();
             bool menu = mode == MODE_MENU && (screen == SCREEN_MAIN || screen == SCREEN_SETTINGS);
             if (!menu)                          graphics_fill_screen(d, col_bg);    // the two menus clear the screen themselves
@@ -1021,6 +1053,14 @@ int main(void)
             else if (screen == SCREEN_CREDITS)  draw_credits(d);
             else if (screen == SCREEN_ABOUT)    draw_about(d);
             else                                draw_main(d);
+            if (lock_readout) {                 // how long the picture before this one took
+                char b[24];
+                uint32_t us = (uint32_t)(((uint64_t)menu_ticks * 1000000u) / TICKS_PER_SECOND);
+                snprintf(b, sizeof(b), "%lu.%lu ms", (unsigned long)(us / 1000u), (unsigned long)((us % 1000u) / 100u));
+                graphics_set_color(col_text, graphics_make_color(0, 0, 0, 0xFF));
+                graphics_draw_text(d, 16, 0, b);
+            }
+            menu_ticks = TICKS_READ() - t0;
         } else {
             // Game: the SNES picture and sound go to the console's own output. The SNES is a few
             // lines into the picture it is drawing now; that picture is fetched quarter by
@@ -1044,7 +1084,8 @@ int main(void)
             }
             game_frames_shown++;
         }
-        display_show(d);
+        if (game_display) display_show(d);      // two buffers: the next one is free at the vertical interrupt
+        else              menu_show(d);
         frame_count++;
     }
 }

@@ -2,7 +2,7 @@
 
 The small program an N64 or M64 boots from the SN64 cartridge. It shows the SN64 menu, reads the N64 controllers, maps them to SNES button images and writes them to the SN64 mailbox every frame. It also lets the user request or drop SNES cartridge power. Built with [libdragon](https://github.com/DragonMinded/libdragon) (Unlicense). SN64 sources are GPL-3.0-or-later.
 
-**Status:** builds, passes the CIC-6102 boot-checksum check, and passes host tests and an RTL co-simulation with the FPGA endpoint. **It has not run on an N64, an M64 or an emulator.** Design notes, evidence and limits are in [docs/design/n64-bootstrap.md](../../docs/design/n64-bootstrap.md).
+**Status:** builds, passes the CIC-6102 boot-checksum check, and passes host tests and an RTL co-simulation with the FPGA endpoint. Since 2026-10-01 it runs in the ares emulator: logos, menus and controller input (ares has no SN64 behind the cartridge port, so nothing past the menus). **It has not run on an N64 or an M64.** Design notes, evidence and limits are in [docs/design/n64-bootstrap.md](../../docs/design/n64-bootstrap.md).
 
 ## Layout
 
@@ -54,6 +54,22 @@ powershell -NoProfile -ExecutionPolicy Bypass -File firmware/bootstrap/tools/run
 ```
 
 Build outputs stay under `build/n64-bootstrap/`. Do not commit ROM binaries.
+
+## Running it in an emulator
+
+Use [ares](https://github.com/ares-emulator/ares) (v148 was used). libdragon's own instructions name it as the only emulator accurate enough; Project64 shows a black screen.
+
+```
+ares --system "Nintendo 64" --no-file-prompt build/n64-bootstrap/sn64_bootstrap.z64
+```
+
+A new ares has no keys or buttons set: do that first under Settings, Input. The menu says "SN64 hardware not found" and Play refuses, which is right in an emulator.
+
+For timing or looking at one screen without a controller, build a second ROM beside the real one:
+
+```bash
+make rom OUT=<other dir> SN64_EXTRA_CFLAGS="-DSN64_READOUT_DEFAULT=true -DSN64_START_SCREEN=SCREEN_MAPPING"
+```
 
 ## FPGA contract
 

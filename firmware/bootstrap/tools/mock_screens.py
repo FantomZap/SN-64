@@ -231,10 +231,10 @@ def service(check_summary, summary_kind, lock=('no game shown yet', 'Slow 0.00 %
     s.line(14, 'hi', 'Frame lock: ' + lock[0])
     s.line(15, 'text', lock[1])
     s.line(16, 'dim', 'Console timing: ' + lock[2])
-    s.line(17, 'dim', 'Readout over the game: off')
+    s.line(17, 'dim', 'Timing readout: off')
     s.line(19, 'dim', 'A: check the cartridge now, no power')
     s.line(20, 'dim', 'L or R: change the check mode')
-    s.line(21, 'dim', 'C-up: readout over the game')
+    s.line(21, 'dim', 'C-up: timing readout on every screen')
     s.line(22, 'dim', 'B: back')
     return s
 

@@ -471,3 +471,18 @@ The owner: "the title name on the menu can just be the logo centered on the top.
 Evidence (PC only): new `test_menuview` 87 checks; `test_mapscreen` 128; all host tests 1,063 checks in eleven sets; 13 fault builds rejected, the new one a title 6 pixels off centre. ROM 163,840 bytes, SHA-256 `16bb2243d451e40200a3348d84d5d5975f10b1159fd01f2466d2b6d621d5b297`, 157,046 bytes used, 105,098 free in the 256 KiB window; CIC-6102 check OK; ROM and endpoint co-simulation passes. Mock-ups from the code under test: [menu-screens.png](design/img/menu-screens.png), [theme-screens.png](design/img/theme-screens.png), [theme-other-screens.png](design/img/theme-other-screens.png).
 
 Open: not run on a console, so the colours have only been seen on a PC screen and the menus' picture rate is not measured. The themes, their names and colours, the marks and what About says are my choices and wait for his word. The theme is not kept across power-off. Write-up: [n64-bootstrap.md](design/n64-bootstrap.md), "The menu's look".
+
+## 2026-10-01 — first run in an emulator; the top lines blinked, and why
+
+The owner tried the ROM in Project64: black screen. libdragon's own instructions name ares as the only emulator accurate enough, so with his yes ares v148 was fetched from its GitHub releases (portable zip, hash checked against the one GitHub publishes). The ROM came up at once: both logos, then the main menu at 60 pictures a second. He set up his Xbox controller in ares and drove the menus: "the menu works fine".
+
+This is the first time the menu program has run anywhere but in unit tests and the co-simulation. It says "SN64 hardware not found", which is right in an emulator, so nothing past the menus is covered.
+
+- **A fault it found.** He saw the picture flicker, and my captures showed the same: 10 of 40 had the top of the logo wiped. The menu was redrawing the buffer that had just left the screen, and ares takes its picture of that buffer a little late. On a console the buffer is no longer read by then, by my reading; not seen on one.
+- **Fix.** Three picture buffers for the menu and the logos, and a new one taken only after the vertical interrupt. 120 captures in a row, none wiped.
+- **A readout of how long a menu picture takes** was added to the service screen's readout. A text screen takes about 4 ms of the 16.7 ms a picture has, in ares.
+- **Things that did not work, kept for the record.** ares has no keys set when new, and key presses made by a script did not reach it although its settings held the bindings; dropped when the owner said his controller was enough. The main menu and the mapping screen were not timed: another window covered the readout in those captures.
+
+Evidence: host tests 1,063 checks, 13 fault builds rejected, ROM SHA-256 `977c1f5e4031186550530cb6b1bd0737cd5d26d102c6a078fdd1125746690eee` (163,840 bytes, 157,527 used), CIC-6102 check OK, co-simulation passes. Write-up: [n64-bootstrap.md](design/n64-bootstrap.md), "First run in an emulator".
+
+Open: a console run. The owner has an EverDrive 64; the ROM can go on its card.
