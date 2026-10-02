@@ -15,7 +15,7 @@
 | Settings that stay | Mapping and options survive power-off, on a Controller Pak if one is in the pad | menu |
 | Region choice | Auto, NTSC or PAL. The FPGA has the switch; the menu has no item for it | menu |
 | Picture options | Sharp or smooth, full screen or exact pixels, picture position for a CRT | menu |
-| About screen | Versions, "SN64 by FantomZap", where the source is, credits for the projects it builds on. **The credits part was built 2026-10-01** as a "Credits" row: `CREDITS.md` as a roll ([n64-bootstrap.md](n64-bootstrap.md)). Versions are still only on the status screens | menu |
+| About screen | Versions, "SN64 by FantomZap", where the source is, credits for the projects it builds on. **The credits part was built 2026-10-01** as a "Credits" row: `CREDITS.md` as a roll ([n64-bootstrap.md](n64-bootstrap.md)). **About was built later that day** as a row under Settings: the credit line, the source location, the versions, the console, the licences | menu |
 
 ## Playing
 
@@ -75,9 +75,9 @@
 
 The menu is plain text in the console's built-in 8-pixel font. A repackaged one could look like part of the product:
 
-- **Look**: black background as on the splash screens, the SN64 logo small at the top, the four button colours for highlights, a real font in two sizes, panels with rounded corners like the logo's ring.
+- **Look**: black background as on the splash screens, the SN64 logo small at the top, the four button colours for highlights, a real font in two sizes, panels with rounded corners like the logo's ring. **Partly built 2026-10-01:** the logo is the title at the top of every screen, the main menu's rows carry marks in the four button colours, the rows stand on a panel with rounded corners, and there are six colour themes (Settings, Theme). The font is still the console's 8-pixel one.
 - **Home screen**: one large Start with the cartridge's name under it, and three or four entries below: Settings, Tools, About.
-- **Settings**: Picture, Sound, Controllers, System (region, quick start, logos, hotkey). A Settings sub-menu exists since 2026-10-01 with Compatibility mode, Status / diagnostics and Credits.
+- **Settings**: Picture, Sound, Controllers, System (region, quick start, logos, hotkey). A Settings sub-menu exists since 2026-10-01 with Compatibility mode, Theme, Status / diagnostics, Credits and About.
 - **Tools**: Save backup, Tests, Diagnostics. The service screen stays hidden behind Diagnostics.
 - **In the game**: the pause overlay instead of a jump to the full menu.
 - **Moving around**: stick or D-pad, A to choose, B back, Start to play from anywhere, and holding a button to confirm anything that removes power.
@@ -86,7 +86,7 @@ What limits it:
 
 | Limit | Today | Meaning |
 |---|---|---|
-| ROM space | The program is 163,840 bytes since 2026-10-01 and no longer fits a 128 KiB window; the v2 board's window is 256 KiB, with about 112 KB free since the controller pictures and the stick option | A font and graphics fit on v2 |
+| ROM space | The program is 163,840 bytes since 2026-10-01 and no longer fits a 128 KiB window; the v2 board's window is 256 KiB, with about 105 KB free since the logo title and the themes | A font and graphics fit on v2 |
 | Settings storage | None on the board that the menu can write | Controller Pak first; writing the board's flash from the menu would need FPGA work |
 | Not yet run on a console | The whole menu has only been compiled and tested on the PC | The first real run may change what is worth polishing |
 

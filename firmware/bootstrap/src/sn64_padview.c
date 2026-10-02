@@ -108,6 +108,16 @@ static void round_rect(const sn64_canvas_t *c, int x0, int y0, int x1, int y1, i
     }
 }
 
+void sn64_pad_disc(const sn64_canvas_t *c, int x, int y, int r, uint16_t colour)
+{
+    disc(c, x, y, r, colour);
+}
+
+void sn64_pad_round(const sn64_canvas_t *c, int x0, int y0, int x1, int y1, int r, uint16_t colour)
+{
+    round_rect(c, x0, y0, x1, y1, r, colour);
+}
+
 // A line with round ends: a disc every two pixels or so along it.
 static void thick_line(const sn64_canvas_t *c, int x0, int y0, int x1, int y1, int r, uint16_t colour)
 {

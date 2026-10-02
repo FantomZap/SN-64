@@ -21,6 +21,7 @@
 #include "sn64_mailbox.h"
 #include "sn64_mapping.h"
 #include "sn64_mapscreen.h"
+#include "sn64_menuview.h"
 #include "sn64_resample.h"
 #include "sn64_splash.h"
 
@@ -55,26 +56,13 @@
 
 typedef enum { MODE_MENU, MODE_RUN, MODE_CHECK } run_mode_t;
 typedef enum { SCREEN_MAIN, SCREEN_SETTINGS, SCREEN_MAPPING, SCREEN_STATUS, SCREEN_SERVICE, SCREEN_ALERT,
-               SCREEN_COMPAT, SCREEN_CREDITS } screen_t;
-// The main menu has four rows (owner, 2026-10-01); everything else is under Settings.
-typedef enum { ITEM_PLAY, ITEM_MAPPING, ITEM_SETTINGS, ITEM_POWER_OFF, ITEM_COUNT } item_t;
-typedef enum { SET_COMPAT, SET_STATUS, SET_CREDITS, SET_COUNT } setting_t;
-
-static const char *const item_names[ITEM_COUNT] = {
-    "Play",
-    "Controller mapping",
-    "Settings",
-    "Power off cartridge",
-};
-static const char *const setting_names[SET_COUNT] = {
-    "Compatibility mode",
-    "Status / diagnostics",
-    "Credits",
-};
+               SCREEN_COMPAT, SCREEN_CREDITS, SCREEN_ABOUT } screen_t;
+// The main menu has four rows (owner, 2026-10-01); everything else is under Settings. The rows
+// of both, and how they look, are in src/sn64_menuview.h: SN64_MAIN_*, SN64_SET_*.
 
 // Credits roll (owner, 2026-10-01): CREDITS.md on the screen, the SN64 crew and the cats last.
 // It rises half a pixel a picture; holding A makes it eight times as quick.
-#define CREDITS_TOP        22
+#define CREDITS_TOP        32              // under the title
 #define CREDITS_BOTTOM     228
 #define CREDITS_FAST       8
 
@@ -114,7 +102,27 @@ static sn64_mapscreen_t mapscreen;                        // the mapping screen:
 static unsigned   frame_count;                            // pictures shown (the mapping screen's cursor blinks with it)
 static int        credits_pos;                            // how far the credits have risen, in half pixels
 
+// The colour theme (owner, 2026-10-01; src/sn64_theme.h): chosen under Settings, the first one
+// after every start-up. The col_ values are its colours as the console's text drawing takes them.
+static unsigned   theme_index = SN64_THEME_DEFAULT;
+static const sn64_theme_t *theme;
 static uint32_t col_text, col_dim, col_hi, col_warn, col_bg;
+
+static uint32_t screen_colour(uint16_t c)           // a 16-bit colour, as libdragon's graphics take one
+{
+    return ((uint32_t)c << 16) | c;
+}
+
+static void set_theme(unsigned index)
+{
+    theme_index = index % SN64_THEMES;
+    theme = sn64_theme(theme_index);
+    col_bg = screen_colour(theme->bg);
+    col_text = screen_colour(theme->text);
+    col_dim = screen_colour(theme->dim);
+    col_hi = screen_colour(theme->hi);
+    col_warn = screen_colour(theme->warn);
+}
 
 static uint16_t n64_word(joypad_buttons_t b)
 {
@@ -436,28 +444,28 @@ static void go_to(screen_t to)
     say("", false);
 }
 
-static void menu_select(item_t item)
+static void menu_select(int item)
 {
     switch (item) {
-    case ITEM_PLAY:
+    case SN64_MAIN_PLAY:
         if (!mbox.present) {
-            say("SN64 hardware not detected", true);
+            say("Cannot start a cartridge", true);  // the line over the rows says why: no SN64 hardware found
         } else if (mbox.status & SN64_STATUS_FAULT_LATCHED) {
-            say("Power fault latched: not starting", true);
+            say("Power fault: not starting", true);
         } else {
             run_request = true;                 // or back to a cartridge that is still running
             mode = MODE_RUN;
             say("", false);
         }
         break;
-    case ITEM_MAPPING:
+    case SN64_MAIN_MAPPING:
         sn64_mapscreen_open(&mapscreen);
         go_to(SCREEN_MAPPING);
         break;
-    case ITEM_SETTINGS:
+    case SN64_MAIN_SETTINGS:
         go_to(SCREEN_SETTINGS);
         break;
-    case ITEM_POWER_OFF:
+    case SN64_MAIN_POWER_OFF:
         run_request = false;
         say("Cartridge is off", false);
         break;
@@ -466,10 +474,10 @@ static void menu_select(item_t item)
     }
 }
 
-static void settings_select(setting_t item)
+static void settings_select(int item)
 {
     switch (item) {
-    case SET_COMPAT:
+    case SN64_SET_COMPAT:
         if (compat_mode) {
             compat_mode = false;                // turning it off needs no confirmation
             say("Compatibility mode off", false);
@@ -490,12 +498,19 @@ static void settings_select(setting_t item)
             }
         }
         break;
-    case SET_STATUS:
+    case SN64_SET_THEME:
+        set_theme(theme_index + 1);             // the next one, and round again; the screen shows it at once
+        say("", false);
+        break;
+    case SN64_SET_STATUS:
         go_to(SCREEN_STATUS);
         break;
-    case SET_CREDITS:
+    case SN64_SET_CREDITS:
         credits_pos = 0;
         go_to(SCREEN_CREDITS);
+        break;
+    case SN64_SET_ABOUT:
+        go_to(SCREEN_ABOUT);
         break;
     default:
         break;
@@ -554,21 +569,25 @@ static void menu_input(joypad_buttons_t pressed)
         else if (pressed.z) screen = SCREEN_SERVICE;
         break;
     case SCREEN_CREDITS:
+    case SCREEN_ABOUT:
         if (back) go_to(SCREEN_SETTINGS);
         break;
     case SCREEN_ALERT:
         if (back || pressed.a) go_to(SCREEN_MAIN);
         break;
     case SCREEN_SETTINGS:
-        if (pressed.d_up)   set_cursor = (set_cursor + SET_COUNT - 1) % SET_COUNT;
-        if (pressed.d_down) set_cursor = (set_cursor + 1) % SET_COUNT;
-        if (pressed.a)      settings_select((setting_t)set_cursor);
+        if (pressed.d_up)   set_cursor = (set_cursor + SN64_SET_ITEMS - 1) % SN64_SET_ITEMS;
+        if (pressed.d_down) set_cursor = (set_cursor + 1) % SN64_SET_ITEMS;
+        // on the Theme row, Left and Right go through the themes as well
+        if (set_cursor == SN64_SET_THEME && pressed.d_left)  set_theme(theme_index + SN64_THEMES - 1);
+        if (set_cursor == SN64_SET_THEME && pressed.d_right) set_theme(theme_index + 1);
+        if (pressed.a)      settings_select(set_cursor);
         else if (back)      go_to(SCREEN_MAIN);
         break;
     case SCREEN_MAIN:
-        if (pressed.d_up)   cursor = (cursor + ITEM_COUNT - 1) % ITEM_COUNT;
-        if (pressed.d_down) cursor = (cursor + 1) % ITEM_COUNT;
-        if (pressed.a)      menu_select((item_t)cursor);
+        if (pressed.d_up)   cursor = (cursor + SN64_MAIN_ITEMS - 1) % SN64_MAIN_ITEMS;
+        if (pressed.d_down) cursor = (cursor + 1) % SN64_MAIN_ITEMS;
+        if (pressed.a)      menu_select(cursor);
         break;
     default:
         break;
@@ -638,7 +657,7 @@ static void inputs_and_mailbox(void)
             if (++chord_frames >= MENU_CHORD_FRAMES) {
                 mode = MODE_MENU;
                 screen = SCREEN_MAIN;
-                cursor = ITEM_PLAY;             // Play goes back to the game
+                cursor = SN64_MAIN_PLAY;        // Play goes back to the game
                 chord_frames = 0;
                 say("Cartridge still running", false);
             }
@@ -721,61 +740,97 @@ static void line(surface_t *d, int row, uint32_t colour, const char *fmt, ...)
     graphics_draw_text(d, 16, 12 + row * 10, buf);
 }
 
+// The pure-C screen code (src/sn64_menuview.c, src/sn64_mapscreen.c) draws its shapes straight
+// into the screen buffer and hands its text back to be drawn with the console font.
+static sn64_canvas_t canvas_of(surface_t *d)
+{
+    sn64_canvas_t c = { (uint16_t *)d->buffer, d->width, d->height, d->stride / 2 };
+    return c;
+}
+
+static void screen_text(void *ctx, int x, int y, uint16_t colour, const char *text)
+{
+    graphics_set_color(screen_colour(colour), 0);
+    graphics_draw_text((surface_t *)ctx, x, y, text);
+}
+
+// The top of a text screen: the logo, small and centred, and the four-colour rule. The lines
+// of the screen start at row 2.
 static void draw_header(surface_t *d)
 {
-    line(d, 0, col_hi, "SN64 bootstrap v%s", SN64_BOOTSTRAP_VERSION);
-    if (mbox.present)
-        line(d, 1, col_text, "SN64 build %u.%u (0x%04X)",
-             mbox.version >> 8, mbox.version & 0xFF, mbox.version);
-    else
-        line(d, 1, col_warn, "SN64 not detected (MAGIC %04X)", mbox.magic);
+    sn64_canvas_t c = canvas_of(d);
+    sn64_menu_title(&c, theme, false);
 }
 
-// The cartridge in a word, for the main menu.
-static const char *cartridge_text(void)
+// What stands under the rows of the two menus: the message, and the standing warnings (never
+// silently: the service screen relaxed the check, or compatibility mode is on). Settings says
+// the second in its first row and does not repeat it.
+static void menu_lines(sn64_menu_view_t *v, char check_text[SN64_MENU_COLUMNS + 1], bool say_compat)
 {
-    if (!run_request)        return "off";
-    if (cartridge_running()) return "running";
-    return "starting";
-}
-
-// Never silently: the service screen relaxed the check, or compatibility mode is on.
-static void draw_warnings(surface_t *d, int row)
-{
-    if (check_mode != SN64_CHECK_MODE_ENFORCE)
-        line(d, row, col_warn, "Cartridge check: %s", sn64_check_mode_name(check_mode));
-    if (compat_mode)
-        line(d, row + 1, col_warn, "Compatibility mode: games run slower");
+    int n = 0;
+    v->message = message;
+    v->message_bad = message_bad;
+    v->warning[0] = v->warning[1] = NULL;
+    if (check_mode != SN64_CHECK_MODE_ENFORCE) {
+        snprintf(check_text, SN64_MENU_COLUMNS + 1, "Cartridge check: %s", sn64_check_mode_name(check_mode));
+        v->warning[n++] = check_text;
+    }
+    if (compat_mode && say_compat)
+        v->warning[n++] = "Compatibility mode is on";
 }
 
 static void draw_main(surface_t *d)
 {
-    draw_header(d);
-    line(d, 3, col_text, "Cartridge: %s", cartridge_text());
-    if (mbox.present && (mbox.status & SN64_STATUS_FAULT_LATCHED))
-        line(d, 4, col_warn, "POWER FAULT LATCHED");
-    for (int i = 0; i < ITEM_COUNT; i++)
-        line(d, 6 + i, i == cursor ? col_hi : col_text, "%c %s", i == cursor ? '>' : ' ', item_names[i]);
-    line(d, 11, message_bad ? col_warn : col_text, "%s", message);
-    draw_warnings(d, 13);
-    line(d, 19, col_dim, "In a game: all four C buttons = menu");
-    line(d, 20, col_dim, "Up/Down select  A choose");
+    sn64_canvas_t c = canvas_of(d);
+    char check_text[SN64_MENU_COLUMNS + 1];
+    sn64_menu_view_t v = { .cursor = cursor };
+    // the cartridge in a word, over the rows
+    if (!mbox.present) {
+        v.head = "SN64 hardware not found";
+        v.head_bad = true;
+    } else if (mbox.status & SN64_STATUS_FAULT_LATCHED) {
+        v.head = "Cartridge: power fault";
+        v.head_bad = true;
+    } else {
+        v.head = !run_request ? "Cartridge: off" : cartridge_running() ? "Cartridge: running" : "Cartridge: starting";
+    }
+    menu_lines(&v, check_text, true);
+    sn64_menu_draw_main(&c, screen_text, d, theme, &v);
 }
 
 static void draw_settings(surface_t *d)
 {
+    sn64_canvas_t c = canvas_of(d);
+    char check_text[SN64_MENU_COLUMNS + 1];
+    sn64_menu_view_t v = { .cursor = set_cursor, .head = "Settings" };
+    menu_lines(&v, check_text, false);
+    sn64_menu_draw_settings(&c, screen_text, d, theme, &v, compat_mode, theme_index);
+}
+
+// One line of a text screen in the colour its kind names (SN64_LINE_*).
+static uint32_t kind_colour(unsigned kind)
+{
+    return kind == SN64_LINE_HI ? col_hi : kind == SN64_LINE_DIM ? col_dim : kind == SN64_LINE_WARN ? col_warn : col_text;
+}
+
+// About (owner, 2026-10-01: "move all the version stuff and odd info to an about section in
+// settings"): who made it and where the source is, the versions, the licences. The first two
+// lines are the credit line and the source location, as the credits roll opens with them. The
+// text is in src/sn64_menuview.c.
+static void draw_about(surface_t *d)
+{
+    char text[SN64_ABOUT_LINES][SN64_ABOUT_COLUMNS + 1];
+    uint8_t kind[SN64_ABOUT_LINES];
+    const sn64_about_t about = {
+        .credit = sn64_credits_lines[0], .source = sn64_credits_lines[1], .menu_version = SN64_BOOTSTRAP_VERSION,
+        .present = mbox.present, .magic = mbox.magic, .version = mbox.version, .features = mbox.features,
+        .tv = (unsigned)get_tv_type(),
+    };
+    sn64_menu_about(&about, text, kind);
     draw_header(d);
-    line(d, 3, col_hi, "Settings");
-    for (int i = 0; i < SET_COUNT; i++) {
-        uint32_t c = i == set_cursor ? col_hi : col_text;
-        if (i == SET_COMPAT)
-            line(d, 5 + i, c, "%c %s: %s", i == set_cursor ? '>' : ' ', setting_names[i], compat_mode ? "ON" : "off");
-        else
-            line(d, 5 + i, c, "%c %s", i == set_cursor ? '>' : ' ', setting_names[i]);
-    }
-    line(d, 9, message_bad ? col_warn : col_text, "%s", message);
-    draw_warnings(d, 13);
-    line(d, 20, col_dim, "Up/Down select  A choose  B back");
+    for (int i = 0; i < SN64_ABOUT_LINES; i++)
+        line(d, 2 + i, kind_colour(kind[i]), "%s", text[i]);
+    line(d, 22, col_dim, "B: back");
 }
 
 // The credits roll: section titles and the credit line in the highlight colour, the projects
@@ -784,6 +839,7 @@ static void draw_credits(surface_t *d)
 {
     int index[32], y[32];
     const int end = 2 * sn64_credits_end(CREDITS_TOP, CREDITS_BOTTOM);
+    draw_header(d);
     credits_pos += (pad1_n64 & N64_BTN_A) ? CREDITS_FAST : 1;
     if (credits_pos > end) credits_pos = end;           // it stops with the last line in the middle
     int n = sn64_credits_visible(credits_pos / 2, CREDITS_TOP, CREDITS_BOTTOM, index, y, 32);
@@ -866,18 +922,10 @@ static void draw_alert(surface_t *d)
     line(d, 20, col_dim, "A or B: back to the menu");
 }
 
-// The mapping screen (src/sn64_mapscreen.c) draws its pictures straight into the screen buffer
-// and hands its text back to be drawn with the console font.
-static void mapping_text(void *ctx, int x, int y, uint16_t colour, const char *text)
-{
-    graphics_set_color(((uint32_t)colour << 16) | colour, 0);
-    graphics_draw_text((surface_t *)ctx, x, y, text);
-}
-
 static void draw_mapping(surface_t *d)
 {
-    sn64_canvas_t c = { (uint16_t *)d->buffer, d->width, d->height, d->stride / 2 };
-    sn64_mapscreen_draw(&mapscreen, &map, &c, mapping_text, d, pad1_n64, pad1_x, pad1_y, frame_count);
+    sn64_canvas_t c = canvas_of(d);
+    sn64_mapscreen_draw(&mapscreen, &map, &c, screen_text, d, theme, pad1_n64, pad1_x, pad1_y, frame_count);
 }
 
 static void draw_status(surface_t *d)
@@ -944,11 +992,7 @@ int main(void)
     // Super NES controller of the console's own part of the world (the PAL one has four colours).
     sn64_mapscreen_init(&mapscreen, SN64_PAD_N64, get_tv_type() == TV_PAL ? SN64_PAD_SFC : SN64_PAD_SNES);
 
-    col_bg   = graphics_make_color(0x10, 0x18, 0x30, 0xFF);
-    col_text = graphics_make_color(0xE0, 0xE0, 0xE0, 0xFF);
-    col_dim  = graphics_make_color(0x80, 0x88, 0x98, 0xFF);
-    col_hi   = graphics_make_color(0xFF, 0xD8, 0x40, 0xFF);
-    col_warn = graphics_make_color(0xFF, 0x60, 0x50, 0xFF);
+    set_theme(SN64_THEME_DEFAULT);
 
     // Default-off: explicitly clear any stale request after every boot.
     run_request = false;
@@ -965,7 +1009,8 @@ int main(void)
 
         if (!game_display) {
             inputs_and_mailbox();
-            graphics_fill_screen(d, col_bg);
+            bool menu = mode == MODE_MENU && (screen == SCREEN_MAIN || screen == SCREEN_SETTINGS);
+            if (!menu)                          graphics_fill_screen(d, col_bg);    // the two menus clear the screen themselves
             if (mode != MODE_MENU)              draw_wait(d);
             else if (screen == SCREEN_SETTINGS) draw_settings(d);
             else if (screen == SCREEN_MAPPING)  draw_mapping(d);
@@ -974,6 +1019,7 @@ int main(void)
             else if (screen == SCREEN_ALERT)    draw_alert(d);
             else if (screen == SCREEN_COMPAT)   draw_compat(d);
             else if (screen == SCREEN_CREDITS)  draw_credits(d);
+            else if (screen == SCREEN_ABOUT)    draw_about(d);
             else                                draw_main(d);
         } else {
             // Game: the SNES picture and sound go to the console's own output. The SNES is a few

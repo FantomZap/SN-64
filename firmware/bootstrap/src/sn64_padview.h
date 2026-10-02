@@ -89,11 +89,15 @@ void sn64_pad_frame(const sn64_canvas_t *c, int x0, int y0, int x1, int y1, uint
 void sn64_pad_mark(const sn64_canvas_t *c, int x, int y, uint16_t colour);
 void sn64_pad_mark_up(const sn64_canvas_t *c, int x, int y, uint16_t colour);
 void sn64_pad_arrow(const sn64_canvas_t *c, int x, int y, uint16_t colour);
+// A filled disc, and a filled rectangle with round corners of radius r.
+void sn64_pad_disc(const sn64_canvas_t *c, int x, int y, int r, uint16_t colour);
+void sn64_pad_round(const sn64_canvas_t *c, int x0, int y0, int x1, int y1, int r, uint16_t colour);
 
-// 5-5-5-1 colour from 8-bit parts.
+// 5-5-5-1 colour from 8-bit parts: as a constant for tables, and as a function.
+#define SN64_RGB(r, g, b) ((uint16_t)((((r) >> 3) << 11) | (((g) >> 3) << 6) | (((b) >> 3) << 1) | 1u))
 static inline uint16_t sn64_rgb(unsigned r, unsigned g, unsigned b)
 {
-    return (uint16_t)(((r >> 3) << 11) | ((g >> 3) << 6) | ((b >> 3) << 1) | 1u);
+    return SN64_RGB(r, g, b);
 }
 
 #endif

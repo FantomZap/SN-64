@@ -20,13 +20,14 @@
 #define CHOICE_W   69
 #define CHOICE_H   13
 
-#define COL_TEXT   sn64_rgb(0xE0, 0xE0, 0xE0)
-#define COL_DIM    sn64_rgb(0x80, 0x88, 0x98)
-#define COL_HI     sn64_rgb(0xFF, 0xD8, 0x40)
-#define COL_WARN   sn64_rgb(0xFF, 0x60, 0x50)
-#define COL_BAR    sn64_rgb(0x28, 0x40, 0x80)   // behind the line the cursor is on
-#define COL_BOX    sn64_rgb(0x08, 0x0C, 0x1C)   // inside a list box
-#define COL_PANEL  sn64_rgb(0x18, 0x24, 0x48)   // behind the choices
+// The colours are the theme's; `th` is the theme wherever one of these names is used.
+#define COL_TEXT   (th->text)
+#define COL_DIM    (th->dim)
+#define COL_HI     (th->hi)
+#define COL_WARN   (th->warn)
+#define COL_BAR    (th->bar)                    // behind the line the cursor is on
+#define COL_BOX    (th->box)                    // inside a list box
+#define COL_PANEL  (th->panel)                  // behind the choices
 
 void sn64_mapscreen_init(sn64_mapscreen_t *s, unsigned input_pad, unsigned snes_pad)
 {
@@ -152,11 +153,13 @@ typedef struct {
     const sn64_canvas_t *c;
     sn64_text_fn         text;
     void                *ctx;
+    const sn64_theme_t  *th;
 } out_t;
 
 // A list box: the name of what is chosen and the mark that says a list drops down from it.
 static void list_box(const out_t *o, int x, const char *name, bool at)
 {
+    const sn64_theme_t *th = o->th;
     sn64_pad_fill(o->c, x, Y_LIST, x + SN64_PAD_W - 1, Y_LIST + LIST_H - 1, at ? COL_BAR : COL_BOX);
     sn64_pad_frame(o->c, x, Y_LIST, x + SN64_PAD_W - 1, Y_LIST + LIST_H - 1, at ? COL_HI : COL_DIM);
     o->text(o->ctx, x + 3, Y_LIST + 3, at ? COL_HI : COL_TEXT, name);
@@ -170,6 +173,7 @@ static void list_box(const out_t *o, int x, const char *name, bool at)
 static void draw_rows(const out_t *o, const sn64_mapscreen_t *s, const sn64_map_t *map,
                       uint16_t held, uint16_t passed, uint16_t snes, uint16_t stick_dirs)
 {
+    const sn64_theme_t *th = o->th;
     for (int v = 0; v < SN64_MS_VISIBLE; v++) {
         int row = s->first + v, e = row - 1;
         int x = X_RIGHT, y = Y_ROWS + v * ROW_H;
@@ -209,6 +213,7 @@ static void draw_rows(const out_t *o, const sn64_mapscreen_t *s, const sn64_map_
 // The panel the choices stand in, in the place of the list: both pictures stay in view.
 static void choices_panel(const out_t *o, int entry, bool held, const char *head)
 {
+    const sn64_theme_t *th = o->th;
     sn64_pad_fill(o->c, X_RIGHT, Y_ROWS - 1, X_END, Y_ROWS + SN64_MS_VISIBLE * ROW_H - 1, COL_PANEL);
     sn64_pad_frame(o->c, X_RIGHT, Y_ROWS - 1, X_END, Y_ROWS + SN64_MS_VISIBLE * ROW_H - 1, COL_HI);
     sn64_pad_icon_input(o->c, X_RIGHT + 4, Y_ROWS + 3, entry, held);
@@ -218,6 +223,7 @@ static void choices_panel(const out_t *o, int entry, bool held, const char *head
 // The choices for a button: the 12 Super NES buttons and nothing.
 static void draw_choices(const out_t *o, const sn64_mapscreen_t *s, uint16_t held)
 {
+    const sn64_theme_t *th = o->th;
     int entry = sn64_mapscreen_entry(s);
     char head[24];
     snprintf(head, sizeof head, "%s gives:", sn64_map_n64_name(entry));
@@ -235,6 +241,7 @@ static void draw_choices(const out_t *o, const sn64_mapscreen_t *s, uint16_t hel
 // The choices for the stick: the D-pad from 20, 30 ... 80 percent of its travel, or nothing.
 static void draw_stick_choices(const out_t *o, const sn64_mapscreen_t *s, uint16_t stick_dirs)
 {
+    const sn64_theme_t *th = o->th;
     choices_panel(o, SN64_IN_STICK, stick_dirs != 0, "Stick gives:");
     for (int i = 0; i < SN64_STICK_CHOICES; i++) {
         int x = X_RIGHT + 4, y = Y_ROWS + 20 + i * ROW_H;
@@ -256,6 +263,7 @@ static void draw_stick_choices(const out_t *o, const sn64_mapscreen_t *s, uint16
 // An open controller list, over the top of its picture.
 static void draw_list(const out_t *o, const sn64_mapscreen_t *s)
 {
+    const sn64_theme_t *th = o->th;
     bool input = s->open == SN64_MS_LIST_INPUT;
     int n = input ? SN64_PAD_INPUT_COUNT : SN64_PAD_SNES_COUNT;
     int x = input ? X_LEFT : X_RIGHT, y = Y_LIST + LIST_H - 1;
@@ -271,10 +279,10 @@ static void draw_list(const out_t *o, const sn64_mapscreen_t *s)
 }
 
 void sn64_mapscreen_draw(const sn64_mapscreen_t *s, const sn64_map_t *map, const sn64_canvas_t *c,
-                         sn64_text_fn text, void *ctx, uint16_t n64_buttons, int8_t stick_x, int8_t stick_y,
-                         unsigned frame)
+                         sn64_text_fn text, void *ctx, const sn64_theme_t *th,
+                         uint16_t n64_buttons, int8_t stick_x, int8_t stick_y, unsigned frame)
 {
-    const out_t o = { c, text, ctx };
+    const out_t o = { c, text, ctx, th };
     bool blink = (frame & 16u) != 0;                    // about a quarter of a second on, a quarter off
     bool chord = (n64_buttons & N64_BTN_C_ALL) == N64_BTN_C_ALL;
     bool closed = s->open == SN64_MS_CLOSED;

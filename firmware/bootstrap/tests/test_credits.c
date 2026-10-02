@@ -16,7 +16,7 @@
 #include "sn64_credits.h"
 
 // The window main.c gives the roll on the 320 x 240 menu screen.
-#define TOP    22
+#define TOP    32
 #define BOTTOM 228
 
 static int checks, failures;

@@ -274,9 +274,8 @@ static void test_reset_and_leave(void)
 #define BW     (W + 2 * GUARD)
 #define BH     (H + 2 * GUARD)
 #define SENTINEL 0xF81Eu
-#define BG     sn64_rgb(0x10, 0x18, 0x30)
-#define COL_DIM sn64_rgb(0x80, 0x88, 0x98)
-#define COL_HI  sn64_rgb(0xFF, 0xD8, 0x40)
+#define COL_DIM (shot_theme->dim)
+#define COL_HI  (shot_theme->hi)
 // where the screen puts things (src/sn64_mapscreen.c)
 #define X_LEFT   16
 #define X_RIGHT  164
@@ -312,11 +311,13 @@ static uint16_t *pixel(shot_t *f, int x, int y)
     return &f->buf[(y + GUARD) * BW + x + GUARD];
 }
 
+static const sn64_theme_t *shot_theme;         // the theme the shots are taken in
+
 static void blank_shot(shot_t *f)
 {
     for (int i = 0; i < BW * BH; i++) f->buf[i] = SENTINEL;
     for (int y = 0; y < H; y++)
-        for (int x = 0; x < W; x++) *pixel(f, x, y) = BG;
+        for (int x = 0; x < W; x++) *pixel(f, x, y) = shot_theme->bg;
     f->texts = f->bad_text = 0;
 }
 
@@ -324,7 +325,7 @@ static void shoot(shot_t *f, const sn64_mapscreen_t *st, const sn64_map_t *m, ui
 {
     blank_shot(f);
     sn64_canvas_t c = { pixel(f, 0, 0), W, H, BW };
-    sn64_mapscreen_draw(st, m, &c, record, f, n64, (int8_t)sx, (int8_t)sy, frame);
+    sn64_mapscreen_draw(st, m, &c, record, f, shot_theme, n64, (int8_t)sx, (int8_t)sy, frame);
 }
 
 static int tidy(const shot_t *f)        // nothing outside the screen, no text off it
@@ -790,11 +791,54 @@ static int screens(const char *dir)
     tap(N64_BTN_D_DOWN);
     shoot(&f, &s, &map, N64_BTN_C_ALL, 0, 0, 0);
     bad |= save(dir, "map-shortcut", &f);
+    // the screen in the other themes: row B under the cursor, B held
+    sn64_mapscreen_init(&s, SN64_PAD_N64, SN64_PAD_SNES);
+    taps(N64_BTN_D_DOWN, 2);
+    for (unsigned k = 1; k < SN64_THEMES; k++) {
+        char name[24];
+        shot_theme = sn64_theme(k);
+        s.snes_pad = (k & 1) ? SN64_PAD_SFC : SN64_PAD_SNES;
+        shoot(&f, &s, &map, N64_BTN_B, 0, 0, 0);
+        snprintf(name, sizeof name, "map-theme-%u", k);
+        bad |= save(dir, name, &f);
+    }
+    shot_theme = sn64_theme(0);
     return bad;
+}
+
+// The same screen in another theme: its colours, and the pictures unchanged.
+static void test_themes(void)
+{
+    static shot_t a, b;
+    sn64_box_t box;
+    int text_follows = 1;
+    sn64_map_default(&map);
+    sn64_mapscreen_init(&s, SN64_PAD_N64, SN64_PAD_SNES);
+    s.row = SN64_MS_ROW_RESET;
+    shot_theme = sn64_theme(0);
+    shoot(&a, &s, &map, N64_BTN_A, 0, 0, 0);
+    for (unsigned k = 1; k < SN64_THEMES; k++) {
+        shot_theme = sn64_theme(k);
+        shoot(&b, &s, &map, N64_BTN_A, 0, 0, 0);
+        if (!tidy(&b) || b.texts != a.texts) text_follows = 0;
+        for (int i = 0; i < b.texts; i++) {
+            uint16_t want = a.text[i].colour == sn64_theme(0)->text ? shot_theme->text :
+                            a.text[i].colour == sn64_theme(0)->dim ? shot_theme->dim :
+                            a.text[i].colour == sn64_theme(0)->hi ? shot_theme->hi : shot_theme->warn;
+            if (b.text[i].colour != want || strcmp(b.text[i].s, a.text[i].s) != 0) text_follows = 0;
+        }
+        // a button of each controller keeps its own colours whatever the theme
+        sn64_pad_input_box(SN64_PAD_N64, SN64_IN_A, false, &box);
+        if (diff_in(&a, &b, X_LEFT + box.x0 + 3, Y_PAD + box.y0 + 3, X_LEFT + box.x1 - 3, Y_PAD + box.y1 - 3)) text_follows = 0;
+        if (*pixel(&b, 2, 2) != shot_theme->bg || *pixel(&b, 2, 2) == *pixel(&a, 2, 2)) text_follows = 0;
+    }
+    shot_theme = sn64_theme(0);
+    expect(text_follows, "in each of the other themes: the same words in that theme's colours, on its background, the pictures as they were");
 }
 
 int main(int argc, char **argv)
 {
+    shot_theme = sn64_theme(0);
     test_cursor();
     test_choices();
     test_stick();
@@ -804,6 +848,7 @@ int main(int argc, char **argv)
         test_lighting(in, in % SN64_PAD_SNES_COUNT);
     test_lighting(SN64_PAD_N64, SN64_PAD_SFC);
     test_drawing();
+    test_themes();
 
     if (argc == 3 && strcmp(argv[1], "--screens") == 0 && screens(argv[2]))
         return 1;

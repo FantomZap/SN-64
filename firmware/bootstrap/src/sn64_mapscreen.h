@@ -25,6 +25,7 @@
 
 #include "sn64_mapping.h"
 #include "sn64_padview.h"
+#include "sn64_theme.h"
 
 #define SN64_MS_LIST_ROWS  (SN64_MAP_ENTRIES + 1)   // rows of the list: the stick, then the 14 buttons
 #define SN64_MS_VISIBLE    10                       // of which this many are on the screen at once
@@ -63,14 +64,12 @@ bool sn64_mapscreen_input(sn64_mapscreen_t *s, sn64_map_t *map, uint16_t pressed
 // (SN64_IN_*), SN64_IN_STICK for the stick's row, or -1 on the lists and the reset field.
 int sn64_mapscreen_entry(const sn64_mapscreen_t *s);
 
-// Text is drawn by the caller: 8 x 8 character cells, the top left corner at (x, y), nothing
-// behind the letters.
-typedef void (*sn64_text_fn)(void *ctx, int x, int y, uint16_t colour, const char *text);
-
-// Draw the whole screen, 320 x 240, on a screen the caller has cleared. `n64_buttons` and the
-// stick are controller 1 as read; `frame` counts pictures (the cursor's mark blinks with it).
+// Draw the whole screen, 320 x 240, on a screen the caller has cleared to the theme's
+// background, in the theme's colours. The text is drawn by the caller (sn64_theme.h).
+// `n64_buttons` and the stick are controller 1 as read; `frame` counts pictures (the cursor's
+// mark blinks with it).
 void sn64_mapscreen_draw(const sn64_mapscreen_t *s, const sn64_map_t *map, const sn64_canvas_t *c,
-                         sn64_text_fn text, void *ctx, uint16_t n64_buttons, int8_t stick_x, int8_t stick_y,
-                         unsigned frame);
+                         sn64_text_fn text, void *ctx, const sn64_theme_t *t,
+                         uint16_t n64_buttons, int8_t stick_x, int8_t stick_y, unsigned frame);
 
 #endif

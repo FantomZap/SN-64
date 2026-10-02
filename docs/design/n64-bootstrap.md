@@ -223,13 +223,15 @@ ROM: 147,456 bytes, SHA-256 `0b0f9f14a336bf9d24659761761e26e4349481ccaa4ae9158c6
 
 Owner: "the main menu should be play, controller mapping, settings and power off cartridge", with the rest in a Settings sub-menu. For the mapping: "an n64 controller and a snes controller side by side with light up buttons corresponding to button presses", "a dropdown list of controllers for m64 input sake and another dropdown for snes compatible controllers", "each should have their buttons light up and also images of their singular buttons in the mapping part". Defaults: "the normal buttons should be mapped to their counterpart on the snes controller and the z button to the select button". "To bring up the sn64 menu they press all 4 c buttons together." And: "no actual nintendo logos on anything".
 
-![Mock-up of the main menu and Settings](img/menu-screens.png)
+![Mock-up of the main menu, Settings, About and the screens around them](img/menu-screens.png)
+
+The picture shows the menus as they look since the rework described under "The menu's look" below.
 
 ### The menus
 
 - **Main menu, four rows:** Play, Controller mapping, Settings, Power off cartridge. One line above them says whether the cartridge is off, starting or running. Play starts the cartridge, or goes back to a cartridge that is still running.
-- **Settings:** Compatibility mode (with its confirmation screen, as before), Status / diagnostics (the service screen is behind Z there, as before), Credits. B goes back one level everywhere.
-- **Notes and refusals.** The line under the rows is white for a plain note ("Cartridge is off") and red for a refusal ("Power fault latched: not starting"). The two standing warnings (cartridge check relaxed, compatibility mode on) show on both menus.
+- **Settings:** Compatibility mode (with its confirmation screen, as before), Theme, Status / diagnostics (the service screen is behind Z there, as before), Credits, About. B goes back one level everywhere. Theme and About came later the same day, see "The menu's look" below.
+- **Notes and refusals.** The line under the rows is in the text colour for a plain note ("Cartridge is off") and in the warning colour for a refusal ("Power fault: not starting"). The two standing warnings (cartridge check relaxed, compatibility mode on) show under the main menu's rows; Settings shows the first and says the second in its first row.
 - **The technical lines** that stood on the main menu (STATUS word, sequence count, region) are on the Status screen, where they already were.
 
 ### The shortcut: all four C buttons
@@ -352,3 +354,93 @@ The modules are pure C with no libdragon dependency, so the host tests run the c
 - **The tenth of a second for the shortcut, the C-diamond defaults, and the stick's 50 %, its steps of ten and its eight equal slices are my choices.** The stick has only met numbers: no real stick has been read.
 
 Sources: [M64](https://modretro.com/products/m64), [M64 Pro Controller](https://modretro.com/products/m64-pro-controller) and [ModRetro x Hyperkin Captain+](https://modretro.com/products/hyperkin-captain-plus-wired-controller) product pages (the controller list, and the shape of those two controllers), [Hyperkin Captain](https://www.hyperkinstore.com/products/captain-premium-controller), [8BitDo 64 Controller](https://www.8bitdo.com/64-controller/), [8BitDo 64 review, Nintendo Life](https://www.nintendolife.com/reviews/8bitdo-64-controller-for-switch-1-and-2-a-worthy-alternative-to-nintendos-n64-pad), [Brawler64, Retro Fighters](https://retrofighters.com/our-collection/brawler64-nextgen-n64-controller-original-v2/), [Brawler64 review, Nintendo Life](https://www.nintendolife.com/news/2019/06/hardware_review_retro_fighters_brawler64_controller_-_a_crowdfunded_upgrade_to_your_battered_original), and the two photographs by Evan-Amos on Wikimedia Commons named in the table above. Read 2026-10-01.
+
+## The menu's look: the logo as the title, themes, About (2026-10-01)
+
+Owner: "the title name on the menu can just be the logo centered on the top. We need some stylization I think. Maybe make a few themes?" Then: "Move all the version stuff and odd info to an about section in settings too. Also left justify the menu but tabbed in a little", corrected at once to "not indented but just moved right a bit to look more centered".
+
+Pictures of the menus themselves are at the head of the section before this one.
+
+### What changed
+
+- **The logo is the title.** The two lines of text that headed every screen ("SN64 bootstrap v0.1.0" and the SN64 build) are gone. The main menu and Settings carry the SN64 logo, 160 pixels wide, centred at the top, with a thin rule under it in the logo's four colours. Every text screen carries the logo small, 62 pixels wide and centred, with the rule running out to both sides of it.
+- **The rows are one left-justified block on a panel that is centred on the screen.** That is how I read the owner's correction: the rows keep one left edge, and the block as a whole stands in the middle.
+- **Each row of the main menu has a round mark** in one of the logo's four colours with a small sign: play, a D-pad, two sliders, a power sign. The mark of the row under the cursor has a white line round it, as a lit button of the controller pictures has. The row under the cursor also stands on a bar.
+- **What the buttons do is shown with their small pictures** at the bottom, the same pictures the mapping screen uses. On the main menu the line over that shows the four C buttons that bring the menu up from a game.
+- **About** is a new row under Settings. It holds what the header used to say, and the odd facts: the credit line and the source location, the version of the menu program, the SN64 build and its feature word, the kind of console, the two licences, and a line that there is no warranty and no affiliation with Nintendo or ModRetro. The Status screen keeps the diagnostic words.
+- **Theme** is a new row under Settings. A goes to the next theme. With the cursor on the row, Left and Right go both ways, and two small arrows on the row say so. The whole menu changes at once.
+- **One line over the rows.** On the main menu it says the cartridge's state in a word, or in the warning colour that no SN64 hardware was found. On Settings it is the menu's name.
+
+| Where things stand, 320 x 240 screen | Columns or rows |
+|---|---|
+| Large logo | 160 x 52, columns 80 to 239, rows 8 to 59 |
+| Its rule | rows 64 and 65, as wide as the logo |
+| Small logo | 62 x 20, columns 129 to 190, rows 6 to 25 |
+| Its rule | rows 15 and 16, columns 16 to 119 and 200 to 303 |
+| First line of a text screen | row 32 |
+| Panel behind the rows | columns 44 to 275 |
+| Bar under the cursor | columns 50 to 269, 18 rows high |
+| Rows' marks, and the lines over and under the rows | from column 58 |
+| Rows' text | from column 80 |
+| First row | row 86; a row every 20 |
+
+### The themes
+
+![Mock-up of the main menu in the six themes](img/theme-screens.png)
+
+A theme is nine colours: the screen, a panel, the bar under the cursor, the inside of a box, three text colours (text, dim, highlight), the warning colour, and the ink of the logo's ring and letters.
+
+| Theme | Screen | Bar under the cursor | Highlight |
+|---|---|---|---|
+| Midnight | dark navy | blue | yellow |
+| Smoke | charcoal | grey | white |
+| Grape | dark purple | violet | yellow |
+| Jungle | dark green | green | lime |
+| Ice | dark blue-green | light blue | pale cyan |
+| Fire | dark red-brown | orange | yellow |
+
+- **Midnight is the look the menu had before,** and the one it starts in.
+- **All six are dark,** so the logo's light ring and letters and the controller pictures stand out on each. A light theme is not built: the mapping screen marks a lit button with a white ring, which would have to be rethought first.
+- **The pictures keep their own colours.** The logo's four buttons, the controller pictures and the single-button pictures look the same in every theme. Only the logo's ring and letters take the theme's ink, and all six themes give the same light ink today.
+- **Every screen follows the theme:** the two menus, the mapping screen, and the text screens.
+- **The theme is not kept** when the console is switched off, like every other setting.
+
+![Mock-up of other screens in other themes](img/theme-other-screens.png)
+
+### How it is built
+
+| File | Role |
+|---|---|
+| `src/sn64_theme.c` | the six themes |
+| `tools/make_title.py`, `src/sn64_title_data.c` | the logo as the title, in two sizes: generated from the two logo files in `assets/logo/` (`make title`) |
+| `src/sn64_menuview.c` | the title, the main menu and Settings drawn whole, and the text of About |
+| `src/sn64_mapscreen.c` | takes its colours from the theme |
+| `src/main.c` | the text screens write their lines under the small title in the theme's colours |
+
+- **The logo has see-through edges and takes the theme's ink.** A splash picture is stored on its black background. The title cannot be, because the background changes with the theme. `make_title.py` draws the logo's version for dark backgrounds and its version for light ones, which differ only in the ring and the letters. A pixel where the two differ is ink and is drawn in the theme's colour; any other pixel keeps its own colour. Each pixel is one byte: three bits say how solid it is, five say which colour.
+- **`make test` fails if the logo files changed** and the title was not made again: the generated file records the hashes of the two files it came from.
+- **The main menu and Settings clear the screen themselves,** so the screen is not cleared twice a picture.
+
+### Evidence, all on the PC
+
+- `tests/test_menuview.c`: 87 checks.
+  - Themes: text, dim text, the highlight and the warning colour can each be read on the screen, on a panel and on the bar; no two themes share a name or a background.
+  - The logo: solid pixels take their colour, see-through pixels leave the screen alone, edge pixels lie between the two; another ink changes exactly the ink pixels; a logo drawn across the edge of the screen is cut off there.
+  - The title: the logo stands centred at the top in both sizes, the rule has four equal parts in the logo's four colours in the logo's order, and nothing is drawn below.
+  - The two menus: the rows share one left edge, the bar and the lit mark are on the row under the cursor and no other, moving the cursor changes those two rows and nothing else, notes and warnings stand under the rows in the right colours, every text stays on the screen.
+  - About: its lines, with and without an SN64 answering, and that none is longer than the screen is wide.
+- `tests/test_mapscreen.c`: 128 checks. The new one: in each of the other themes the screen has the same words in that theme's colours, on its background, with the pictures as they were.
+- `tests/test_credits.c` now uses the window the roll has under the small title, rows 32 to 228.
+- `make test-negative`: a build with the title's logo 6 pixels off centre is rejected. 13 fault builds in all.
+- All host tests: 1,063 checks in eleven sets.
+- ROM: **163,840 bytes**, SHA-256 `16bb2243d451e40200a3348d84d5d5975f10b1159fd01f2466d2b6d621d5b297`, CIC-6102 check OK; 157,046 bytes used, 105,098 free in the v2 board's 256 KiB window. The two title pictures and the new code took 6,973 bytes. The file is padded in steps of 16 KiB and 6,794 bytes are left before the next step.
+- Co-simulation with the FPGA endpoint passes with the new image (last non-zero word 78,522); the corrupted-load run fails as required.
+- The mock-ups are made from the pixels and the text positions the code under test produced (`make test-menuview` and `make test-mapscreen`, then `tools/mock_screens.py`). The main menu, Settings and the mapping screen are the code's whole. Of a text screen the background, the small title, the colours and, for About, the lines are the code's; the other text screens' lines are laid out by the tool as `src/main.c` lays them out. Only the font differs from the console's.
+
+### Limits and what is assumed
+
+- **Not run on a console or an emulator.** How the colours look on a television or on the M64's HDMI output is not known; a dark colour on the PC can come out darker or more saturated there.
+- **Whether the menus keep 60 pictures a second is not measured.** A menu picture is the cleared screen, the logo (8,320 pixels, blended only at its edges) and the panel (about 20,000 pixels). If that is too much for one picture, the cursor follows the D-pad one picture later and nothing else changes.
+- **The bottom line of the screens stands close to the lower edge** (the menus' at rows 228 to 235, the text screens' at rows 232 to 239), where a television with a picture tube may cut it. That was so before, and it has not been seen on one.
+- **My choices, not the owner's:** the six themes, their names and colours, Midnight as the one to start in, the marks and their signs, the panel and the bar, the rule in four colours, and what About says. The names of five of the themes are colour names that N64 owners know from the console's see-through colours; they are plain words, and no logo or artwork is involved.
+- **The console's own 8-pixel font is still used.** A real font in two sizes is still only an idea ([menu-ideas.md](menu-ideas.md)).
