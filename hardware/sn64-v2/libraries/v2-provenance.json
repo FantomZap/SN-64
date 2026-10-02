@@ -861,6 +861,11 @@
     "Resistor_SMD:R_0603_1608Metric"
    ],
    [
+    "R214",
+    "100k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
     "J1",
     "N64 cartridge edge",
     "SN64:N64_Edge_SC64_Reference"

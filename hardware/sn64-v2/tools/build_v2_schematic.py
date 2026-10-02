@@ -425,11 +425,12 @@ def build_fpga_sheet(sh, balls, rows):
     # Telemetry ADC: TLA2528 (8 ch, 12 bit, I2C). AVDD is the reference, so FPGA_3V3 itself is watched by U3.
     sh.place('U6', 'SN64_V2:TLA2528RTE', 'TLA2528IRTER',
              {'15': 'MON_HOST_3V3', '16': 'MON_VBUS', '1': 'MON_5V_SYS', '2': 'MON_CART_5V', '3': V11, '4': 'MON_NTC',
-              '5': 'USB_CC1', '6': 'USB_CC2', '13': 'ADC_SCL', '14': 'ADC_SDA', '11': GND, '8': 'ADC_DECAP', '12': None,
+              '5': 'USB_CC1', '6': 'USB_CC2', '13': 'ADC_SCL', '14': 'ADC_SDA', '11': None, '8': 'ADC_DECAP', '12': None,
               '7': V33, '10': V33, '9': GND, '17': GND},
              'Package_DFN_QFN:Texas_RTE0016D_WQFN-16-1EP_3x3mm_P0.5mm_EP0.8x0.8mm',
              {'Datasheet': 'https://www.ti.com/lit/ds/symlink/tla2528.pdf', 'LCSC': LCSC['TLA2528IRTER'][0], 'MPN': 'TLA2528IRTER',
-              'Note': 'ADDR=GND; AIN4 = FPGA_1V1 direct; footprint EP size to verify against SBAS961A mechanical drawing'})
+              'Note': 'ADDR open: I2C address 0x10 (SBAS961A table 2: no resistor on ADDR; straight to ground is not a listed setting); '
+                      'AIN4 = FPGA_1V1 direct; footprint EP size to verify against SBAS961A mechanical drawing'})
     sh.cap('C34', '1uF', 'ADC_DECAP', GND)
     sh.cap('C35', '100nF', V33, GND)
     sh.res('R22', '4.7k', V33, 'ADC_SCL')
@@ -471,10 +472,14 @@ def build_cart_sheet(sh):
                ['L_SYSTEM_CLK', 'L_CIC_CLK', 'L_CIC_SLAVE_RESET', GND, GND, GND, GND, GND],
                ['SNES_SYSTEM_CLK', 'SNES_CIC_CLK', 'SNES_CIC_SLAVE_RESET', None, None, None, None, None],
                V33, 'CTL_OE_N', V33, 'CIC_OE_N')
+    # U204 byte 2 goes from the socket to the FPGA (DIR low). Its /OE is driven by the FPGA and pulled
+    # up: a level shifter must be off while its 5 V side has no supply (TI SCAS416Q section 10), and
+    # the cartridge's 5 V is switched. Unused channels: both pins to ground, so that no input floats
+    # whether the byte is on or off. EXPAND (socket pin 2) keeps its pull-up and is not read.
     translator(sh, 'U204', [f'L_D{i}' for i in range(8)], [f'SNES_D{i}' for i in range(8)],
-               ['L_CIC_DATA0_IN', 'L_CIC_DATA1_IN', 'L_IRQ_N', 'L_RESET_N_SENSE', 'L_EXPAND', None, None, None],
-               ['SNES_CIC_DATA0', 'SNES_CIC_DATA1', 'SNES_IRQ_N', 'SNES_RESET_N', 'SNES_EXPAND', GND, GND, GND],
-               'DATA_DIR', 'DATA_OE_N', GND, GND)
+               ['L_CIC_DATA0_IN', 'L_CIC_DATA1_IN', 'L_IRQ_N', 'L_RESET_N_SENSE', GND, GND, GND, GND],
+               ['SNES_CIC_DATA0', 'SNES_CIC_DATA1', 'SNES_IRQ_N', 'SNES_RESET_N', GND, GND, GND, GND],
+               'DATA_DIR', 'DATA_OE_N', GND, 'SENSE_OE_N')
     sh.newline()
     n = 201
     for _ in range(4):
@@ -498,6 +503,7 @@ def build_cart_sheet(sh):
     sh.res('R207', '4.7k', CART5, 'SNES_RESET_N'); sh.res('R208', '4.7k', CART5, 'SNES_IRQ_N'); sh.res('R209', '10k', CART5, 'SNES_EXPAND')
     sh.res('R210', '100k', V33, 'CTL_OE_N'); sh.res('R211', '100k', V33, 'CIC_OE_N'); sh.res('R212', '100k', V33, 'DATA_OE_N')
     sh.res('R213', '100k', GND, 'DATA_DIR')
+    sh.res('R214', '100k', V33, 'SENSE_OE_N')
     sh.newline()
     # N64 cartridge edge on this board (one board: the card stands in the console slot). 12 V, audio,
     # video-sync and key fingers are left open. SummerCart64 finger geometry (CERN-OHL-S-2.0).

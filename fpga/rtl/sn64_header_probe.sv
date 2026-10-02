@@ -217,6 +217,7 @@ endmodule
 // ---------------------------------------------------------------------------
 module sn64_header_probe_mux (
     input  wire        bridge_permit,
+    input  wire        idle_drive,       // the cartridge has its 5 V: its pins are held at rest when nobody owns the socket
     // Bridge side
     input  wire [23:0] b_address,
     input  wire [7:0]  b_pa,
@@ -237,23 +238,37 @@ module sn64_header_probe_mux (
 );
     assign probe_owns = p_drive_en && !bridge_permit;
     wire   bridge_owns = bridge_permit;
+    // At rest: the cartridge is powered and neither the probe nor the bridge drives its pins (the
+    // bridge is not permitted yet, or is held in reset because /RESET is still low at the socket).
+    // The address and strobe octets are then driven with every strobe inactive and no clock,
+    // instead of being released: a cartridge that is out of reset never sees a loose /WR, and no
+    // input of a level shifter floats while its 5 V side has power. The data octet stays released.
+    // Found with the board-level run (tb_board_game.sv): /RESET was let go two SNES clocks before
+    // the bridge enabled the octets.
+`ifdef SN64_FAULT_NO_IDLE_DRIVE               // fault injection: the pins are let go as before (tb_system must fail)
+    wire   rest = 1'b0;
+`else
+    wire   rest = idle_drive && !probe_owns && !(bridge_owns && !b_ctl_oe_n);
+`endif
+    wire   quiet = probe_owns || rest;        // what the owner does not use is held inactive
 
-    assign cart_address   = probe_owns ? p_address  : b_address;
-    assign cart_pa        = probe_owns ? 8'hFF      : b_pa;
-    assign cart_rd_n      = probe_owns ? p_rd_n     : b_rd_n;
-    assign cart_romsel_n  = probe_owns ? p_romsel_n : b_romsel_n;
-    assign cart_wr_n      = probe_owns ? 1'b1       : b_wr_n;
-    assign cart_pwr_n     = probe_owns ? 1'b1       : b_pwr_n;
-    assign cart_prd_n     = probe_owns ? 1'b1       : b_prd_n;
-    assign cart_wramsel_n = probe_owns ? 1'b1       : b_wramsel_n;
-    assign cart_refresh   = probe_owns ? 1'b0       : b_refresh;
-    assign cart_phi2      = probe_owns ? 1'b0       : b_phi2;
-    assign cart_sysclk    = probe_owns ? 1'b0       : (b_sysclk & bridge_owns);
+    assign cart_address   = probe_owns ? p_address  : rest ? 24'd0 : b_address;
+    assign cart_pa        = quiet      ? 8'hFF      : b_pa;
+    assign cart_rd_n      = probe_owns ? p_rd_n     : rest ? 1'b1  : b_rd_n;
+    assign cart_romsel_n  = probe_owns ? p_romsel_n : rest ? 1'b1  : b_romsel_n;
+    assign cart_wr_n      = quiet      ? 1'b1       : b_wr_n;
+    assign cart_pwr_n     = quiet      ? 1'b1       : b_pwr_n;
+    assign cart_prd_n     = quiet      ? 1'b1       : b_prd_n;
+    assign cart_wramsel_n = quiet      ? 1'b1       : b_wramsel_n;
+    assign cart_refresh   = quiet      ? 1'b0       : b_refresh;
+    assign cart_phi2      = quiet      ? 1'b0       : b_phi2;
+    assign cart_sysclk    = quiet      ? 1'b0       : (b_sysclk & bridge_owns);
 
-    assign ctl_oe_n  = probe_owns  ? 1'b0 :
+    assign ctl_oe_n  = quiet       ? 1'b0 :
                        bridge_owns ? b_ctl_oe_n : 1'b1;
-    assign data_dir  = probe_owns  ? 1'b0 :
+    assign data_dir  = quiet       ? 1'b0 :
                        bridge_owns ? b_data_dir : 1'b0;
     assign data_oe_n = probe_owns  ? !(p_data_listen) :
+                       rest        ? 1'b1 :
                        bridge_owns ? b_data_oe_n : 1'b1;
 endmodule

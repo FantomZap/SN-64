@@ -28,6 +28,7 @@ module sn64_top #(
     parameter        REGION_TIMEOUT_MS = 300,      // give up waiting for a key CIC
     parameter        SEQ_RESET_HOLD_MS = 20,
     parameter        SEQ_RAIL_TIMEOUT_MS = 50,
+    parameter        SEQ_SHUTDOWN_HOLD_MS = 1,     // /RESET low this long before the pins are let go and the 5 V is switched off
     parameter        SEQ_PROBE_ENABLE = 0,         // 1: cartridge check before 5 V (needs sn64_rail_monitor on the board)
     parameter        SEQ_PROBE_TIMEOUT_MS = 4000,  // assumed: time for the test current to charge the rail
     parameter [11:0] SEQ_PROBE_OK_CODE = 12'd269,  // assumed: 0.65 V on the rail (code x 3 x 0.806 mV)
@@ -84,6 +85,7 @@ module sn64_top #(
     output wire        ctl_oe_n, data_oe_n, data_dir,
     // SNES CIC lines
     output wire        snes_cic_oe_n,              // U206 enable: CIC_CLK, CIC_SLAVE_RESET, SYSTEM_CLK octet
+    output wire        snes_sense_oe_n,            // v2: enable of the octet that brings CIC data, /IRQ and /RESET back from the socket
     output wire        snes_cic_clk, snes_cic_slave_reset,
     output wire        snes_cic_data0_o, snes_cic_data0_oe,
     input  wire        snes_cic_data0_i,
@@ -170,6 +172,7 @@ module sn64_top #(
     wire probe_done, probe_pass; wire [1:0] probe_mode_q; wire [7:0] probe_level;
     reg  release_ok;
     sn64_power_sequencer #(.CLK_HZ(CLK25_HZ), .RESET_HOLD_MS(SEQ_RESET_HOLD_MS), .RAIL_TIMEOUT_MS(SEQ_RAIL_TIMEOUT_MS),
+                           .SHUTDOWN_HOLD_MS(SEQ_SHUTDOWN_HOLD_MS),
                            .PROBE_ENABLE(SEQ_PROBE_ENABLE), .PROBE_TIMEOUT_MS(SEQ_PROBE_TIMEOUT_MS),
                            .PROBE_OK_CODE(SEQ_PROBE_OK_CODE)) sequencer (
         .clk(clk_25), .reset_n(rst25_n),
@@ -189,7 +192,16 @@ module sn64_top #(
     // reports the key's region.
     // =====================================================================
     wire cic_enable = (seq_state >= 4'd3) && (seq_state <= 4'd4);   // IFACE or RUN
-    assign snes_cic_oe_n = !cic_enable;                              // enabled from IFACE, before the SNES clock
+    // The octet with CIC_CLK, CIC_SLAVE_RESET and SYSTEM_CLK: enabled from IFACE, before the SNES
+    // clock, and kept driven (lock stopped, lines low) through the shutdown hold until the 5 V goes.
+    assign snes_cic_oe_n = !(cic_enable || seq_state == 4'd5);
+    // The octet in the other direction (socket to FPGA) is on only while the cartridge has its
+    // 5 V as well: a level shifter must be off while one of its two supplies is (TI SCAS416Q,
+    // section 10: /OE high until both supplies are up, and again before one goes).
+    assign snes_sense_oe_n = snes_cic_oe_n;
+    // The cartridge has its 5 V and the sequencer has not taken it away yet (IFACE, RUN and the
+    // shutdown hold): the socket owner mux keeps the pins at rest whenever nobody owns them.
+    wire idle_drive = (seq_state >= 4'd3) && (seq_state <= 4'd5) && cart_5v_ok && iface_rail_ok && !fault_latched;
     reg [3:0] seed_counter = 4'd0;                                   // stream-select nibble, sampled at key reset
     always @(posedge clk_25) seed_counter <= seed_counter + 4'd1;
     sn64_snes_cic_lock #(.CLK_DIV(CIC_LOCK_CLK_DIV), .T_PWRUP(CIC_LOCK_T_PWRUP)) snes_cic (
@@ -308,7 +320,7 @@ module sn64_top #(
     // bridge's data-octet state with bridge_permit (the bridge clears it only
     // on a clk_snes edge, which may never come once the clock is stopped).
     sn64_header_probe_mux socket_mux (
-        .bridge_permit(bridge_permit),
+        .bridge_permit(bridge_permit), .idle_drive(idle_drive),
         .b_address(br_address), .b_pa(br_pa), .b_rd_n(br_rd_n), .b_wr_n(br_wr_n), .b_prd_n(br_prd_n), .b_pwr_n(br_pwr_n),
         .b_romsel_n(br_romsel_n), .b_wramsel_n(br_wramsel_n), .b_refresh(br_refresh), .b_phi2(br_phi2), .b_sysclk(br_sysclk),
         .b_ctl_oe_n(br_ctl_oe_n), .b_data_oe_n(br_data_oe_n), .b_data_dir(br_data_dir),

@@ -55,13 +55,14 @@ module tb_header_probe;
     reg b_rd_n = 1, b_wr_n = 0, b_prd_n = 0, b_pwr_n = 0, b_romsel_n = 0, b_wramsel_n = 0;
     reg b_refresh = 1, b_phi2 = 1, b_sysclk = 1;
     reg b_ctl_oe_n = 0, b_data_oe_n = 0, b_data_dir = 1;   // stale "driving" state
+    reg idle_drive = 0;                                    // 1: the cartridge is powered, hold its pins at rest
 
     // ---------------- Pads ----------------
     wire [23:0] a; wire [7:0] pa;
     wire rd_n, wr_n, prd_n, pwr_n, romsel_n, wramsel_n, refresh, phi2, sysclk;
     wire ctl_oe_n, data_oe_n, data_dir, probe_owns;
     sn64_header_probe_mux mux (
-        .bridge_permit(bridge_permit),
+        .bridge_permit(bridge_permit), .idle_drive(idle_drive),
         .b_address(b_addr), .b_pa(b_pa), .b_rd_n(b_rd_n), .b_wr_n(b_wr_n), .b_prd_n(b_prd_n), .b_pwr_n(b_pwr_n),
         .b_romsel_n(b_romsel_n), .b_wramsel_n(b_wramsel_n), .b_refresh(b_refresh), .b_phi2(b_phi2), .b_sysclk(b_sysclk),
         .b_ctl_oe_n(b_ctl_oe_n), .b_data_oe_n(b_data_oe_n), .b_data_dir(b_data_dir),
@@ -133,10 +134,13 @@ module tb_header_probe;
             if (!ctl_oe_n && (!wr_n || !pwr_n)) begin strobe_err++; err("/WR or /PWR asserted"); end
             if (probe_owns && (!wr_n || !pwr_n || !prd_n || !wramsel_n || sysclk || refresh || phi2 || pa != 8'hFF))
                 begin strobe_err++; err("probe owner: write/clock/PA outputs not idle"); end
-            if (!permit && !bridge_permit && (!ctl_oe_n || !data_oe_n || !romsel_n && !ctl_oe_n))
+            if (!idle_drive && !permit && !bridge_permit && (!ctl_oe_n || !data_oe_n || !romsel_n && !ctl_oe_n))
                 begin permit_err++; err("socket enabled without permit"); end
-            if (!bridge_permit && !probe_owns && (!ctl_oe_n || !data_oe_n))
+            if (!idle_drive && !bridge_permit && !probe_owns && (!ctl_oe_n || !data_oe_n))
                 begin permit_err++; err("socket enabled with no owner"); end
+            if (idle_drive && !bridge_permit && !probe_owns && (ctl_oe_n || !data_oe_n || data_dir || !rd_n || !wr_n || !prd_n || !pwr_n
+                                                              || !romsel_n || !wramsel_n || sysclk || refresh || phi2))
+                begin permit_err++; err("socket not at rest with idle drive and no owner"); end
 
             // ---- strobe timing (probe-owned reads) ----
             if (probe_owns && !own_prev) t_addr_chg = $realtime;   // ownership starts: address and idle strobes applied
@@ -207,6 +211,7 @@ module tb_header_probe;
     endtask
 
     realtime t_drop, t_rel;
+    integer t_rest;
     initial begin
         $display("tb_header_probe: ACCESS_CYC=%0d, ROM access %0d ns", ACCESS, T_ACC_NS);
         repeat (4) @(posedge clk); reset_n = 1;
@@ -256,6 +261,32 @@ module tb_header_probe;
         if (probe_owns || a !== b_addr) err("mux: probe won over a permitted bridge");
         permit = 0; enable = 0; bridge_permit = 0; b_data_dir = 0; #1;
         $display("  %-26s stale bridge state blocked; bridge passes when permitted and wins", "mux ownership");
+
+        // ---- mux: pins at rest while the cartridge is powered and nobody owns the socket ----
+        repeat (4) @(posedge clk); #3;
+        b_wr_n = 0; b_pwr_n = 0; b_prd_n = 0; b_romsel_n = 0; b_rd_n = 0; b_sysclk = 1; b_ctl_oe_n = 0; b_data_oe_n = 0; b_data_dir = 1;
+        idle_drive = 1; #1;                          // stale bridge state behind the mux, no bridge permit
+        if (ctl_oe_n !== 0 || wr_n !== 1 || rd_n !== 1 || prd_n !== 1 || pwr_n !== 1 || romsel_n !== 1 || wramsel_n !== 1
+            || sysclk !== 0 || phi2 !== 0 || refresh !== 0 || data_oe_n !== 1 || data_dir !== 0 || a !== 24'd0 || pa !== 8'hFF)
+            err("mux: pins not at rest with idle drive and no owner");
+        bridge_permit = 1; b_ctl_oe_n = 1; #1;       // bridge permitted but still in reset: rest
+        if (ctl_oe_n !== 0 || wr_n !== 1 || rd_n !== 1 || romsel_n !== 1 || sysclk !== 0 || data_oe_n !== 1)
+            err("mux: pins not at rest while the permitted bridge holds its octets off");
+        b_ctl_oe_n = 0; b_wr_n = 1; b_pwr_n = 1; b_prd_n = 1; #1;   // bridge drives: it passes
+        if (ctl_oe_n !== 0 || a !== b_addr || rd_n !== b_rd_n || romsel_n !== b_romsel_n || sysclk !== 1 || data_dir !== 1 || data_oe_n !== 0)
+            err("mux: a driving bridge not passed through with idle drive on");
+        bridge_permit = 0; b_data_dir = 0; #1;
+        enable = 1; permit = 1;                      // the probe takes the socket from rest and gives it back to rest
+        t_rest = 0;
+        while (!probe_owns && t_rest < 200) begin @(posedge clk); t_rest++; end
+        if (!probe_owns) err("mux: probe did not take the socket from rest");
+        while (!done && t_rest < 5000) begin @(posedge clk); t_rest++; end
+        #1;
+        if (probe_owns || ctl_oe_n !== 0 || rd_n !== 1 || romsel_n !== 1 || wr_n !== 1 || data_oe_n !== 1)
+            err("mux: pins not back at rest after the probe");
+        permit = 0; enable = 0; idle_drive = 0; #1;
+        if (ctl_oe_n !== 1 || data_oe_n !== 1) err("mux: pins not released when the idle drive ends");
+        $display("  %-26s pins at rest with no owner; bridge and probe take and return them", "mux rest drive");
 
         $display("  reads=%0d  min addr->/ROMSEL %0.0f ns  min /RD low %0.0f ns  min /ROMSEL high gap %0.0f ns",
                  n_reads, min_setup, min_rd_low, min_gap);

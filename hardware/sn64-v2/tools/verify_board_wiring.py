@@ -63,7 +63,10 @@ SNES_OUT = ([('cart_address[%d]' % i, 'A%d' % i, 'ctl_oe_n') for i in range(24)]
              ('snes_cic_clk', 'CIC_CLK', 'cic_oe_n'), ('snes_cic_slave_reset', 'CIC_SLAVE_RESET', 'cic_oe_n')])
 SNES_DATA = [('cart_data[%d]' % i, 'D%d' % i) for i in range(8)]
 SNES_IN = [('cic_data0_in', 'CIC_DATA0'), ('cic_data1_in', 'CIC_DATA1'), ('cart_irq_n', '/IRQ'),
-           ('cart_reset_n_sense', '/RESET'), ('expand_sense', 'EXPAND')]
+           ('cart_reset_n_sense', '/RESET')]
+# TLA2528 (TI SBAS961A), RTE package: inputs AIN0..AIN7, and the rest.
+ADC_AIN = ['15', '16', '1', '2', '3', '4', '5', '6']
+ADC = {'avdd': '7', 'decap': '8', 'gnd': '9', 'dvdd': '10', 'addr': '11', 'scl': '13', 'sda': '14'}
 SNES_PULL = [('cic_data0_od', 'CIC_DATA0'), ('cic_data1_od', 'CIC_DATA1'), ('reset_pull_od', '/RESET')]
 N64 = ([('n64_ad[%d]' % i, 'AD%d' % i) for i in range(16)] +
        [('n64_alel', 'ALE_L'), ('n64_aleh', 'ALE_H'), ('n64_read_n', '/READ'), ('n64_write_n', '/WRITE'),
@@ -221,13 +224,13 @@ def run_checks(b, snes, n64, schematic, lattice):
         if b.net(ref, t['dir']) != b.port_net('data_dir') or b.net(ref, t['oe']) != b.port_net('data_oe_n'):
             bad.append('%s: direction on %s, enable on %s' % (port, b.net(ref, t['dir']), b.net(ref, t['oe'])))
     check('D0-D7 reach their socket pins through one byte whose direction is data_dir and whose enable is data_oe_n', not bad, '; '.join(bad[:6]))
-    pulls = [b.two_pin(b.port_net(p), 'R') for p in ('ctl_oe_n', 'cic_oe_n', 'data_oe_n')]
-    check('the three level-shifter enables are pulled to 3.3 V, so the socket is released until the FPGA drives them',
+    pulls = [b.two_pin(b.port_net(p), 'R') for p in ('ctl_oe_n', 'cic_oe_n', 'data_oe_n', 'sense_oe_n')]
+    check('the four level-shifter enables are pulled to 3.3 V, so every byte is off until the FPGA drives them',
           all(any(o == v33 for _, _, o in pl) for pl in pulls), str(pulls))
     check('data_dir is pulled low, so the data byte points away from the cartridge until the FPGA drives it',
           any(o == gnd for _, _, o in b.two_pin(b.port_net('data_dir'), 'R')), str(b.two_pin(b.port_net('data_dir'), 'R')))
 
-    # 4. Cartridge inputs: a channel that points B to A and is always enabled.
+    # 4. Cartridge inputs: a channel that points B to A, switched by sense_oe_n.
     bad = []
     for port, signal in SNES_IN:
         net = b.port_net(port)
@@ -240,9 +243,62 @@ def run_checks(b, snes, n64, schematic, lattice):
         got = sorted(p for r, p in b.on(b.net(ref, t['b'][i]), 'J2'))
         if got != pins_of(snes, signal):
             bad.append('%s (%s): comes from socket pins %s' % (port, signal, got))
-        if b.net(ref, t['dir']) != gnd or b.net(ref, t['oe']) != gnd:
-            bad.append('%s: direction on %s, enable on %s (both should be ground)' % (port, b.net(ref, t['dir']), b.net(ref, t['oe'])))
-    check('%d cartridge inputs come from their own socket pin through a channel that points to the FPGA' % len(SNES_IN), not bad, '; '.join(bad[:6]))
+        if b.net(ref, t['dir']) != gnd or b.net(ref, t['oe']) != b.port_net('sense_oe_n'):
+            bad.append('%s: direction on %s (should be ground), enable on %s (should be the net of sense_oe_n)' % (
+                port, b.net(ref, t['dir']), b.net(ref, t['oe'])))
+    check('%d cartridge inputs come from their own socket pin through a channel that points to the FPGA and is switched by sense_oe_n' % len(SNES_IN),
+          not bad, '; '.join(bad[:6]))
+
+    # 4b. Rules of the level shifter's data sheet (TI SCAS416Q). Section 10: /OE is to be high until
+    #     both supplies are up; the B side's supply is the switched cartridge 5 V, so no byte may be
+    #     enabled by a fixed level. Section 3: the inputs of both ports are always active and must
+    #     not float: no pin of the A side (always powered) is open, and no B-side input.
+    bad = []
+    enables = {b.port_net(p) for p in ('ctl_oe_n', 'cic_oe_n', 'data_oe_n', 'sense_oe_n')}
+    for ref in b.translators():
+        for sec, t in T245.items():
+            if b.net(ref, t['oe']) not in enables:
+                bad.append('%s byte %d: enable on %s, which the FPGA does not drive' % (ref, sec, b.net(ref, t['oe'])))
+            if b.open(ref, t['dir']):
+                bad.append('%s byte %d: direction pin open' % (ref, sec))
+            a_to_b = b.net(ref, t['dir']) == v33
+            for i in range(8):
+                a_open, b_open = b.open(ref, t['a'][i]), b.open(ref, t['b'][i])
+                if a_open:
+                    # the A side always has its 3.3 V: an open pin there floats for as long as the byte is off
+                    bad.append('%s byte %d channel %d: its A-side pin is open' % (ref, sec, i + 1))
+                elif b_open and not a_to_b:
+                    bad.append('%s byte %d channel %d: its B-side input is open' % (ref, sec, i + 1))
+                # An open B-side pin of a byte that points to the cartridge is an output: driven while the
+                # byte is on, and without supply while the cartridge is off. It floats only for the few
+                # milliseconds between the 5 V coming up and the byte being switched on. Accepted.
+    check('level shifters: every byte enable is driven by the FPGA, and no pin that can float for long is left open (TI SCAS416Q sections 3 and 10)', not bad, '; '.join(bad[:6]))
+
+    # 4c. The converter that watches the supplies (TLA2528, TI SBAS961A).
+    bad = []
+    adc = sorted(r for r, comp in b.c.items() if 'TLA2528' in comp['value'])
+    if len(adc) != 1:
+        bad.append('%d converters' % len(adc))
+    else:
+        u = adc[0]
+        if not b.open(u, ADC['addr']):
+            bad.append('ADDR on %s: the logic talks to address 0x10, which the data sheet (table 2) gives for the pin left open' % b.net(u, ADC['addr']))
+        if b.net(u, ADC['scl']) != b.port_net('adc_scl') or b.net(u, ADC['sda']) != b.port_net('adc_sda'):
+            bad.append('SCL/SDA on %s / %s' % (b.net(u, ADC['scl']), b.net(u, ADC['sda'])))
+        for name in ('scl', 'sda'):
+            if not any(o == v33 for _, _, o in b.two_pin(b.net(u, ADC[name]), 'R')):
+                bad.append('%s has no pull-up to 3.3 V' % name.upper())
+        if b.net(u, ADC['avdd']) != v33 or b.net(u, ADC['dvdd']) != v33 or b.net(u, ADC['gnd']) != gnd:
+            bad.append('supply pins on %s / %s / %s' % (b.net(u, ADC['avdd']), b.net(u, ADC['dvdd']), b.net(u, ADC['gnd'])))
+        if not any(o == gnd for _, _, o in b.two_pin(b.net(u, ADC['decap']), 'C')):
+            bad.append('DECAP has no capacitor to ground')
+        rail_inputs = [i for i, pad in enumerate(ADC_AIN) if any(o == cart5 for _, _, o in b.two_pin(b.net(u, pad), 'R'))]
+        if rail_inputs != [3]:
+            bad.append('the cartridge supply is divided into inputs %s; the logic reads it, and feeds its test current, on input 3' % rail_inputs)
+        if any(b.open(u, pad) for pad in ADC_AIN):
+            bad.append('an input is open')
+    check('supply converter: address pin open (0x10), I2C lines pulled up and on their balls, supplies, DECAP capacitor, cartridge supply on input 3',
+          not bad, '; '.join(bad[:6]))
 
     # 5. Open-drain pulls: FPGA -> SN74LVC07A input -> its output -> the socket pin, with a pull-up to cartridge 5 V.
     bad = []
@@ -492,6 +548,10 @@ MISTAKES = [
                                                      [swap(d, ('J2', str(i + 31)), ('J2', str(63 - i))) for i in range(1, 16)]),
     ('a level-shifter byte pointing the wrong way', lambda d, l: d['components']['U202']['pads'].__setitem__('1', 'GND')),
     ('the data byte enabled all the time', lambda d, l: d['components']['U204']['pads'].__setitem__('48', 'GND')),
+    ('the byte from the socket to the FPGA enabled all the time', lambda d, l: d['components']['U204']['pads'].__setitem__('25', 'GND')),
+    ('an unused level-shifter pin left open', lambda d, l: d['components']['U204']['pads'].__setitem__('26', 'unconnected-(U204-2A7-Pad26)')),
+    ('the supply converter address pin tied to ground', lambda d, l: d['components']['U6']['pads'].__setitem__('11', 'GND')),
+    ('the cartridge supply divider on the wrong converter input', lambda d, l: swap(d, ('U6', '2'), ('U6', '3'))),
     ('level shifter B side on 3.3 V', lambda d, l: d['components']['U203']['pads'].__setitem__('7', 'FPGA_3V3')),
     ('two FPGA ports exchanged in the constraints', lambda d, l: l.update({'cart_rd_n': l['cart_wr_n'], 'cart_wr_n': l['cart_rd_n']})),
     ('N64 address/data lines swapped on the edge', lambda d, l: swap(d, ('J1', '28'), ('J1', '29'))),

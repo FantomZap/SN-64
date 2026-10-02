@@ -1,9 +1,17 @@
 """Run a real cartridge image through the whole SN64 logic in simulation and save what the
-N64 would show and play (fpga/tests/tb_game.sv).
+N64 would show and play (fpga/tests/tb_game.sv), or with --board through the v2 board as its
+board file wires it (fpga/tests/tb_board_game.sv).
 
   python fpga/tools/run_game.py --build-dir <dir without spaces> --rom <image> [--frames N]
          [--shot K] [--pad <file>] [--key ntsc|pal|none] [--hirom|--lorom] [--sram-kb N]
          [--out <dir>] [--threads N] [--rebuild]
+         [--board [--cartridge 0|1|2] [--bootrom <z64>] [--b-off-a 0|1] [--start-ms N]]
+
+--board needs the board's connection list turned into a simulation first:
+  <KiCad's python> hardware/sn64-v2/tools/export_board_nets.py
+  python hardware/sn64-v2/tools/make_board_sim.py
+and the two generated vendor copies (fpga/tools/prepare_flash_pads.py, prepare_usb_core.py; both
+are run by evaluate.py). It uses its own build directory: <build-dir>-board.
 
 The image must be without a copier header. The board kind (LoROM or HiROM), the size of the
 battery RAM and the region are read from the image's own header unless given. Outputs in --out
@@ -43,6 +51,12 @@ SOURCES = ['-Ibuild/generated/snestang/src', '-Ibuild/generated/snestang/src/spc
            'fpga/vendor/snestang-controller/src/controller_adapter.sv', 'fpga/rtl/sn64_snes_joypad.sv',
            'fpga/rtl/sn64_header_probe.sv', 'fpga/rtl/sn64_sd_adc.sv', 'fpga/rtl/sn64_audio_mix.sv',
            'fpga/rtl/sn64_clock_pace.sv', 'fpga/rtl/sn64_top.sv', 'fpga/tests/tb_game.sv']
+# The board bench: the same logic under the board's real top level, the stand-ins for the FPGA's
+# own cells, the part models and the board's connection list.
+BOARD_ONLY = ['-I{board}', 'build/generated/summercart64/memory_flash_dq.sv', 'fpga/rtl/sn64_bootrom_flash.sv',
+              'fpga/rtl/sn64_rail_monitor.sv', 'fpga/rtl/sn64_usb_prog.sv', 'fpga/rtl/sn64_board_top.sv',
+              'fpga/tests/ecp5_sim_stubs.sv', 'fpga/tests/tb_bootrom_flash.sv', 'fpga/tests/board_models.sv',
+              '{board}/sn64_board_netlist.sv', 'fpga/tests/tb_board_game.sv']
 
 
 def header(data, base):
@@ -101,8 +115,21 @@ def main():
     ap.add_argument('--out', type=Path)
     ap.add_argument('--threads', type=int, default=1)
     ap.add_argument('--rebuild', action='store_true')
+    ap.add_argument('--board', action='store_true', help='through the v2 board as its board file wires it')
+    ap.add_argument('--cartridge', type=int, choices=[0, 1, 2], default=1,
+                    help='--board: 0 nothing in the socket, 1 a cartridge, 2 a cartridge back to front')
+    ap.add_argument('--bootrom', type=Path, help='--board: the boot program image for the flash')
+    ap.add_argument('--b-off-a', type=int, choices=[0, 1],
+                    help='--board: level an always-on level shifter byte puts out while the cartridge has no 5 V')
+    ap.add_argument('--start-ms', type=int, default=3000, help='--board: give up if the game has not started after this long')
+    ap.add_argument('--stop-ms', type=int, help='--board: end the run at this time (to measure the speed)')
+    ap.add_argument('--board-dir', default='build/board-sim',
+                    help='--board: where make_board_sim.py wrote the netlist (another one for a deliberate wiring mistake)')
     args = ap.parse_args()
     obj = args.build_dir.resolve()
+    if args.board:
+        obj = obj.with_name(obj.name + '-board')
+    top = 'tb_board_game' if args.board else 'tb_game'
     if ' ' in str(obj):
         ap.error('the build directory must not contain spaces')
     os.chdir(ROOT)
@@ -130,20 +157,30 @@ def main():
         sys.exit('Verilator is not on PATH; see fpga/README.md')
     if os.name == 'nt':
         env.setdefault('VERILATOR_ROOT', str(Path(verilator).resolve().parents[1] / 'share/verilator'))
-    exe = obj / ('Vtb_game.exe' if os.name == 'nt' else 'Vtb_game')
+    exe = obj / ('V%s.exe' % top if os.name == 'nt' else 'V' + top)
     stamp = obj / 'build-stamp.json'
     watched = sorted(f.relative_to(ROOT).as_posix() for f in (ROOT / 'fpga/rtl').glob('*.sv')) + [
         'fpga/tests/tb_game.sv', 'fpga/tests/snes_key_cic_model.svh']
+    sources = SOURCES
+    if args.board:
+        usb = sorted(f.relative_to(ROOT).as_posix() for f in (ROOT / 'build/generated/tinyfpga').glob('*.v'))
+        board_dir = Path(args.board_dir).as_posix().rstrip('/')
+        if not usb or not (ROOT / board_dir / 'sn64_board_netlist.sv').exists():
+            sys.exit('--board: run export_board_nets.py and make_board_sim.py first, and evaluate.py once for the generated vendor copies')
+        board_only = [f.replace('{board}', board_dir) for f in BOARD_ONLY]
+        sources = SOURCES[:-1] + usb + board_only
+        watched = watched[:-2] + [f for f in board_only if f.startswith(('fpga/tests/', board_dir + '/'))] + [
+            'fpga/tests/snes_key_cic_model.svh', board_dir + '/board_pins.svh']
     want = {'threads': args.threads, 'sources': {s: hashlib.sha256((ROOT / s).read_bytes()).hexdigest() for s in watched}}
     if args.rebuild or not exe.exists() or not stamp.exists() or json.loads(stamp.read_text()) != want:
         cmd = [verilator, '--binary', '--timing', '--build-jobs', '16', '-O3', '--x-assign', 'fast', '--x-initial', 'fast',
                '-CFLAGS', '-O2', '-Wno-fatal', '-Wno-lint', '-Wno-style', '-Wno-TIMESCALEMOD',
-               '--top-module', 'tb_game', '--Mdir', str(obj).replace('\\', '/')]
+               '--top-module', top, '--Mdir', str(obj).replace('\\', '/')]
         if args.threads > 1:
             cmd += ['--threads', str(args.threads)]
         t0 = time.time()
         with (out / 'build.log').open('w', encoding='utf-8') as log:
-            r = subprocess.run(cmd + SOURCES, env=env, stdout=log, stderr=subprocess.STDOUT)
+            r = subprocess.run(cmd + sources, env=env, stdout=log, stderr=subprocess.STDOUT)
         if r.returncode:
             sys.exit('build failed; see %s' % (out / 'build.log'))
         stamp.write_text(json.dumps(want))
@@ -155,6 +192,16 @@ def main():
         run.append('+hirom')
     if args.key in ('ntsc', 'pal'):
         run.append('+%s_key' % args.key)
+    if args.board:
+        run += ['+cartridge=%d' % args.cartridge, '+start_ms=%d' % args.start_ms]
+        if args.b_off_a is not None:
+            run.append('+b_off_a=%d' % args.b_off_a)
+        if args.stop_ms:
+            run.append('+stop_ms=%d' % args.stop_ms)
+        if args.bootrom:
+            boot = obj / ('boot-%s.z64' % tag)
+            shutil.copyfile(args.bootrom, boot)
+            run.append('+bootrom=' + boot.as_posix())
     if args.pad:
         pad = obj / ('pad-%s.txt' % tag)
         shutil.copyfile(args.pad, pad)
@@ -172,7 +219,7 @@ def main():
             print(line.rstrip(), flush=True)
         p.wait()
     took = time.time() - t0
-    done = next((ln for ln in lines if ln.startswith('DONE:')), None)
+    done = next((ln for ln in lines if ln.startswith(('DONE:', 'REFUSED:'))), None)
 
     # Pictures and sound, whatever the run got to.
     shots = []
@@ -207,7 +254,9 @@ def main():
     summary = {'image': args.rom.name, 'sha256': hashlib.sha256(data).hexdigest(), 'bytes': len(data), 'header': info,
                'board': 'HiROM' if hirom else 'LoROM', 'sram_kb': sram_kb, 'key': args.key or 'none', 'frames_asked': args.frames,
                'pictures_written': [n for n, _ in shots], 'sound_samples': samples, 'exit_code': p.returncode,
-               'seconds': round(took, 1), 'done_line': done, 'fatal': [ln for ln in lines if 'Fatal' in ln or 'fatal' in ln][:5]}
+               'seconds': round(took, 1), 'done_line': done, 'fatal': [ln for ln in lines if 'Fatal' in ln or 'fatal' in ln][:5],
+               'through': 'the v2 board (tb_board_game.sv)' if args.board else 'the logic (tb_game.sv)',
+               'board_line': next((ln for ln in lines if ln.startswith('BOARD:')), None)}
     (out / 'summary.json').write_text(json.dumps(summary, indent=1), encoding='utf-8')
     print('%s in %.0f s; %d pictures, %d sound samples; outputs in %s' % ('finished' if done else 'DID NOT FINISH', took, len(shots), samples, out))
     return 0 if done and p.returncode == 0 else 1

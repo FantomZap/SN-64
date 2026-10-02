@@ -303,9 +303,21 @@ module tb_system;
     endtask
 
     // ---------------- Invariants ----------------
+    integer reset_low_clocks = 0; reg off_ok = 0, cart_5v_enable_q = 0;
     reg run_seen=0, pal_at_start=0;
     always @(posedge clk_25) begin
-        if (!ctl_oe_n && !dut.bus_permit && !dut.hdr_owns) $fatal(1,"socket outputs enabled without permission");
+        // The socket's outputs: never on without cartridge power; at rest (no strobe, no clock, data
+        // octet released) while neither the bridge nor the header probe owns them; and never
+        // released while the cartridge is powered and out of reset.
+        if (!ctl_oe_n && !(cart_5v_ok && iface_rail_ok)) $fatal(1, "socket outputs enabled without cartridge power");
+        if (!ctl_oe_n && !dut.bus_permit && !dut.hdr_owns && (!wr_c || !rd_c || !prd_c || !pwr_c || !romsel || sysclk || !data_oe_n))
+            $fatal(1, "socket not at rest while nobody owns it");
+        if (cart_5v_ok && iface_rail_ok && !cart_reset_pull && ctl_oe_n) $fatal(1, "cartridge out of reset while the socket outputs are released");
+        // Taking the 5 V away: /RESET has been low for the hold time (0.9 ms of the 1 ms here).
+        if (cart_5v_enable) off_ok <= reset_low_clocks >= 22000;
+        reset_low_clocks <= cart_reset_pull ? reset_low_clocks + 1 : 0;
+        cart_5v_enable_q <= cart_5v_enable;
+        if (cart_5v_enable_q && !cart_5v_enable && !off_ok && !dut.fault_latched) $fatal(1, "cartridge 5 V switched off without /RESET held first");
         if (dut.hdr_owns && (!wr_c || !pwr_c || !data_oe_n && data_dir || snes_clk_run || !cart_reset_pull))
             $fatal(1,"header probe: write strobe, D-bus drive, running clock or released /RESET");
         if (snes_clk_run && !(cart_5v_ok && iface_rail_ok)) $fatal(1,"SNES clock running without cartridge power");
@@ -458,6 +470,13 @@ module tb_system;
             if (pace_slow < want - 3.0 || pace_slow > want + 3.0) $fatal(1,"PACE did not slow the SNES clock as written: %0d, expected %0.1f", pace_slow, want);
             if (pace_back < pace_base - 2 || pace_back > pace_base + 2) $fatal(1,"SNES clock did not return to full speed: %0d, was %0d", pace_back, pace_base);
         end
+        // Power off, as the menu does: the request is dropped. /RESET must be low for the hold time
+        // before the 5 V goes (checked on every clock above), and nothing may stay enabled.
+        pi_addr(32'h1FFF_0016); pi_write(16'h0000); pi_end;            // CONTROL: no run request
+        wait (!cart_5v_enable);
+        repeat (50) @(posedge clk_25);
+        if (!cart_reset_pull || !ctl_oe_n || !data_oe_n || snes_clk_run)
+            $fatal(1,"after power-off: /RESET not held, socket outputs enabled or SNES clock running");
         $display("PASS: system power-on: N64 mailbox, ordered cartridge power, PLL lock, region decided before the SNES clock (%s via %s), reset release, SNES program from cartridge, controller image via auto-joypad, cartridge audio mixed (%0d samples), PACE ffff slows the SNES clock %0.2f %%, STATUS=%h REGION_INFO=%h REGION_SOURCE=%h",
                  exp_region_s, exp_src_s, audio_mixed, 100.0 * (pace_base - pace_slow) / pace_base, d0, d1, d2);
         $finish;

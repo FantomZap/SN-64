@@ -321,6 +321,17 @@ def main():
                 'region 0, expected 1 (key CIC > ROM header')
             report['simulation']['injected_system_key_fault'] = ('Rejected: with one corrupted key bit the region falls '
                                                                  'back to the NTSC header and the key-wins check fails')
+            # Negative: the socket pins let go while the cartridge is powered and out of reset, and the
+            # 5 V taken away without /RESET held first, must both be caught.
+            for tag, define, expect in (('no-idle-drive', 'SN64_FAULT_NO_IDLE_DRIVE', 'cartridge out of reset while the socket outputs are released'),
+                                        ('no-shutdown-hold', 'SN64_FAULT_NO_SHUTDOWN_HOLD', 'cartridge 5 V switched off without /RESET held first')):
+                f_obj = obj / ('system-' + tag)
+                run('system-%s-build' % tag, [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',
+                    '-Wno-lint', '-Wno-style', '-Wno-TIMESCALEMOD', '+define+' + define,
+                    '--top-module', 'tb_system', '--Mdir', str(f_obj).replace('\\', '/')] + sys_sources)
+                run('system-' + tag, [str(f_obj / ('Vtb_system.exe' if os.name == 'nt' else 'Vtb_system'))], expect)
+            report['simulation']['injected_socket_rest_faults'] = ('Rejected: socket pins released while the cartridge is powered and out '
+                                                                   'of reset; cartridge 5 V switched off without /RESET held first')
         # Cartridge audio: I2S receiver (62.5 MHz oversampling) + elastic buffer + saturating mix, against an
         # asynchronous I2S master at +/-500 ppm and at the pinned SNESTang DSP rate; four fault builds must fail.
         aud_src = ['fpga/rtl/sn64_cdc.sv', 'fpga/rtl/sn64_i2s_rx.sv', 'fpga/rtl/sn64_audio_mix.sv', 'fpga/tests/tb_audio_mix.sv']

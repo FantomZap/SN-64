@@ -137,8 +137,20 @@ module tb_game;
         .status_word(status_word));
 
     // ---------------- Invariants (as tb_system.sv) ----------------
+    integer reset_low_clocks = 0; reg off_ok = 0, cart_5v_enable_q = 0;
     always @(posedge clk_25) begin
-        if (!ctl_oe_n && !dut.bus_permit && !dut.hdr_owns) $fatal(1, "socket outputs enabled without permission");
+        // The socket's outputs: never on without cartridge power; at rest (no strobe, no clock, data
+        // octet released) while neither the bridge nor the header probe owns them; and never
+        // released while the cartridge is powered and out of reset.
+        if (!ctl_oe_n && !(cart_5v_ok && iface_rail_ok)) $fatal(1, "socket outputs enabled without cartridge power");
+        if (!ctl_oe_n && !dut.bus_permit && !dut.hdr_owns && (!wr_c || !rd_c || !prd_c || !pwr_c || !romsel || sysclk || !data_oe_n))
+            $fatal(1, "socket not at rest while nobody owns it");
+        if (cart_5v_ok && iface_rail_ok && !cart_reset_pull && ctl_oe_n) $fatal(1, "cartridge out of reset while the socket outputs are released");
+        // Taking the 5 V away: /RESET has been low for the hold time (0.9 ms of the 1 ms here).
+        if (cart_5v_enable) off_ok <= reset_low_clocks >= 22000;
+        reset_low_clocks <= cart_reset_pull ? reset_low_clocks + 1 : 0;
+        cart_5v_enable_q <= cart_5v_enable;
+        if (cart_5v_enable_q && !cart_5v_enable && !off_ok && !dut.fault_latched) $fatal(1, "cartridge 5 V switched off without /RESET held first");
         if (snes_clk_run && !(cart_5v_ok && iface_rail_ok)) $fatal(1, "SNES clock running without cartridge power");
         if (!snes_clk_run && !cart_reset_pull && cart_5v_ok) $fatal(1, "cartridge /RESET released before the SNES clock runs");
     end

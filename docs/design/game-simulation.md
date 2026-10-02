@@ -1,6 +1,6 @@
 # A real game through the simulated SN64
 
-**Status (2026-10-01): simulation only. A real cartridge image boots, draws, plays sound and takes controller input through the SN64's logic, with the picture read out through the N64 cartridge port. Nothing here has run on hardware.**
+**Status (2026-10-02): simulation only. A real cartridge image boots, draws, plays sound and takes controller input through the SN64's logic, with the picture read out through the N64 cartridge port. 38 of 38 judged test programs pass. The same game also runs through a model of the board itself: [board-simulation.md](board-simulation.md). Nothing here has run on hardware.**
 
 ## Why
 
@@ -39,7 +39,8 @@ On a board this fault would have meant garbled or black pictures in nearly every
 | Hello World test program, 32 KiB LoROM | Black before the fix. After it: the text is on the screen. |
 | The owner's Super Mario World cartridge image, 512 KiB LoROM with 2 KiB battery RAM, NTSC key CIC | 660 pictures. Region decided as NTSC by the key CIC. The opening screen, the title screen, the file menu after a Start press, "1 player game" after another, the fade into the first scene with the mosaic effect, and the first scene with its status line and sprites. Title music in the sound output. No picture missed or fetched twice by the N64 side, no clock with two drivers on D0 to D7. |
 | 65816 instruction test "ADC" | All eight rows of its last table say PASS. |
-| The set of 49 free test programs | See "The test set" below. |
+| The set of 49 free test programs | 38 judged, 38 pass; 11 looked at. See "The test set" below. |
+| The same two images through the board's own wiring | [board-simulation.md](board-simulation.md) |
 
 Controller input reached the game: the Start and A presses in the run came from the N64 side's controller image through the mailbox and the SNES controller port logic.
 
@@ -55,7 +56,23 @@ With a program that makes no sound, the output is not silence. It is a repeating
 
 Peter Lemon's public collection of SNES test programs ([github.com/PeterLemon/SNES](https://github.com/PeterLemon/SNES), commit `350b394e`): 23 tests of the 65816's instructions and 7 of the SPC700's, which print a table of PASS or FAIL; memory-mapping tests for LoROM and HiROM, slow and fast; picture tests (background modes, mode 7, HDMA, windows, mosaic); sound tests; a controller test; one small game. 49 files, 2.6 MB, fetched with the owner's yes on 2026-10-01 and kept out of the repository.
 
-Results are added below when the run is finished.
+Each program ran alone through the logic for 150 to 420 pictures (run of 2026-10-01, before the changes of 2026-10-02).
+
+| Group | Programs | How it is judged | Result |
+|---|---|---|---|
+| 65816 instruction tests | 23 | the words PASS and FAIL are read off the last picture, pixel for pixel in the tests' own font: at least one PASS and no FAIL | **23 pass** |
+| SPC700 instruction tests | 7 | the same | **7 pass** |
+| Memory map: LoROM and HiROM, slow and fast, and work RAM | 5 | the same; these print PASSED | **5 pass** |
+| Sound programs | 2 | the sound that reaches the N64 side is well above the idle pattern | **2 pass** (peaks 13,252 and 4,196 of 32,767) |
+| Controller test | 1 | run with a button held from picture 60: the picture must change with it | **pass** |
+| Picture programs: 2, 4 and 8 bit backgrounds, mode 7 rotation, two HDMA effects, mosaic, colour rings, windows | 9 | looked at | all nine show what the program draws |
+| Hello World, and one small free game | 2 | looked at | text on the screen; the game reaches its first screen |
+
+No picture was missed or fetched twice by the N64 side in any run, and no run had two drivers on the data lines.
+
+The "MSC" instruction test ends on STP, which stops the processor until a reset; its last row stays empty, as its own screen says. The two sound programs and the controller program show a black picture by design.
+
+What the set does not cover: enhancement chips, the more unusual picture modes, timing-sensitive games. It is a floor, not a guarantee.
 
 ## How to run it
 

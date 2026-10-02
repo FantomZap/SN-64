@@ -154,6 +154,7 @@ stays readable after the request is dropped and is cleared when the next request
 | `tb_cart_check +keep_reset` | /RESET left pulled during the check | fails as required: "empty socket failed the check (rail reached 0.625 V)" |
 | `tb_cart_check`, `SN64_FAULT_CHECK_IGNORED` | a sequencer that does not enforce a failed check | fails as required: "5 V switched on into a cartridge the check must protect" |
 | `tb_n64_endpoint` | check mode in `CONTROL`, `CART_CHECK` at 0x0A, mode back to enforce on host reset | PASS |
+| `tb_board_game` (2026-10-02, [board-simulation.md](board-simulation.md)) | the check through a model of the board made from the board file, with the rail's real capacitance, the real divider and the real times | a good cartridge passes after 0.38 s with the rail at 0.69 V and gets its 5 V; a reversed one is refused after the 4.0 s limit with the rail at 0.46 V, fault 0x01, 5 V never on |
 | `make test`, `make test-negative` in `firmware/bootstrap` | which screen each result gives; every line fits the screen; a wrong short/backwards level is caught | PASS, 74 checks |
 | `route_top.py --top board --speed 8` | the design still fits and meets timing with the check | all five clocks pass; 30.2k LUT4, 13,348 flip-flops (106 more than before), 203 of 208 block RAMs ([v2-board-route.json](../../fpga/reports/v2-board-route.json)) |
 

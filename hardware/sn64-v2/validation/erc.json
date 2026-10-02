@@ -1,7 +1,7 @@
 {
     "$schema": "https://schemas.kicad.org/erc.v1.json",
     "coordinate_units": "mm",
-    "date": "2026-09-30T20:15:40",
+    "date": "2026-10-02T00:18:19",
     "ignored_checks": [
         {
             "description": "Global label only appears once in the schematic",
@@ -160,6 +160,29 @@
                     "description": "Pins of type Bidirectional and Power output are connected",
                     "items": [
                         {
+                            "description": "Symbol U204 Pin 19 [2B4, Bidirectional, Line]",
+                            "pos": {
+                                "x": 3.0607,
+                                "y": 2.9083
+                            },
+                            "uuid": "5b950048-ca30-5d2e-b2ed-6a4f1ebb7a1f"
+                        },
+                        {
+                            "description": "Symbol #FLG1 Pin 1 [Power output, Line]",
+                            "pos": {
+                                "x": 0.2794,
+                                "y": 5.3213
+                            },
+                            "uuid": "38f2208a-5feb-5a1d-a1fa-55845df48d4a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "Pins of type Bidirectional and Power output are connected",
+                    "items": [
+                        {
                             "description": "Symbol U204 Pin 20 [2B5, Bidirectional, Line]",
                             "pos": {
                                 "x": 3.0607,
@@ -212,6 +235,98 @@
                                 "y": 2.9845
                             },
                             "uuid": "787b86b6-48a2-521e-9f69-bb82d495625b"
+                        },
+                        {
+                            "description": "Symbol #FLG1 Pin 1 [Power output, Line]",
+                            "pos": {
+                                "x": 0.2794,
+                                "y": 5.3213
+                            },
+                            "uuid": "38f2208a-5feb-5a1d-a1fa-55845df48d4a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "Pins of type Bidirectional and Power output are connected",
+                    "items": [
+                        {
+                            "description": "Symbol U204 Pin 30 [2A4, Bidirectional, Line]",
+                            "pos": {
+                                "x": 3.3147,
+                                "y": 2.9083
+                            },
+                            "uuid": "8c37aeea-1d2d-5afc-bdef-e1d278d12123"
+                        },
+                        {
+                            "description": "Symbol #FLG1 Pin 1 [Power output, Line]",
+                            "pos": {
+                                "x": 0.2794,
+                                "y": 5.3213
+                            },
+                            "uuid": "38f2208a-5feb-5a1d-a1fa-55845df48d4a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "Pins of type Bidirectional and Power output are connected",
+                    "items": [
+                        {
+                            "description": "Symbol U204 Pin 29 [2A5, Bidirectional, Line]",
+                            "pos": {
+                                "x": 3.3147,
+                                "y": 2.9337
+                            },
+                            "uuid": "dec2cc73-52a9-577b-bd5c-5f060eee12e4"
+                        },
+                        {
+                            "description": "Symbol #FLG1 Pin 1 [Power output, Line]",
+                            "pos": {
+                                "x": 0.2794,
+                                "y": 5.3213
+                            },
+                            "uuid": "38f2208a-5feb-5a1d-a1fa-55845df48d4a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "Pins of type Bidirectional and Power output are connected",
+                    "items": [
+                        {
+                            "description": "Symbol U204 Pin 27 [2A6, Bidirectional, Line]",
+                            "pos": {
+                                "x": 3.3147,
+                                "y": 2.9591
+                            },
+                            "uuid": "c24f020d-190f-599e-9336-581d38416c4a"
+                        },
+                        {
+                            "description": "Symbol #FLG1 Pin 1 [Power output, Line]",
+                            "pos": {
+                                "x": 0.2794,
+                                "y": 5.3213
+                            },
+                            "uuid": "38f2208a-5feb-5a1d-a1fa-55845df48d4a"
+                        }
+                    ],
+                    "severity": "warning",
+                    "type": "pin_to_pin"
+                },
+                {
+                    "description": "Pins of type Bidirectional and Power output are connected",
+                    "items": [
+                        {
+                            "description": "Symbol U204 Pin 26 [2A7, Bidirectional, Line]",
+                            "pos": {
+                                "x": 3.3147,
+                                "y": 2.9845
+                            },
+                            "uuid": "96a778c9-f6e9-554e-b090-4f2333ecabeb"
                         },
                         {
                             "description": "Symbol #FLG1 Pin 1 [Power output, Line]",

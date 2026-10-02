@@ -490,6 +490,8 @@ A picture has 16.7 ms at 60 Hz. ares counts the processor's time only roughly, s
 - Co-simulation with the FPGA endpoint passes with this image (last non-zero word 78,763); the corrupted-load run fails as required.
 - In ares: boots, logos, main menu; 0 of 120 pictures wiped. The owner's own run with a controller was on the build before the fix.
 
+**2026-10-02:** the credits roll gained two entries (the free test programs, the ares emulator). ROM 163,840 bytes, SHA-256 `f601658de41924e0776d60e85c05e68ba05d75f1c3bf1ddd9edcc603d644a718`, 157,551 bytes used, 104,593 free; host tests 1,065 checks; CIC-6102 check OK. The board-level run reads the first and last 32 words of this image out of the flash model through the cartridge port ([board-simulation.md](board-simulation.md)).
+
 ### Running it in ares
 
 ```

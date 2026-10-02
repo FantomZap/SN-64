@@ -69,7 +69,7 @@ RIGHT = ([(f'cart_data[{i}]', f'L_D{i}', 'LVCMOS33') for i in range(8)] +
          [('snes_cic_clk', 'L_CIC_CLK', 'LVCMOS33'), ('snes_cic_slave_reset', 'L_CIC_SLAVE_RESET', 'LVCMOS33'),
           ('cic_data0_in', 'L_CIC_DATA0_IN', 'LVCMOS33'), ('cic_data1_in', 'L_CIC_DATA1_IN', 'LVCMOS33'),
           ('cart_irq_n', 'L_IRQ_N', 'LVCMOS33'), ('cart_reset_n_sense', 'L_RESET_N_SENSE', 'LVCMOS33'),
-          ('expand_sense', 'L_EXPAND', 'LVCMOS33'),
+          ('sense_oe_n', 'SENSE_OE_N', 'LVCMOS33'),            # the ball and trace that carried the unused EXPAND sense
           ('cic_data0_od', 'CIC_DATA0_OD', 'LVCMOS33'), ('cic_data1_od', 'CIC_DATA1_OD', 'LVCMOS33'),
           ('reset_pull_od', 'RESET_PULL_OD', 'LVCMOS33'),
           ('ctl_oe_n', 'CTL_OE_N', 'LVCMOS33'), ('cic_oe_n', 'CIC_OE_N', 'LVCMOS33'),
@@ -186,7 +186,10 @@ def write_outputs(rows):
         else:
             pull = 'UP' if port in ('n64_cic_clk', 'n64_cic_dq', 'n64_int_n', 'n64_read_n', 'n64_write_n', 'n64_aleh', 'n64_si_dq',
                                     'efuse_fault_n', 'board_reset_n', 'cart_irq_n') else \
-                   'DOWN' if port in ('n64_reset_n', 'n64_nmi_n', 'n64_alel', 'n64_si_clk', 'usb_pu') else 'NONE'
+                   'DOWN' if port in ('n64_reset_n', 'n64_nmi_n', 'n64_alel', 'n64_si_clk', 'usb_pu',
+                                      # lines that nobody drives while a level shifter octet is off: its A-side
+                                      # inputs and the FPGA's must not float (TI SCAS416Q, section 3)
+                                      'cic_data0_in', 'cic_data1_in', 'cart_reset_n_sense') or port.startswith('cart_data[') else 'NONE'
             lines.append(f'IOBUF PORT "{port}" IO_TYPE=LVCMOS33 PULLMODE={pull};')
     lpf.write_text('\n'.join(lines) + '\n', encoding='utf-8', newline='\n')
     return out, lpf

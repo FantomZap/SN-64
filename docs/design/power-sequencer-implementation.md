@@ -21,7 +21,7 @@ This block decides when the SNES cartridge gets power and when the FPGA may driv
 | RAMP5 (2) | interface rail enabled | rail valid; timeout → FAULT code `0x10` |
 | IFACE (3) | reset still pulled for `RESET_HOLD_MS` | hold time elapsed → reset released |
 | RUN (4) | everything on, `bus_permit` may be high; `hold_reset` pulls cartridge /RESET only | request dropped or host reset → SHUTDOWN |
-| SHUTDOWN (5) | reset pulled, rails off | next clock → OFF |
+| SHUTDOWN (5) | reset pulled; after a run the rails stay on for `SHUTDOWN_HOLD_MS` (1 ms), then go | hold time elapsed, or at once if the 5 V was not on → OFF |
 | FAULT (6) | everything off, reset pulled, fault latched | `fault_clear` while `run_request` is low → OFF |
 | CART CHECK (7) | 5 V off, test current on, reset released | two rail readings in a row at or above the threshold → CHECK END; timeout → FAULT code `0x01` (enforce) or CHECK END (report only, check only) |
 | CHECK END (8) | 5 V off, test current off, reset pulled | the monitor has given the rail-sense pin back → RESET, or CHECK HOLD in check-only mode |
@@ -44,3 +44,13 @@ Added for the owner's idea of catching a cartridge that is in back to front; the
 `fault_code` bit 0, which was always 0, now means "cartridge check failed in enforce mode". The result of the last check (`probe_done`, `probe_pass`, mode, rail reading) stays readable after the request is dropped and is cleared when the next request starts.
 
 Verification: `tb_power_sequencer` has a second instance with the check and ten more cases (two readings in a row to pass, enforce, report only, check only, off, abort, hardware fault during the check, a monitor that never gives the pin back, and a build without the check asked for check only). `tb_cart_check` runs the sequencer with the real monitor against an ADC model and an electrical model of the rail. Both are in `evaluate.py --mode sim`. Simulation only; the threshold (0.65 V) and the timeout (4 s) are assumptions.
+
+## Power-off order and pins at rest (2026-10-02)
+
+Found by the board-level run ([board-simulation.md](board-simulation.md)): at a start the cartridge's `/RESET` was released about 90 ns before the octets that drive its control pins were switched on, and at power-off `/RESET` and the pins were let go in the same instant. A cartridge's battery RAM is guarded by its `/RESET`; the pins should never be loose while it is high.
+
+- **Pins at rest.** While the cartridge has its 5 V and the sequencer is in IFACE, RUN or SHUTDOWN, the socket owner part ([sn64_header_probe.sv](../../fpga/rtl/sn64_header_probe.sv)) drives the address and strobe octets with every strobe inactive and no clock whenever neither the bridge nor the header read owns them. The data octet stays released. The octet with the CIC clock, the CIC reset and the SNES clock stays driven through SHUTDOWN as well.
+- **Hold at power-off.** When the request is dropped, `/RESET` is pulled at once. The rails stay on for `SHUTDOWN_HOLD_MS` with the pins at rest, then the 5 V is switched off and the pins are let go. A fault does not wait: everything goes on the same clock.
+- **Level shifter enables.** The byte that brings signals from the socket to the FPGA has its own enable (`snes_sense_oe_n`), on in IFACE, RUN and SHUTDOWN and off otherwise, so that no byte is enabled while its 5 V side has no supply.
+
+Verification: `tb_system` and `tb_game` check on every clock that the socket outputs are never on without cartridge power, are at rest while nobody owns them, and are never released while the cartridge is powered and out of reset; and that `/RESET` has been low for the hold time when the 5 V is switched off. `tb_system` now ends with a power-off. Two fault builds put the old behaviour back (`SN64_FAULT_NO_IDLE_DRIVE`, `SN64_FAULT_NO_SHUTDOWN_HOLD`) and are refused. `tb_header_probe` has a new section for the rest state of the socket owner part. Simulation only.

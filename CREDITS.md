@@ -35,13 +35,14 @@ Nothing from these is copied into SN64, but the design depends on what they made
 | [SNESDRONE cartridge shell](https://github.com/michael-hirschmugl/SNESDRONE-Cartridge-Shell) | Michael Hirschmugl | Super Famicom shell reference | none stated |
 | [New Super Famicom Cartridge](https://www.thingiverse.com/thing:1396153) | usagi_ | Super Famicom shell reference | CC BY 3.0 |
 | [M64 open-source files](https://support.modretro.com/en_us/articles/m64-open-source-files-ByrpukdUGg) | ModRetro | Reference for the M64 cartridge bay | as published by ModRetro |
+| [SNES test programs](https://github.com/PeterLemon/SNES) | Peter Lemon | Free test programs for the processor, the sound processor, the memory map, the picture and the controllers, run through the simulated SN64 to test it (`docs/design/game-simulation.md`); they are not in this repository | none stated |
 | TriStar 64 | Its makers | The idea: an adapter that plays SNES cartridges through an N64 | concept only |
 
 ## Tools
 
 KiCad, the OSS CAD Suite (Yosys, nextpnr, Verilator and their contributors),
 [KiCadRoutingTools](https://github.com/drandyhaas/KiCadRoutingTools) by drandyhaas, Freerouting,
-build123d and FreeCAD.
+build123d, FreeCAD and the [ares](https://ares-emu.net) emulator.
 
 Exact revisions, hashes and what was changed are recorded beside the material: `fpga/vendor/*/provenance.json`,
 `hardware/sn64/THIRD_PARTY.md`, `hardware/sn64/libraries/*provenance.json`, `mechanical/README.md` and

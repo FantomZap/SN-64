@@ -41,7 +41,8 @@ module sn64_board_top (
     output wire        cart_romsel_n, cart_wramsel_n, cart_refresh, cart_phi2, cart_sysclk,
     inout  wire [7:0]  cart_data,                       // U204 byte 1; driven only while data_dir = 1
     output wire        snes_cic_clk, snes_cic_slave_reset,
-    input  wire        cic_data0_in, cic_data1_in, cart_irq_n, cart_reset_n_sense, expand_sense,
+    input  wire        cic_data0_in, cic_data1_in, cart_irq_n, cart_reset_n_sense,
+    output wire        sense_oe_n,                      // U204 byte 2 (socket to FPGA): 0 = on, only while the cartridge has 5 V
     output wire        cic_data0_od, cic_data1_od, reset_pull_od,   // SN74LVC07A inputs: 0 = pull the 5 V line low
     output wire        ctl_oe_n, cic_oe_n, data_oe_n, data_dir,
     // cartridge audio sigma-delta front end
@@ -188,15 +189,19 @@ module sn64_board_top (
         .cart_refresh(cart_refresh), .cart_phi2(cart_phi2), .cart_sysclk(cart_sysclk),
         .cart_data_out(cart_data_out), .cart_data_in(cart_data_in), .cart_irq_n(cart_irq_n), .cart_reset_n_sense(cart_reset_n_sense),
         .cart_reset_pull(cart_reset_pull), .ctl_oe_n(ctl_oe_n), .data_oe_n(data_oe_n), .data_dir(data_dir),
-        .snes_cic_oe_n(cic_oe_n), .snes_cic_clk(snes_cic_clk), .snes_cic_slave_reset(snes_cic_slave_reset),
+        .snes_cic_oe_n(cic_oe_n), .snes_sense_oe_n(sense_oe_n),
+        .snes_cic_clk(snes_cic_clk), .snes_cic_slave_reset(snes_cic_slave_reset),
         .snes_cic_data0_o(d0_o), .snes_cic_data0_oe(d0_oe), .snes_cic_data0_i(cic_data0_in),
         .snes_cic_data1_o(d1_o), .snes_cic_data1_oe(d1_oe), .snes_cic_data1_i(cic_data1_in),
         .aud_l_cmp(aud_l_cmp), .aud_r_cmp(aud_r_cmp), .aud_l_fb(aud_l_fb), .aud_r_fb(aud_r_fb),
         .status_word(status_word));
 
     // Status LED: steady while the SNES clock runs, blinking while a USB host talks to us.
+    // The LED sits between 3.3 V and this pin (D1, R18): a low pin lights it. Found dark in a
+    // running game by the board-level run (tb_board_game.sv) when the pin was driven high for "on".
     reg [23:0] blink = '0;
     always @(posedge osc_27) blink <= blink + 1'b1;
-    assign led_status = usb_host ? blink[23] : status_word[12];
-    wire unused = &{1'b0, expand_sense, mux_status, spi_active, adc_codes};
+    wire led_on = usb_host ? blink[23] : status_word[12];
+    assign led_status = !led_on;
+    wire unused = &{1'b0, mux_status, spi_active, adc_codes};
 endmodule

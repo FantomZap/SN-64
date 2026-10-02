@@ -18,9 +18,9 @@
    "detail": ""
   },
   {
-   "check": "the three level-shifter enables are pulled to 3.3 V, so the socket is released until the FPGA drives them",
+   "check": "the four level-shifter enables are pulled to 3.3 V, so every byte is off until the FPGA drives them",
    "result": "pass",
-   "detail": "[[('R210', '100k', 'FPGA_3V3')], [('R211', '100k', 'FPGA_3V3')], [('R212', '100k', 'FPGA_3V3')]]"
+   "detail": "[[('R210', '100k', 'FPGA_3V3')], [('R211', '100k', 'FPGA_3V3')], [('R212', '100k', 'FPGA_3V3')], [('R214', '100k', 'FPGA_3V3')]]"
   },
   {
    "check": "data_dir is pulled low, so the data byte points away from the cartridge until the FPGA drives it",
@@ -28,7 +28,17 @@
    "detail": "[('R213', '100k', 'GND')]"
   },
   {
-   "check": "5 cartridge inputs come from their own socket pin through a channel that points to the FPGA",
+   "check": "4 cartridge inputs come from their own socket pin through a channel that points to the FPGA and is switched by sense_oe_n",
+   "result": "pass",
+   "detail": ""
+  },
+  {
+   "check": "level shifters: every byte enable is driven by the FPGA, and no pin that can float for long is left open (TI SCAS416Q sections 3 and 10)",
+   "result": "pass",
+   "detail": ""
+  },
+  {
+   "check": "supply converter: address pin open (0x10), I2C lines pulled up and on their balls, supplies, DECAP capacitor, cartridge supply on input 3",
    "result": "pass",
    "detail": ""
   },
@@ -83,7 +93,7 @@
    "detail": ""
   },
   {
-   "check": "every pad of the board is on the net the schematic gives it (176 parts)",
+   "check": "every pad of the board is on the net the schematic gives it (177 parts)",
    "result": "pass",
    "detail": ""
   },
@@ -99,7 +109,7 @@
   }
  ],
  "summary": {
-  "pass": 19,
+  "pass": 21,
   "fail": 0,
   "skipped": 0
  }

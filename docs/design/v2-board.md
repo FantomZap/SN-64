@@ -63,10 +63,16 @@ shoulders (the player's left), power lower left.
 ## What stays outside, and why
 
 - **Cartridge translators.** The FPGA is not 5 V tolerant and cannot drive 5 V CMOS inputs. Four
-  SN74ALVC164245 (the sd2snes part; A = 3.3 V, B = 5 V, Ioff for the unpowered cartridge side):
+  SN74ALVC164245 (the sd2snes part; A = 3.3 V, B = the cartridge's switched 5 V):
   U201 A0-15, U202 A16-23 + RD/WR/PRD/PWR/ROMSEL/WRAMSEL/REFRESH/PHI2, U203 PA0-7 + SYSTEM_CLK /
-  CIC_CLK / CIC_SLAVE_RESET (its own enable), U204 D0-7 bidirectional + the five inputs
-  (CIC_DATA0/1, IRQ, RESET sense, EXPAND) as a permanently enabled B-to-A byte.
+  CIC_CLK / CIC_SLAVE_RESET (its own enable), U204 D0-7 bidirectional + the four inputs
+  (CIC_DATA0/1, IRQ, RESET sense) as a B-to-A byte with an enable of its own, `SENSE_OE_N`.
+  The part has no power-off protection of its pins: a B-side pin may be at most 0.5 V above the
+  B supply, and TI's sheet (SCAS416Q, section 10) wants `/OE` high until both supplies are up. So
+  every one of the eight byte enables is driven by the FPGA and pulled up, and the logic switches
+  a byte on only while the cartridge has its 5 V. Until 2026-10-02 the B-to-A byte was tied on
+  and carried an EXPAND sense that nothing read
+  ([board-verification.md](board-verification.md)); EXPAND keeps its pull-up.
 - **SN74LVC07A hex open-drain driver** at 3.3 V with 5 V pull-ups for the lines the FPGA only ever
   pulls low: PROGRAMN (reboot after a USB update), SNES_CIC_DATA0/1, SNES_RESET_N.
 - **Power**: TPS2121 mux (USB has priority above 4.0 V, host 3.3 V otherwise, 2.5 A limit),
@@ -92,19 +98,21 @@ shoulders (the player's left), power lower left.
 | Pin plan | `hardware/sn64-v2/tools/pin_plan.py` -> `interfaces/fpga-pin-map.csv`, `fpga/constraints/sn64_board.lpf` |
 | Sheets | `sn64-v2.kicad_sch` (root), `fpga.kicad_sch`, `cart.kicad_sch`, `power.kicad_sch` |
 | Libraries | `libraries/SN64_V2.kicad_sym` (TPS2121, TLA2528, TPS2553 drawn from the TI pin tables), `libraries/SN64_V2.pretty` (straddle socket footprint from `tools/make_socket_footprint.py`), `libraries/3d/` (socket model from `tools/socket_3d_model.py`), v1 libraries reused unchanged; `libraries/v2-provenance.json` |
-| Boards | `build_v2_pcb.py` (placement), `prepare_route_v2.py` (fan-out, planes), `apply_netclasses_v2.py`, `finish_route_v2.py`, `add_plane_vias_v2.py`, `refit_tower_v2.py` (tower refit), `report_board_v2.py` (DRC summary); router KiCadRoutingTools (see `docs/design/pcb-routing.md`) |
-| Checks | `validation/erc.json` (0 errors, 8 warnings: unused translator inputs tied to ground), `validation/*.xml` netlists, DRC reports under `build/` |
+| Boards | `build_v2_pcb.py` (placement), `prepare_route_v2.py` (fan-out, planes), `apply_netclasses_v2.py`, `finish_route_v2.py`, `add_plane_vias_v2.py`, `refit_tower_v2.py` (tower refit), `apply_enable_fix_v2.py` (the schematic change of 2026-10-02 carried into the routed board), `report_board_v2.py` (DRC summary); router KiCadRoutingTools (see `docs/design/pcb-routing.md`) |
+| Checks | `validation/erc.json` (0 errors, 13 warnings: unused translator pins tied to ground), `validation/*.xml` netlists, `validation/pcb-drc.json`; `export_board_nets.py` then `verify_board_wiring.py` (21 checks, `--negative` 20 deliberate mistakes; [board-verification.md](board-verification.md)) and `make_board_sim.py` (the board as a simulation netlist; [board-simulation.md](board-simulation.md)) |
 | FPGA | `fpga/tools/evaluate.py --mode sim` (all benches pass, new `tb_sd_adc`); `fpga/tools/route_top.py --top board --speed 8` routes with every clock passing timing (`fpga/reports/v2-board-route.json`, rerun 2026-10-01 with the cartridge check: 30.2k LUT4, 203/208 block RAMs, 111 I/O) |
 
 ## Provisional values (to confirm at review or bring-up)
 
 TPS2553 RILIM 24.9 k (1.04 A nominal, 0.96 to 1.12 A by the SLVS841F equations; the choice of limit is provisional); TPS2121 CSS 1 nF; decoupling counts; sigma-delta RC 10 k / 1 nF;
-NTC part and its threshold; TLA2528 register map and I2C address (SBAS961A, manual mode); TLA2528
+NTC part and its threshold; TLA2528 register map (SBAS961A, manual mode; its I2C address 0x10 is
+the sheet's value for the ADDR pin left open, as the board now has it); TLA2528
 footprint exposed-pad size; USB pull-up switched only after PLL lock.
 
 ## Open items
 
-- Routing after the refit to the shorter shell: 3,603 tracks, 1,066 vias, 213 of 218 signal nets fully connected, 6 unconnected items (FLASH_D2, FPGA_3V3, N64_AD6, N64_JOYBUS, USB_DP_F, USB_PU); DRC errors: 6 starved_thermal. Remaining items are listed in `validation/pcb-open-connections.json` for hand routing in KiCad.
+- Routing after the refit to the shorter shell and the change of 2026-10-02: 213 of 218 signal nets fully connected, 6 unconnected items (FLASH_D2, FPGA_3V3 at the converter's supply pin, N64_AD6, N64_JOYBUS, USB_DP_F, USB_PU); DRC errors: 6 starved_thermal. Remaining items are listed in `validation/pcb-open-connections.json` for hand routing in KiCad. **Each of the six is needed for the board to work; none may be left.**
+- The first load of a blank board (2026-10-02): the USB port is part of the FPGA's logic, so a board with an empty flash cannot be loaded over USB. The ways in are the five JTAG pads or a flash programmed before assembly. The specification asks for blank-target loading over USB; the owner has to decide ([board-verification.md](board-verification.md), "The first load").
 - Shell: envelope model only (`docs/design/v2-shell.md`, `mechanical/sn64-v2-shell/`): upright tower, socket ears screwed to brackets in the shell. The board was refitted to it on 2026-09-30 (socket on the top edge, outline widened for the USB-C, USB-C above the console's top) and to the 10 mm shorter shell on 2026-10-01 (top edge at 60 mm, USB-C at 32.5 mm).
 - Mounting holes (2026-10-01): H1, H2, H5 and H6 are 4.0 mm (KiCad `MountingHole_4mm`, set by `tools/set_mounting_holes_v2.py`) because the shell's screw posts pass through the board there; H3 and H4 stay 2.5 mm for the shell's two registration pins, which sit at different heights so the board cannot go in back to front. No copper is within 4.5 mm of the four larger holes; the checks are unchanged (6 starved thermals, 6 open items).
 - Cartridge check (2026-10-01): before the cartridge's 5 V is switched on, the FPGA uses the telemetry ADC's channel 3 as an output so that R30 feeds 0.165 mA into the rail, and reads the rail back; a cartridge that is in back to front holds it at about half a volt ([reversed-cartridge-detection.md](reversed-cartridge-detection.md)). No part, pin or trace was added. Simulated only. To do on a real board: measure real cartridges both ways round in check-only mode and set the threshold; if the gap is thin, lower R30 and R31 together for more test current.

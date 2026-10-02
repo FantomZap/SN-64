@@ -66,6 +66,8 @@ const char *const sn64_credits_lines[] = {
     "  usagi_",
     "M64 open-source files",
     "  ModRetro",
+    "SNES test programs",
+    "  Peter Lemon",
     "TriStar 64",
     "  Its makers",
     "",
@@ -74,8 +76,8 @@ const char *const sn64_credits_lines[] = {
     "KiCad, the OSS CAD Suite (Yosys,",
     "nextpnr, Verilator and their",
     "contributors), KiCadRoutingTools by",
-    "drandyhaas, Freerouting, build123d",
-    "and FreeCAD.",
+    "drandyhaas, Freerouting, build123d,",
+    "FreeCAD and the ares emulator.",
     "",
     "",
     "Engineer: Claude (AI by Anthropic)",
@@ -88,8 +90,8 @@ const char *const sn64_credits_lines[] = {
 const unsigned char sn64_credits_kind[] = {
     1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 3, 2, 3, 3, 2, 3, 3, 3, 2, 3, 2, 3,
     3, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 3, 0, 1, 1, 0, 2, 3, 3, 2, 3, 2, 3, 2,
-    3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 0, 1, 0, 3, 3, 3, 3, 3, 0, 0, 4, 4,
-    4, 4,
+    3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 0, 1, 0, 3, 3, 3, 3, 3, 0, 0,
+    4, 4, 4, 4,
 };
 
-const int sn64_credits_count = 77;
+const int sn64_credits_count = 79;

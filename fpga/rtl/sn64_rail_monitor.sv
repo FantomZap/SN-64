@@ -6,7 +6,8 @@
 //   4 FPGA_1V1      5 NTC 10k/10k   6 USB CC1     7 USB CC2
 // TLA2528 access (TI SBAS961A, manual mode, to verify on hardware): single register
 // write opcode 0x08 to CHANNEL_SEL (0x11), then an I2C read of two bytes returns
-// the conversion of that channel. I2C address 0x10 with ADDR = GND.
+// the conversion of that channel. I2C address 0x10: the ADDR pin left open
+// (TI SBAS961A table 2; tied straight to ground is not one of its eight settings).
 // Thresholds are 12-bit codes on the divided inputs (fixed in logic for now;
 // telemetry gets the raw codes).
 //

@@ -4,6 +4,9 @@
 // (itself the reference model of tb_snes_cic_lock.sv), in a file of its own so that another bench
 // can include it. The including module provides: cic_clk, cic_srst, d0o, d0oe, d1o, d1oe, clk_25.
 // Start it with `fork key_model(); join_none` after setting km_pal.
+// A bench that has the key on real pins (tb_board_game.sv) defines SN64_KEY_ON_PINS and provides
+// cic_clk, cic_srst, line0, line1 and the key's k0_o, k0_oe, k1_o, k1_oe itself.
+`ifndef SN64_KEY_ON_PINS
     // SNES CIC lines: optional key CIC; released lines read low (pull-downs).
     wire cic_clk, cic_srst, d0o, d0oe, d1o, d1oe;
     logic k0_o = 1'b0, k0_oe = 1'b0, k1_o = 1'b0, k1_oe = 1'b0;
@@ -11,6 +14,7 @@
     wire line1 = d1oe ? d1o : (k1_oe ? k1_o : 1'b0);
     integer cic_contention = 0;
     always @(posedge clk_25) if ((d0oe && k0_oe) || (d1oe && k1_oe)) cic_contention++;
+`endif
 
     // ---------------- Key CIC model ----------------
     // Copied from the reference model in tb_snes_cic_lock.sv (SN64, GPL-3.0-or-later):

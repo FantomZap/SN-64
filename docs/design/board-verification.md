@@ -1,6 +1,6 @@
 # Is the v2 board right? What has been checked, and what has not
 
-**Status (2026-10-01): not ready to order. The wiring is traced and passes; the layout is unfinished; the socket footprint has not met a real socket.**
+**Status (2026-10-02): not ready to order. The wiring is traced and passes, and a real game runs through a model of the board. Reading the makers' data sheets found two wiring mistakes, both corrected. The layout is unfinished, the socket footprint has not met a real socket, and the first load of a blank board is undecided.**
 
 The owner's question: can the board be ordered without it turning out a paperweight? This note keeps the answer in one place. It lists every kind of mistake that would ruin a board, what checks it, and how far that check has got. "Passed" below always means the named check on the PC, never a test on hardware.
 
@@ -8,43 +8,112 @@ The owner's question: can the board be ordered without it turning out a paperwei
 
 | | After the board is made |
 |---|---|
-| The FPGA's logic | Can be corrected: it is loaded through the USB port. The fault found by the first game run was of this kind. |
+| The FPGA's logic | Can be corrected: it is loaded through the USB port. The faults found by the game runs were of this kind. |
 | Which pin goes where, the parts, the copper, the connectors' shape and position | Cannot. These are what the checks below are for. |
-| The USB port, the FPGA's configuration pins, the flash, the supplies | Cannot, and nothing else can be corrected without them: they are the way in. |
+| The FPGA's configuration pins, the flash, the supplies, the JTAG pads | Cannot, and nothing else can be corrected without them: they are the way in. |
+| The USB port | Its wiring cannot. And on this board the USB port only works once the FPGA has been loaded: see "The first load" below. |
 
 ## The checks
 
 | Mistake that would ruin a board | Check | State |
 |---|---|---|
-| A signal on the wrong FPGA ball, level-shifter pin, socket pin or edge finger | [verify_board_wiring.py](../../hardware/sn64-v2/tools/verify_board_wiring.py): traces every port from its ball through the level shifter to the connector pin, in the board file itself | **19 of 19 pass; 16 of 16 deliberate mistakes caught** |
-| A level-shifter byte pointing the wrong way, or enabled when it must not be | same | pass |
-| Board and schematic disagree | same: every pad's net compared with the schematic's list | pass (176 parts) |
-| FPGA supply, ground, configuration, clock balls wrong | same, against Lattice's pin-out table | pass |
-| Copper does not join what it should, or joins what it should not | KiCad's design-rule check | **6 connections still open, 6 thermal-relief errors** (`validation/pcb-open-connections.json`) |
-| The logic does not run a game | [game-simulation.md](game-simulation.md) | a real game boots and plays; one fault found and corrected |
-| The logic is too slow for the chip | route and timing check of the whole design on the board's pins | pass after the correction: every clock, SNES master 37.2 MHz against 21.5 needed |
-| A part's pin numbers differ from its maker's sheet | pin tables typed once in the schematic generator and once in the wiring check | both from memory of the same sheets: **an independent reading of each sheet is still to do** |
+| A signal on the wrong FPGA ball, level-shifter pin, socket pin or edge finger | [verify_board_wiring.py](../../hardware/sn64-v2/tools/verify_board_wiring.py): traces every port from its ball through the level shifter to the connector pin, in the board file itself | **21 of 21 pass; 20 of 20 deliberate mistakes caught** |
+| The same, with everything working together | [board-simulation.md](board-simulation.md): the owner's game through a model of the board made from the board file, cartridge and N64 plugged in by pin number | **a game boots and plays; two deliberately mis-wired boards are refused** |
+| A level-shifter byte pointing the wrong way, or enabled when it must not be | both of the above | pass, after the correction of 2026-10-02 |
+| Board and schematic disagree | wiring check: every pad's net compared with the schematic's list | pass (177 parts) |
+| FPGA supply, ground, configuration, clock balls wrong | wiring check, against Lattice's pin-out table | pass |
+| A part's pin numbers differ from its maker's sheet | each sheet read again, pin by pin, against the board | **done from the makers' sheets for 11 kinds of part and from the supplier's data for one; all agree** (table below). One small part not re-read |
+| A part is wired against a rule of its sheet | the same reading | **two found, both corrected** (below) |
+| Copper does not join what it should, or joins what it should not | KiCad's design-rule check | **6 connections still not routed, 6 thermal-relief errors** (`validation/pcb-open-connections.json`) |
+| The logic does not run a game | [game-simulation.md](game-simulation.md) | a real game boots and plays; 38 of 38 judged test programs pass; three faults found and corrected |
+| The logic is too slow for the chip | route and timing check of the whole design on the board's pins | pass with the final logic: every clock, SNES master 36.6 MHz against 21.5 needed |
 | A footprint does not fit its part | KiCad library footprints for standard packages; own footprints for the socket, the N64 edge, the USB-C, the buck-boost and an inductor | **not re-checked for v2** |
 | The cartridge socket's pads do not meet a real socket's tails | none possible on the PC | **open: no socket has been measured** |
-| The socket or the N64 edge is mirrored or back to front | orientation reasoned from the SNESdev and N64brew pin-outs and SummerCart64's board (2026-09-30); the wiring check catches a mirrored net list but not a mirrored footprint | **to be confirmed a second time from the sources** |
-| A supply gives the wrong voltage or cannot carry the load | divider values recomputed; budget from the console's 3.3 V | **review still to do** |
-| The level shifters misbehave while the cartridge's 5 V is off | their B side is on the switched 5 V | **to be settled from the data sheet** |
+| The socket or the N64 edge is mirrored or back to front | orientation reasoned from the SNESdev and N64brew pin-outs and SummerCart64's board (2026-09-30); the wiring check and the board run catch a mirrored net list but not a mirrored footprint. Looked at again on 2026-10-02: the board file has socket pins 1 to 31 and edge pins 1 to 25 on the face towards the player, both with pin 1 at the player's left. The SNESdev page says in so many words that pins 01 to 31 are the row nearest the console's front, drawn from the console's right side, which puts pin 1 at the left: the socket agrees. The N64brew page gives the edge's pin table but not its orientation; the edge is SummerCart64's own footprint, the same way round in SummerCart64's own shell | **socket: confirmed from the source a second time. N64 edge: by construction only; a second source is still to find** |
+| A supply gives the wrong voltage or cannot carry the load | divider values recomputed (5.0, 3.3, 1.1 V; reset threshold 3.03 V); budget from the console's 3.3 V | **budget review still to do** |
+| A blank board cannot be loaded | see "The first load" | **open: the owner's decision** |
 | The board breaks PCBWay's rules | the board's own rules are 0.1 mm spacing, 0.125 mm ring; PCBWay's are to be confirmed with the quote | open |
+
+## What the makers' data sheets said
+
+Read on 2026-10-02 from each maker's own sheet, pin by pin, against the pads of the board file. The sheets are kept on the owner's PC under `build/`, not in the repository.
+
+| Part | Sheet | Pins agree with the board | What else it says that matters here |
+|---|---|---|---|
+| SN74ALVC164245 level shifter (U201 to U204) | TI SCAS416Q | yes, all 48 | A side is 2.5 or 3.3 V, B side 3.3 or 5 V; direction and enable pins belong to the A supply. Section 10: power the A side first, with `/OE` pulled up to it. Section 3: the inputs of both sides are always active and must not float. A B-side pin may be at most 0.5 V above the B supply |
+| SN74LVC07A open-drain driver (U205) | TI SCAS595W | yes | |
+| TPS2553 cartridge switch (U12) | TI SLVS841F | yes; enable is active high | |
+| TLA2528 supply converter (U6) | TI SBAS961A | yes | Table 2: the I2C address is set by resistors on ADDR; with the pin open it is 0x10 |
+| TPS3808G01 reset supervisor (U3) | TI SBVS050N | yes | timing pin open: fixed delay |
+| TPS2121 input selector (U7) | TI SLVSEA3F | yes | |
+| TPS63070 5 V converter (U8) | TI SLVSC58B | yes | |
+| TLV62569 3.3 V and 1.1 V converters (U9, U10) | TI SLVSDG1C | yes | enable must not float: it is driven by the 5 V converter's power-good with its pull-up |
+| W25Q128JV flash (U2) | Winbond, revision F | yes | |
+| 27 MHz oscillator (X1) | pin names from the supplier's part data (LCSC C3003262) | yes | the maker's own sheet has not been read |
+| LFE5U-85F FPGA (U1) | Lattice pin-out table | yes (wiring check) | |
+| AP2112K-2.5 regulator (U11) | Diodes DS39724 rev. 2-2 | yes | |
+| USBLC6-2SC6 protection (U4) | not re-read: the maker's site did not answer; KiCad's library symbol | | **open** |
+
+### The two mistakes, and what was done
+
+**1. One half of a level shifter was switched on all the time.**
+
+- U204's second byte brings the cartridge's CIC data, `/IRQ` and `/RESET` back to the FPGA. Its enable pin was tied to ground.
+- The B side of every level shifter is fed from the cartridge's switched 5 V. In the menu, with the cartridge off, that byte was enabled with one of its two supplies missing. The sheet's rule is to keep `/OE` high until both supplies are up. What the part does otherwise is not stated: an undefined level on its outputs and extra current are possible.
+- **Now:** the enable is a line of its own, `SENSE_OE_N`, driven by the FPGA and pulled up by a new 100 k resistor (R214). The logic switches the byte on only while the cartridge has its 5 V. The line uses the FPGA ball and trace that carried the EXPAND sense, which the logic never read; EXPAND keeps its pull-up. The byte's four unused channels have both pins on ground, and the FPGA's pads on the data and sense lines have a pull, so that nothing floats while a byte is off.
+- The other seven bytes already followed the rule: their enables are pulled up and driven by the FPGA.
+- One thing is accepted as it is: five unused outputs of U203 are open. They are driven whenever their byte is on and have no supply while the cartridge is off; they float only for the few milliseconds between the 5 V coming up and the byte being switched on.
+
+**2. The supply converter's address pin was tied to ground.**
+
+- The logic talks to the converter at address 0x10. The sheet's table gives 0x10 for the address pin left open, and three other addresses for a resistor to ground. Straight to ground is not in the table.
+- If the part took another address, the logic would get no answer, would report a converter error, and would never switch a cartridge on. It could have been put right in the logic afterwards, by trying the other addresses.
+- **Now:** the pin is open, as the table has it.
+
+Both changes were carried into the routed board by [apply_enable_fix_v2.py](../../hardware/sn64-v2/tools/apply_enable_fix_v2.py): 10 pads on new nets, 9.2 mm of new track on the bottom layer, one resistor, two ground bars across pads, the dead branch of the EXPAND trace removed. KiCad's design-rule check shows no new error and the same six open connections as before. The wiring check has a rule for each, and the board run refuses a board with either mistake put back.
 
 ## What the wiring check covers
 
 It reads three things that are made independently of one another: the board file (which pad is on which net), the FPGA constraints (which port is on which ball), and the two connector tables that v1 drew from other people's working boards (OpenSFC, sd2snes and the Sanni reader for the SNES socket; SummerCart64 and ModRetro's schematics for the N64 edge). A port passes when its ball's net reaches the connector pin that carries that signal on a real console, through a level-shifter channel that points the right way and is switched by the right port.
 
-- 43 outputs to the cartridge, D0 to D7 both ways, 5 inputs from it, 3 open-drain pulls and PROGRAMN.
+- 43 outputs to the cartridge, D0 to D7 both ways, 4 inputs from it, 3 open-drain pulls and PROGRAMN.
+- Every level-shifter enable driven by the FPGA and pulled up; no pin that can float for long left open.
 - 27 signals on the N64 edge, its supply fingers and the unused 12 V fingers.
-- The flash on the configuration balls, the mode pins, the clock, the reset supervisor, the USB pins and their resistors, the telemetry converter and the test-current divider of the cartridge check, the cartridge sound input.
+- The flash on the configuration balls, the mode pins, the clock, the reset supervisor, the USB pins and their resistors, the cartridge sound input.
+- The supply converter: address pin, I2C lines, supplies, and the cartridge supply on the input the cartridge check uses.
 - Every supply and ground ball of the FPGA.
 
-`--negative` makes 16 deliberate mistakes one at a time, among them the socket's rows exchanged, the socket mirrored, a byte pointing the wrong way and two ports exchanged in the constraints. Each is caught.
+`--negative` makes 20 deliberate mistakes one at a time, among them the socket's rows exchanged, the socket mirrored, a byte pointing the wrong way, a byte enabled all the time, the converter's address pin on ground and two ports exchanged in the constraints. Each is caught.
 
 It says nothing about voltages, timing, footprints or whether the logic works.
 
-## Found on the way
+## The first load
 
-- **The status LED is wired to light when its FPGA pin is low**, and the logic drives the pin high while a game runs. The LED would be on when idle and off in a game. A matter of the logic, to be corrected there.
-- **The cartridge's control lines have no pull resistors on the 5 V side.** While the cartridge has power and the level shifters are released, `/RD`, `/WR` and the address lines float. The logic holds `/RESET` low in those moments, which protects battery RAM on boards that gate it with `/RESET`. To be looked at with the power-off behaviour of the level shifters.
+On the v2 board the USB port is part of the FPGA's logic. A board that comes from the factory with an empty flash has no logic, so its USB port does nothing. The first load has to come another way:
+
+| Way | What it needs |
+|---|---|
+| PCBWay programs the flash chip before it is soldered | their programming service, and a file from us |
+| The five JTAG pads on the board | a JTAG adapter and five wires or spring pins |
+| A USB-to-JTAG chip on the board, as v1 had | a chip and its parts added back; the owner's decision |
+
+After a first load, updates go over USB. If an update ever breaks the USB part of the logic, the way back is the JTAG pads again. The specification asks for loading a blank board over USB; v2 as drawn does not do that. This is the owner's decision and is open.
+
+## Still open before an order
+
+| What | Who |
+|---|---|
+| Finish the six connections that are not routed: the converter's supply pin, a flash data line, USB D+ and its pull-up, N64 AD6 and the N64 controller line. And the six thermal-relief errors | Claude |
+| Measure a real cartridge socket against the footprint | the owner: a socket sample is needed |
+| The first load of a blank board | the owner |
+| Footprints of the own-drawn parts against their makers' drawings | Claude |
+| Socket and N64 edge orientation, a second time from the sources | Claude |
+| Power budget from the console's 3.3 V | Claude |
+| The one small part whose sheet was not re-read (USB protection) | Claude |
+| PCBWay's rules, production files, quote | Claude, then the owner's go-ahead |
+| Sound: the cartridge sound input adds a faint pattern to every game ([game-simulation.md](game-simulation.md)); a matter of the logic | Claude |
+
+## Found on the way, and settled
+
+- **The status LED** lights when its FPGA pin is low; the logic drove it high in a game. Corrected in the logic on 2026-10-02; the board run checks that it is lit in a game.
+- **The cartridge's control lines have no pull resistors on the 5 V side.** The logic now drives them at rest whenever the cartridge has its 5 V, and holds `/RESET` low for 1 ms before it lets them go at power-off ([board-simulation.md](board-simulation.md)). While the cartridge is off, neither it nor that side of the level shifters has a supply.

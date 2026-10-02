@@ -512,3 +512,37 @@ Not covered by it: footprints, voltages, the socket's fit, the six connections t
 ## 2026-10-01 — shell: the two lower screw posts level with the recess
 
 The owner: the two bottom screw holes had a cylinder standing out of the stepped-in corners of the back; they should be flush with the indented portion. Measured on SummerCart64's back half, the recess floor is 5.6 mm from the board's mid-plane; our posts went to the back face at 9.6. They now end at 5.6. Checked in the model, nothing printed. Write-up: [v2-shell.md](design/v2-shell.md), last section.
+
+## 2026-10-02 — the game through the board's own wiring; two wiring mistakes found in the data sheets and corrected
+
+The owner asked for the board to be tested as a whole, with a game. The logic run of the day before joined the cartridge and the N64 to the logic signal by signal, so a wire on the board that goes to the wrong pin would not have shown. Three things were done.
+
+**1. The test set's results.** The 49 free test programs through the logic: 23 processor tests, 7 sound-processor tests and 5 memory-map tests all pass (the words PASS and FAIL are read off the last picture in the tests' own font), 2 sound programs and the controller program pass, 11 picture programs were looked at and show what they draw. No picture missed, no two drivers on the data lines in any run. The first judging of the batch read the tables by position and called two tests failed; the pictures showed every row PASS, and the judge now looks for the words anywhere on the screen. Table in [game-simulation.md](design/game-simulation.md).
+
+**2. A model of the board, made from the board file.** `hardware/sn64-v2/tools/make_board_sim.py` turns the board file's connection list into a netlist: the real top level `sn64_board_top` on its balls, a model of each part on its pads with the pin numbers of its maker's data sheet, the pull resistors, the dividers on the supply converter's inputs, the sound network. `fpga/tests/tb_board_game.sv` plugs the cartridge into the socket's pins and an N64 onto the edge fingers by number. Nothing of the start-up is shortened. Write-up: [board-simulation.md](design/board-simulation.md).
+
+- The owner's Super Mario World boots and plays through it. From Play to a running game takes 0.45 s on the board: 0.38 s of that is the cartridge check charging the rail. The key chip in the cartridge is recognised through the board's open-drain lines (678 rounds, no mismatch) and the header is read through the level shifters. The pictures are the same as the logic run's.
+- At the end of a run the cartridge is powered off as the menu does it, and the order is checked.
+- A cartridge plugged in back to front is refused through the board's own parts: the check gives up after its 4.0 s limit with the rail at 0.46 V, and the 5 V is never switched on.
+
+**3. The makers' data sheets, read again pin by pin.** Eleven kinds of part against their makers' sheets and one against its supplier's data: every pin number agrees with the board. Two wiring rules did not, and neither could have shown in a simulation with ideal parts:
+
+- **One half of a level shifter was switched on all the time** (U204's byte from the socket to the FPGA had its enable on ground), also while its 5 V side has no supply in the menu. TI's sheet wants `/OE` high until both supplies are up. It now has an enable of its own, `SENSE_OE_N`, on the ball and trace of the EXPAND sense that nothing read, with a 100 k pull-up (R214). Unused channels have both pins on ground; the FPGA's pads on lines that can float have a pull.
+- **The supply converter's address pin was on ground.** The sheet gives the address the logic uses for the pin left open, and has no setting for a pin tied to ground. On a board the converter might not have answered, and no cartridge would ever have been powered. The pin is now open.
+
+Both were carried into the routed board by a script that changes only the copper involved (`apply_enable_fix_v2.py`): KiCad's rule check shows no new error and the same six open connections. The wiring check has a rule for each (21 checks, 20 deliberate mistakes caught), and the board run refuses a board with either mistake put back.
+
+**What the board run found in the logic, corrected the same day:**
+
+- The status LED was dark in a game (it lights with a low pin).
+- The cartridge was out of reset for about 90 ns at every start with nothing driving its control pins, and at power-off the pins were let go in the same instant as `/RESET` was pulled. The pins are now held at rest whenever the cartridge has its 5 V, and `/RESET` is held low for 1 ms before the 5 V goes. Two fault builds put the old behaviour back and are refused.
+
+**Evidence.** `evaluate.py --mode sim` passes with the two new fault builds. The logic run of Super Mario World gives the same 33 pictures as before the change. The design routes on the board's pins with every clock passing (SNES master 36.6 MHz against 21.5 needed; `fpga/reports/v2-board-route.json`). Boot program rebuilt for two new credits (Peter Lemon's test programs, the ares emulator): 163,840 bytes, SHA-256 `f601658de41924e0776d60e85c05e68ba05d75f1c3bf1ddd9edcc603d644a718`, 157,551 used; host tests 1,065 checks.
+
+**Found and not settled:**
+
+- **A blank board cannot be loaded over USB.** On v2 the USB port is logic inside the FPGA. The first load needs the JTAG pads or a flash programmed before assembly. The specification asks for blank-target loading over USB. The owner's decision.
+- Six connections of the board are still not routed, and each is needed: the converter's supply pin, a flash data line, USB D+ and its pull-up, N64 AD6, the N64 controller line.
+- The cartridge sound input still adds a faint pattern to every game; a gate in the logic is still to do.
+
+What stands between the design and an order is in [board-verification.md](design/board-verification.md).

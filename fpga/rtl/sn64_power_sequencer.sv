@@ -12,8 +12,11 @@
 // belongs to the analog fault circuit; this block is the digital half).
 //
 // States: OFF -> [CART_CHECK -> CHECK_END] -> RESET_ASSERTED -> CART_5V_RAMP ->
-// IFACE_RAIL -> RUNNING; any fault or loss of request -> SHUTDOWN (outputs off
-// first, then rails) -> OFF.
+// IFACE_RAIL -> RUNNING; loss of request -> SHUTDOWN -> OFF; any fault -> FAULT.
+// SHUTDOWN after a run: /RESET is pulled at once and held for SHUTDOWN_HOLD_MS with the rails
+// still up (the top level keeps the socket pins at rest meanwhile); only then the rails go, and
+// with them the pins. A cartridge's battery RAM is guarded by its /RESET: it must be low before
+// anything else changes. A fault does not wait: /RESET, pins and rails go on the same clock.
 // Faults latch until `fault_clear` (a deliberate operator/bootstrap action) so
 // nothing restarts automatically after a trip.
 //
@@ -40,6 +43,7 @@ module sn64_power_sequencer #(
     parameter CLK_HZ = 21_477_272,
     parameter RESET_HOLD_MS = 20,     // cartridge /RESET held after 5 V valid
     parameter RAIL_TIMEOUT_MS = 50,   // max wait for a rail to report valid
+    parameter SHUTDOWN_HOLD_MS = 1,   // /RESET low this long before the rails are switched off after a run
     parameter PROBE_ENABLE = 0,       // 1: this build has the cartridge check
     parameter PROBE_TIMEOUT_MS = 4000,        // max wait for the rail to rise under the test current
     parameter [11:0] PROBE_OK_CODE = 12'd269, // rail reading (ADC code) that rules out a reversed cartridge
@@ -91,6 +95,7 @@ module sn64_power_sequencer #(
     localparam [1:0] M_ENFORCE=2'd0, M_REPORT=2'd1, M_OFF=2'd2, M_CHECK_ONLY=2'd3;
     localparam integer RESET_TICKS = CLK_HZ / 1000 * RESET_HOLD_MS;
     localparam integer RAIL_TICKS  = CLK_HZ / 1000 * RAIL_TIMEOUT_MS;
+    localparam integer HOLD_TICKS  = CLK_HZ / 1000 * SHUTDOWN_HOLD_MS;
     localparam integer PROBE_TICKS = CLK_HZ / 1000 * PROBE_TIMEOUT_MS;
     localparam [7:0] FAULT_PROBE = 8'h01;   // rail held low under the test current: reversed or shorted cartridge
 
@@ -192,11 +197,18 @@ module sn64_power_sequencer #(
                     // SHUTDOWN or FAULT. The SNES master clock is never changed
                     // here (region is fixed at power-on; see sn64_clock_init).
                     cart_reset_pull <= hold_reset;
-                    if (!run_request || !host_reset_n) state <= S_SHUTDOWN;
+                    if (!run_request || !host_reset_n) begin cart_reset_pull <= 1'b1; timer <= 0; state <= S_SHUTDOWN; end
                 end
-                S_SHUTDOWN: begin                   // outputs off (bus_permit already 0), then rails
-                    cart_reset_pull <= 1'b1; iface_rail_enable <= 1'b0; cart_5v_enable <= 1'b0; probe_req <= 1'b0;
-                    state <= S_OFF;
+                S_SHUTDOWN: begin                   // /RESET low (bus_permit already 0); after a run the rails stay up
+                    cart_reset_pull <= 1'b1; probe_req <= 1'b0;      // for the hold time, then they go
+                    timer <= timer + 1;
+`ifdef SN64_FAULT_NO_SHUTDOWN_HOLD            // fault injection: the rails go at once (tb_system must fail)
+                    if (1'b1) begin
+`else
+                    if (!cart_5v_enable || timer >= HOLD_TICKS) begin
+`endif
+                        iface_rail_enable <= 1'b0; cart_5v_enable <= 1'b0; state <= S_OFF;
+                    end
                 end
                 S_FAULT: begin
                     cart_5v_enable <= 1'b0; iface_rail_enable <= 1'b0; cart_reset_pull <= 1'b1; probe_req <= 1'b0;

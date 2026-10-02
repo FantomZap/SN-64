@@ -1,10 +1,10 @@
 {
- "date": "2026-10-01",
- "board": "sn64-v2.kicad_pcb",
- "note": "single vertical board for the shorter mushroom-cap tower shell: top edge 60 mm above the shoulders, SNES socket J2 straddling it (pins 1-31 on B.Cu), USB-C 32.5 mm above the shoulders; mounting holes H1, H2, H5, H6 are 4.0 mm for the shell's through-hole posts, H3 and H4 are 2.5 mm for its registration pins; DRC errors are single-spoke thermal reliefs",
- "tracks": 3603,
- "vias": 1066,
- "track_length_mm": 7617,
+ "date": "2026-10-02",
+ "board": "hardware/sn64-v2/sn64-v2.kicad_pcb",
+ "note": "single vertical board for the shorter mushroom-cap tower shell: top edge 60 mm above the shoulders, SNES socket J2 straddling it (pins 1-31 on B.Cu), USB-C 32.5 mm above the shoulders; mounting holes H1, H2, H5, H6 are 4.0 mm for the shell's through-hole posts, H3 and H4 are 2.5 mm for its registration pins; 2026-10-02: U204 byte 2 enable on SENSE_OE_N with R214, U6 ADDR open (apply_enable_fix_v2.py); DRC errors are single-spoke thermal reliefs",
+ "tracks": 3596,
+ "vias": 1059,
+ "track_length_mm": 7576,
  "signal_nets_fully_connected": "213 of 218",
  "drc_errors": {
   "starved_thermal": 6
@@ -76,7 +76,7 @@
    ],
    "items": [
     "Pad C12 [USB_DP_F] of U1 on F.Cu",
-    "Pad 2 [USB_DP_F] of R19 on B.Cu"
+    "Via [USB_DP_F] on F.Cu - B.Cu"
    ],
    "from": {
     "x": -1.2,
@@ -93,7 +93,7 @@
    ],
    "items": [
     "Pad C14 [USB_PU] of U1 on F.Cu",
-    "Pad 1 [USB_PU] of R21 on B.Cu"
+    "Via [USB_PU] on F.Cu - B.Cu"
    ],
    "from": {
     "x": -2.8,
@@ -109,12 +109,12 @@
     "FLASH_D2"
    ],
    "items": [
-    "Track [FLASH_D2] on F.Cu, length 1.1000 mm",
+    "Track [FLASH_D2] on B.Cu, length 3.1113 mm",
     "Pad Y2 [FLASH_D2] of U1 on F.Cu"
    ],
    "from": {
     "x": 18.6,
-    "y": -36.8
+    "y": -35.7
    },
    "to": {
     "x": 6.8,
