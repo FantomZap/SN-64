@@ -54,7 +54,7 @@ The mailbox resets to `0x0000` (no buttons), so before the bootstrap writes anyt
 
 ## Default N64 → SNES mapping
 
-**In force since 2026-10-01 (owner's decision):** every N64 button gives the Super NES button of the same name (A, B, L, R, Start, the D-pad) and Z gives Select. X and Y have no namesake, so the C buttons give the Super NES diamond in its own positions: C-Up X, C-Left Y, C-Down B, C-Right A. The stick also presses the D-pad beyond a threshold. A player can change any row on the boot menu's mapping screen; nothing is kept after power-off yet. Details: [n64-bootstrap.md](n64-bootstrap.md), last section.
+**In force since 2026-10-01 (owner's decision):** every N64 button gives the Super NES button of the same name (A, B, L, R, Start, the D-pad) and Z gives Select. X and Y have no namesake, so the C buttons give the Super NES diamond in its own positions: C-Up X, C-Left Y, C-Down B, C-Right A. The stick presses the D-pad when it is pushed past a set part of its travel, 50 % to begin with, in eight directions (two at once towards a corner); the player can change the percentage or turn it off. A player can change any row on the boot menu's mapping screen; nothing is kept after power-off yet. Details: [n64-bootstrap.md](n64-bootstrap.md), last section.
 
 The mapping runs in the N64 bootstrap, not the FPGA, so this change touched no logic.
 

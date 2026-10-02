@@ -54,6 +54,10 @@ enum {
     SN64_IN_L, SN64_IN_R, SN64_IN_START, SN64_IN_D_UP, SN64_IN_D_DOWN, SN64_IN_D_LEFT, SN64_IN_D_RIGHT,
     SN64_MAP_ENTRIES
 };
+// The stick and the D-pad as a whole are not table entries. Where a row of the mapping screen
+// or a picture needs a number for them, these are the numbers.
+#define SN64_IN_STICK    SN64_MAP_ENTRIES
+#define SN64_OUT_DPAD    SNES_BUTTONS
 
 typedef struct {
     uint16_t    n64;        // one N64_BTN_* bit
@@ -63,23 +67,50 @@ typedef struct {
 
 typedef struct {
     sn64_map_entry_t entry[SN64_MAP_ENTRIES];
-    int8_t           stick_threshold;   // |stick| >= threshold also presses the D-pad; 0 = off
+    uint8_t          stick_percent;     // the stick presses the D-pad when pushed this far, in percent
+                                        // of a full throw; 0: the stick presses nothing
 } sn64_map_t;
 
 // The default table (owner, 2026-10-01): every button to the SNES button of the same name
 // (A, B, L, R, Start, the D-pad) and Z to Select. X and Y have no namesake on an N64 pad:
 // the C buttons give the SNES diamond in its own positions (C-Up X, C-Left Y, C-Down B,
-// C-Right A).
+// C-Right A). The stick presses the D-pad from half its travel.
 void sn64_map_default(sn64_map_t *map);
 bool sn64_map_is_default(const sn64_map_t *map);
 // The N64 button (one N64_BTN_* bit) and the name of a table entry; 0 and "" outside the table.
 uint16_t    sn64_map_n64_bit(int entry);
 const char *sn64_map_n64_name(int entry);
 
-// Map one N64 controller state to a SNES button image. Opposing directions
-// (Up+Down, Left+Right), which a real SNES D-pad cannot produce, cancel.
+// Map one N64 controller state to a SNES button image: the buttons through the table, the
+// stick as set below. Opposing directions (Up+Down, Left+Right), which a real SNES D-pad
+// cannot produce, cancel.
 uint16_t sn64_map_buttons(const sn64_map_t *map, uint16_t n64_buttons,
                           int8_t stick_x, int8_t stick_y);
+
+// ---- the stick (owner, 2026-10-01) ----
+// Pushed further than a set part of its travel, the stick presses the D-pad in the direction
+// it points: one of eight, so a push towards a corner presses two directions at once. How far
+// is measured from the middle, the same in every direction; the circle is cut into eight equal
+// slices of 45 degrees, one round each of the eight notches of the controller's gate. How far
+// is far enough is the player's choice: 20 to 80 percent in steps of ten, 50 to begin with.
+// Or the stick presses nothing.
+//
+// A full throw is taken as 80 of the controller's own units. libdragon's joypad.h gives about
+// 85 for an original controller in good condition and as little as 60 for a well-worn one, so
+// a worn stick still reaches 75 percent.
+#define SN64_STICK_FULL             80
+#define SN64_STICK_PERCENT_DEFAULT  50
+#define SN64_STICK_CHOICES          8       // the D-pad from 20, 30 ... 80 percent, and nothing
+
+// The directions (SNES_BTN_UP ...) the stick presses at this position.
+uint16_t sn64_map_stick(const sn64_map_t *map, int8_t stick_x, int8_t stick_y);
+// How far the stick is pushed, in percent of a full throw; 100 at most.
+unsigned sn64_stick_push(int8_t stick_x, int8_t stick_y);
+// The choices in the order the screen offers them: the percentage of choice `index`, and 0 for
+// the last one (the stick presses nothing) and for an index outside the list. And back.
+unsigned sn64_map_stick_choice(int index);
+int      sn64_map_stick_choice_index(unsigned percent);
+void     sn64_map_set_stick(sn64_map_t *map, unsigned percent);
 
 // The menu shortcut is not the game's business: with all four C buttons down, none of them
 // is passed on. Returns the buttons to map.
@@ -95,7 +126,8 @@ void sn64_map_set_target(sn64_map_t *map, int entry, int snes_bit);
 #define SN64_MAP_CHOICES (SNES_BUTTONS + 1)
 int  sn64_map_choice(int index);
 int  sn64_map_choice_index(int snes_bit);
-// The SNES buttons no entry of the table gives (the stick is not counted): a mask.
+// The SNES buttons nothing gives: no entry of the table, and for the D-pad's four not the
+// stick either. A mask.
 uint16_t sn64_map_unreachable(const sn64_map_t *map);
 // "B", "Y", "Select", ... for a bit number; "nothing" for -1.
 const char *sn64_snes_button_name(int snes_bit);

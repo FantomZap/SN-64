@@ -212,15 +212,17 @@ static void draw_arm(const sn64_canvas_t *c, int cx, int cy, int len, int dir, b
 }
 
 // The stick: a dark well and a cap that moves with the stick, three pixels at a full throw.
-static void draw_stick(const sn64_canvas_t *c, int x, int y, int r, int8_t sx, int8_t sy)
+// The cap lights while the stick is pressing something, and is white when the cursor marks it.
+static void draw_stick(const sn64_canvas_t *c, int x, int y, int r, int8_t sx, int8_t sy, bool lit, bool marked)
 {
-    static const rgb_t well = RGB_CROSS, edge = RGB_EDGE, cap = RGB_CAP;
+    static const rgb_t well = RGB_CROSS, edge = RGB_EDGE, rest = RGB_CAP, glow = RGB_GLOW, white = RGB_WHITE;
+    rgb_t cap = marked ? white : lit ? glow : rest;
     int dx = sx * 3 / 80, dy = -(sy * 3 / 80);      // the N64 stick: +y is up; a full throw is about 80
     if (dx > 3) dx = 3;
     if (dx < -3) dx = -3;
     if (dy > 3) dy = 3;
     if (dy < -3) dy = -3;
-    disc(c, x, y, r + 1, px(edge));
+    disc(c, x, y, r + 1, px(lit ? white : edge));
     disc(c, x, y, r, px(well));
     disc(c, x + dx, y + dy, r >= 12 ? 6 : 5, px(cap));
 }
@@ -366,7 +368,7 @@ const char *sn64_input_pad_name(unsigned which)
 }
 
 void sn64_pad_draw_input(const sn64_canvas_t *c, int x0, int y0, unsigned which, uint16_t n64_buttons,
-                         int8_t stick_x, int8_t stick_y, int cursor, bool blink)
+                         int8_t stick_x, int8_t stick_y, bool stick_lit, int cursor, bool blink)
 {
     if (which >= SN64_PAD_INPUT_COUNT) which = 0;
     const input_pad_t *p = &input_pads[which];
@@ -379,7 +381,8 @@ void sn64_pad_draw_input(const sn64_canvas_t *c, int x0, int y0, unsigned which,
                 draw_outline(c, x0, y0, l->shape, px(rim_of(p->tint)), 1);
             draw_outline(c, x0, y0, l->shape, px(p->tint), 0);
             draw_cross(c, x0 + l->dpad.x, y0 + l->dpad.y, l->dpad.r);
-            draw_stick(c, x0 + l->stick.x, y0 + l->stick.y, l->stick.r, stick_x, stick_y);
+            draw_stick(c, x0 + l->stick.x, y0 + l->stick.y, l->stick.r, stick_x, stick_y, stick_lit,
+                       blink && cursor == SN64_IN_STICK);
         }
         for (int e = 0; e < SN64_MAP_ENTRIES; e++) {
             const control_t *k = &input_controls[e];
@@ -414,9 +417,16 @@ void sn64_pad_draw_input(const sn64_canvas_t *c, int x0, int y0, unsigned which,
 
 bool sn64_pad_input_box(unsigned which, int entry, bool second, sn64_box_t *box)
 {
-    if (which >= SN64_PAD_INPUT_COUNT || entry < 0 || entry >= SN64_MAP_ENTRIES)
+    if (which >= SN64_PAD_INPUT_COUNT || entry < 0 || entry > SN64_IN_STICK)
         return false;
     const input_layout_t *l = &layouts[input_pads[which].layout];
+    if (entry == SN64_IN_STICK) {
+        if (second)
+            return false;
+        *box = (sn64_box_t){ l->stick.x - l->stick.r - 1, l->stick.y - l->stick.r - 1,
+                             l->stick.x + l->stick.r + 1, l->stick.y + l->stick.r + 1 };
+        return true;
+    }
     const control_t *k = &input_controls[entry];
     const at_t *a = &l->at[entry];
     if (second) {
@@ -513,7 +523,8 @@ void sn64_pad_draw_snes(const sn64_canvas_t *c, int x0, int y0, unsigned which, 
     draw_cross(c, x0 + snes_dpad.x, y0 + snes_dpad.y, snes_dpad.r);
     for (int bit = 0; bit < 10; bit++) {
         const at_t *a = &snes_at[bit];
-        bool lit = (snes_buttons & (1u << bit)) != 0, marked = blink && cursor == bit;
+        bool lit = (snes_buttons & (1u << bit)) != 0;
+        bool marked = blink && (cursor == bit || (cursor == SN64_OUT_DPAD && snes_controls[bit].kind == K_ARM));
         int face = snes_controls[bit].face, g = snes_controls[bit].glyph;
         switch (snes_controls[bit].kind) {
         case K_DISC:
@@ -575,8 +586,26 @@ static void icon_capsules(const sn64_canvas_t *c, int x, int y, bool right, bool
     }
 }
 
+void sn64_pad_icon_dpad(const sn64_canvas_t *c, int x, int y, uint16_t snes_dirs)
+{
+    static const rgb_t on = RGB_ICON_ON, glow = RGB_GLOW;
+    sn64_pad_fill(c, x + 4, y, x + 6, y + 10, px(on));
+    sn64_pad_fill(c, x, y + 4, x + 10, y + 6, px(on));
+    if (snes_dirs & SNES_BTN_UP)    sn64_pad_fill(c, x + 4, y, x + 6, y + 3, px(glow));
+    if (snes_dirs & SNES_BTN_DOWN)  sn64_pad_fill(c, x + 4, y + 7, x + 6, y + 10, px(glow));
+    if (snes_dirs & SNES_BTN_LEFT)  sn64_pad_fill(c, x, y + 4, x + 3, y + 6, px(glow));
+    if (snes_dirs & SNES_BTN_RIGHT) sn64_pad_fill(c, x + 7, y + 4, x + 10, y + 6, px(glow));
+}
+
 void sn64_pad_icon_input(const sn64_canvas_t *c, int x, int y, int entry, bool lit)
 {
+    if (entry == SN64_IN_STICK) {               // the stick: its well and its cap
+        static const rgb_t rim = RGB_ICON_DIM, well = RGB_CROSS, cap = RGB_CAP, glow = RGB_GLOW;
+        disc(c, x + 5, y + 5, 5, px(rim));
+        disc(c, x + 5, y + 5, 4, px(well));
+        disc(c, x + 5, y + 5, 2, px(lit ? glow : cap));
+        return;
+    }
     if (entry < 0 || entry >= SN64_MAP_ENTRIES)
         return;
     const control_t *k = &input_controls[entry];

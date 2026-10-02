@@ -9,8 +9,7 @@
 //  - X and Y have no namesake on an N64 pad. The C-button diamond is laid out like the SNES
 //    diamond (C-Up = X, C-Left = Y, C-Down = B, C-Right = A), so every SNES face button is
 //    also reachable in its SNES position. The player can change any of it on the mapping screen.
-//  - The analog stick also drives the D-pad beyond a threshold (about half of a typical
-//    +/-80 stick range).
+//  - The stick presses the D-pad from half its travel (sn64_map_stick below).
 #ifndef SN64_FAULT_SWAP_AB
 #define SN64_DEFAULT_A_TARGET SNES_BTN_A
 #define SN64_DEFAULT_B_TARGET SNES_BTN_B
@@ -40,7 +39,7 @@ static const sn64_map_entry_t default_entries[SN64_MAP_ENTRIES] = {
 void sn64_map_default(sn64_map_t *map)
 {
     memcpy(map->entry, default_entries, sizeof(default_entries));
-    map->stick_threshold = 40;
+    map->stick_percent = SN64_STICK_PERCENT_DEFAULT;
 }
 
 uint16_t sn64_map_n64_bit(int entry)
@@ -58,7 +57,7 @@ bool sn64_map_is_default(const sn64_map_t *map)
     for (int i = 0; i < SN64_MAP_ENTRIES; i++)
         if (map->entry[i].snes != default_entries[i].snes)
             return false;
-    return true;
+    return map->stick_percent == SN64_STICK_PERCENT_DEFAULT;
 }
 
 uint16_t sn64_map_buttons(const sn64_map_t *map, uint16_t n64_buttons,
@@ -69,13 +68,7 @@ uint16_t sn64_map_buttons(const sn64_map_t *map, uint16_t n64_buttons,
         if (n64_buttons & map->entry[i].n64)
             snes |= map->entry[i].snes;
 
-    if (map->stick_threshold > 0) {
-        int t = map->stick_threshold;
-        if (stick_y >=  t) snes |= SNES_BTN_UP;      // N64 stick: +y is up
-        if (stick_y <= -t) snes |= SNES_BTN_DOWN;
-        if (stick_x <= -t) snes |= SNES_BTN_LEFT;
-        if (stick_x >=  t) snes |= SNES_BTN_RIGHT;
-    }
+    snes |= sn64_map_stick(map, stick_x, stick_y);
 
     if ((snes & (SNES_BTN_UP | SNES_BTN_DOWN)) == (SNES_BTN_UP | SNES_BTN_DOWN))
         snes &= (uint16_t)~(SNES_BTN_UP | SNES_BTN_DOWN);
@@ -83,6 +76,58 @@ uint16_t sn64_map_buttons(const sn64_map_t *map, uint16_t n64_buttons,
         snes &= (uint16_t)~(SNES_BTN_LEFT | SNES_BTN_RIGHT);
 
     return snes & SNES_BTN_ALL;
+}
+
+// ---- the stick ----
+
+uint16_t sn64_map_stick(const sn64_map_t *map, int8_t stick_x, int8_t stick_y)
+{
+    int x = stick_x, y = stick_y;
+    int ax = x < 0 ? -x : x, ay = y < 0 ? -y : y;
+    int t = map->stick_percent * SN64_STICK_FULL / 100;
+    uint16_t dirs = 0;
+    if (map->stick_percent == 0 || ax * ax + ay * ay < t * t)
+        return 0;                               // not pushed far enough, whichever way it points
+#ifdef SN64_FAULT_STICK_AXES
+    // Fault injection for the host test: each axis on its own against the threshold. A push
+    // towards a corner then needs more travel than a push straight along an axis.
+    bool across = ax >= t, along = ay >= t;
+#else
+    // Which of the eight slices it points into: both directions if the smaller part is at
+    // least tan 22.5 degrees (169/408 = 0.41422) of the larger, else the larger one alone.
+    int big = ax > ay ? ax : ay, small = ax > ay ? ay : ax;
+    bool corner = small * 408 >= big * 169;
+    bool across = corner || ax >= ay, along = corner || ay > ax;
+#endif
+    if (across) dirs |= x < 0 ? SNES_BTN_LEFT : SNES_BTN_RIGHT;
+    if (along)  dirs |= y < 0 ? SNES_BTN_DOWN : SNES_BTN_UP;      // the N64 stick: +y is up
+    return dirs;
+}
+
+unsigned sn64_stick_push(int8_t stick_x, int8_t stick_y)
+{
+    unsigned sq = (unsigned)(stick_x * stick_x + stick_y * stick_y), r = 0;
+    while ((r + 1u) * (r + 1u) <= sq) r++;      // the whole part of the root: 181 steps at most
+    unsigned percent = r * 100u / SN64_STICK_FULL;
+    return percent > 100u ? 100u : percent;
+}
+
+unsigned sn64_map_stick_choice(int index)
+{
+    return (index >= 0 && index < SN64_STICK_CHOICES - 1) ? 20u + 10u * (unsigned)index : 0u;
+}
+
+int sn64_map_stick_choice_index(unsigned percent)
+{
+    for (int i = 0; i < SN64_STICK_CHOICES - 1; i++)
+        if (sn64_map_stick_choice(i) == percent)
+            return i;
+    return SN64_STICK_CHOICES - 1;              // nothing, and anything that is not in the list
+}
+
+void sn64_map_set_stick(sn64_map_t *map, unsigned percent)
+{
+    map->stick_percent = (uint8_t)(percent > 100u ? 100u : percent);
 }
 
 uint16_t sn64_map_strip_menu_chord(uint16_t n64_buttons)
@@ -138,6 +183,8 @@ uint16_t sn64_map_unreachable(const sn64_map_t *map)
     uint16_t reach = 0;
     for (int i = 0; i < SN64_MAP_ENTRIES; i++)
         reach |= map->entry[i].snes;
+    if (map->stick_percent)
+        reach |= SNES_BTN_UP | SNES_BTN_DOWN | SNES_BTN_LEFT | SNES_BTN_RIGHT;
     return (uint16_t)(SNES_BTN_ALL & ~reach);
 }
 

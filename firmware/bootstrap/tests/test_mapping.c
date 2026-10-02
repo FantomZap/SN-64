@@ -3,6 +3,8 @@
 // stick, the cancelling of opposite directions, the menu shortcut, and changing the table as
 // the mapping screen does.
 // Build with -DSN64_FAULT_SWAP_AB to inject a wrong table; the test must fail.
+// Build with -DSN64_FAULT_STICK_AXES (each axis of the stick on its own against the threshold);
+// the test must fail.
 #include <stdio.h>
 #include <string.h>
 
@@ -70,12 +72,80 @@ int main(void)
                SNES_BTN_ALL & ~(SNES_BTN_DOWN | SNES_BTN_RIGHT));
     expect_map(&m, "Up+Down cancel",       N64_BTN_D_UP | N64_BTN_D_DOWN, 0, 0, 0);
     expect_map(&m, "Left+Right cancel",    N64_BTN_D_LEFT | N64_BTN_D_RIGHT | N64_BTN_A, 0, 0, SNES_BTN_A);
-    expect_map(&m, "stick up past threshold",    0, 0, 40, SNES_BTN_UP);
-    expect_map(&m, "stick up below threshold",   0, 0, 39, 0);
-    expect_map(&m, "stick down-left",            0, -80, -80, SNES_BTN_DOWN | SNES_BTN_LEFT);
-    expect_map(&m, "stick right",                0, 85, 0, SNES_BTN_RIGHT);
-    expect_map(&m, "D-Up + stick down cancel",   N64_BTN_D_UP, 0, -60, 0);
     expect_map(&m, "RST/reserved bits ignored",  0x00C0u, 0, 0, 0);
+
+    // The stick (owner, 2026-10-01): pushed past a set part of its travel it presses the D-pad
+    // in the direction it points, two directions at once towards a corner. Half its travel
+    // (40 of 80) to begin with.
+    expect(m.stick_percent == 50 && SN64_STICK_FULL == 80, "the stick starts at half its travel, a full throw being 80");
+    expect_map(&m, "stick up at half its travel",       0, 0, 40, SNES_BTN_UP);
+    expect_map(&m, "stick up just short of it",         0, 0, 39, 0);
+    expect_map(&m, "stick right at half its travel",    0, 40, 0, SNES_BTN_RIGHT);
+    expect_map(&m, "stick left, down",                  0, -40, 0, SNES_BTN_LEFT);
+    expect_map(&m, "stick down",                        0, 0, -40, SNES_BTN_DOWN);
+    // how far is measured from the middle, the same in every direction
+    expect_map(&m, "towards a corner, 41 from the middle",  0, 29, 29, SNES_BTN_UP | SNES_BTN_RIGHT);
+    expect_map(&m, "towards a corner, 39.6 from the middle", 0, 28, 28, 0);
+    expect_map(&m, "exactly 40 from the middle, off the axes", 0, 24, 32, SNES_BTN_UP | SNES_BTN_RIGHT);
+    {
+        // a full throw every 5 degrees round the circle: eight equal slices of 45 degrees
+        static const struct { int deg, x, y; uint16_t want; } at[] = {
+            {   0,  80,   0, SNES_BTN_RIGHT },                   {  20,  75,  27, SNES_BTN_RIGHT },
+            {  25,  73,  34, SNES_BTN_RIGHT | SNES_BTN_UP },     {  45,  57,  57, SNES_BTN_RIGHT | SNES_BTN_UP },
+            {  65,  34,  73, SNES_BTN_RIGHT | SNES_BTN_UP },     {  70,  27,  75, SNES_BTN_UP },
+            {  90,   0,  80, SNES_BTN_UP },                      { 110, -27,  75, SNES_BTN_UP },
+            { 115, -34,  73, SNES_BTN_LEFT | SNES_BTN_UP },      { 135, -57,  57, SNES_BTN_LEFT | SNES_BTN_UP },
+            { 155, -73,  34, SNES_BTN_LEFT | SNES_BTN_UP },      { 160, -75,  27, SNES_BTN_LEFT },
+            { 180, -80,   0, SNES_BTN_LEFT },                    { 200, -75, -27, SNES_BTN_LEFT },
+            { 205, -73, -34, SNES_BTN_LEFT | SNES_BTN_DOWN },    { 225, -57, -57, SNES_BTN_LEFT | SNES_BTN_DOWN },
+            { 245, -34, -73, SNES_BTN_LEFT | SNES_BTN_DOWN },    { 250, -27, -75, SNES_BTN_DOWN },
+            { 270,   0, -80, SNES_BTN_DOWN },                    { 290,  27, -75, SNES_BTN_DOWN },
+            { 295,  34, -73, SNES_BTN_RIGHT | SNES_BTN_DOWN },   { 315,  57, -57, SNES_BTN_RIGHT | SNES_BTN_DOWN },
+            { 335,  73, -34, SNES_BTN_RIGHT | SNES_BTN_DOWN },   { 340,  75, -27, SNES_BTN_RIGHT },
+        };
+        int ok = 1;
+        for (unsigned i = 0; i < sizeof at / sizeof at[0]; i++)
+            if (sn64_map_stick(&m, (int8_t)at[i].x, (int8_t)at[i].y) != at[i].want) {
+                ok = 0;
+                printf("    stick at %d degrees (%d, %d): %04X, want %04X\n", at[i].deg, at[i].x, at[i].y,
+                       sn64_map_stick(&m, (int8_t)at[i].x, (int8_t)at[i].y), at[i].want);
+            }
+        expect(ok, "round the circle: one direction within 22.5 degrees of an axis, two towards the corners");
+    }
+    expect_map(&m, "the far corners of the numbers",    0, -128, -128, SNES_BTN_DOWN | SNES_BTN_LEFT);
+    expect_map(&m, "and of one axis",                   0, 127, 0, SNES_BTN_RIGHT);
+    // the stick and the D-pad together
+    expect_map(&m, "D-Up + stick down cancel",          N64_BTN_D_UP, 0, -60, 0);
+    expect_map(&m, "D-Right + stick right",             N64_BTN_D_RIGHT, 80, 0, SNES_BTN_RIGHT);
+    expect_map(&m, "D-Left + stick up and right",       N64_BTN_D_LEFT, 57, 57, SNES_BTN_UP);
+    {
+        // how far is far enough: the seven choices, then nothing
+        int ok = 1, list = 1;
+        for (int i = 0; i < SN64_STICK_CHOICES - 1; i++) {
+            unsigned p = sn64_map_stick_choice(i);
+            int t = (int)p * SN64_STICK_FULL / 100;
+            sn64_map_set_stick(&m, p);
+            if (p != 20u + 10u * (unsigned)i || sn64_map_stick_choice_index(p) != i) list = 0;
+            if (sn64_map_stick(&m, (int8_t)t, 0) != SNES_BTN_RIGHT || sn64_map_stick(&m, (int8_t)(t - 1), 0) != 0 ||
+                sn64_map_stick(&m, 0, (int8_t)-t) != SNES_BTN_DOWN) ok = 0;
+        }
+        expect(SN64_STICK_CHOICES == 8 && list && sn64_map_stick_choice(7) == 0 && sn64_map_stick_choice_index(0) == 7 &&
+               sn64_map_stick_choice(-1) == 0 && sn64_map_stick_choice(8) == 0 && sn64_map_stick_choice_index(55) == 7,
+               "the choices are 20, 30 ... 80 percent and nothing");
+        expect(ok, "each percentage presses exactly from that part of the travel");
+        expect(!sn64_map_is_default(&m), "a changed stick is not the default");
+        sn64_map_set_stick(&m, 0);
+        expect_map(&m, "the stick set to nothing presses nothing", 0, 127, 127, 0);
+        expect_map(&m, "and leaves the buttons alone",             N64_BTN_A, -128, 0, SNES_BTN_A);
+        sn64_map_set_stick(&m, 250);
+        expect(m.stick_percent == 100, "a percentage out of range is cut to 100");
+        sn64_map_default(&m);
+        expect(m.stick_percent == 50 && sn64_map_is_default(&m), "the defaults bring the stick back to half");
+    }
+    // the reading the screen shows: how far the stick is pushed now
+    expect(sn64_stick_push(0, 0) == 0 && sn64_stick_push(40, 0) == 50 && sn64_stick_push(24, 32) == 50 &&
+           sn64_stick_push(-60, 0) == 75 && sn64_stick_push(80, 0) == 100 && sn64_stick_push(127, 127) == 100 &&
+           sn64_stick_push(0, -128) == 100, "how far the stick is pushed, in percent, 100 at most");
 
     // The menu shortcut: all four C buttons. They are not passed on to the game while all are down.
     expect(sn64_map_strip_menu_chord(N64_BTN_C_ALL | N64_BTN_A) == N64_BTN_A, "all four C down: none of them is passed on");
@@ -121,6 +191,12 @@ int main(void)
     sn64_map_set_target(&m, SN64_IN_Z, -1);
     expect(sn64_map_unreachable(&m) == (SNES_BTN_START | SNES_BTN_SELECT), "Start and Z set to nothing: Start and Select are reported");
     sn64_map_default(&m);
+    for (int e = SN64_IN_D_UP; e <= SN64_IN_D_RIGHT; e++) sn64_map_set_target(&m, e, -1);
+    expect(sn64_map_unreachable(&m) == 0, "the D-pad's four set to nothing: the stick still gives the directions");
+    sn64_map_set_stick(&m, 0);
+    expect(sn64_map_unreachable(&m) == (SNES_BTN_UP | SNES_BTN_DOWN | SNES_BTN_LEFT | SNES_BTN_RIGHT),
+           "and the stick to nothing as well: the four directions are reported");
+    sn64_map_default(&m);
     {
         // The rows of the mapping screen: 14, and no name longer than its column.
         int ok = 1;
@@ -142,7 +218,8 @@ int main(void)
         printf("FAIL: mapping table, %d of %d checks failed\n", failures, checks);
         return 1;
     }
-    printf("PASS: mapping table, %d checks (namesake defaults with Z->Select and the C diamond, "
-           "stick threshold %d, opposing directions cancel, menu shortcut, remapping)\n", checks, m.stick_threshold);
+    printf("PASS: mapping table, %d checks (namesake defaults with Z->Select and the C diamond, the stick as a D-pad "
+           "from %d %% of its travel in eight directions, opposing directions cancel, menu shortcut, remapping)\n",
+           checks, m.stick_percent);
     return 0;
 }

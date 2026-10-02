@@ -435,3 +435,23 @@ What was done:
 Evidence (PC only): `test_padview` 416 checks, eight of them on the shapes themselves; `test_mapscreen` 94; all host tests 900 checks in ten sets; 11 fault builds rejected. ROM 147,456 bytes, SHA-256 `ce7b45db1fec11f20e36e0a5c212ef05e89dacd14e31689e1416bf880d8f12a3`, 146,622 bytes used; CIC-6102 check OK; ROM and endpoint co-simulation passes. Mock-up from the code under test: [mapping-screens.png](design/img/mapping-screens.png).
 
 Open: not run on a console. The 8BitDo 64 is the least certain shape: none of its maker's pictures is straight from the front. The Brawler64 was read by eye. Write-up: [n64-bootstrap.md](design/n64-bootstrap.md), "The right shapes".
+
+## 2026-10-01 — the stick as a setting: the D-pad from a chosen part of its travel, in eight directions
+
+The owner: "we ought to create an input method option for the joystick. I was thinking beyond a certain percent pushed in a direction it can press a directional button? Perhaps if pressed diagonally beyond that threshold it can press the appropriate 2 directions at once?"
+
+The stick did press the D-pad already, which I had not told him plainly: at a fixed half of its travel, each axis judged on its own. It is now a setting and works the way he describes.
+
+- **First row of the mapping list:** "Stick", the D-pad, a percentage. A opens one list: the D-pad from 20 to 80 % in steps of ten, or nothing. 50 % to begin with.
+- **The rule changed, not only the menu.** How far is now measured from the middle, the same in every direction, and the direction is one of eight equal slices: one direction within 22.5 degrees of an axis, two between. With the old rule a diagonal push of 60 % of the travel pressed nothing while the same push to the right pressed Right.
+- **A reading on the screen.** With the cursor on the row: "Stick now: 63 %". A worn stick reaches less than a new one, and this lets the player see what theirs reaches before choosing.
+- **Try before taking.** While choices are open the pictures behave as if the one under the cursor were set. That now holds for a button's choices too.
+- **The cap of the stick lights** while it presses something, and the cursor can mark the stick and the whole D-pad.
+- **A full throw is 80 units,** from libdragon's figures for the controller (about 85 in good condition, as little as 60 when worn).
+- **The mouse stays deferred;** the raw stick still goes to the mailbox. The stick's row is where that choice would go.
+
+The ROM file grew from 147,456 to 163,840 bytes: it is padded in steps of 16 KiB and the used part went from 146,622 to 150,073. It fits the v2 board's 256 KiB window with 112,071 bytes to spare.
+
+Evidence (PC only): `test_mapping` 69 checks, among them a full throw every 5 degrees round the circle; `test_padview` 438; `test_mapscreen` 127; all host tests 975 checks in ten sets; 12 fault builds rejected, the new one a stick judged one axis at a time. ROM SHA-256 `f7959a0e52404afffa0c89de313ec7d4497881fb5ab78fee6dac2c4e4078bfbf`, CIC-6102 check OK, ROM and endpoint co-simulation passes. Mock-up: [mapping-screens.png](design/img/mapping-screens.png), second and third screen.
+
+Open: no real stick has been read, so 50 %, the steps and the slices are untried. No slack round the boundaries: a stick held exactly on one can flicker between two answers; to be judged on hardware. Not kept across power-off. Write-up: [n64-bootstrap.md](design/n64-bootstrap.md), "The stick".

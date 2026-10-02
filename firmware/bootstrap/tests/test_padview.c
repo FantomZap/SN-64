@@ -89,7 +89,13 @@ static int differ_in(const frame_t *a, const frame_t *b, const sn64_box_t *box)
 static void input_frame(frame_t *f, unsigned which, uint16_t n64, int sx, int sy, int cursor, bool blink)
 {
     sn64_canvas_t c = canvas(f);
-    sn64_pad_draw_input(&c, GUARD, GUARD, which, n64, (int8_t)sx, (int8_t)sy, cursor, blink);
+    sn64_pad_draw_input(&c, GUARD, GUARD, which, n64, (int8_t)sx, (int8_t)sy, false, cursor, blink);
+}
+
+static void stick_frame(frame_t *f, unsigned which, bool lit, int cursor, bool blink)
+{
+    sn64_canvas_t c = canvas(f);
+    sn64_pad_draw_input(&c, GUARD, GUARD, which, 0, 0, 0, lit, cursor, blink);
 }
 
 static void snes_frame(frame_t *f, unsigned which, uint16_t snes, int cursor, bool blink)
@@ -156,6 +162,22 @@ static void test_input(unsigned which)
         input_frame(&lit, which, 0, 80, -80, -1, false);
         expect(moved && distinct && small, "%s: the stick's cap moves four ways and stays in its well", name);
         expect(memcmp(&far, &lit, sizeof far) == 0, "%s: beyond a full throw the cap does not move further", name);
+    }
+    // the stick lights while it presses something, and the cursor can mark it; nothing else changes
+    {
+        sn64_box_t b;
+        int outside, n, m, overlap = 0;
+        expect(sn64_pad_input_box(which, SN64_IN_STICK, false, &b) && !sn64_pad_input_box(which, SN64_IN_STICK, true, &b) &&
+               b.x0 >= 0 && b.y0 >= 0 && b.x1 < SN64_PAD_W && b.y1 < SN64_PAD_INPUT_H, "%s: the stick has a place inside the picture", name);
+        stick_frame(&lit, which, true, -1, false);
+        n = differ(&rest, &lit, &b, NULL, &outside);
+        for (int i = 0; i < CW * CH; i++)
+            if (rest.px[i] != lit.px[i] && owner[i]) overlap++;
+        expect(n >= 30 && outside == 0 && overlap == 0, "%s: the stick lights in its own place and no button's (%d pixels change, %d elsewhere)", name, n, outside);
+        stick_frame(&mark, which, false, SN64_IN_STICK, true);
+        m = differ(&rest, &mark, &b, NULL, &outside);
+        stick_frame(&lit, which, false, SN64_IN_STICK, false);
+        expect(m >= 30 && outside == 0 && memcmp(&rest, &lit, sizeof rest) == 0, "%s: the cursor marks the stick while the blink is on, and only then", name);
     }
 }
 
@@ -250,6 +272,25 @@ static void test_snes(unsigned which)
     expect(overlaps == 0, "%s: no two buttons light the same pixel (%d shared)", name, overlaps);
     snes_frame(&lit, which, 0xF000u, -1, false);
     expect(memcmp(&rest, &lit, sizeof rest) == 0, "%s: the four bits above the buttons light nothing", name);
+    {
+        // the whole D-pad can be marked: its four arms, and nothing else
+        int arms = 0, elsewhere = 0;
+        snes_frame(&mark, which, 0, SN64_OUT_DPAD, true);
+        for (int y = 0; y < CH; y++)
+            for (int x = 0; x < CW; x++)
+                if (rest.px[y * CW + x] != mark.px[y * CW + x]) {
+                    int in = 0;
+                    for (int bit = 4; bit < 8; bit++) {
+                        sn64_box_t b;
+                        sn64_pad_snes_box(bit, &b);
+                        if (in_box(&b, x - GUARD, y - GUARD)) in = 1;
+                    }
+                    if (in) arms++; else elsewhere++;
+                }
+        snes_frame(&lit, which, 0, SN64_OUT_DPAD, false);
+        expect(arms >= 4 * 40 && elsewhere == 0 && memcmp(&rest, &lit, sizeof rest) == 0,
+               "%s: the cursor marks the whole D-pad, its four arms and nothing else (%d and %d pixels)", name, arms, elsewhere);
+    }
 }
 
 // ---- single buttons
@@ -294,6 +335,29 @@ static void test_icons(void)
             if (memcmp(&in[k], &in[e], sizeof in[e]) == 0) same++;
     }
     expect(same == 0, "the 14 single pictures of the player's buttons are all different (%d alike)", same);
+    {
+        // the stick's own small picture, and the whole D-pad with any of its arms lit
+        static icon_t stick, dpad[16];
+        sn64_canvas_t c = icon_canvas(&stick);
+        sn64_pad_icon_input(&c, GUARD, GUARD, SN64_IN_STICK, false);
+        n = icon_pixels(&stick, &stray);
+        c = icon_canvas(&lit);
+        sn64_pad_icon_input(&c, GUARD, GUARD, SN64_IN_STICK, true);
+        same = 0;
+        for (int e = 0; e < SN64_MAP_ENTRIES; e++)
+            if (memcmp(&in[e], &stick, sizeof stick) == 0) same++;
+        expect(n >= 60 && stray == 0 && memcmp(&stick, &lit, sizeof lit) != 0 && same == 0,
+               "the single picture of the stick is there, is no button's, and lights up (%d pixels, %d outside)", n, stray);
+        same = 0;
+        for (int d = 0; d < 16; d++) {
+            c = icon_canvas(&dpad[d]);
+            sn64_pad_icon_dpad(&c, GUARD, GUARD, (uint16_t)(d << 4));     // Up, Down, Left, Right are bits 4 to 7
+            if (icon_pixels(&dpad[d], &stray) != 57 || stray) same += 100;   // a cross of two 3 x 11 bars
+            for (int k = 0; k < d; k++)
+                if (memcmp(&dpad[k], &dpad[d], sizeof lit) == 0) same++;
+        }
+        expect(same == 0, "the small picture of the whole D-pad: each of the 16 sets of arms lights its own (%d wrong)", same);
+    }
     for (unsigned w = 0; w < SN64_PAD_SNES_COUNT; w++) {
         same = 0;
         for (int i = 0; i < SN64_MAP_CHOICES; i++) {
@@ -338,8 +402,10 @@ static void test_clipping(void)
     for (int i = 0; i < BW * BH; i++) buf[i] = SENTINEL;
     sn64_canvas_t c = { buf, VW, VH, BW };
     for (int i = 0; i < 4; i++) {
-        sn64_pad_draw_input(&c, at[i][0], at[i][1], SN64_PAD_N64, 0xFFFF, 80, 80, SN64_IN_A, true);
-        sn64_pad_draw_input(&c, at[i][0], at[i][1], SN64_PAD_BRAWLER, 0xFFFF, -80, -80, SN64_IN_Z, true);
+        sn64_pad_draw_input(&c, at[i][0], at[i][1], SN64_PAD_N64, 0xFFFF, 80, 80, true, SN64_IN_A, true);
+        sn64_pad_draw_input(&c, at[i][0], at[i][1], SN64_PAD_BRAWLER, 0xFFFF, -80, -80, false, SN64_IN_STICK, true);
+        sn64_pad_icon_dpad(&c, VW - 4, at[i][1] + 20, 0x00F0);
+        sn64_pad_icon_input(&c, -5, VH - 6, SN64_IN_STICK, true);
         sn64_pad_draw_snes(&c, at[i][0], at[i][1], SN64_PAD_SFC, 0x0FFF, 3, true);
         sn64_pad_icon_input(&c, at[i][0] + 45, at[i][1] + 35, SN64_IN_L, true);
         sn64_pad_icon_snes(&c, VW - 5, VH - 5, SN64_PAD_SNES, 8, false);
@@ -400,22 +466,23 @@ static int dump(const char *path)
     sn64_pad_fill(&c, 0, 0, SW - 1, SH - 1, sn64_rgb(0x10, 0x18, 0x30));
 #define AT (4 + (cell % COLS) * CELLW), (4 + (cell / COLS) * CELLH)
     for (unsigned w = 0; w < SN64_PAD_INPUT_COUNT; w++, cell++)
-        sn64_pad_draw_input(&c, AT, w, 0, 0, 0, -1, false);
+        sn64_pad_draw_input(&c, AT, w, 0, 0, 0, false, -1, false);
     for (unsigned w = 0; w < SN64_PAD_SNES_COUNT; w++, cell++)
         sn64_pad_draw_snes(&c, AT, w, 0, -1, false);
-    sn64_pad_draw_input(&c, AT, SN64_PAD_N64, 0xFFFF, 80, 80, -1, false); cell++;
-    sn64_pad_draw_input(&c, AT, SN64_PAD_CAPTAIN, 0xFFFF, -80, -80, -1, false); cell++;
-    sn64_pad_draw_input(&c, AT, SN64_PAD_8BITDO, 0xFFFF, 0, 0, -1, false); cell++;
+    sn64_pad_draw_input(&c, AT, SN64_PAD_N64, 0xFFFF, 80, 80, true, -1, false); cell++;
+    sn64_pad_draw_input(&c, AT, SN64_PAD_CAPTAIN, 0xFFFF, -80, -80, true, -1, false); cell++;
+    sn64_pad_draw_input(&c, AT, SN64_PAD_8BITDO, 0xFFFF, 0, 0, false, -1, false); cell++;
     sn64_pad_draw_snes(&c, AT, SN64_PAD_SNES, 0x0FFF, -1, false); cell++;
     sn64_pad_draw_snes(&c, AT, SN64_PAD_SFC, 0x0FFF, -1, false); cell++;
-    sn64_pad_draw_input(&c, AT, SN64_PAD_N64, N64_BTN_A, 0, 0, SN64_IN_Z, true); cell++;
-    sn64_pad_draw_snes(&c, AT, SN64_PAD_SNES, SNES_BTN_A, 2, true); cell++;
-    sn64_pad_draw_input(&c, AT, SN64_PAD_BRAWLER, N64_BTN_Z | N64_BTN_C_LEFT, 0, 0, SN64_IN_D_UP, true); cell++;
+    sn64_pad_draw_input(&c, AT, SN64_PAD_N64, N64_BTN_A, 0, 0, false, SN64_IN_STICK, true); cell++;
+    sn64_pad_draw_snes(&c, AT, SN64_PAD_SNES, SNES_BTN_A, SN64_OUT_DPAD, true); cell++;
+    sn64_pad_draw_input(&c, AT, SN64_PAD_BRAWLER, N64_BTN_Z | N64_BTN_C_LEFT, 0, 0, false, SN64_IN_D_UP, true); cell++;
 #undef AT
     for (int lit = 0; lit < 2; lit++) {
         int y = ROWS * CELLH + 4 + lit * 32;
-        for (int e = 0; e < SN64_MAP_ENTRIES; e++)
+        for (int e = 0; e <= SN64_IN_STICK; e++)
             sn64_pad_icon_input(&c, 4 + e * 14, y, e, lit);
+        sn64_pad_icon_dpad(&c, 4 + 16 * 14, y, lit ? SNES_BTN_UP | SNES_BTN_RIGHT : 0);
         for (unsigned w = 0; w < SN64_PAD_SNES_COUNT; w++)
             for (int i = 0; i < SN64_MAP_CHOICES; i++)
                 sn64_pad_icon_snes(&c, 4 + i * 14 + (int)w * 200, y + 14, w, sn64_map_choice(i), lit);
@@ -457,7 +524,7 @@ int main(int argc, char **argv)
         expect(same == 0, "the six controllers' pictures are all different");
         expect(second == ((1 << SN64_PAD_BRAWLER) | (1 << SN64_PAD_8BITDO)), "the two-handled controllers have two Z triggers, the others one");
         expect(!sn64_pad_input_box(SN64_PAD_BRAWLER, SN64_IN_A, true, &b) && !sn64_pad_input_box(99, SN64_IN_A, false, &b) &&
-               !sn64_pad_input_box(0, SN64_MAP_ENTRIES, false, &b) && !sn64_pad_snes_box(12, &b) && !sn64_pad_snes_box(-1, &b),
+               !sn64_pad_input_box(0, SN64_IN_STICK + 1, false, &b) && !sn64_pad_snes_box(12, &b) && !sn64_pad_snes_box(-1, &b),
                "no place is reported for a button that is not there");
     }
     for (unsigned w = 0; w < SN64_PAD_SNES_COUNT; w++)
@@ -483,7 +550,7 @@ int main(int argc, char **argv)
         printf("FAIL: controller pictures, %d of %d checks failed\n", failures, checks);
         return 1;
     }
-    printf("PASS: controller pictures, %d checks (six controllers and two colour sets: the right shapes, every button lights "
-           "its own place and no other, the cursor's mark, the stick, single buttons, nothing outside the box or the screen)\n", checks);
+    printf("PASS: controller pictures, %d checks (six controllers and two colour sets: the right shapes, every button and the "
+           "stick light their own place and no other, the cursor's mark, single buttons, nothing outside the box or the screen)\n", checks);
     return 0;
 }

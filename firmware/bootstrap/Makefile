@@ -23,7 +23,7 @@ HOST_CC       ?= gcc
 # Must equal the ROM_ADDR_BITS parameter of sn64_n64_endpoint in the top level: 17 on the v2
 # board (a 256 KiB window in the configuration flash, fpga/rtl/sn64_board_top.sv). The program
 # was 131,072 bytes and fitted 16 until the frame lock and the sound queue (2026-10-01); it is
-# 147,456 bytes now. The RTL default is still 12 = 8 KiB, too small; see the design note.
+# 163,840 bytes now. The RTL default is still 12 = 8 KiB, too small; see the design note.
 ROM_ADDR_BITS ?= 17
 
 all: rom
@@ -115,6 +115,8 @@ test-negative:
 	mkdir -p $(OUT)/host
 	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -DSN64_FAULT_SWAP_AB -Isrc -o $(OUT)/host/test_mapping_fault tests/test_mapping.c src/sn64_mapping.c
 	if $(OUT)/host/test_mapping_fault; then echo "NOT DETECTED: swapped A/B table"; exit 1; fi
+	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -DSN64_FAULT_STICK_AXES -Isrc -o $(OUT)/host/test_mapping_fault2 tests/test_mapping.c src/sn64_mapping.c
+	if $(OUT)/host/test_mapping_fault2; then echo "NOT DETECTED: the stick judged one axis at a time"; exit 1; fi
 	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -DSN64_FAULT_PAD_WRONG_BUTTON -Isrc -o $(OUT)/host/test_padview_fault tests/test_padview.c src/sn64_padview.c src/sn64_padshape_data.c src/sn64_mapping.c
 	if $(OUT)/host/test_padview_fault; then echo "NOT DETECTED: a button lights the wrong place"; exit 1; fi
 	$(HOST_CC) -std=c11 -Wall -Wextra -Werror -DSN64_FAULT_MAPSCREEN_CANCEL_SETS -Isrc -o $(OUT)/host/test_mapscreen_fault tests/test_mapscreen.c src/sn64_mapscreen.c src/sn64_padview.c src/sn64_padshape_data.c src/sn64_mapping.c

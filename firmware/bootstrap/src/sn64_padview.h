@@ -54,25 +54,29 @@ const char *sn64_input_pad_name(unsigned which);    // at most SN64_PAD_NAME_MAX
 const char *sn64_snes_pad_name(unsigned which);
 
 // The player's controller in a SN64_PAD_W x SN64_PAD_INPUT_H box at (x0, y0). `n64_buttons`
-// are the buttons held (N64_BTN_*), which light up; the stick's cap moves with the stick.
-// `cursor` is the mapping entry (SN64_IN_*) to mark, or -1: its button is drawn white while
+// are the buttons held (N64_BTN_*), which light up; the stick's cap moves with the stick and
+// lights while `stick_lit` says that the stick is pressing something. `cursor` is the mapping
+// entry (SN64_IN_*, or SN64_IN_STICK for the stick) to mark, or -1: it is drawn white while
 // `blink` is true.
 void sn64_pad_draw_input(const sn64_canvas_t *c, int x0, int y0, unsigned which, uint16_t n64_buttons,
-                         int8_t stick_x, int8_t stick_y, int cursor, bool blink);
+                         int8_t stick_x, int8_t stick_y, bool stick_lit, int cursor, bool blink);
 
 // The controller the game sees, in a SN64_PAD_W x SN64_PAD_SNES_H box. `snes_buttons` light
-// up (SNES_BTN_*); `cursor` is a SNES button's bit number to mark, or -1.
+// up (SNES_BTN_*); `cursor` is a SNES button's bit number to mark, SN64_OUT_DPAD for the
+// whole D-pad, or -1.
 void sn64_pad_draw_snes(const sn64_canvas_t *c, int x0, int y0, unsigned which, uint16_t snes_buttons,
                         int cursor, bool blink);
 
 // A single button, SN64_ICON pixels square at (x, y): mapping entry `entry` of the player's
-// controller, or SNES button bit `snes_bit` (-1: the mark for "nothing").
+// controller (SN64_IN_STICK: the stick), or SNES button bit `snes_bit` (-1: the mark for
+// "nothing"). And the whole D-pad, with the arms in `snes_dirs` (SNES_BTN_UP ...) lit.
 void sn64_pad_icon_input(const sn64_canvas_t *c, int x, int y, int entry, bool lit);
 void sn64_pad_icon_snes(const sn64_canvas_t *c, int x, int y, unsigned which, int snes_bit, bool lit);
+void sn64_pad_icon_dpad(const sn64_canvas_t *c, int x, int y, uint16_t snes_dirs);
 
 // Where a button is inside its picture: the rectangle it is drawn in, relative to the box.
-// `second` asks for the second Z trigger of a two-handled controller. False if there is no
-// such button. For the tests: lighting a button must change that rectangle and nothing else.
+// `second` asks for the second Z trigger of a two-handled controller. SN64_IN_STICK gives the
+// stick's well. False if there is no such button. For the tests: lighting a button must change that rectangle and nothing else.
 typedef struct { int x0, y0, x1, y1; } sn64_box_t;
 bool sn64_pad_input_box(unsigned which, int entry, bool second, sn64_box_t *box);
 bool sn64_pad_snes_box(int snes_bit, sn64_box_t *box);

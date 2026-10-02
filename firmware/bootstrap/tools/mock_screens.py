@@ -277,6 +277,8 @@ def main():
         raise SystemExit('run `make test-mapscreen` first: it writes ' + str(made))
     screens = [
         mapping('Controller mapping as it opens', made, 'map-open'),
+        mapping('The stick up and right: two directions', made, 'map-stick'),
+        mapping('A on the stick row: how far to push', made, 'map-stick-choices'),
         mapping('A held: A lights on both', made, 'map-a'),
         mapping('Cursor on Z, Z held: Select lights', made, 'map-z'),
         mapping('A on a row: what should Z give?', made, 'map-choices'),

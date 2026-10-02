@@ -11,7 +11,7 @@
 | Quick start | Power on, logos, and the game starts by itself. Hold a button during the logos to get the menu instead | menu |
 | Cartridge name on the home screen | "SUPER MARIO WORLD, USA" read from the cartridge before it starts, instead of "Play" | FPGA (the header reader already runs; it has to hand the title over) and menu |
 | Pause menu in the game | The shortcut (all four C buttons since 2026-10-01) opens a small overlay: Resume, Reset game, Controls, Quit to menu. Today it only jumps back to the menu | menu; Reset game uses the soft reset the FPGA already has |
-| Controller mapping editor | Change any button, pick a preset, set the stick threshold. The spec asks for a configurable mapping. **Built 2026-10-01:** any button can be changed and the defaults restored, on a screen with two controller pictures that light up. Presets and the stick threshold are not built, and nothing is kept after power-off | menu |
+| Controller mapping editor | Change any button, pick a preset, set the stick threshold. The spec asks for a configurable mapping. **Built 2026-10-01:** any button can be changed and the defaults restored, on a screen with two controller pictures that light up. The stick's threshold is a row of the same list since later that day (20 to 80 %, or off). Presets are not built, and nothing is kept after power-off | menu |
 | Settings that stay | Mapping and options survive power-off, on a Controller Pak if one is in the pad | menu |
 | Region choice | Auto, NTSC or PAL. The FPGA has the switch; the menu has no item for it | menu |
 | Picture options | Sharp or smooth, full screen or exact pixels, picture position for a CRT | menu |
@@ -86,7 +86,7 @@ What limits it:
 
 | Limit | Today | Meaning |
 |---|---|---|
-| ROM space | The program is 147,456 bytes since 2026-10-01 and no longer fits a 128 KiB window; the v2 board's window is 256 KiB, with about 116 KB free since the controller pictures | A font and graphics fit on v2 |
+| ROM space | The program is 163,840 bytes since 2026-10-01 and no longer fits a 128 KiB window; the v2 board's window is 256 KiB, with about 112 KB free since the controller pictures and the stick option | A font and graphics fit on v2 |
 | Settings storage | None on the board that the menu can write | Controller Pak first; writing the board's flash from the menu would need FPGA work |
 | Not yet run on a console | The whole menu has only been compiled and tested on the PC | The first real run may change what is worth polishing |
 

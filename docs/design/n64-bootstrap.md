@@ -248,7 +248,7 @@ While a cartridge runs, all four C buttons of controller 1 pressed together brin
 | A, B, L, R, Start, D-pad | the button of the same name | owner |
 | Z | Select | owner |
 | C-Up, C-Left, C-Down, C-Right | X, Y, B, A | my choice: X and Y have no namesake on an N64 controller, and the C diamond sits like the Super NES diamond |
-| Stick beyond +/-40 | D-pad | as before |
+| Stick past 50 % of its travel | D-pad, in eight directions | a setting since later that day, see "The stick" |
 
 Opposite directions still cancel. One table serves both controllers.
 
@@ -259,18 +259,46 @@ Opposite directions still cancel. One table serves both controllers.
 The screen was reworked the same day, after the owner had seen the first version: "can you please just make the graphics closer to the right shapes", "the controllers I mean", and "the button list below can be scrollable too if it helps fit things". What follows is the reworked screen.
 
 - **Two pictures side by side, in the controllers' real shapes.** Left: the controller in the player's hands, as large as its half of the screen allows. Right: the controller the game sees. A list box over each names it.
-- **What is held lights on the left; what the game is given lights on the right.** Pressing Z lights Z on the left and Select on the right, and after a change the new button lights instead. The stick's cap moves with the stick, and past its threshold the D-pad on the right lights.
+- **What is held lights on the left; what the game is given lights on the right.** Pressing Z lights Z on the left and Select on the right, and after a change the new button lights instead. The stick's cap moves with the stick and lights when the stick presses the D-pad (see "The stick" below).
 - **The right side shows what the game gets.** Up and Down together light nothing on the right. Nor do the four C buttons while they make the menu shortcut.
 - **The two lists.** Left, for the M64's sake, the controllers ModRetro lists as working with it: N64 controller, M64 Pro, Hyperkin Captain, Switch N64 pad, Brawler64, 8BitDo 64. Right: Super NES (purple and lavender buttons) and Super Famicom (four colours, which is also the Super NES of the PAL countries). On a PAL console the right list starts on the four-colour one.
 - **The lists change the picture and nothing else.** Every controller in the left list reports the same 14 buttons and the stick to the console, and both in the right list have the same 12 buttons.
-- **The mapping list** stands under the Super NES controller, which is a flat one and leaves the room. One column: a small picture of the single button, its name, an arrow, a small picture of the Super NES button it gives, and that button's name. The small pictures light too. Ten of the 14 rows are on the screen and the list scrolls with the cursor; a small mark above or below it says that there are more rows that way.
+- **The mapping list** stands under the Super NES controller, which is a flat one and leaves the room. One column of 15 rows: the stick first, then the 14 buttons. A button's row: a small picture of the single button, its name, an arrow, a small picture of the Super NES button it gives, and that button's name. The small pictures light too. Ten rows are on the screen and the list scrolls with the cursor; a small mark above or below it says that there are more rows that way.
 - **Changing a row.** A on a row opens its 13 choices (the 12 Super NES buttons and "nothing"), each with its small picture, in two columns in the place of the list, so both controllers stay in view. The choice under the cursor is marked on the right-hand controller. A takes it, B gives it up.
 - **Under the player's controller:** three lines that say how the menu is reached from a game; they light up while all four C buttons are held. Below them one line of notes.
 - **Buttons no row gives any more are shown** on that line in red, "Unmapped:" and their small pictures (their number if there are more than five), so a change that leaves Start out of reach is seen before a game is started.
 - **Restore defaults** is a field at the bottom left.
-- **Moving.** Up and Down go through the two lists, the 14 rows and the reset field, and round again; Left and Right change between the two lists.
-- **Only the D-pad, A and B do anything here,** so every other button can be tried freely. B leaves when it is let go, so it can be seen to light first.
-- **The row under the cursor is marked** in both pictures: its button blinks white.
+- **Moving.** Up and Down go through the two lists, the 15 rows and the reset field, and round again; Left and Right change between the two lists.
+- **Only the D-pad, A and B do anything here,** so every other button and the stick can be tried freely. B leaves when it is let go, so it can be seen to light first.
+- **The row under the cursor is marked** in both pictures: its button blinks white. On the stick's row that is the stick and the whole D-pad.
+
+### The stick
+
+Owner: "we ought to create an input method option for the joystick. I was thinking beyond a certain percent pushed in a direction it can press a directional button? Perhaps if pressed diagonally beyond that threshold it can press the appropriate 2 directions at once?"
+
+The stick already pressed the D-pad, but at a fixed half of its travel and with each axis judged on its own. It is now a setting, the first row of the mapping list: "Stick", an arrow, the D-pad, and a percentage.
+
+- **One list of choices:** the D-pad from 20, 30, 40, 50, 60, 70 or 80 % of the stick's travel, or nothing. It starts at 50 %. "Nothing" is for a stick that drifts or a thumb that rests on it.
+- **How far is measured from the middle, the same in every direction.** Before, each axis was compared with the threshold by itself. A push towards a corner then needed 41 % more travel than a push along an axis, and a diagonal push of 60 % of the travel pressed nothing at all while the same push straight to the right pressed Right.
+- **Eight directions.** Past the set distance, the direction the stick points in decides: within 22.5 degrees of an axis it presses that one direction, between them it presses two at once. That makes eight equal slices of 45 degrees, one round each of the eight notches of the controller's gate.
+- **With the D-pad.** Stick and D-pad are added together and opposite directions cancel, as before: Up on the D-pad and the stick pulled down give neither.
+- **What the screen shows.** The stick's cap lights while the stick presses something; the arms it presses light on the Super NES controller and in the row's small picture. With the cursor on the row, a line under the controller reads "Stick now: 63 %": how far the stick is pushed at this moment, so a player can see what their own stick reaches before choosing.
+- **A choice can be tried before it is taken.** While the choices are open, the pictures already behave as if the one under the cursor were set. The same now holds for a button's choices.
+- **A full throw is taken as 80** of the controller's own units. libdragon's `joypad.h` gives about 85 for an original controller in good condition and as little as 60 for a well-worn one, so a worn stick still reaches 75 %. The reading on the screen stops at 100 %.
+- **Both controllers** use the setting, like the rest of the mapping. It is not kept when the console is switched off.
+- **The mouse is still deferred.** The raw stick goes to `JOY1_STICK` as before, for the Super NES mouse of a later update. This row is where that choice would be added.
+
+| Setting | Units from the middle |
+|---|---|
+| 20 % | 16 |
+| 30 % | 24 |
+| 40 % | 32 |
+| 50 %, to begin with | 40 |
+| 60 % | 48 |
+| 70 % | 56 |
+| 80 % | 64 |
+
+Not built: a little slack round the boundaries. A stick held exactly on the set distance, or exactly between two slices, can flicker between two answers. Whether that is ever felt has to be judged with a real stick; the usual converters do without it. Also not built: a four-directions-only choice, and measuring one's own stick's full throw instead of assuming 80.
 
 ### The right shapes
 
@@ -306,12 +334,12 @@ The modules are pure C with no libdragon dependency, so the host tests run the c
 
 ### Evidence, all on the PC
 
-- `tests/test_mapping.c`: 49 checks (defaults, stick, cancelling, the shortcut, changing the table, the choices, the buttons nothing gives).
-- `tests/test_padview.c`: 416 checks. The shapes: three handles side by side of which only the middle one reaches the bottom, a body about as tall as it is wide, two handles on the other two, a Super NES controller more than twice as wide as high with a flat top and a step along the bottom. For each of the six controllers and both colour sets: every button lights its own place and no other pixel, no two buttons share a pixel, the cursor's mark, the stick, nothing outside the picture's box. The 14 and 13 single-button pictures are there, differ from one another and light. Pictures drawn across the edge of the screen are cut off there.
-- `tests/test_mapscreen.c`: 94 checks. The cursor's path, the list scrolling and its marks, both controller lists, the choices (every one can be reached), restore, leaving on B let go, the buttons that do nothing. On the drawn screen: each button lights itself, the button it gives and the two small pictures of its row, and nothing else changes; all text stays on the screen.
-- `make test-negative`: a build in which A lights B's place and a build in which B takes a choice are each rejected. 11 fault builds in all.
-- All host tests: 900 checks in ten sets.
-- ROM: 147,456 bytes, SHA-256 `ce7b45db1fec11f20e36e0a5c212ef05e89dacd14e31689e1416bf880d8f12a3`, CIC-6102 check OK; 146,622 bytes used, 115,522 free in the v2 board's 256 KiB window.
+- `tests/test_mapping.c`: 69 checks (defaults, cancelling, the shortcut, changing the table, the choices, the buttons nothing gives; the stick: each percentage presses exactly from its distance, a full throw every 5 degrees round the circle gives the right one or two directions, nothing, the stick with the D-pad).
+- `tests/test_padview.c`: 438 checks. The shapes: three handles side by side of which only the middle one reaches the bottom, a body about as tall as it is wide, two handles on the other two, a Super NES controller more than twice as wide as high with a flat top and a step along the bottom. For each of the six controllers and both colour sets: every button and the stick light their own place and no other pixel, no two share a pixel, the cursor's mark, nothing outside the picture's box. The single-button pictures are there, differ from one another and light. Pictures drawn across the edge of the screen are cut off there.
+- `tests/test_mapscreen.c`: 127 checks. The cursor's path, the list scrolling and its marks, both controller lists, the choices for a button (every one can be reached), the choices for the stick, restore, leaving on B let go, the buttons that do nothing. On the drawn screen: each button and the stick light themselves, what they give and the two small pictures of their row, and nothing else changes; a choice under the cursor is in force for the pictures before it is taken; all text stays on the screen.
+- `make test-negative`: a build in which A lights B's place, a build in which B takes a choice, and a build in which the stick is judged one axis at a time are each rejected. 12 fault builds in all.
+- All host tests: 975 checks in ten sets.
+- ROM: **163,840 bytes**, SHA-256 `f7959a0e52404afffa0c89de313ec7d4497881fb5ab78fee6dac2c4e4078bfbf`, CIC-6102 check OK; 150,073 bytes used, 112,071 free in the v2 board's 256 KiB window. The file is padded to the next 16 KiB, and the stick option took the used part past 147,456.
 - Co-simulation with the FPGA endpoint passes with the new image; its first frame carries the new default (A and Start give 0x0108).
 - The mock-ups above are made from the pixels and the text positions the code under test produced (`make test-mapscreen`, then `tools/mock_screens.py`). Only the font differs from the console's.
 
@@ -321,6 +349,6 @@ The modules are pure C with no libdragon dependency, so the host tests run the c
 - **Nothing is kept when the console is switched off.** The mapping, the two lists and compatibility mode go back to their defaults. The SN64 has nowhere yet for the menu to store settings.
 - **One mapping for both controllers,** and the pictures show controller 1.
 - **The controller list is my reading** of ModRetro's list of compatible controllers. The Brawler64 and the 8BitDo 64 are both drawn with two Z triggers. Only the N64 and the Super NES controller were measured, and on photographs, not on the controllers themselves.
-- **The tenth of a second for the shortcut and the C-diamond defaults are my choices.**
+- **The tenth of a second for the shortcut, the C-diamond defaults, and the stick's 50 %, its steps of ten and its eight equal slices are my choices.** The stick has only met numbers: no real stick has been read.
 
 Sources: [M64](https://modretro.com/products/m64), [M64 Pro Controller](https://modretro.com/products/m64-pro-controller) and [ModRetro x Hyperkin Captain+](https://modretro.com/products/hyperkin-captain-plus-wired-controller) product pages (the controller list, and the shape of those two controllers), [Hyperkin Captain](https://www.hyperkinstore.com/products/captain-premium-controller), [8BitDo 64 Controller](https://www.8bitdo.com/64-controller/), [8BitDo 64 review, Nintendo Life](https://www.nintendolife.com/reviews/8bitdo-64-controller-for-switch-1-and-2-a-worthy-alternative-to-nintendos-n64-pad), [Brawler64, Retro Fighters](https://retrofighters.com/our-collection/brawler64-nextgen-n64-controller-original-v2/), [Brawler64 review, Nintendo Life](https://www.nintendolife.com/news/2019/06/hardware_review_retro_fighters_brawler64_controller_-_a_crowdfunded_upgrade_to_your_battered_original), and the two photographs by Evan-Amos on Wikimedia Commons named in the table above. Read 2026-10-01.
