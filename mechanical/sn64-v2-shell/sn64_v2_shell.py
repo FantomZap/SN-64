@@ -59,7 +59,16 @@ Sourced
   board 1.2 thick, tongue 64.5 wide and 10.5 below the shoulders, outline as hardware/sn64-v2
   socket, console-replacement family (OpenSFC CartSlot, docs/dimensions.md): body 99.0 x 11.25,
       ear holes 3.2 at +-47.5, rows 7.0 apart, 85.0 first to last
-  USB-C receptacle J101 body 8.94 x 6.9 x 3.16 (its footprint)
+  USB-C receptacle J101, JAE DX07S016JA3R1500 (JAE drawing SJ122205 revision 2,
+      docs/design/usb-connector-mechanics.md): face 8.94 x 3.16 +-0.15 with round ends, 6.9 deep,
+      centre 1.58 above the board, face 0.5 beyond the board's edge; a mated plug goes 4.7 +-0.2 in
+      and its overmold stops 1.95 in front of the face
+  USB-C plug (USB-IF, Type-C Connectors and Cable Assemblies Compliance Document revision 1.2,
+      figure B-1, dimensions 1, 6, 14, 15, 16): metal shell 8.25 x 2.40, 6.65 long; overmold
+      12.35 x 6.5 at most, its shape left to the maker
+  SummerCart64's own port for the same receptacle (its shell STEP): a window 14.54 x 8.0 through
+      the wall with corners of about 1 mm, centred on the receptacle; the plug's overmold goes in
+  board edge at the port: 55.5 from the middle (hardware/sn64-v2, Edge.Cuts)
   US cartridge: caliper measurements by rainwarrior (NESdev forum t=23890), listed with the constants
 
 Assumed, to be measured before anything is cut
@@ -67,15 +76,18 @@ Assumed, to be measured before anything is cut
   cartridge seats with its bottom face on the socket shoulder
   cap: 5 mm walls, pocket clearance 0.6 / 0.3, rim 21.5 mm above the seat at the centre and 6 mm
       lower at the ends
-  USB-C plug overmold 12.35 x 6.5 at most (recess 13 x 7)
+  allowance between shell and board at the port: 0.3 any way (printing, the board on its pins, the
+      receptacle on the board). The opening is 0.5 larger than the receptacle's face all round
+      (0.3, and 0.15 for the tallest receptacle); the recess holds the largest overmold with
+      square corners moved 0.3 both ways
 
 Two geometries, picked by VARIANT below
   "board-60"  the board in hardware/sn64-v2 as it is since 2026-10-01 (owner: shorter, with about
       5 mm clear on each side of the USB port): top edge 60 above the shoulders.
         USB-C centre 32.5: the lowest the board allows (its side notches for the shell's locating
-            posts end at 26.4) and the height of SummerCart64's own port; window 26.0-39.0, 8.3 above
+            posts end at 26.4) and the height of SummerCart64's own port; recess 25.2-39.8, 7.5 above
             the console top
-        flare from 44.0 (5 above the window) to the board top
+        flare from 44.8 (5 above the recess) to the board top
         board top 60.0: translator row (top at 47.7), 8 mm of fan-out, then the socket pads
       The tracked STEP, STL and shell-*.png show this one.
   "board-70"  the geometry before that: top edge 70, USB-C centre 50, flare 57.5-70. Kept for
@@ -93,7 +105,13 @@ SC64_ROOTS = ("", "../../")             # repository root (cwd) or the script fo
 DZ = 0.6                                # SummerCart64 shell frame -> board mid-plane at z = 0
 BOARD_T, TONGUE_W, TONGUE_H, BOARD_W_SLOT = 1.2, 64.5, 10.5, 101.8
 SOCK_L, SOCK_D, EAR_X, EAR_HOLE, ROW_Z, PIN_SPAN = 99.0, 11.25, 47.5, 3.2, 3.5, 85.0
-USB_W, USB_D, USB_H = 8.94, 6.9, 3.16
+USB_W, USB_D, USB_H, USB_H_TOL = 8.94, 6.9, 3.16, 0.15    # receptacle: face width, depth, height (JAE SJ122205)
+USB_CENTRE_UP, USB_OVERHANG = 1.58, 0.5                   # centre above the board; face beyond the board's edge
+USB_MATE_GAP, USB_MATE_TOL = 1.95, 0.3                    # overmold to the receptacle's face when mated: 6.65 +-0.1 less 4.7 +-0.2
+PLUG_SHELL_W, PLUG_SHELL_T, PLUG_SHELL_L = 8.25, 2.40, 6.65   # the plug's metal shell (USB-IF compliance document)
+OVERMOLD_W, OVERMOLD_T = 12.35, 6.5                       # the largest overmold a compliant plug may have
+SC64_PORT_W, SC64_PORT_T = 14.54, 8.0                     # SummerCart64's window for the same receptacle (its STEP)
+BOARD_EDGE_USB = 55.5                                     # the board's edge at the port, from the middle
 W_STEM = 116.12                         # N64 cartridge width (measured on the SummerCart64 shell)
 # US SNES cartridge: caliper measurements by rainwarrior, NESdev forum t=23890, 2022-05-21 ("a little
 # rough" in the author's words). Depth = front to back.
@@ -123,15 +141,21 @@ WALL = 2.0
 Y_CUT = 24.5                            # real SummerCart64 shell below, extruded outline above
 SOCK_BASE_H = 6.0
 TAIL_T, TAIL_LAP = 0.5, 3.0
-PLUG_W, PLUG_T = 13.0, 7.0               # recess for the cable plug's overmold (12.35 x 6.5 at most, ASSUMED)
-# USB-C port (owner, 2026-10-01: the plain window was a placeholder). Two steps with rounded ends, as on
-# a console: a recess for the plug's overmold, and through its floor an opening just larger than the
-# receptacle's face. JAE drawing SJ122205 (docs/design/usb-connector-mechanics.md): receptacle 8.94 x
-# 3.16; a mated plug's overmold stops 1.95 in front of the receptacle. The receptacle's face is 2.06
-# behind the wall's outer surface here, so without the recess a plug would stop 0.1 short of home.
+USB_FIT = 0.3                           # allowance between shell and board at the port, any way (ASSUMED)
+# USB-C port (owner, 2026-10-01: the plain window was a placeholder; 2026-10-02: "ensure the usbc that
+# we will use fits the hole you made, or rather vice versa"). Two steps, as on a console: a recess for
+# the plug's overmold, and through its floor an opening for the plug itself, larger than the
+# receptacle's face. The receptacle's face is 2.06 behind the wall's outer surface here and a mated
+# plug's overmold stops 1.95 in front of the face, so without the recess a plug would stop 0.1 short of
+# home, and 0.4 short at the end of the tolerances.
+# The recess has the size of SummerCart64's own window, which takes the overmold of any cable that
+# shell takes, and corners round enough to look like the rest and tight enough to hold the largest
+# overmold a compliant plug may have (12.35 x 6.5, square-cornered, 0.3 off both ways): 2.0.
+PLUG_W, PLUG_T, PLUG_R = SC64_PORT_W, SC64_PORT_T, 2.0
 USB_SIDE = -1                           # -1: board -X, the player's right (owner, 2026-10-02); +1 was the left
-USB_RECESS_DEPTH = 1.0                  # leaves a 1.0 rim around the opening; the overmold ends 0.9 above its floor
-USB_OPEN_CLR = 0.33                     # opening larger than the receptacle's face all round
+USB_RECESS_DEPTH = 1.0                  # leaves a 1.0 rim around the opening; the overmold ends 0.6 to 1.2 above its floor
+USB_OPEN_CLR = 0.5                      # opening larger than the receptacle's face all round: USB_FIT, and 0.15 for
+                                        # the tallest receptacle, rounded up
 CAP_WALL, POCKET_CLR_X, POCKET_CLR_Z, POCKET_R = 5.0, 0.6, 0.3, 1.0
 # cartridge unknowns, to be replaced by two caliper readings on a real cartridge
 CART_BACK_TO_PCB = 8.5                  # back face to the PCB mid-plane (ASSUMED: PCB centred in the side sections,
@@ -192,7 +216,7 @@ if VARIANT == "board-60":               # hardware/sn64-v2 today
     USB_CLEAR = 5.0                     # plain wall above the USB-C window before the flare starts (owner)
     Y_BOARD_TOP, Y_WIDE0, Y_WIDE1, Y_USB = 60.0, 26.4, 50.0, 32.5
     Y_HOLE56 = 44.5
-    Y_F0 = Y_USB + PLUG_W / 2 + USB_CLEAR   # 44.0
+    Y_F0 = Y_USB + PLUG_W / 2 + USB_CLEAR   # 44.77
 elif VARIANT == "board-70":             # before the refit of 2026-10-01
     Y_BOARD_TOP, Y_WIDE0, Y_WIDE1, Y_USB = 70.0, 32.0, 60.0, 50.0
     Y_HOLE56 = 38.0
@@ -214,7 +238,8 @@ POCKET_Z0, POCKET_Z1 = CART_ZF_MID - POCKET_CLR_Z, CART_ZB + POCKET_CLR_Z
 POCKET_T, ZC = POCKET_Z1 - POCKET_Z0, (POCKET_Z0 + POCKET_Z1) / 2   # the cap is centred on the pocket
 CAP_HW, CAP_HT = POCKET_W / 2 + CAP_WALL, POCKET_T / 2 + CAP_WALL
 R_RIM = (CAP_HW ** 2 + RIM_SAG ** 2) / (2 * RIM_SAG)
-USB_ZC = BOARD_T / 2 + USB_H / 2
+USB_ZC = BOARD_T / 2 + USB_CENTRE_UP     # the receptacle's centre line: on the board's back face
+USB_FACE_X = BOARD_EDGE_USB + USB_OVERHANG   # the receptacle's face, from the middle: 56.0
 C45 = 0.70710678
 # cap outline: 6 mm back corners, 9 mm front corners (the N64 cartridge's own radius)
 CAP_O = [(CAP_HW - 6, ZC + CAP_HT), (CAP_HW - 6 + 6 * C45, ZC + CAP_HT - 6 + 6 * C45), (CAP_HW, ZC + CAP_HT - 6),
@@ -403,20 +428,41 @@ def back_logo_recess(z_face):
     return pocket, islands[0].fuse(*islands[1:])
 
 
+def usb_plane(x):
+    """Sketch plane across the port at x from the middle, seen from outside: local x up the board (the
+    port's long side), local y out of the board's back face, normal outward."""
+    return Plane(origin=(USB_SIDE * x, Y_USB, USB_ZC), x_dir=(0, 1, 0), z_dir=(USB_SIDE, 0, 0))
+
+
 def usb_port():
-    """What to cut from the stem's side wall for the USB-C port: a recess with rounded ends for the
+    """What to cut from the stem's side wall for the USB-C port: a recess with rounded corners for the
     plug's overmold, and an opening with rounded ends for the plug itself through the floor of it."""
-    x_out = USB_SIDE * W_STEM / 2                        # the wall's outer surface at the port
-    # sketch plane on the wall, seen from outside: local x up the board (the port's long side), normal outward
-    face = Plane(origin=(x_out, Y_USB, USB_ZC), x_dir=(0, 1, 0), z_dir=(USB_SIDE, 0, 0))
+    face = usb_plane(W_STEM / 2 + 1.0)                   # 1.0 outside the wall's outer surface
     inward = (-USB_SIDE, 0, 0)
-    recess = extrude(face.from_local_coords(Pos(0, 0, 1.0) * SlotOverall(PLUG_W, PLUG_T)),
+    recess = extrude(face.from_local_coords(RectangleRounded(PLUG_W, PLUG_T, PLUG_R)),
                      amount=1.0 + USB_RECESS_DEPTH, dir=inward)
-    opening = extrude(face.from_local_coords(Pos(0, 0, 1.0) * SlotOverall(USB_W + 2 * USB_OPEN_CLR, USB_H + 2 * USB_OPEN_CLR)),
+    opening = extrude(face.from_local_coords(SlotOverall(USB_W + 2 * USB_OPEN_CLR, USB_H + 2 * USB_OPEN_CLR)),
                       amount=1.0 + WALL + 1.5, dir=inward)
-    NOTES.append(f"USB-C port: recess {PLUG_W} x {PLUG_T} with rounded ends, {USB_RECESS_DEPTH} deep; opening "
-                 f"{USB_W + 2 * USB_OPEN_CLR:.1f} x {USB_H + 2 * USB_OPEN_CLR:.1f} through a {WALL - USB_RECESS_DEPTH:.1f} rim")
+    NOTES.append(f"USB-C port: recess {PLUG_W} x {PLUG_T} with {PLUG_R} corners, {USB_RECESS_DEPTH} deep; opening "
+                 f"{USB_W + 2 * USB_OPEN_CLR:.2f} x {USB_H + 2 * USB_OPEN_CLR:.2f} with round ends through a "
+                 f"{WALL - USB_RECESS_DEPTH:.1f} rim")
     return recess + opening
+
+
+def usb_receptacle():
+    """The receptacle as its drawing gives it: a shell with round ends, its face USB_OVERHANG beyond
+    the board's edge, sitting on the board's back face."""
+    return extrude(usb_plane(USB_FACE_X).from_local_coords(SlotOverall(USB_W, USB_H)), amount=USB_D, dir=(-USB_SIDE, 0, 0))
+
+
+def usb_plug(gap=USB_MATE_GAP, dy=0.0, dz=0.0, corner=0.01):
+    """A mated plug with the largest overmold a compliant plug may have: (metal shell, overmold). gap
+    is from the overmold to the receptacle's face; dy, dz move the plug across the port."""
+    pl = usb_plane(USB_FACE_X + gap)                     # the overmold's front face
+    here = Pos(dy, dz)
+    shell = extrude(pl.from_local_coords(here * SlotOverall(PLUG_SHELL_W, PLUG_SHELL_T)), amount=PLUG_SHELL_L, dir=(-USB_SIDE, 0, 0))
+    over = extrude(pl.from_local_coords(here * RectangleRounded(OVERMOLD_W, OVERMOLD_T, corner)), amount=18.0, dir=(USB_SIDE, 0, 0))
+    return shell, over
 
 
 def build():
@@ -516,7 +562,7 @@ def build():
 
     cart, cart_pcb = us_cartridge(Y_TOP)
 
-    usb = box(USB_SIDE * (W_STEM / 2 - WALL - 0.06 - USB_D / 2), Y_USB - USB_W / 2, Y_USB + USB_W / 2, USB_ZC, USB_D, USB_H)
+    usb = usb_receptacle()
 
     console = (box(0, Y_LINE - 1, Y_LINE, DZ, 200, 90)
                - box(0, Y_LINE - 2, Y_LINE + 1, DZ, W_STEM + 2, 18.06 + 2))                      # console top surface (measured)
@@ -564,6 +610,41 @@ def interface_checks():
         "contact slot engagement on the PCB": round(NOSE_H - CART_EDGE_RECESS, 2),
         "pocket clearance each side (width, thickness)": (POCKET_CLR_X, POCKET_CLR_Z),
         "pocket and cap offset toward the label side": round(-ZC, 2),
+        **usb_checks(),
+    }
+
+
+def in_rounded_rectangle(x, y, w, h, r):
+    """Is the point (x, y) inside a w x h rectangle with corner radius r, centred on the origin?"""
+    x, y = abs(x), abs(y)
+    if x > w / 2 or y > h / 2:
+        return False
+    cx, cy = w / 2 - r, h / 2 - r
+    return x <= cx or y <= cy or (x - cx) ** 2 + (y - cy) ** 2 <= r ** 2
+
+
+def usb_checks():
+    """The port against the receptacle's drawing and the plug's limits. Every number must be
+    positive; the last line must be True."""
+    floor = W_STEM / 2 - USB_RECESS_DEPTH                     # the recess floor, from the middle
+    over = [USB_FACE_X + USB_MATE_GAP + d for d in (-USB_MATE_TOL, 0.0, USB_MATE_TOL)]   # the overmold's face when mated
+    open_w, open_t = USB_W + 2 * USB_OPEN_CLR, USB_H + 2 * USB_OPEN_CLR
+    return {
+        "USB-C receptacle face behind the wall (outer surface, inner surface)":
+            (round(W_STEM / 2 - USB_FACE_X, 2), round(W_STEM / 2 - WALL - USB_FACE_X, 2)),
+        "USB-C opening around the receptacle's face (as drawn, tallest receptacle)":
+            (USB_OPEN_CLR, round(USB_OPEN_CLR - USB_H_TOL, 2)),
+        "USB-C opening around the plug's metal shell (width, thickness)":
+            (round((open_w - PLUG_SHELL_W) / 2, 2), round((open_t - PLUG_SHELL_T) / 2, 2)),
+        "USB-C recess around the largest overmold, each side (width, thickness)":
+            (round((PLUG_W - OVERMOLD_W) / 2, 2), round((PLUG_T - OVERMOLD_T) / 2, 2)),
+        "USB-C mated overmold above the recess floor (least, as drawn, most)": tuple(round(x - floor, 2) for x in over),
+        "USB-C mated overmold inside the wall's outer surface (most, as drawn)":
+            (round(W_STEM / 2 - over[0], 2), round(W_STEM / 2 - over[1], 2)),
+        "USB-C largest overmold, square corners, 0.3 off both ways, goes into the recess":
+            in_rounded_rectangle(OVERMOLD_W / 2 + USB_FIT, OVERMOLD_T / 2 + USB_FIT, PLUG_W, PLUG_T, PLUG_R),
+        "USB-C wall left above the recess before the flare, below it to the console top":
+            (round(Y_F0 - Y_USB - PLUG_W / 2, 2), round(Y_USB - PLUG_W / 2 - Y_LINE, 2)),
     }
 
 
@@ -594,7 +675,7 @@ def report(parts):
     print(f"variant {VARIANT}: shell {bb.size.X:.1f} x {bb.size.Y:.1f} x {bb.size.Z:.1f} mm, bottom {bb.min.Y:.2f}")
     for name, h in (("label-side half", front), ("back half", back)):
         print(f"  {name}: solids {len(h.solids())}, volume {h.volume / 1000:.1f} cm3, valid {h.is_valid}")
-    print(f"console top {Y_LINE:.2f} above the shoulders (measured: 30 mm hole), USB-C centre {Y_USB} (window {Y_USB - PLUG_W / 2 - Y_LINE:.1f} above the console top, flare {Y_F0 - Y_USB - PLUG_W / 2:.1f} above the window), "
+    print(f"console top {Y_LINE:.2f} above the shoulders (measured: 30 mm hole), USB-C centre {Y_USB} (recess {Y_USB - PLUG_W / 2 - Y_LINE:.1f} above the console top, flare {Y_F0 - Y_USB - PLUG_W / 2:.1f} above the recess), "
           f"real N64 shell to {Y_CUT}, flare {Y_F0}..{Y_F1}, cartridge seat {Y_TOP}, rim {RIM_C} at the centre and "
           f"{RIM_C - RIM_SAG} at the ends, cap {2 * CAP_HW:.1f} x {2 * CAP_HT:.1f}, cartridge top {Y_TOP + CART_MID_H}")
     print("notes:", "; ".join(NOTES))

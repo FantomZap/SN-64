@@ -1,0 +1,46 @@
+{
+ "config": "build/route-board/sn64_board_top.config",
+ "config_sha256": "3cb5bdfb421c882d3ef5ffd1ce41265630cef889113ba349ed562bc826b14a74",
+ "options": {
+  "compress": true,
+  "spimode": "qspi",
+  "freq_mhz": 38.8
+ },
+ "bitstream": {
+  "file": "sn64_board_top.bit",
+  "bytes": 1313752,
+  "sha256": "c4c7d0e6a4fc3dc5ef54be33b4fe46e6a531bffa64e7ea7c538fd242b7e904ea"
+ },
+ "flash_offset_of_boot_program": "0x400000",
+ "load_time_ms": {
+  "as_packed": 67.7,
+  "as_packed_slow_clock": 77.9,
+  "fpga_start_up_before_it_at_most": 33.0,
+  "same_image_other_settings": {
+   "fast-read at 2.4 MHz": 4379.2,
+   "fast-read at 38.8 MHz": 270.9,
+   "fast-read at 62.0 MHz": 169.5,
+   "dual-spi at 2.4 MHz": 2189.6,
+   "dual-spi at 38.8 MHz": 135.4,
+   "dual-spi at 62.0 MHz": 84.8,
+   "qspi at 2.4 MHz": 1094.8,
+   "qspi at 38.8 MHz": 67.7,
+   "qspi at 62.0 MHz": 42.4
+  }
+ },
+ "note": "worked out from the file size; nothing has been loaded into a board",
+ "boot_program": {
+  "file": "sn64_bootstrap.z64",
+  "bytes": 163840,
+  "sha256": "2b3f2c8d60d8e8ecf35a0feb066a3c8edfdc4c94ea458da3d3cc2221bb56e461"
+ },
+ "whole_flash": {
+  "file": "sn64-flash.bin",
+  "bytes": 4358144,
+  "sha256": "7ca7c10e624ab80590b68095159340347f4dd2af0d86cec335a516a84b08c158"
+ },
+ "load_commands": [
+  "openFPGALoader -b ulx3s -f --verify sn64_board_top.bit",
+  "openFPGALoader -b ulx3s -f --verify -o 0x400000 --file-type raw sn64_bootstrap.z64"
+ ]
+}

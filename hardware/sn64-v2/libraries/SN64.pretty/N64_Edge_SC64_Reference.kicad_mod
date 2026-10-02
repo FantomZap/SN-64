@@ -55,33 +55,9 @@
 			)
 		)
 	)
-	(property "Notes" "Not in BOM"
-		(at 0 0 0)
-		(layer "F.Fab")
-		(hide yes)
-		(uuid "e84a1e37-26a6-4c4f-af39-a530be5baaec")
-		(effects
-			(font
-				(size 1 1)
-				(thickness 0.15)
-			)
-		)
-	)
-	(property "exclude_from_bom" ""
-		(at 0 0 0)
-		(layer "F.Fab")
-		(hide yes)
-		(uuid "c064b3b9-8f69-4da5-9a3d-07aebe78bcb5")
-		(effects
-			(font
-				(size 1 1)
-				(thickness 0.15)
-			)
-		)
-	)
 	(sheetname "Root")
 	(sheetfile "sc64v2.kicad_sch")
-	(attr exclude_from_bom)
+	(attr exclude_from_pos_files exclude_from_bom)
 	(duplicate_pad_numbers_are_jumpers no)
 	(fp_poly
 		(pts
@@ -114,7 +90,7 @@
 			(width 0.1)
 			(type solid)
 		)
-		(layer "Edge.Cuts")
+		(layer "Cmts.User")
 		(uuid "a6c62207-e47b-4cb7-87a4-29e345d3d7b5")
 	)
 	(fp_line
@@ -124,7 +100,7 @@
 			(width 0.1)
 			(type solid)
 		)
-		(layer "Edge.Cuts")
+		(layer "Cmts.User")
 		(uuid "0bb2bec8-60b9-4621-862e-dd28e83eac02")
 	)
 	(fp_line
@@ -134,7 +110,7 @@
 			(width 0.1)
 			(type solid)
 		)
-		(layer "Edge.Cuts")
+		(layer "Cmts.User")
 		(uuid "ae8b6961-8107-40d3-955d-29b1e559f30e")
 	)
 	(fp_line
@@ -144,7 +120,7 @@
 			(width 0.1)
 			(type solid)
 		)
-		(layer "Edge.Cuts")
+		(layer "Cmts.User")
 		(uuid "6ec197e0-b2d8-430a-861c-b9262679c80a")
 	)
 	(fp_line
@@ -154,7 +130,7 @@
 			(width 0.1)
 			(type solid)
 		)
-		(layer "Edge.Cuts")
+		(layer "Cmts.User")
 		(uuid "2ab0cdef-3157-4105-946f-bd107ad3a90b")
 	)
 	(fp_line
@@ -164,7 +140,7 @@
 			(width 0.1)
 			(type solid)
 		)
-		(layer "Edge.Cuts")
+		(layer "Cmts.User")
 		(uuid "86f9672f-2972-4389-8803-0beec1f46b13")
 	)
 	(fp_text user "50"

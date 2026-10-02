@@ -247,11 +247,173 @@
  },
  "provisional_values": [
   "TPS2553 RILIM 24.9k",
-  "TPS2121 CSS 1 nF",
+  "TPS2121 CSS 10 nF (inrush about 0.3 A into 42 uF, from the data sheet curve; not measured)",
   "decoupling counts (Lattice checklist, not per ball)",
   "sigma-delta ADC RC (10k/1nF)",
-  "NTC part"
+  "NTC curve in the logic (part: Sunlord 3950 K)"
  ],
+ "capacitor_at_pin": {
+  "C201": [
+   "U201",
+   "42"
+  ],
+  "C213": [
+   "U201",
+   "31"
+  ],
+  "C202": [
+   "U201",
+   "7"
+  ],
+  "C214": [
+   "U201",
+   "18"
+  ],
+  "C203": [
+   "U202",
+   "42"
+  ],
+  "C215": [
+   "U202",
+   "31"
+  ],
+  "C204": [
+   "U202",
+   "7"
+  ],
+  "C216": [
+   "U202",
+   "18"
+  ],
+  "C205": [
+   "U203",
+   "42"
+  ],
+  "C217": [
+   "U203",
+   "31"
+  ],
+  "C206": [
+   "U203",
+   "7"
+  ],
+  "C218": [
+   "U203",
+   "18"
+  ],
+  "C207": [
+   "U204",
+   "42"
+  ],
+  "C219": [
+   "U204",
+   "31"
+  ],
+  "C208": [
+   "U204",
+   "7"
+  ],
+  "C220": [
+   "U204",
+   "18"
+  ],
+  "C211": [
+   "U205",
+   "14"
+  ],
+  "C31": [
+   "U2",
+   "8"
+  ],
+  "C32": [
+   "X1",
+   "4"
+  ],
+  "C33": [
+   "U3",
+   "6"
+  ],
+  "C35": [
+   "U6",
+   "7"
+  ],
+  "C46": [
+   "U6",
+   "10"
+  ],
+  "C34": [
+   "U6",
+   "8"
+  ],
+  "C41": [
+   "U13",
+   "15"
+  ],
+  "C42": [
+   "U13",
+   "13"
+  ],
+  "C43": [
+   "U13",
+   "3"
+  ],
+  "C307": [
+   "U8",
+   "3"
+  ],
+  "C324": [
+   "U8",
+   "13"
+  ],
+  "C325": [
+   "U8",
+   "7"
+  ],
+  "C312": [
+   "U9",
+   "4"
+  ],
+  "C313": [
+   "U10",
+   "4"
+  ],
+  "C322": [
+   "U12",
+   "1"
+  ],
+  "C323": [
+   "U12",
+   "6"
+  ],
+  "C320": [
+   "U11",
+   "1"
+  ],
+  "C321": [
+   "U11",
+   "5"
+  ],
+  "C304": [
+   "U7",
+   "7"
+  ],
+  "C305": [
+   "U7",
+   "2"
+  ],
+  "C306": [
+   "U7",
+   "1"
+  ],
+  "C209": [
+   "J2",
+   "27"
+  ],
+  "C210": [
+   "J2",
+   "58"
+  ]
+ },
  "bom": {
   "main": [
    [
@@ -556,7 +718,7 @@
    ],
    [
     "D1",
-    "LED green 0603",
+    "LED yellow-green 0603",
     "LED_SMD:LED_0603_1608Metric"
    ],
    [
@@ -567,7 +729,7 @@
    [
     "U6",
     "TLA2528IRTER",
-    "Package_DFN_QFN:Texas_RTE0016D_WQFN-16-1EP_3x3mm_P0.5mm_EP0.8x0.8mm"
+    "Package_DFN_QFN:WQFN-16-1EP_3x3mm_P0.5mm_EP1.68x1.68mm"
    ],
    [
     "C34",
@@ -576,7 +738,12 @@
    ],
    [
     "C35",
-    "100nF",
+    "1uF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C46",
+    "1uF",
     "Capacitor_SMD:C_0603_1608Metric"
    ],
    [
@@ -770,6 +937,46 @@
     "Capacitor_SMD:C_0603_1608Metric"
    ],
    [
+    "C213",
+    "100nF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C214",
+    "100nF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C215",
+    "100nF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C216",
+    "100nF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C217",
+    "100nF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C218",
+    "100nF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C219",
+    "100nF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C220",
+    "100nF",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
     "C209",
     "22uF 10V",
     "Capacitor_SMD:C_0805_2012Metric"
@@ -886,7 +1093,7 @@
    ],
    [
     "C301",
-    "4.7uF 10V",
+    "2.2uF 10V",
     "Capacitor_SMD:C_0805_2012Metric"
    ],
    [
@@ -966,7 +1173,7 @@
    ],
    [
     "C303",
-    "1nF",
+    "10nF",
     "Capacitor_SMD:C_0603_1608Metric"
    ],
    [
@@ -976,7 +1183,7 @@
    ],
    [
     "C304",
-    "10uF 10V",
+    "4.7uF 10V",
     "Capacitor_SMD:C_0805_2012Metric"
    ],
    [
@@ -1013,6 +1220,21 @@
     "R311",
     "100k",
     "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R321",
+    "10k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "C324",
+    "10uF 25V",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C325",
+    "10uF 25V",
+    "Capacitor_SMD:C_0603_1608Metric"
    ],
    [
     "C307",

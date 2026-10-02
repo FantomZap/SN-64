@@ -12,6 +12,9 @@ with fpga/constraints/sn64_trial.lpf. Either way this measures resources and
 internal timing on the constrained pins, not board-level I/O timing. Requires the OSS CAD Suite environment (yosys with the
 slang plugin, nextpnr-ecp5) on PATH and prepared core sources in build/
 (run fpga/tools/evaluate.py or prepare_core.py first).
+
+When the board top routes with its timing met, pack_bitstream.py then writes the files for the
+board's flash into build/bitstream/.
 """
 import argparse
 import json
@@ -104,6 +107,9 @@ def main():
     print(json.dumps(summary, indent=2))
     if r.returncode or any(v['result'] != 'PASS' for v in fmax.values()):
         sys.exit(1)
+    if args.top == 'board':
+        # The files for the board's flash, packed so that the FPGA loads them quickly (pack_bitstream.py says why).
+        subprocess.run([sys.executable, str(Path(__file__).with_name('pack_bitstream.py')), '--config', str(config)], check=True)
 
 
 if __name__ == '__main__':

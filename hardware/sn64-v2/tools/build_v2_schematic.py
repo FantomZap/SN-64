@@ -18,6 +18,7 @@ import argparse
 import copy
 import json
 import math
+import re
 import shutil
 import sys
 import uuid
@@ -184,7 +185,7 @@ class Sheet:
         self.next_cell(0, 0)
         self.cursor[1] += gap
 
-    def place(self, ref, lib_id, value, nets, fp='', fields=None, unit=1, dnp=False):
+    def place(self, ref, lib_id, value, nets, fp='', fields=None, unit=1, dnp=False, in_bom=True):
         sym = self.load(lib_id)
         pins = self.unit_pins(sym, unit)
         nums = {str(get(p, 'number')[1]) for p in pins}
@@ -208,7 +209,9 @@ class Sheet:
             rx, ry, vx, vy, just = x + min(xs), y - max(ys) - 7.62, x + min(xs), y - max(ys) - 5.08, 'left'
         hidden = ref.startswith('#')
         key = ref + (f':u{unit}' if unit != 1 else '')
-        out = [f'(symbol (lib_id {q(lib_id)}) (at {g(x)} {g(y)} 0) (unit {unit}) (exclude_from_sim no) (in_bom {"no" if hidden else "yes"}) '
+        if fields and 'MPN' in fields and 'Manufacturer' not in fields:
+            fields = dict(fields, Manufacturer=MAKER[fields['MPN']])
+        out = [f'(symbol (lib_id {q(lib_id)}) (at {g(x)} {g(y)} 0) (unit {unit}) (exclude_from_sim no) (in_bom {"no" if hidden or not in_bom else "yes"}) '
                f'(on_board {"no" if hidden else "yes"}) (dnp {"yes" if dnp else "no"}) (uuid {q(uid("sym:" + key))})',
                prop('Reference', ref, rx, ry, hidden, just), prop('Value', value, vx, vy, hidden, just),
                prop('Footprint', fp, x, y, True), prop('Datasheet', (fields or {}).get('Datasheet', ''), x, y, True)]
@@ -256,10 +259,11 @@ class Sheet:
             self.bom.append((ref, value, fp))
 
     def res(self, ref, value, n1, n2, fields=None):
-        self.place(ref, 'Device:R', value, {'1': n1, '2': n2}, 'Resistor_SMD:R_0603_1608Metric', fields)
+        fp = 'Resistor_SMD:R_0603_1608Metric'
+        self.place(ref, 'Device:R', value, {'1': n1, '2': n2}, fp, dict(small_part('R', fp, value), **(fields or {})))
 
     def cap(self, ref, value, n1, n2, fp='Capacitor_SMD:C_0603_1608Metric', fields=None):
-        self.place(ref, 'Device:C', value, {'1': n1, '2': n2}, fp, fields)
+        self.place(ref, 'Device:C', value, {'1': n1, '2': n2}, fp, dict(small_part('C', fp, value), **(fields or {})))
 
     def flag(self, net):
         self.nflag = getattr(self, 'nflag', 0) + 1
@@ -309,6 +313,62 @@ LCSC = {  # JLC/LCSC stock snapshot 2026-09-30 (pcbparts jlc_search / mouser)
     'AP2112K-2.5TRG1': ('C51118', None), 'TPS2553DBVR': ('C55266', 59074), 'PNR4020-1R5M': ('C54620133', 7449),
     'FNR4030S2R2MT': ('C167869', 67195), 'DX07S016JA3R1500': ('C2939926', None),
     'FT231XS-R': ('C132160', 3714)}      # stock read 2026-10-02 (pcbparts jlc_get_part)
+MAKER = {'LFE5U-85F-8BG381I': 'Lattice Semiconductor', 'W25Q128JVSIQ': 'Winbond', '1631-27005-BTBEYA': 'Interquip',
+         'TPS3808G01DBVR': 'Texas Instruments', 'USBLC6-2SC6': 'STMicroelectronics', 'SN74ALVC164245DGGR': 'Texas Instruments',
+         'SN74LVC07APWR': 'Texas Instruments', 'TLA2528IRTER': 'Texas Instruments', 'TPS2121RUXR': 'Texas Instruments',
+         'TPS63070RNMR': 'Texas Instruments', 'TLV62569DBVR': 'Texas Instruments', 'AP2112K-2.5TRG1': 'Diodes Incorporated',
+         'TPS2553DBVR': 'Texas Instruments', 'PNR4020-1R5M': 'APV', 'FNR4030S2R2MT': 'Changjiang Microelectronics',
+         'DX07S016JA3R1500': 'JAE', 'FT231XS-R': 'FTDI'}
+# The small parts: one maker's part for each value and size, so that every line of the parts list can be bought
+# (JLC/LCSC database read 2026-10-02 through pcbparts jlc_search). The part's own voltage is at least what the
+# value text asks for and is given in the description. Key: kind, size, first word of the value, and '0.1%' for
+# the thin-film resistors of the regulators' dividers.
+SMALL_PARTS = {
+    ('C', '0603', '100nF'): ('YAGEO', 'CC0603KRX7R9BB104', 'C14663', '100 nF 50 V X7R 10 % 0603'),
+    ('C', '0603', '10nF'): ('FH (Fenghua)', '0603B103K500NT', 'C57112', '10 nF 50 V X7R 10 % 0603'),
+    ('C', '0603', '1nF'): ('Samsung Electro-Mechanics', 'CL10C102JB8NNNC', 'C163508', '1 nF 50 V C0G 5 % 0603'),
+    ('C', '0603', '1uF'): ('Samsung Electro-Mechanics', 'CL10A105KB8NNNC', 'C15849', '1 uF 50 V X5R 10 % 0603'),
+    ('C', '0603', '47pF'): ('Samsung Electro-Mechanics', 'CL10C470JB8NNNC', 'C1671', '47 pF 50 V C0G 5 % 0603'),
+    ('C', '0603', '6.8pF'): ('FH (Fenghua)', '0603CG6R8C500NT', 'C1679', '6.8 pF 50 V C0G 0.25 pF 0603'),
+    ('C', '0603', '10uF'): ('Samsung Electro-Mechanics', 'CL10A106MA8NRNC', 'C96446', '10 uF 25 V X5R 20 % 0603'),
+    ('C', '0805', '10uF'): ('Samsung Electro-Mechanics', 'CL21A106KAYNNNE', 'C15850', '10 uF 25 V X5R 10 % 0805'),
+    ('C', '0805', '22uF'): ('Samsung Electro-Mechanics', 'CL21A226MAQNNNE', 'C45783', '22 uF 25 V X5R 20 % 0805'),
+    ('C', '0805', '4.7uF'): ('Samsung Electro-Mechanics', 'CL21A475KAQNNNE', 'C1779', '4.7 uF 25 V X5R 10 % 0805'),
+    ('C', '0805', '2.2uF'): ('Samsung Electro-Mechanics', 'CL21A225KBQNNNE', 'C377773', '2.2 uF 50 V X5R 10 % 0805'),
+    ('R', '0603', '100k'): ('UNI-ROYAL', '0603WAF1003T5E', 'C25803', '100 k 1 % 0603'),
+    ('R', '0603', '10k'): ('UNI-ROYAL', '0603WAF1002T5E', 'C25804', '10 k 1 % 0603'),
+    ('R', '0603', '4.7k'): ('UNI-ROYAL', '0603WAF4701T5E', 'C23162', '4.7 k 1 % 0603'),
+    ('R', '0603', '1k'): ('UNI-ROYAL', '0603WAF1001T5E', 'C21190', '1 k 1 % 0603'),
+    ('R', '0603', '20k'): ('UNI-ROYAL', '0603WAF2002T5E', 'C4184', '20 k 1 % 0603'),
+    ('R', '0603', '5.1k'): ('UNI-ROYAL', '0603WAF5101T5E', 'C23186', '5.1 k 1 % 0603'),
+    ('R', '0603', '27'): ('UNI-ROYAL', '0603WAF270JT5E', 'C25190', '27 ohm 1 % 0603'),
+    ('R', '0603', '33'): ('UNI-ROYAL', '0603WAF330JT5E', 'C23140', '33 ohm 1 % 0603'),
+    ('R', '0603', '24.9k'): ('UNI-ROYAL', '0603WAF2492T5E', 'C25962', '24.9 k 1 % 0603'),
+    ('R', '0603', '182k'): ('FOJAN', 'FRC0603F1823TS', 'C5126102', '182 k 1 % 0603'),
+    ('R', '0603', '274k'): ('FOJAN', 'FRC0603F2743TS', 'C5126128', '274 k 1 % 0603'),
+    ('R', '0603', '44.2k'): ('FOJAN', 'FRC0603F4422TS', 'C2930103', '44.2 k 1 % 0603'),
+    ('R', '0603', '649k'): ('FOJAN', 'FRC0603F6493TS', 'C2999594', '649 k 1 % 0603'),
+    ('R', '0603', '100k', '0.1%'): ('YAGEO', 'RT0603BRD07100KL', 'C122538', '100 k 0.1 % 25 ppm thin film 0603'),
+    ('R', '0603', '102k', '0.1%'): ('YAGEO', 'RT0603BRD07102KL', 'C861068', '102 k 0.1 % 25 ppm thin film 0603'),
+    ('R', '0603', '120k', '0.1%'): ('YAGEO', 'RT0603BRD07120KL', 'C705720', '120 k 0.1 % 25 ppm thin film 0603'),
+    ('R', '0603', '232k', '0.1%'): ('YAGEO', 'RT0603BRD07232KL', 'C861240', '232 k 0.1 % 25 ppm thin film 0603'),
+    ('R', '0603', '44.2k', '0.1%'): ('YAGEO', 'RT0603BRD0744K2L', 'C861410', '44.2 k 0.1 % 25 ppm thin film 0603'),
+    ('R', '0603', '459k', '0.1%'): ('YAGEO', 'RT0603BRD07459KL', 'C6288321', '459 k 0.1 % 25 ppm thin film 0603'),
+}
+# A yellow-green lamp: about 2 V across it, so 1.3 mA through R18 from 3.3 V. A pure green one needs 3 V and
+# would stay dark on this supply.
+LED_PART = ('Everlight', '19-21SYGC/S530-E2/4T', 'C2986011', 'LED yellow-green 573 nm, 2.0 V, 0603')
+NTC_PART = ('Sunlord', 'SDNT1608X103F3950FTF', 'C279936', 'NTC 10 k 1 %, B(25/50) 3950 K 1 %, 0603')
+
+
+def small_part(kind, fp, value):
+    size = '0805' if '0805' in fp else '0603'
+    words = value.split()
+    key = (kind, size, words[0]) + (('0.1%',) if '0.1%' in words else ())
+    maker, mpn, lcsc, text = SMALL_PARTS[key]
+    return {'MPN': mpn, 'Manufacturer': maker, 'LCSC': lcsc, 'Description': text}
+
+
 SOCKET = {1: 'SNES_SYSTEM_CLK', 2: 'SNES_EXPAND', 3: 'SNES_PA6', 4: 'SNES_PRD_N', 5: GND, 6: 'SNES_A11', 7: 'SNES_A10', 8: 'SNES_A9',
           9: 'SNES_A8', 10: 'SNES_A7', 11: 'SNES_A6', 12: 'SNES_A5', 13: 'SNES_A4', 14: 'SNES_A3', 15: 'SNES_A2', 16: 'SNES_A1',
           17: 'SNES_A0', 18: 'SNES_IRQ_N', 19: 'SNES_D0', 20: 'SNES_D1', 21: 'SNES_D2', 22: 'SNES_D3', 23: 'SNES_RD_N',
@@ -332,6 +392,20 @@ JOINT = ([f'N64_AD{i}' for i in range(16)] + ['N64_ALE_L', 'N64_ALE_H', 'N64_REA
          + [HOST] * 4 + [GND] * 9)
 assert len(JOINT) == 40
 JOINT_NETS = {str(i + 1): n for i, n in enumerate(JOINT)}
+
+
+# The capacitor that belongs at each supply pin (capacitor: chip, pin). The board tools place by this table
+# (tools/apply_decoupling_v2.py) and the wiring check measures the distances.
+AT_PIN = {'C201': ('U201', '42'), 'C213': ('U201', '31'), 'C202': ('U201', '7'), 'C214': ('U201', '18'),
+          'C203': ('U202', '42'), 'C215': ('U202', '31'), 'C204': ('U202', '7'), 'C216': ('U202', '18'),
+          'C205': ('U203', '42'), 'C217': ('U203', '31'), 'C206': ('U203', '7'), 'C218': ('U203', '18'),
+          'C207': ('U204', '42'), 'C219': ('U204', '31'), 'C208': ('U204', '7'), 'C220': ('U204', '18'),
+          'C211': ('U205', '14'), 'C31': ('U2', '8'), 'C32': ('X1', '4'), 'C33': ('U3', '6'), 'C35': ('U6', '7'), 'C46': ('U6', '10'),
+          'C34': ('U6', '8'), 'C41': ('U13', '15'), 'C42': ('U13', '13'), 'C43': ('U13', '3'),
+          'C307': ('U8', '3'), 'C324': ('U8', '13'), 'C325': ('U8', '7'), 'C312': ('U9', '4'), 'C313': ('U10', '4'),
+          'C322': ('U12', '1'), 'C323': ('U12', '6'), 'C320': ('U11', '1'), 'C321': ('U11', '5'),
+          'C304': ('U7', '7'), 'C305': ('U7', '2'), 'C306': ('U7', '1'),
+          'C209': ('J2', '27'), 'C210': ('J2', '58')}        # the two 22 uF of the cartridge's 5 V, at the socket's 5 V pins
 
 
 def translator(sh, ref, a1, b1, a2, b2, dir1, oe1, dir2, oe2):
@@ -396,7 +470,7 @@ def build_fpga_sheet(sh, balls, rows):
     # JTAG: the USB loader chip U13 (power sheet) drives it; service pads (no header fitted) and pulls.
     # TCK has no pull of its own in the FPGA: Lattice FPGA-TN-02039 asks for 4.7 k to ground.
     for i, net in enumerate(['JTAG_TCK', 'JTAG_TMS', 'JTAG_TDI', 'JTAG_TDO', GND], start=1):
-        sh.place(f'TP{i}', 'Connector:TestPoint', net, {'1': net}, 'TestPoint:TestPoint_Pad_1.5x1.5mm')
+        sh.place(f'TP{i}', 'Connector:TestPoint', net, {'1': net}, 'TestPoint:TestPoint_Pad_1.5x1.5mm', in_bom=False)    # a bare pad
     sh.res('R12', '4.7k', V33, 'JTAG_TDI')
     sh.res('R13', '4.7k', V33, 'JTAG_TMS')
     sh.res('R14', '4.7k', V33, 'JTAG_TDO')
@@ -405,8 +479,11 @@ def build_fpga_sheet(sh, balls, rows):
     # 27 MHz oscillator (all clocks come from the FPGA PLLs: docs/design/v2-board.md)
     sh.place('X1', 'Oscillator:ASE-xxxMHz', '27MHz 1631-27005-BTBEYA', {'1': V33, '2': GND, '3': 'OSC_27', '4': V33},
              'Oscillator:Oscillator_SMD_Abracon_ASE-4Pin_3.2x2.5mm',
-             {'Datasheet': 'https://www.lcsc.com/product-detail/C3003262.html', 'LCSC': LCSC['1631-27005-BTBEYA'][0],
-              'MPN': '1631-27005-BTBEYA', 'Frequency': '27MHz', 'Note': 'CMOS 3.3 V, +-50 ppm, 10 mA (JLC stock 7439)'})
+             {'Datasheet': 'https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2211111700_Interquip-1631-27005-BTBEYA_C3003262.pdf',
+              'LCSC': LCSC['1631-27005-BTBEYA'][0], 'MPN': '1631-27005-BTBEYA', 'Frequency': '27MHz',
+              'Description': '27 MHz CMOS oscillator, 3.3 V, 50 ppm, 3.2 x 2.5 mm, 4 pads',
+              'Note': 'CMOS 3.3 V, +-50 ppm, 10 mA; pad 1 enable (high), 2 ground, 3 output, 4 supply, and the land pattern, as the '
+                      'data sheet SPXO 3225 163-B (checked 2026-10-02)'})
     sh.cap('C32', '100nF', V33, GND)
     # Reset supervisor: TPS3808G01 on FPGA_3V3 (v1 values 649k/100k: 3.03 V threshold), RESET -> BOARD_RESET_N
     sh.place('U3', 'Power_Supervisor:TPS3808DBV', 'TPS3808G01DBVR',
@@ -417,7 +494,8 @@ def build_fpga_sheet(sh, balls, rows):
     sh.res('R17', '10k', V33, 'BOARD_RESET_N')
     sh.cap('C33', '100nF', V33, GND)
     # Status LED
-    sh.place('D1', 'Device:LED', 'LED green 0603', {'1': 'LED_K', '2': V33}, 'LED_SMD:LED_0603_1608Metric')
+    sh.place('D1', 'Device:LED', 'LED yellow-green 0603', {'1': 'LED_K', '2': V33}, 'LED_SMD:LED_0603_1608Metric',
+             {'MPN': LED_PART[1], 'Manufacturer': LED_PART[0], 'LCSC': LED_PART[2], 'Description': LED_PART[3]})
     sh.res('R18', '1k', 'LED_K', 'LED')
     sh.newline()
     # Telemetry ADC: TLA2528 (8 ch, 12 bit, I2C). AVDD is the reference, so FPGA_3V3 itself is watched by U3.
@@ -425,12 +503,16 @@ def build_fpga_sheet(sh, balls, rows):
              {'15': 'MON_HOST_3V3', '16': 'MON_VBUS', '1': 'MON_5V_SYS', '2': 'MON_CART_5V', '3': V11, '4': 'MON_NTC',
               '5': 'USB_CC1', '6': 'USB_CC2', '13': 'ADC_SCL', '14': 'ADC_SDA', '11': None, '8': 'ADC_DECAP', '12': None,
               '7': V33, '10': V33, '9': GND, '17': GND},
-             'Package_DFN_QFN:Texas_RTE0016D_WQFN-16-1EP_3x3mm_P0.5mm_EP0.8x0.8mm',
+             'Package_DFN_QFN:WQFN-16-1EP_3x3mm_P0.5mm_EP1.68x1.68mm',
              {'Datasheet': 'https://www.ti.com/lit/ds/symlink/tla2528.pdf', 'LCSC': LCSC['TLA2528IRTER'][0], 'MPN': 'TLA2528IRTER',
               'Note': 'ADDR open: I2C address 0x10 (SBAS961A table 2: no resistor on ADDR; straight to ground is not a listed setting); '
-                      'AIN4 = FPGA_1V1 direct; footprint EP size to verify against SBAS961A mechanical drawing'})
+                      'AIN4 = FPGA_1V1 direct; exposed pad 1.68 x 1.68 mm as TI package RTE0016C (checked 2026-10-02)'})
     sh.cap('C34', '1uF', 'ADC_DECAP', GND)
-    sh.cap('C35', '100nF', V33, GND)
+    # AVDD (pin 7, also the reference) and DVDD (pin 10) each get their own 1 uF close to the pin, with no via
+    # between pin and capacitor (TI SBAS961A, power-supply recommendations and 10.1: at least 220 nF when both
+    # come from one supply). Until 2026-10-02 the two pins shared one 100 nF, and the board had it 32 mm away.
+    sh.cap('C35', '1uF', V33, GND)
+    sh.cap('C46', '1uF', V33, GND)
     sh.res('R22', '4.7k', V33, 'ADC_SCL')
     sh.res('R23', '4.7k', V33, 'ADC_SDA')
     sh.res('R24', '10k 1%', HOST, 'MON_HOST_3V3'); sh.res('R25', '10k 1%', GND, 'MON_HOST_3V3')       # /2
@@ -438,7 +520,8 @@ def build_fpga_sheet(sh, balls, rows):
     sh.res('R28', '20k 1%', V5, 'MON_5V_SYS'); sh.res('R29', '10k 1%', GND, 'MON_5V_SYS')             # /3
     sh.res('R30', '20k 1%', CART5, 'MON_CART_5V'); sh.res('R31', '10k 1%', GND, 'MON_CART_5V')        # /3
     sh.place('RT1', 'Device:Thermistor_NTC', 'NTC 10k B3950 0603', {'1': V33, '2': 'MON_NTC'}, 'Resistor_SMD:R_0603_1608Metric',
-             {'Note': 'board temperature for telemetry (replaces the v1 TMP302 switch); threshold in FPGA logic'})
+             {'MPN': NTC_PART[1], 'Manufacturer': NTC_PART[0], 'LCSC': NTC_PART[2], 'Description': NTC_PART[3],
+              'Note': 'board temperature for telemetry (replaces the v1 TMP302 switch); threshold in FPGA logic'})
     sh.res('R32', '10k 1%', GND, 'MON_NTC')
     sh.newline()
     # Sigma-delta audio ADC front end (2 ch): LVDS comparator, 1st-order RC integrator on the feedback pin.
@@ -479,9 +562,13 @@ def build_cart_sheet(sh):
                ['SNES_CIC_DATA0', 'SNES_CIC_DATA1', 'SNES_IRQ_N', 'SNES_RESET_N', GND, GND, GND, GND],
                'DATA_DIR', 'DATA_OE_N', GND, 'SENSE_OE_N')
     sh.newline()
+    # One 100 nF for every supply pin: each chip has two pins on 3.3 V (31, 42) and two on the cartridge's 5 V
+    # (7, 18). Until 2026-10-02 there was one for each supply of each chip, and the board had them in a clump.
     n = 201
     for _ in range(4):
         sh.cap(f'C{n}', '100nF', V33, GND); sh.cap(f'C{n + 1}', '100nF', CART5, GND); n += 2
+    for n in range(213, 221, 2):
+        sh.cap(f'C{n}', '100nF', V33, GND); sh.cap(f'C{n + 1}', '100nF', CART5, GND)
     sh.cap('C209', '22uF 10V', CART5, GND, C0805); sh.cap('C210', '22uF 10V', CART5, GND, C0805)
     sh.newline()
     # Open-drain driver at 3.3 V, outputs pulled to 5 V (LVC07A outputs are 5.5 V tolerant)
@@ -490,7 +577,8 @@ def build_cart_sheet(sh):
     gates = [(GND, None), ('CIC_DATA0_OD', 'SNES_CIC_DATA0'), ('CIC_DATA1_OD', 'SNES_CIC_DATA1'),
              ('RESET_PULL_OD', 'SNES_RESET_N'), (GND, None), (GND, None)]
     pinmap = [('1', '2'), ('3', '4'), ('5', '6'), ('9', '8'), ('11', '10'), ('13', '12')]
-    fields = {'Datasheet': 'https://www.ti.com/lit/ds/symlink/sn74lvc07a.pdf', 'LCSC': LCSC['SN74LVC07APWR'][0], 'MPN': 'SN74LVC07APWR'}
+    fields = {'Datasheet': 'https://www.ti.com/lit/ds/symlink/sn74lvc07a.pdf', 'LCSC': LCSC['SN74LVC07APWR'][0], 'MPN': 'SN74LVC07APWR',
+              'Description': 'Hex buffer with open-drain outputs, TSSOP-14'}
     for u, ((i, o), (ni, no)) in enumerate(zip(pinmap, gates), start=1):
         sh.place('U205', '74xx:74LS07', 'SN74LVC07APWR', {i: ni, o: no}, 'Package_SO:TSSOP-14_4.4x5mm_P0.65mm', fields, unit=u)
     sh.place('U205', '74xx:74LS07', 'SN74LVC07APWR', {'7': GND, '14': V33}, 'Package_SO:TSSOP-14_4.4x5mm_P0.65mm', fields, unit=7)
@@ -510,7 +598,7 @@ def build_cart_sheet(sh):
     edge = {str(k): (None if v in ('HOST_12V', 'N64_AUDIO_L', 'N64_AUDIO_R', 'N64_KEY1_RESERVED', 'N64_KEY2_RESERVED',
                                    'N64_VIDEO_SYNC_RESERVED') else v) for k, v in N64_EDGE.items()}
     sh.place('J1', 'SN64:N64_Cartridge_Edge_50', 'N64 cartridge edge', edge, 'SN64:N64_Edge_SC64_Reference',
-             {'Note': 'SummerCart64 edge geometry; 12 V, audio, sync and key fingers unused'})
+             {'Note': 'SummerCart64 edge geometry; 12 V, audio, sync and key fingers unused'}, in_bom=False)   # copper fingers
     sh.cap('C212', '10uF 10V', HOST, GND, C0805)
 
 
@@ -526,7 +614,8 @@ def build_power_sheet(sh):
     sh.place('U4', 'Power_Protection:USBLC6-2SC6', 'USBLC6-2SC6', {'1': 'USB_DN', '2': GND, '3': 'USB_DP', '4': 'USB_DP', '5': VBUS, '6': 'USB_DN'},
              'Package_TO_SOT_SMD:SOT-23-6', {'LCSC': LCSC['USBLC6-2SC6'][0], 'MPN': 'USBLC6-2SC6'})
     sh.res('R301', '5.1k 1%', GND, 'USB_CC1'); sh.res('R302', '5.1k 1%', GND, 'USB_CC2')
-    sh.cap('C301', '4.7uF 10V', VBUS, GND, C0805); sh.cap('C302', '1uF 10V', VBUS, GND)
+    # 8.0 uF directly on VBUS in all (C301, C302, C304, C41): USB allows a device 10 uF at plug-in (TI SLYT118)
+    sh.cap('C301', '2.2uF 10V', VBUS, GND, C0805); sh.cap('C302', '1uF 10V', VBUS, GND)
     sh.newline()
     # USB loader chip (owner, 2026-10-02): FTDI FT231X as a USB-to-JTAG bridge, wired like the ULX3S
     # board so that openFPGALoader's "ulx3s" entry drives it as it comes from the factory:
@@ -552,7 +641,8 @@ def build_power_sheet(sh):
     sh.cap('C43', '100nF 16V X7R', 'FT_3V3', GND)              # VCCIO, pin 3
     sh.newline()
     # Input mux: IN1 = USB (priority when VBUS > 4.0 V: PR1 divider 274k/100k, VREF 1.06 V), IN2 = host 3.3 V
-    # (CP2 divider 182k/100k: IN2 usable above 3.0 V), OV1/OV2 grounded (unused), ILM 44.2k = 2.5 A, SS 1 nF, ST -> FPGA.
+    # (CP2 divider 182k/100k: IN2 usable above 3.0 V), OV1/OV2 grounded (unused), ILM 44.2k = 2.5 A, ST -> FPGA.
+    # SS 10 nF: the output rises at about 7 V/ms (SLVSEA3F figure 7-6), 0.3 A into the 42 uF on SYS_VIN; it was 1 nF, 11 V/ms.
     sh.place('U7', 'SN64_V2:TPS2121RUX', 'TPS2121RUXR',
              {'7': VBUS, '2': HOST, '6': 'MUX_PR1', '3': 'MUX_CP2', '5': GND, '4': GND, '1': VIN, '8': VIN, '9': 'MUX_ST',
               '10': 'MUX_ILM', '11': 'MUX_SS', '12': GND},
@@ -561,17 +651,27 @@ def build_power_sheet(sh):
               'Note': 'SLVSEA3F: RILM 18-100k (44.2k = 2.5 A typ), PR1/CP2/OV thresholds 1.06 V rising, ST pull-up 6-20k'})
     sh.res('R303', '274k 1%', VBUS, 'MUX_PR1'); sh.res('R304', '100k 1%', GND, 'MUX_PR1')
     sh.res('R305', '182k 1%', HOST, 'MUX_CP2'); sh.res('R306', '100k 1%', GND, 'MUX_CP2')
-    sh.res('R307', '44.2k 1%', GND, 'MUX_ILM'); sh.cap('C303', '1nF', 'MUX_SS', GND); sh.res('R308', '10k', V33, 'MUX_ST')
-    sh.cap('C304', '10uF 10V', VBUS, GND, C0805); sh.cap('C305', '10uF 10V', HOST, GND, C0805); sh.cap('C306', '10uF 10V', VIN, GND, C0805)
+    sh.res('R307', '44.2k 1%', GND, 'MUX_ILM'); sh.cap('C303', '10nF', 'MUX_SS', GND); sh.res('R308', '10k', V33, 'MUX_ST')
+    sh.cap('C304', '4.7uF 10V', VBUS, GND, C0805); sh.cap('C305', '10uF 10V', HOST, GND, C0805); sh.cap('C306', '10uF 10V', VIN, GND, C0805)
     sh.newline()
-    # Buck-boost 5V_SYS (v1 U304 wiring and values: FB 232k/44.2k, L 1.5 uH, PS/SYNC low = PFM, VSEL low)
+    # Buck-boost 5V_SYS (v1 U304 wiring and values: FB 232k/44.2k, L 1.5 uH, VSEL low). PS/SYNC low is forced
+    # PWM (SLVSC58B pin table: low = forced PWM, high = power save); the comment here said PFM until 2026-10-02.
+    # Three rules of the data sheet that the board did not keep until the review of 2026-10-02:
+    #   8.4.2 / 11.1  EN is not tied straight to VIN: "a 10k resistor must be used in series" (R321).
+    #   11.1          one capacitor of size 0603 as close as possible from VIN to ground and one from VOUT to
+    #                 ground (C324, C325; TI's own design uses 10 uF 25 V X5R 0603 for both), the 0805 ones
+    #                 behind them for the capacitance.
+    #   11.1          input capacitor, output capacitor and inductor as close as possible to the IC, wide and
+    #                 short traces (the placement: tools/apply_power_layout_v2.py).
     sh.place('U8', 'SN64_POWER:TPS63070RNM', 'TPS63070RNMR',
              {'1': GND, '2': 'PG_5V', '3': 'VAUX_5V', '4': GND, '5': 'FB_5V', '6': None, '7': V5, '8': V5, '9': 'L2_5V', '10': GND,
-              '11': 'L1_5V', '12': VIN, '13': VIN, '14': VIN, '15': GND},
+              '11': 'L1_5V', '12': VIN, '13': VIN, '14': 'EN_5V', '15': GND},
              'SN64:Texas_RNM0015A_VQFN-HR-15_2.5x3mm',
              {'Datasheet': 'https://www.ti.com/lit/ds/symlink/tps63070.pdf', 'LCSC': LCSC['TPS63070RNMR'][0], 'MPN': 'TPS63070RNMR'})
     sh.place('L1', 'Device:L', '1.5uH PNR4020-1R5M', {'1': 'L1_5V', '2': 'L2_5V'}, 'SN64:L_APV_PNR4020', {'LCSC': LCSC['PNR4020-1R5M'][0], 'MPN': 'PNR4020-1R5M'})
     sh.res('R309', '232k 0.1%', V5, 'FB_5V'); sh.res('R310', '44.2k 0.1%', GND, 'FB_5V'); sh.res('R311', '100k', V5, 'PG_5V')
+    sh.res('R321', '10k', VIN, 'EN_5V')
+    sh.cap('C324', '10uF 25V', VIN, GND); sh.cap('C325', '10uF 25V', V5, GND)        # 0603, at the pins
     sh.cap('C307', '100nF', 'VAUX_5V', GND)
     sh.cap('C308', '10uF 25V', VIN, GND, C0805); sh.cap('C309', '22uF 25V', VIN, GND, C0805)
     for i in range(310, 314):
@@ -631,6 +731,57 @@ def write_project(path, name):
     save(path / f'{name}.kicad_pro', json.dumps(pro, indent=2))
 
 
+def drop_blocks(text, opening, keep=lambda block: False):
+    """Remove every s-expression that starts with `opening` from the text, unless keep(block) says otherwise."""
+    out, at = [], 0
+    while True:
+        i = text.find(opening, at)
+        if i < 0:
+            return ''.join(out) + text[at:]
+        depth, j = 0, i
+        while True:
+            depth += {'(': 1, ')': -1}.get(text[j], 0)
+            j += 1
+            if depth == 0:
+                break
+        line = text.rfind('\n', 0, i) + 1
+        if keep(text[i:j]):
+            out.append(text[at:j])
+        else:
+            out.append(text[at:line] if not text[line:i].strip() else text[at:i])
+            j += text[j:j + 1] == '\n' and not text[line:i].strip()
+        at = j
+
+
+def adapt_v2_footprints():
+    """The v2 board uses two of v1's footprints differently, and its copies say so, so that KiCad's comparison of
+    the board with its libraries stays empty.
+
+    N64 edge: the v2 board draws its own outline (build_v2_pcb.py), so the footprint's copy of the tongue's
+    outline is a drawing on the comments layer; the fingers are copper, so the part is in no placement file;
+    two fields left over from SummerCart64's board file go.
+    USB-C receptacle: its body reaches 0.5 mm beyond the board's edge (JAE SJ122205), so the three silkscreen
+    lines round its mouth cannot be printed; they are left out."""
+    f = V2 / 'libraries' / 'SN64.pretty' / 'N64_Edge_SC64_Reference.kicad_mod'
+    t = f.read_text(encoding='utf-8')
+    assert t.count('(layer "Edge.Cuts")') == 6 and t.count('(attr exclude_from_bom)') == 1, f
+    t = t.replace('(layer "Edge.Cuts")', '(layer "Cmts.User")').replace('(attr exclude_from_bom)', '(attr exclude_from_pos_files exclude_from_bom)')
+    t = drop_blocks(drop_blocks(t, '(property "Notes"'), '(property "exclude_from_bom"')
+    f.write_text(t, encoding='utf-8', newline='\n')
+    f = V2 / 'libraries' / 'SN64_USB.pretty' / 'USB_C_JAE_DX07S016JA3R1500.kicad_mod'
+    t = f.read_text(encoding='utf-8')
+
+    def inside_the_board(block):
+        if '"F.SilkS"' not in block:
+            return True
+        ys = [float(m.split()[2].rstrip(')')) for m in re.findall(r'\((?:start|end) [-0-9.]+ [-0-9.]+\)', block)]
+        return max(ys) < 2.0
+    n = t.count('(fp_line')
+    t = drop_blocks(t, '(fp_line', inside_the_board)
+    assert n - t.count('(fp_line') == 3, (f, n, t.count('(fp_line'))
+    f.write_text(t, encoding='utf-8', newline='\n')
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--force', action='store_true')
@@ -639,7 +790,8 @@ def main():
         ap.error('sn64-v2.kicad_sch exists; --force regenerates every sheet (native edits are lost)')
     balls, rows = pin_plan.plan()
     pin_plan.write_outputs(rows)
-    # Libraries: reuse v1 symbol/footprint libraries unchanged, plus the v2 drawn symbols.
+    # Libraries: reuse v1 symbol/footprint libraries, plus the v2 drawn symbols. Two footprints are adapted
+    # to the way the v2 board uses them (adapt_v2_footprints); v1's own copies stay as they are.
     (V2 / 'libraries').mkdir(parents=True, exist_ok=True)
     for name in ('SN64', 'SN64_POWER', 'SN64_USB'):
         shutil.copy(V1 / 'libraries' / f'{name}.kicad_sym', V2 / 'libraries' / f'{name}.kicad_sym')
@@ -648,12 +800,13 @@ def main():
         if dst.exists():
             shutil.rmtree(dst)
         shutil.copytree(V1 / 'libraries' / f'{name}.pretty', dst)
+    adapt_v2_footprints()
     v2lib = parse_text('(kicad_symbol_lib (version 20241209) (generator "sn64_v2_authoring") (generator_version "10.0"))')
     for name, value, pins, descr, ds, fp in (
             ('TPS2121RUX', 'TPS2121RUXR', TPS2121_PINS, '2.8-22 V priority power mux, 4.5 A, current limit, VQFN-HR-12',
              'https://www.ti.com/lit/ds/symlink/tps2121.pdf', 'Package_DFN_QFN:Texas_VQFN-HR-12_2x2.5mm_P0.5mm'),
             ('TLA2528RTE', 'TLA2528IRTER', TLA2528_PINS, '8-channel 12-bit I2C ADC, WQFN-16',
-             'https://www.ti.com/lit/ds/symlink/tla2528.pdf', 'Package_DFN_QFN:Texas_RTE0016D_WQFN-16-1EP_3x3mm_P0.5mm_EP0.8x0.8mm'),
+             'https://www.ti.com/lit/ds/symlink/tla2528.pdf', 'Package_DFN_QFN:WQFN-16-1EP_3x3mm_P0.5mm_EP1.68x1.68mm'),
             ('TPS2553DBV', 'TPS2553DBVR', TPS2553_PINS, 'Power-distribution switch 1.5 A, adjustable current limit, fault flag, SOT-23-6',
              'https://www.ti.com/lit/ds/symlink/tps2553.pdf', 'Package_TO_SOT_SMD:SOT-23-6')):
         v2lib.append(own_symbol('SN64_V2', name, value, pins, descr, ds, fp))
@@ -680,8 +833,9 @@ def main():
             'reused_v1_libraries': ['SN64 (socket, N64 edge: Sanni CC-BY-4.0, SummerCart64 CERN-OHL-S-2.0)', 'SN64_POWER (TPS63070RNM, TI SLVSC58B)', 'SN64_USB (JAE DX07S016JA3R1500)'],
             'installed_kicad_symbols': ['FPGA_Lattice:LFE5U-85F-8BG381x', '74xx:74ALVC164245', '74xx:74LS07 (as SN74LVC07APW)', 'Memory_Flash:W25Q128JVS', 'Power_Supervisor:TPS3808DBV',
                                         'Regulator_Switching:TLV62569DBV', 'Regulator_Linear:AP2112K-2.5', 'Power_Protection:USBLC6-2SC6', 'Oscillator:ASE-xxxMHz'],
-            'lcsc_stock_2026_09_30': LCSC, 'provisional_values': ['TPS2553 RILIM 24.9k', 'TPS2121 CSS 1 nF', 'decoupling counts (Lattice checklist, not per ball)',
-                                                                   'sigma-delta ADC RC (10k/1nF)', 'NTC part'],
+            'lcsc_stock_2026_09_30': LCSC, 'provisional_values': ['TPS2553 RILIM 24.9k', 'TPS2121 CSS 10 nF (inrush about 0.3 A into 42 uF, from the data sheet curve; not measured)', 'decoupling counts (Lattice checklist, not per ball)',
+                                                                   'sigma-delta ADC RC (10k/1nF)', 'NTC curve in the logic (part: Sunlord 3950 K)'],
+            'capacitor_at_pin': {c: list(v) for c, v in AT_PIN.items()},
             'bom': {'main': fpga.bom + cart.bom + power.bom}}
     save(V2 / 'libraries' / 'v2-provenance.json', json.dumps(prov, indent=1))
     n_main = len(fpga.bom) + len(cart.bom) + len(power.bom)
