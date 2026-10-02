@@ -87,7 +87,7 @@ put('C306', 'F', c.at(3.1, -1.6), 'N')       # the selector's output: on the loo
 put('C308', 'F', c.at(0.3, -3.7), 'W')
 put('C304', 'F', c.at(3.3, 2.15), 'W')       # USB side, 1.9 mm from the IN1 pad
 put('C305', 'F', c.at(-3.0, 1.3), 'N')       # console side, 1.6 mm from the IN2 pad
-put('C212', 'F', c.at(-6.0, 2.6), 'E')
+put('C212', 'F', c.at(-6.0, 1.75), 'E')        # 0.7 mm clear of the shell's lower wall (fit check 2026-10-02)
 put('C303', 'B', c.at(-1.4, -4.2), 'E')
 put('R307', 'B', c.at(1.8, -4.2), 'E')
 put('R308', 'B', c.at(2.4, -2.5), 'E')
@@ -105,7 +105,7 @@ run('USB_VBUS', 0.4, [c.at(0.9, 0.35), c.at(1.6, 0.35)])
 run('USB_VBUS', 0.5, [c.at(1.6, 0.35), c.at(2.35, 1.1), c.at(2.35, 2.15)])
 run('HOST_3V3', 0.4, [c.at(-0.9, 0.35), c.at(-1.3, 0.35)])
 run('HOST_3V3', 0.5, [c.at(-1.3, 0.35), c.at(-1.7, 0.75), c.at(-3.0, 0.75)])
-run('HOST_3V3', 0.5, [c.at(-3.0, 0.75), c.at(-4.4, 0.75), c.at(-4.4, 2.0), c.at(-5.05, 2.6)])
+run('HOST_3V3', 0.5, [c.at(-3.0, 0.75), c.at(-4.4, 0.75), c.at(-4.4, 1.4), c.at(-5.05, 1.75)])
 
 # ---------------------------------------------------------------------------------------------
 # The two small converters (TLV62569). Chip not turned in its cell: VIN pin 4 south-east, SW pin 3
@@ -157,19 +157,18 @@ run('FPGA_3V3', 0.4, [c.at(-2.95, -1.25), c.at(-2.95, -2.2)], vias=[c.at(-2.95, 
 
 # ---------------------------------------------------------------------------------------------
 # The measuring chip U6 (TLA2528) and the supply supervisor U3, outside the power section. U6 stays.
-# AVDD (pin 7) is also the chip's reference: its 1 uF sits above the pin row, joined by 1 mm of track with no
-# via between pin and capacitor. DVDD (pin 10): its 1 uF beside the pin, 0.6 mm of track. The supervisor sat
+# AVDD (pin 7) is also the chip's reference: its 1 uF sits above the pin row on 1.6 mm of track. The pin's via
+# into the 3.3 V plane is on that track, 0.5 mm before the capacitor: no other place near the pin is free. DVDD (pin 10): its 1 uF beside the pin, 0.6 mm of track. The supervisor sat
 # 0.6 mm above U6, on a part of the label side that is full of small parts, so that neither capacitor nor a
 # via had room: it moves 10 mm to the west with its 100 nF and its two divider resistors. Board coordinates.
 put('U3', 'F', (-23.2, -20.0), 180)
 put('C33', 'F', (-23.6, -17.4), 'W')
 put('R15', 'B', (-24.6, -20.6), 'W')
 put('R16', 'B', (-24.6, -22.2), 'W')
-put('C35', 'F', (-14.75, -20.1), 'E')
+put('C35', 'F', (-14.75, -20.45), 'E')
 put('C46', 'F', (-17.25, -17.25), 'E')
-run('FPGA_3V3', 0.25, [(-13.75, -18.6), (-13.75, -19.9)])
+run('FPGA_3V3', 0.25, [(-13.75, -18.6), (-13.75, -20.25)])       # past the pin's own plane via, which stays
 run('FPGA_3V3', 0.25, [(-15.2, -17.25), (-16.45, -17.25)])
-run('FPGA_3V3', 0.25, [(-16.475, -17.0), (-16.23, -16.45)], vias=[(-16.23, -16.45)])      # into the plane, behind the capacitor
 run('FPGA_3V3', 0.25, [(-24.337, -19.2), (-24.337, -17.6)], vias=[(-24.337, -18.3)])
 run('GND', 0.2, [(-14.9, -17.75), (-14.2, -17.75)])
 

@@ -98,12 +98,22 @@
    "detail": ""
   },
   {
-   "check": "every pad of the board is on the net the schematic gives it (182 parts)",
+   "check": "every pad of the board is on the net the schematic gives it (194 parts)",
    "result": "pass",
    "detail": ""
   },
   {
    "check": "FPGA supply and ground balls on their rails, ports on user I/O balls, configuration, clock and comparator balls as the Lattice table names them",
+   "result": "pass",
+   "detail": ""
+  },
+  {
+   "check": "5 V converter: enable through a resistor, a 0603 capacitor on its input and on its output; measuring chip: 1 uF on each supply pin",
+   "result": "pass",
+   "detail": ""
+  },
+  {
+   "check": "40 capacitors are at the pin they serve (3.5 mm at most, the few exceptions named in the tool; nearest to its limit: C41 3.3 of 3.5 mm)",
    "result": "pass",
    "detail": ""
   },
@@ -114,7 +124,7 @@
   }
  ],
  "summary": {
-  "pass": 22,
+  "pass": 24,
   "fail": 0,
   "skipped": 0
  }

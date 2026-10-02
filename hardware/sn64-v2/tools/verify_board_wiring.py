@@ -25,6 +25,7 @@ import argparse
 import copy
 import csv
 import json
+import math
 import re
 import sys
 import xml.etree.ElementTree as ET
@@ -135,6 +136,12 @@ class Board:
                 other = next(n for p, n in pads.items() if p != pad)
                 out.append((ref, self.c[ref]['value'], other))
         return out
+
+
+# Capacitors that may be further than 3.5 mm from their pin, and why.
+NEAR = {'C306': 5.0,     # the selector's output: on the loop that joins its two OUT pads, with C308 nearer
+        'C43': 4.5,      # the loader chip's I/O supply, as placed with the chip on 2026-10-02
+        'C209': 6.0, 'C210': 6.0}    # the two 22 uF of the cartridge's 5 V: at the socket's 5 V pads, behind its courtyard
 
 
 def read_lpf(path):
@@ -571,6 +578,46 @@ def run_checks(b, snes, n64, schematic, lattice):
         check('FPGA supply and ground balls on their rails, ports on user I/O balls, configuration, clock and comparator balls as the Lattice table names them',
               not bad, '; '.join(bad[:6]))
 
+    # 15a. Rules of the power parts' data sheets that are wiring, found in the review of 2026-10-02.
+    bad = []
+    en = b.net('U8', '14')
+    if en == b.net('U8', '12'):
+        bad.append('U8 EN is tied straight to VIN (TI SLVSC58B 11.1: through 10 k)')
+    else:
+        r = [x for x in b.two_pin(en, 'R') if x[2] == b.net('U8', '12')]
+        if len(r) != 1 or len(b.on(en)) != 2:
+            bad.append('U8 EN (%s) is not on VIN through one resistor: %s' % (en, b.on(en)))
+    for cap, pin in (('C35', '7'), ('C46', '10')):
+        c = b.c.get(cap)
+        if c is None or not c['value'].startswith('1uF') or b.net('U6', pin) not in c['pads'].values():
+            bad.append('%s is not a 1 uF on the supply of U6 pin %s (TI SBAS961A: 1 uF on AVDD and on DVDD)' % (cap, pin))
+    for ref in ('C324', 'C325'):
+        if ref not in b.c or not b.c[ref]['value'].startswith('10uF') or '0603' not in b.c[ref]['footprint']:
+            bad.append('%s is not a 10 uF 0603 (TI SLVSC58B 11.1: a 0603 at the VIN pins and one at the VOUT pins)' % ref)
+    check('5 V converter: enable through a resistor, a 0603 capacitor on its input and on its output; measuring chip: 1 uF on each supply pin',
+          not bad, '; '.join(bad))
+
+    # 15b. Every capacitor is at the pin it serves. The table is AT_PIN in build_v2_schematic.py; the distance is
+    # between the pin and the capacitor's pad on the same net, whichever face the capacitor is on.
+    table = json.loads((V2 / 'libraries' / 'v2-provenance.json').read_text(encoding='utf-8')).get('capacitor_at_pin', {})
+    bad, worst = [], (0.0, '')
+    for cap, (chip, pin) in sorted(table.items()):
+        if cap not in b.c or chip not in b.c or 'at' not in b.c[cap]:
+            bad.append('%s or %s is not on the board' % (cap, chip))
+            continue
+        net = b.net(chip, pin)
+        mine = [p for p, n in b.c[cap]['pads'].items() if n == net]
+        if not mine:
+            bad.append('%s has no pad on %s, the net of %s pin %s' % (cap, net, chip, pin))
+            continue
+        d = math.dist(b.c[cap]['at'][mine[0]], b.c[chip]['at'][pin])
+        limit = NEAR.get(cap, 3.5)
+        worst = max(worst, (d / limit, '%s %.1f of %.1f mm' % (cap, d, limit)))
+        if d > limit:
+            bad.append('%s is %.1f mm from %s pin %s (limit %.1f)' % (cap, d, chip, pin, limit))
+    check('%d capacitors are at the pin they serve (3.5 mm at most, the few exceptions named in the tool; nearest to its limit: %s)'
+          % (len(table), worst[1]), not bad, '; '.join(bad[:8]))
+
     # 16. Nothing else hangs on an FPGA signal ball.
     used = set(b.lpf.values()) | set(CONFIG_BALLS.values())
     stray = []
@@ -610,7 +657,16 @@ def swap(data, a, b_):
     data['components'][ra]['pads'][pa], data['components'][rb]['pads'][pb] = data['components'][rb]['pads'][pb], data['components'][ra]['pads'][pa]
 
 
+def move_part(data, ref, dx):
+    for xy in data['components'][ref]['at'].values():
+        xy[0] += dx
+
+
 MISTAKES = [
+    ('the 5 V converter enable tied straight to its supply', lambda d, l: d['components']['U8']['pads'].__setitem__('14', d['components']['U8']['pads']['12'])),
+    ('the 1.1 V converter input capacitor 20 mm from its pin', lambda d, l: move_part(d, 'C313', 20.0)),
+    ('a level-shifter capacitor back in the clump', lambda d, l: move_part(d, 'C202', -30.0)),
+    ('the measuring chip with 100 nF on its analog supply', lambda d, l: d['components']['C35'].__setitem__('value', '100nF')),
     ('two address lines swapped at a level shifter', lambda d, l: swap(d, ('U201', '2'), ('U201', '3'))),
     ('two socket pins swapped', lambda d, l: swap(d, ('J2', '19'), ('J2', '20'))),
     ('socket rows exchanged (pins 1-31 with 32-62)', lambda d, l: [swap(d, ('J2', str(i)), ('J2', str(i + 31))) for i in range(1, 32)]),

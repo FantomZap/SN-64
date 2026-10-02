@@ -1,0 +1,36 @@
+SN64 v2 main board: fabrication notes
+Made 2026-10-02 for a quotation. Board file sn64-v2.kicad_pcb.
+
+1. Layers: 6. Order from the top:
+      F.Cu    top copper: the back face of the cartridge
+      In1.Cu  inner 1: ground plane
+      In2.Cu  inner 2: signals
+      In3.Cu  inner 3: 3.3 V plane
+      In4.Cu  inner 4: signals and the 1.1 V area
+      B.Cu    bottom copper: the label side of the cartridge
+2. Size 111 x 70.5 mm, routed outline (Edge.Cuts). Finished thickness 1.2 mm.
+3. Material FR-4, Tg 150 C or higher. Copper 1 oz finished on the outer layers, 0.5 oz on the inner layers.
+   Stack-up: the maker's standard for 6 layers at this thickness. No impedance control.
+4. Smallest track 0.10 mm, smallest clearance 0.1 mm.
+5. Holes:
+      1112 x round 0.2 mm, plated (via)
+         6 x round 0.3 mm, plated (via)
+         4 x round 4 mm, not plated (pad)
+         2 x round 2.5 mm, not plated (pad)
+         2 x slot 0.6 x 1.6 mm, plated (pad)
+         2 x slot 0.6 x 1.9 mm, plated (pad)
+         1 x round 0.6 mm, not plated (pad)
+         1 x slot 0.85 x 0.6 mm, not plated (pad)
+   Vias are tented on both faces.
+6. Via in pad: 85 vias of 0.2 mm lie in surface-mount pads, 8 of them in pads of the BGA U1.
+   Wanted: these filled with resin and plated over. Please quote this and say if another way is advised.
+7. Annular ring: 802 vias have a 0.45 mm pad on a 0.20 mm hole, a ring of 0.125 mm. Please say whether this is
+   accepted as drawn. If not, these may be drilled 0.15 mm.
+8. The unplated oval hole of 0.85 x 0.6 mm and the round one of 0.6 mm locate the USB-C receptacle
+   (JAE DX07S016JA3R1500, drawing SJ122205). The oval may be made as two overlapping 0.6 mm drill hits.
+9. Edge connector: 50 gold fingers, 25 on each face, at the bottom edge. Surface finish immersion gold (ENIG)
+   on the whole board. Bevel 45 degrees on the finger edge. The solder mask is open across the whole
+   row of fingers on purpose. No copper lies between the fingers or on the inner layers under them.
+10. Solder mask on both faces, silkscreen on both faces. Smallest silkscreen text 0.8 mm high, 0.15 mm line.
+11. Electrical test of every board against sn64-v2.d356 (IPC-D-356).
+12. For assembly: tooling rails and fiducials may be added by the maker. The board itself has none.

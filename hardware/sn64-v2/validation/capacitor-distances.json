@@ -1,0 +1,362 @@
+[
+ {
+  "capacitor": "C209",
+  "value": "22uF 10V",
+  "chip": "J2",
+  "pin": "27",
+  "net": "SNES_5V_CART",
+  "mm": 3.75,
+  "face": "other"
+ },
+ {
+  "capacitor": "C210",
+  "value": "22uF 10V",
+  "chip": "J2",
+  "pin": "58",
+  "net": "SNES_5V_CART",
+  "mm": 5.16,
+  "face": "other"
+ },
+ {
+  "capacitor": "C313",
+  "value": "22uF 10V",
+  "chip": "U10",
+  "pin": "4",
+  "net": "5V_SYS",
+  "mm": 2.01,
+  "face": "same"
+ },
+ {
+  "capacitor": "C320",
+  "value": "1uF 10V",
+  "chip": "U11",
+  "pin": "1",
+  "net": "FPGA_3V3",
+  "mm": 1.84,
+  "face": "same"
+ },
+ {
+  "capacitor": "C321",
+  "value": "4.7uF 10V",
+  "chip": "U11",
+  "pin": "5",
+  "net": "FPGA_2V5",
+  "mm": 2.01,
+  "face": "same"
+ },
+ {
+  "capacitor": "C322",
+  "value": "100nF",
+  "chip": "U12",
+  "pin": "1",
+  "net": "5V_SYS",
+  "mm": 1.84,
+  "face": "same"
+ },
+ {
+  "capacitor": "C323",
+  "value": "10uF 10V",
+  "chip": "U12",
+  "pin": "6",
+  "net": "SNES_5V_CART",
+  "mm": 2.01,
+  "face": "same"
+ },
+ {
+  "capacitor": "C42",
+  "value": "100nF 16V X7R",
+  "chip": "U13",
+  "pin": "13",
+  "net": "FT_3V3",
+  "mm": 1.75,
+  "face": "same"
+ },
+ {
+  "capacitor": "C41",
+  "value": "100nF 16V X7R",
+  "chip": "U13",
+  "pin": "15",
+  "net": "USB_VBUS",
+  "mm": 3.33,
+  "face": "same"
+ },
+ {
+  "capacitor": "C43",
+  "value": "100nF 16V X7R",
+  "chip": "U13",
+  "pin": "3",
+  "net": "FT_3V3",
+  "mm": 3.94,
+  "face": "same"
+ },
+ {
+  "capacitor": "C31",
+  "value": "100nF",
+  "chip": "U2",
+  "pin": "8",
+  "net": "FPGA_3V3",
+  "mm": 0.02,
+  "face": "other"
+ },
+ {
+  "capacitor": "C214",
+  "value": "100nF",
+  "chip": "U201",
+  "pin": "18",
+  "net": "SNES_5V_CART",
+  "mm": 0.73,
+  "face": "other"
+ },
+ {
+  "capacitor": "C213",
+  "value": "100nF",
+  "chip": "U201",
+  "pin": "31",
+  "net": "FPGA_3V3",
+  "mm": 0.25,
+  "face": "other"
+ },
+ {
+  "capacitor": "C201",
+  "value": "100nF",
+  "chip": "U201",
+  "pin": "42",
+  "net": "FPGA_3V3",
+  "mm": 2.35,
+  "face": "other"
+ },
+ {
+  "capacitor": "C202",
+  "value": "100nF",
+  "chip": "U201",
+  "pin": "7",
+  "net": "SNES_5V_CART",
+  "mm": 0.02,
+  "face": "other"
+ },
+ {
+  "capacitor": "C216",
+  "value": "100nF",
+  "chip": "U202",
+  "pin": "18",
+  "net": "SNES_5V_CART",
+  "mm": 0.25,
+  "face": "other"
+ },
+ {
+  "capacitor": "C215",
+  "value": "100nF",
+  "chip": "U202",
+  "pin": "31",
+  "net": "FPGA_3V3",
+  "mm": 0.75,
+  "face": "other"
+ },
+ {
+  "capacitor": "C203",
+  "value": "100nF",
+  "chip": "U202",
+  "pin": "42",
+  "net": "FPGA_3V3",
+  "mm": 2.36,
+  "face": "other"
+ },
+ {
+  "capacitor": "C204",
+  "value": "100nF",
+  "chip": "U202",
+  "pin": "7",
+  "net": "SNES_5V_CART",
+  "mm": 0.25,
+  "face": "other"
+ },
+ {
+  "capacitor": "C218",
+  "value": "100nF",
+  "chip": "U203",
+  "pin": "18",
+  "net": "SNES_5V_CART",
+  "mm": 0.97,
+  "face": "other"
+ },
+ {
+  "capacitor": "C217",
+  "value": "100nF",
+  "chip": "U203",
+  "pin": "31",
+  "net": "FPGA_3V3",
+  "mm": 2.31,
+  "face": "same"
+ },
+ {
+  "capacitor": "C205",
+  "value": "100nF",
+  "chip": "U203",
+  "pin": "42",
+  "net": "FPGA_3V3",
+  "mm": 0.03,
+  "face": "other"
+ },
+ {
+  "capacitor": "C206",
+  "value": "100nF",
+  "chip": "U203",
+  "pin": "7",
+  "net": "SNES_5V_CART",
+  "mm": 0.5,
+  "face": "other"
+ },
+ {
+  "capacitor": "C220",
+  "value": "100nF",
+  "chip": "U204",
+  "pin": "18",
+  "net": "SNES_5V_CART",
+  "mm": 0.23,
+  "face": "other"
+ },
+ {
+  "capacitor": "C219",
+  "value": "100nF",
+  "chip": "U204",
+  "pin": "31",
+  "net": "FPGA_3V3",
+  "mm": 0.02,
+  "face": "other"
+ },
+ {
+  "capacitor": "C207",
+  "value": "100nF",
+  "chip": "U204",
+  "pin": "42",
+  "net": "FPGA_3V3",
+  "mm": 0.02,
+  "face": "other"
+ },
+ {
+  "capacitor": "C208",
+  "value": "100nF",
+  "chip": "U204",
+  "pin": "7",
+  "net": "SNES_5V_CART",
+  "mm": 3.12,
+  "face": "same"
+ },
+ {
+  "capacitor": "C211",
+  "value": "100nF",
+  "chip": "U205",
+  "pin": "14",
+  "net": "FPGA_3V3",
+  "mm": 2.64,
+  "face": "same"
+ },
+ {
+  "capacitor": "C33",
+  "value": "100nF",
+  "chip": "U3",
+  "pin": "6",
+  "net": "FPGA_3V3",
+  "mm": 1.65,
+  "face": "same"
+ },
+ {
+  "capacitor": "C46",
+  "value": "1uF",
+  "chip": "U6",
+  "pin": "10",
+  "net": "FPGA_3V3",
+  "mm": 1.52,
+  "face": "same"
+ },
+ {
+  "capacitor": "C35",
+  "value": "1uF",
+  "chip": "U6",
+  "pin": "7",
+  "net": "FPGA_3V3",
+  "mm": 2.01,
+  "face": "same"
+ },
+ {
+  "capacitor": "C34",
+  "value": "1uF",
+  "chip": "U6",
+  "pin": "8",
+  "net": "ADC_DECAP",
+  "mm": 1.03,
+  "face": "other"
+ },
+ {
+  "capacitor": "C306",
+  "value": "10uF 10V",
+  "chip": "U7",
+  "pin": "1",
+  "net": "SYS_VIN",
+  "mm": 4.37,
+  "face": "same"
+ },
+ {
+  "capacitor": "C305",
+  "value": "10uF 10V",
+  "chip": "U7",
+  "pin": "2",
+  "net": "HOST_3V3",
+  "mm": 2.33,
+  "face": "same"
+ },
+ {
+  "capacitor": "C304",
+  "value": "4.7uF 10V",
+  "chip": "U7",
+  "pin": "7",
+  "net": "USB_VBUS",
+  "mm": 2.46,
+  "face": "same"
+ },
+ {
+  "capacitor": "C324",
+  "value": "10uF 25V",
+  "chip": "U8",
+  "pin": "13",
+  "net": "SYS_VIN",
+  "mm": 1.82,
+  "face": "same"
+ },
+ {
+  "capacitor": "C307",
+  "value": "100nF",
+  "chip": "U8",
+  "pin": "3",
+  "net": "VAUX_5V",
+  "mm": 1.65,
+  "face": "same"
+ },
+ {
+  "capacitor": "C325",
+  "value": "10uF 25V",
+  "chip": "U8",
+  "pin": "7",
+  "net": "5V_SYS",
+  "mm": 1.82,
+  "face": "same"
+ },
+ {
+  "capacitor": "C312",
+  "value": "22uF 10V",
+  "chip": "U9",
+  "pin": "4",
+  "net": "5V_SYS",
+  "mm": 2.01,
+  "face": "same"
+ },
+ {
+  "capacitor": "C32",
+  "value": "100nF",
+  "chip": "X1",
+  "pin": "4",
+  "net": "FPGA_3V3",
+  "mm": 0.02,
+  "face": "other"
+ }
+]

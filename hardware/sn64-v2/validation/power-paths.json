@@ -1,0 +1,141 @@
+{
+ "board": "sn64-v2.kicad_pcb",
+ "copper_um": {
+  "outer": 35,
+  "inner": 17.5,
+  "via_barrel": 20
+ },
+ "paths": [
+  {
+   "net": "HOST_3V3",
+   "path": "console's 3.3 V: edge fingers to the input selector",
+   "found": true,
+   "narrowest_mm": 0.3,
+   "length_at_narrowest_mm": 4.2,
+   "length_mm": 42.0,
+   "by_layer_mm": {
+    "B.Cu": 15.6,
+    "F.Cu": 13.9,
+    "In2.Cu": 12.4
+   },
+   "vias": 5,
+   "milliohm": 70.2
+  },
+  {
+   "net": "USB_VBUS",
+   "path": "USB 5 V: socket to the input selector",
+   "found": true,
+   "narrowest_mm": 0.25,
+   "length_at_narrowest_mm": 1.6,
+   "length_mm": 71.3,
+   "by_layer_mm": {
+    "B.Cu": 31.5,
+    "F.Cu": 7.9,
+    "In2.Cu": 31.8
+   },
+   "vias": 13,
+   "milliohm": 137.9
+  },
+  {
+   "net": "SYS_VIN",
+   "path": "input selector to the 5 V converter",
+   "found": true,
+   "narrowest_mm": 0.6,
+   "length_at_narrowest_mm": 5.9,
+   "length_mm": 8.9,
+   "by_layer_mm": {
+    "F.Cu": 8.9
+   },
+   "vias": 0,
+   "milliohm": 6.7
+  },
+  {
+   "net": "5V_SYS",
+   "path": "5 V converter to the 3.3 V converter",
+   "found": true,
+   "narrowest_mm": 0.5,
+   "length_at_narrowest_mm": 19.0,
+   "length_mm": 20.8,
+   "by_layer_mm": {
+    "B.Cu": 6.2,
+    "F.Cu": 1.8,
+    "In2.Cu": 12.8
+   },
+   "vias": 6,
+   "milliohm": 42.6
+  },
+  {
+   "net": "5V_SYS",
+   "path": "5 V converter to the 1.1 V converter",
+   "found": true,
+   "narrowest_mm": 0.5,
+   "length_at_narrowest_mm": 8.5,
+   "length_mm": 15.3,
+   "by_layer_mm": {
+    "F.Cu": 7.7,
+    "In2.Cu": 7.6
+   },
+   "vias": 3,
+   "milliohm": 25.3
+  },
+  {
+   "net": "5V_SYS",
+   "path": "5 V converter to the cartridge switch",
+   "found": true,
+   "narrowest_mm": 0.5,
+   "length_at_narrowest_mm": 9.7,
+   "length_mm": 9.7,
+   "by_layer_mm": {
+    "B.Cu": 4.8,
+    "In2.Cu": 4.8
+   },
+   "vias": 3,
+   "milliohm": 19.1
+  },
+  {
+   "net": "SNES_5V_CART",
+   "path": "cartridge switch to socket pin 27",
+   "found": true,
+   "narrowest_mm": 0.4,
+   "length_at_narrowest_mm": 43.3,
+   "length_mm": 59.2,
+   "by_layer_mm": {
+    "B.Cu": 19.3,
+    "F.Cu": 16.2,
+    "In2.Cu": 23.7
+   },
+   "vias": 8,
+   "milliohm": 108.2
+  },
+  {
+   "net": "SNES_5V_CART",
+   "path": "cartridge switch to socket pin 58",
+   "found": true,
+   "narrowest_mm": 0.4,
+   "length_at_narrowest_mm": 46.0,
+   "length_mm": 62.0,
+   "by_layer_mm": {
+    "B.Cu": 15.5,
+    "F.Cu": 22.8,
+    "In2.Cu": 23.7
+   },
+   "vias": 8,
+   "milliohm": 111.6
+  },
+  {
+   "net": "FPGA_2V5",
+   "path": "2.5 V regulator to the FPGA (nearest ball)",
+   "found": true,
+   "narrowest_mm": 0.15,
+   "length_at_narrowest_mm": 8.6,
+   "length_mm": 62.7,
+   "by_layer_mm": {
+    "B.Cu": 12.5,
+    "F.Cu": 2.3,
+    "In2.Cu": 47.9
+   },
+   "vias": 5,
+   "milliohm": 232.9
+  }
+ ]
+}

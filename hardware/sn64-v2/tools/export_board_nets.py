@@ -29,7 +29,7 @@ def main():
     comps, nets = {}, {}
     for fp in board.GetFootprints():
         ref = fp.GetReference()
-        pads = {}
+        pads, at = {}, {}
         for pad in fp.Pads():
             num = pad.GetNumber()
             net = pad.GetNetname()
@@ -38,9 +38,10 @@ def main():
             if num in pads and pads[num] != net:
                 raise SystemExit('%s pad %s is on two nets: %s and %s' % (ref, num, pads[num], net))
             pads[num] = net
+            at.setdefault(num, [round(pad.GetPosition().x / 1e6, 3), round(pad.GetPosition().y / 1e6, 3)])
             nets.setdefault(net, []).append([ref, num])
         comps[ref] = {'value': fp.GetValue(), 'footprint': str(fp.GetFPID().GetUniStringLibItemName()),
-                      'layer': 'F' if fp.GetLayer() == pcbnew.F_Cu else 'B', 'pads': pads}
+                      'layer': 'F' if fp.GetLayer() == pcbnew.F_Cu else 'B', 'pads': pads, 'at': at}
     for net in nets:
         nets[net] = sorted(set(map(tuple, nets[net])))
     args.out.parent.mkdir(parents=True, exist_ok=True)

@@ -107,6 +107,9 @@ def net_graph(b, net):
             for n in track_nodes:
                 if p.IsOnLayer(n[0]) and p.HitTest(pcbnew.VECTOR2I(pcbnew.FromMM(n[1]), pcbnew.FromMM(n[2])), pcbnew.FromMM(reach[n] + 0.005)):
                     link(hub, n, size, 0.0, 'pad')
+            for x, y, r, d in vias:               # a via that stands in the pad or touches it
+                if p.HitTest(pcbnew.VECTOR2I(pcbnew.FromMM(x), pcbnew.FromMM(y)), pcbnew.FromMM(r)):
+                    link(hub, ('via', round(x, 3), round(y, 3)), math.pi * d, 0.0, 'via')
             edges[hub] += []
     return edges, segs, vias
 

@@ -1,0 +1,65 @@
+Item,Designator,Qty,Manufacturer,Mfg Part #,Description / Value,Package / Footprint,Type,Side,LCSC or other source #,Substitute allowed,Notes
+1,"C1, C2, C3, C4, C5, C6, C7, C8, C11, C12, C14, C15, C16, C17, C18, C19, C20, C21, C22, C23, C24, C25, C26, C27, C31, C32, C33, C41, C42, C43, C201, C202, C203, C204, C205, C206, C207, C208, C211, C213, C214, C215, C216, C217, C218, C219, C220, C307, C322",49,YAGEO,CC0603KRX7R9BB104,100 nF 50 V X7R 10 % 0603,0603,SMD,bottom and top,C14663,"yes: same value, size and dielectric, same voltage or higher",
+2,"C9, C10, C13, C28, C29, C30, C212, C305, C306, C308, C323",11,Samsung Electro-Mechanics,CL21A106KAYNNNE,10 uF 25 V X5R 10 % 0805,0805,SMD,bottom and top,C15850,"yes: same value, size and dielectric, same voltage or higher",
+3,"C34, C35, C36, C38, C40, C46, C302, C320",8,Samsung Electro-Mechanics,CL10A105KB8NNNC,1 uF 50 V X5R 10 % 0603,0603,SMD,bottom and top,C15849,"yes: same value, size and dielectric, same voltage or higher",
+4,"C37, C39",2,Samsung Electro-Mechanics,CL10C102JB8NNNC,1 nF 50 V C0G 5 % 0603,0603,SMD,bottom,C163508,"yes: same value, size and dielectric, same voltage or higher",
+5,"C44, C45",2,Samsung Electro-Mechanics,CL10C470JB8NNNC,47 pF 50 V C0G 5 % 0603,0603,SMD,bottom,C1671,"yes: same value, size and dielectric, same voltage or higher",
+6,"C209, C210, C309, C310, C311, C312, C313, C316, C317, C318, C319",11,Samsung Electro-Mechanics,CL21A226MAQNNNE,22 uF 25 V X5R 20 % 0805,0805,SMD,bottom and top,C45783,"yes: same value, size and dielectric, same voltage or higher",
+7,C301,1,Samsung Electro-Mechanics,CL21A225KBQNNNE,2.2 uF 50 V X5R 10 % 0805,0805,SMD,top,C377773,"yes: same value, size and dielectric, same voltage or higher",
+8,C303,1,FH (Fenghua),0603B103K500NT,10 nF 50 V X7R 10 % 0603,0603,SMD,bottom,C57112,"yes: same value, size and dielectric, same voltage or higher",
+9,"C304, C321",2,Samsung Electro-Mechanics,CL21A475KAQNNNE,4.7 uF 25 V X5R 10 % 0805,0805,SMD,top,C1779,"yes: same value, size and dielectric, same voltage or higher",
+10,"C314, C315",2,FH (Fenghua),0603CG6R8C500NT,6.8 pF 50 V C0G 0.25 pF 0603,0603,SMD,bottom,C1679,"yes: same value, size and dielectric, same voltage or higher",
+11,"C324, C325",2,Samsung Electro-Mechanics,CL10A106MA8NRNC,10 uF 25 V X5R 20 % 0603,0603,SMD,top,C96446,"yes: same value, size and dielectric, same voltage or higher",
+12,D1,1,Everlight,19-21SYGC/S530-E2/4T,"LED yellow-green 573 nm, 2.0 V, 0603",0603,SMD,bottom,C2986011,yes: any yellow-green 0603 lamp with about 2 V across it,
+13,J101,1,JAE,DX07S016JA3R1500,DX07S016JA3R1500. USB 2.0-only Type-C Receptacle connector,"USB-C receptacle, 16 pads and 4 legs in plated slots",SMD,top,C2939926,no,USB-C: surface-mount pads and four legs in plated slots
+14,L1,1,APV,PNR4020-1R5M,1.5uH PNR4020-1R5M. Inductor,4 x 4 x 2 mm inductor,SMD,top,C54620133,no,
+15,"L2, L3",2,Changjiang Microelectronics,FNR4030S2R2MT,2.2uH FNR4030S2R2MT. Inductor,4 x 4 x 3 mm inductor,SMD,top,C167869,no,
+16,R1,1,UNI-ROYAL,0603WAF330JT5E,33 ohm 1 % 0603,0603,SMD,bottom,C23140,"yes: same value, size and tolerance",
+17,"R2, R18",2,UNI-ROYAL,0603WAF1001T5E,1 k 1 % 0603,0603,SMD,bottom,C21190,"yes: same value, size and tolerance",
+18,"R3, R6, R7, R8, R9, R12, R13, R14, R22, R23, R41, R205, R206, R207, R208",15,UNI-ROYAL,0603WAF4701T5E,4.7 k 1 % 0603,0603,SMD,bottom,C23162,"yes: same value, size and tolerance",
+19,"R4, R5, R10, R11, R17, R24, R25, R27, R29, R31, R32, R33, R34, R35, R36, R37, R38, R39, R40, R202, R203, R204, R209, R308, R320, R321",26,UNI-ROYAL,0603WAF1002T5E,10 k 1 % 0603,0603,SMD,bottom and top,C25804,"yes: same value, size and tolerance",
+20,R15,1,FOJAN,FRC0603F6493TS,649 k 1 % 0603,0603,SMD,bottom,C2999594,"yes: same value, size and tolerance",
+21,"R16, R210, R211, R212, R213, R214, R304, R306, R311, R319",10,UNI-ROYAL,0603WAF1003T5E,100 k 1 % 0603,0603,SMD,bottom,C25803,"yes: same value, size and tolerance",
+22,"R19, R20",2,UNI-ROYAL,0603WAF270JT5E,27 ohm 1 % 0603,0603,SMD,bottom,C25190,"yes: same value, size and tolerance",
+23,"R26, R28, R30",3,UNI-ROYAL,0603WAF2002T5E,20 k 1 % 0603,0603,SMD,bottom,C4184,"yes: same value, size and tolerance",
+24,"R301, R302",2,UNI-ROYAL,0603WAF5101T5E,5.1 k 1 % 0603,0603,SMD,bottom,C23186,"yes: same value, size and tolerance",
+25,R303,1,FOJAN,FRC0603F2743TS,274 k 1 % 0603,0603,SMD,bottom,C5126128,"yes: same value, size and tolerance",
+26,R305,1,FOJAN,FRC0603F1823TS,182 k 1 % 0603,0603,SMD,bottom,C5126102,"yes: same value, size and tolerance",
+27,R307,1,FOJAN,FRC0603F4422TS,44.2 k 1 % 0603,0603,SMD,bottom,C2930103,"yes: same value, size and tolerance",
+28,R309,1,YAGEO,RT0603BRD07232KL,232 k 0.1 % 25 ppm thin film 0603,0603,SMD,bottom,C861240,"yes: same value, size and tolerance",
+29,R310,1,YAGEO,RT0603BRD0744K2L,44.2 k 0.1 % 25 ppm thin film 0603,0603,SMD,bottom,C861410,"yes: same value, size and tolerance",
+30,R312,1,YAGEO,RT0603BRD07459KL,459 k 0.1 % 25 ppm thin film 0603,0603,SMD,bottom,C6288321,"yes: same value, size and tolerance",
+31,R313,1,YAGEO,RT0603BRD07102KL,102 k 0.1 % 25 ppm thin film 0603,0603,SMD,bottom,C861068,"yes: same value, size and tolerance",
+32,R315,1,YAGEO,RT0603BRD07100KL,100 k 0.1 % 25 ppm thin film 0603,0603,SMD,bottom,C122538,"yes: same value, size and tolerance",
+33,R316,1,YAGEO,RT0603BRD07120KL,120 k 0.1 % 25 ppm thin film 0603,0603,SMD,bottom,C705720,"yes: same value, size and tolerance",
+34,R318,1,UNI-ROYAL,0603WAF2492T5E,24.9 k 1 % 0603,0603,SMD,bottom,C25962,"yes: same value, size and tolerance",
+35,RT1,1,Sunlord,SDNT1608X103F3950FTF,"NTC 10 k 1 %, B(25/50) 3950 K 1 %, 0603",0603,SMD,bottom,C279936,"yes: 10 k, 1 %, B(25/50) 3950 K, 0603",
+36,U1,1,Lattice Semiconductor,LFE5U-85F-8BG381I,"LFE5U-85F-8BG381I. ECP5 FPGA, 84K LUTs, 1.2V, BGA-381","caBGA-381, 0.8 mm pitch",SMD,top,Mouser 842-LFE5U85F8BG381I,no,
+37,U2,1,Winbond,W25Q128JVSIQ,"W25Q128JVSIQ. 128Mbit / 16MiB Serial Flash Memory, Standard/Dual/Quad SPI, 2.7-3.6V, SOIC-8","SOIC-8, 5.3 mm body",SMD,top,C97521,no,
+38,U3,1,Texas Instruments,TPS3808G01DBVR,"TPS3808G01DBVR. Low-Quiescent-Current, Programmable-Delay Supervisory Circuit, SOT-23-6",SOT-23-6,SMD,top,C19653,no,
+39,U4,1,STMicroelectronics,USBLC6-2SC6,"USBLC6-2SC6. Very low capacitance ESD protection diode, 2 data-line, SOT-23-6",SOT-23-6,SMD,top,C7519,no,
+40,U6,1,Texas Instruments,TLA2528IRTER,"TLA2528IRTER. 8-channel 12-bit I2C ADC, WQFN-16","WQFN-16, 3 x 3 mm, 0.5 mm pitch",SMD,top,C2866175,no,
+41,U7,1,Texas Instruments,TPS2121RUXR,"TPS2121RUXR. 2.8-22 V priority power mux, 4.5 A, current limit, VQFN-HR-12","VQFN-HR-12, 2 x 2.5 mm",SMD,top,C485916,no,
+42,U8,1,Texas Instruments,TPS63070RNMR,"TPS63070RNMR. 2-16 V input buck-boost converter, adjustable output, power good","VQFN-HR-15, 2.5 x 3 mm",SMD,top,C109322,no,
+43,"U9, U10",2,Texas Instruments,TLV62569DBVR,"TLV62569DBVR. High Efficiency Synchronous Buck Converter, Adjustable Output 0.6V-5.5V, 2A, SOT-23-5",SOT-23-5,SMD,top,C141836,no,
+44,U11,1,Diodes Incorporated,AP2112K-2.5TRG1,"AP2112K-2.5TRG1. 600mA low dropout linear regulator, with enable pin, 3V-6V input voltage range, 2.5V fixed positive output, SOT-23-5",SOT-23-5,SMD,top,C51118,no,
+45,U12,1,Texas Instruments,TPS2553DBVR,"TPS2553DBVR. Power-distribution switch 1.5 A, adjustable current limit, fault flag, SOT-23-6",SOT-23-6,SMD,top,C55266,no,
+46,U13,1,FTDI,FT231XS-R,"FT231XS-R. Full Speed USB to Full Handshake UART, SSOP-20","SSOP-20, 0.635 mm pitch",SMD,bottom,C132160,no,
+47,"U201, U202, U203, U204",4,Texas Instruments,SN74ALVC164245DGGR,"SN74ALVC164245DGGR. 16-Bit 2.5V to 3.3V or 3.3V to 5V Level-Shifting Transceiver With 3-State Outputs, TSSOP-48","TSSOP-48, 0.5 mm pitch",SMD,top,C7128,no,
+48,U205,1,Texas Instruments,SN74LVC07APWR,"SN74LVC07APWR. Hex buffer with open-drain outputs, TSSOP-14",TSSOP-14,SMD,top,C7809,no,
+49,X1,1,Interquip,1631-27005-BTBEYA,"27MHz 1631-27005-BTBEYA. 27 MHz CMOS oscillator, 3.3 V, 50 ppm, 3.2 x 2.5 mm, 4 pads","3.2 x 2.5 mm, 4 pads",SMD,top,C3003262,no,
+
+,Not fitted by the assembler
+,H1,0,,,"hole in the board, no part"
+,H2,0,,,"hole in the board, no part"
+,H3,0,,,"hole in the board, no part"
+,H4,0,,,"hole in the board, no part"
+,H5,0,,,"hole in the board, no part"
+,H6,0,,,"hole in the board, no part"
+,J1,0,,,"N64 edge fingers: copper of the board, no part"
+,J2,0,,,"SNES cartridge socket, 62 contacts: supplied and soldered by hand after delivery"
+,TP1,0,,,"test pad: bare copper, no part"
+,TP2,0,,,"test pad: bare copper, no part"
+,TP3,0,,,"test pad: bare copper, no part"
+,TP4,0,,,"test pad: bare copper, no part"
+,TP5,0,,,"test pad: bare copper, no part"

@@ -125,6 +125,12 @@ def main(src, dst, report):
         s, e = xy(trk.GetStart()), xy(trk.GetEnd())
         s_on, e_on = touches(s, layer, net, trk), touches(e, layer, net, trk)
         if s_on and e_on:
+            if math.dist(s, e) <= MM(trk.GetWidth()) + EPS:
+                # a piece no longer than it is wide, lying in the copper it joins (the router's neck-down
+                # stubs): it carries nothing. The caller's check throws the pass away if that is wrong.
+                gone.append(trk)
+                what.append('track %s %.2f mm (%.2f, %.2f) removed, shorter than its width' % (net, math.dist(s, e), pos[0], pos[1]))
+                continue
             kept.append('track %s (%.2f, %.2f): both ends are joined' % (net, pos[0], pos[1]))
             continue
         if not s_on and not e_on:
