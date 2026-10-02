@@ -81,11 +81,14 @@ At the end it powers the cartridge off the way the menu does and checks the orde
 | Hello World test program, 30 pictures | as it was on 2026-10-01 | The text is on the screen: 173 pixels lit, the same count as the logic run. |
 | Super Mario World, 240 pictures, key CIC | as it was on 2026-10-01 | Region decided as NTSC by the key chip: 678 rounds of the exchange through the board's open-drain lines, no mismatch. The cartridge's header read through the board. The opening screen at picture 100 with 301 pixels lit, the same count as the logic run. No picture missed, none fetched twice, no two drivers on the data lines. |
 | Hello World, 30 pictures | corrected board, corrected logic | Same picture. No loose pins, no byte enabled without its supply. Power-off: `/RESET` low after 2.4 µs, socket pins let go after 1.0 ms, 5 V below 4.5 V after 2.4 ms, no battery RAM write. LED lit in the game, dark after. |
+| Super Mario World, 660 pictures with Start and A presses, key CIC | corrected board, corrected logic | The opening screen, the title, the file menu after a Start press, "1 player game", the fade with the mosaic effect, and the first scene with its status line and sprites. Region NTSC by the key chip: 1,858 rounds, no mismatch. No picture missed, none fetched twice, no two drivers on the data lines, no loose pins, no byte enabled without its supply, LED lit. Power-off in the right order with no battery RAM write. 32 of the 33 pictures written are the same, pixel for pixel, as the logic run's; see the note below. |
 | The cartridge plugged in back to front | corrected board, corrected logic | **Refused**: the cartridge check gives up after its 4.0 s limit with the rail at 0.46 V; fault 0x01; the 5 V is never switched on. |
 | A board with the converter's address pin on ground | deliberate mistake | **Refused**: 40 ms after Play the status word still says the converter does not answer; the cartridge is never powered. |
 | A board with the socket-to-FPGA byte enabled all the time | deliberate mistake | **Refused** at 1.0 ms: a level shifter byte is enabled while its 5 V side has no supply. |
 
 Pictures of the owner's game are not in this repository.
+
+**The one picture that differs.** The board run's first fetch lands one game picture later than the logic bench's: its 660 pictures cover 532 more sound samples and 28,121 more ROM reads, which is one picture's worth of each. The two benches wait for the game's start in different ways (the board bench polls the status word once a millisecond, as the boot program does). Still screens are the same in both runs. Picture 360 is taken while the title screen's circle is opening and shows a later step of that effect; it matches neither picture 359 nor picture 361 of the logic run, because the Start press of the script, which is given by picture number, also lands one game picture later.
 
 ## What it found
 
@@ -110,7 +113,7 @@ Pictures of the owner's game are not in this repository.
 
 ## Speed
 
-About 0.4 seconds of computing for a millisecond on the board: 3 minutes for the start-up, 7 seconds for each picture, one processor core for each run. The 240-picture run took 31 minutes.
+About 0.4 seconds of computing for a millisecond on the board: 3 minutes for the start-up, 7 seconds for each picture, one processor core for each run. The 240-picture run took 31 minutes; the 660-picture run, with other runs going beside it, 87 minutes.
 
 ## How to run it
 

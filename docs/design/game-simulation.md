@@ -56,7 +56,7 @@ With a program that makes no sound, the output is not silence. It is a repeating
 
 Peter Lemon's public collection of SNES test programs ([github.com/PeterLemon/SNES](https://github.com/PeterLemon/SNES), commit `350b394e`): 23 tests of the 65816's instructions and 7 of the SPC700's, which print a table of PASS or FAIL; memory-mapping tests for LoROM and HiROM, slow and fast; picture tests (background modes, mode 7, HDMA, windows, mosaic); sound tests; a controller test; one small game. 49 files, 2.6 MB, fetched with the owner's yes on 2026-10-01 and kept out of the repository.
 
-Each program ran alone through the logic for 150 to 420 pictures (run of 2026-10-01, before the changes of 2026-10-02).
+Each program ran alone through the logic for 150 to 420 pictures. The set was run on 2026-10-01 and again on 2026-10-02 with the final logic: the same results, and every program's last picture the same pixel for pixel.
 
 | Group | Programs | How it is judged | Result |
 |---|---|---|---|
