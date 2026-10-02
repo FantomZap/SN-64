@@ -486,3 +486,29 @@ This is the first time the menu program has run anywhere but in unit tests and t
 Evidence: host tests 1,063 checks, 13 fault builds rejected, ROM SHA-256 `977c1f5e4031186550530cb6b1bd0737cd5d26d102c6a078fdd1125746690eee` (163,840 bytes, 157,527 used), CIC-6102 check OK, co-simulation passes. Write-up: [n64-bootstrap.md](design/n64-bootstrap.md), "First run in an emulator".
 
 Open: a console run. The owner has an EverDrive 64; the ROM can go on its card.
+
+## 2026-10-01 — a real game through the simulated SN64; a fault in the cartridge bridge found and corrected
+
+The owner, about ordering the board: "I'm not talking about isolated systems. I'm talking about testing a game somehow. I'm worried that I'll have PCBWay create this and it might be a paperweight." He was right to ask: no real program had ever run through the logic, only a stand-in cartridge of a few dozen bytes.
+
+- **A bench that runs a real cartridge image** (`fpga/tests/tb_game.sv`, `fpga/tools/run_game.py`): the whole logic, a cartridge model that holds the image, and an N64 side that presses Play, sends the controller and fetches every picture through the cartridge port the way the boot program does. Pictures and sound are written out.
+- **Images.** The owner gave a copy of his own Super Mario World cartridge; I did not fetch a commercial game and said so. With his yes, 49 free test programs were fetched from Peter Lemon's public collection. None of it is in the repository.
+- **First run: a real fault.** A test program came up black and the bench counted half a million clocks with the FPGA and the cartridge both driving the data lines. The bridge drove on every write strobe, so a DMA copy out of the cartridge ROM had two drivers and the picture chip got a stale byte. This was the open "DMA matrix" item. Corrected in `sn64_cart_bridge.sv`: whoever answers the read owns the bus.
+- **After the correction** the test program draws its text. Super Mario World runs for 660 pictures: opening screen, title, file menu on a Start press, "1 player game", the fade into the first scene, the first scene with sprites and status line, title music in the sound. No picture missed by the N64 side, no clock with two drivers.
+- **Speed:** about 1.4 s of computing a picture, not the 8 s first estimated.
+- **Also seen:** with no sound playing the output carries a small repeating pattern from the cartridge sound input, 54 dB below full scale. To be gated out in the logic.
+- **The old tests still pass** (`evaluate.py --mode sim`), and the whole design routes on the board's pins with every clock passing after the correction (SNES master 37.2 MHz against 21.5 needed).
+
+Write-up: [game-simulation.md](design/game-simulation.md). What stands between this and an order is in [board-verification.md](design/board-verification.md).
+
+## 2026-10-01 — every signal of the board traced to its connector pin
+
+`hardware/sn64-v2/tools/verify_board_wiring.py` reads the board file, the FPGA constraints and the two connector tables v1 drew from other people's working boards, and follows each of the logic's ports from its ball through the level shifter to the socket pin or edge finger. 19 checks pass. 16 deliberate mistakes (socket rows exchanged, socket mirrored, a byte pointing the wrong way, ports exchanged in the constraints and others) are each caught.
+
+Found on the way: the status LED lights when its pin is low and the logic drives it high in a game; the cartridge's control lines have no pull resistors on the 5 V side. Both are recorded in [board-verification.md](design/board-verification.md).
+
+Not covered by it: footprints, voltages, the socket's fit, the six connections the layout still lacks.
+
+## 2026-10-01 — shell: the two lower screw posts level with the recess
+
+The owner: the two bottom screw holes had a cylinder standing out of the stepped-in corners of the back; they should be flush with the indented portion. Measured on SummerCart64's back half, the recess floor is 5.6 mm from the board's mid-plane; our posts went to the back face at 9.6. They now end at 5.6. Checked in the model, nothing printed. Write-up: [v2-shell.md](design/v2-shell.md), last section.

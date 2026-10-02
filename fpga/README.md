@@ -18,6 +18,7 @@ This directory contains a reproducible **console-only engineering candidate** bu
 - [ROM-header region probe](rtl/sn64_header_probe.sv): reads the SNES header with the cartridge held in reset to pick NTSC/PAL when there is no key CIC; [bench](tests/tb_header_probe.sv). See [notes](../docs/design/header-region-probe.md).
 - [CIC pad sequencing](rtl/sn64_cic_pad.sv): SN74LVC1T45 DIR against pad drive; [bench](tests/tb_cic_pad.sv).
 - [Cartridge check](../docs/design/reversed-cartridge-detection.md): before the cartridge's 5 V is switched on, [sn64_rail_monitor.sv](rtl/sn64_rail_monitor.sv) feeds a small test current into the rail through the telemetry ADC and [sn64_power_sequencer.sv](rtl/sn64_power_sequencer.sv) refuses a cartridge that is in back to front (modes: enforce, report only, off, check only); [bench](tests/tb_cart_check.sv) with an ADC model and an electrical model of the rail. Simulated only.
+- [A real game through the simulated SN64](../docs/design/game-simulation.md): [tb_game.sv](tests/tb_game.sv) is the whole-system bench with a cartridge that holds a real image and an N64 side that fetches every picture through the cartridge port as the boot program does. `tools/run_game.py` runs one image and writes pictures and sound; `tools/run_game_suite.py` runs a folder of test programs. No image is in the repository. Its first run found the DMA fault in the cartridge bridge.
 - [Physical-cartridge bridge work](../docs/design/physical-cartridge-bridge.md) and [FPGA selection](../docs/design/fpga-board-selection.md).
 
 ## What is reused and changed

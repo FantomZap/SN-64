@@ -171,6 +171,11 @@ BOARD_HOLE_D, SPIGOT_D, SPIGOT_H, SHELF_D = 4.0, 3.8, 1.1, 6.5
 PILOT_D, PILOT_DEPTH, RELIEF_D = 1.7, 5.0, 2.2
 SHANK_D, WELL_D, SEAT_UP, POST_B_D = 2.4, 4.6, 2.5, 7.0
 LOWER_HOLES = [(-47.5, -3.25), (47.5, -3.25)]   # board holes H1 and H2 (SummerCart64's positions)
+# The back of an N64 cartridge is stepped in round its two lower screws. SummerCart64's back half has
+# that recess: its floor is 5.6 from the board's mid-plane here (5.0 in its own frame; measured on the
+# STEP file 2026-10-01), 4.0 below the back face at 9.6. Our two lower posts end level with that floor
+# (owner, 2026-10-01: they stood out of the recess as cylinders and should be flush with it).
+LOWER_POST_TOP = 5.6
 HOLE56_X = 52.4                         # board holes H5 and H6 (their height depends on the variant)
 # Registration (owner, 2026-10-01): two solid pins on the label-side half go through board holes H3 and
 # H4, which are at different heights left and right. A board turned back to front has no holes under
@@ -246,10 +251,11 @@ def front_post(x, y, envelope=None):
     return add, cut
 
 
-def back_post(x, y, z0, d, envelope=None):
+def back_post(x, y, z0, d, envelope=None, top=9.6):
     """Back screw post from z0 to the back wall: (what to add, what to cut). Hole for the screw and a
-    well in which its head sits SEAT_UP above z0."""
-    body = (z_cyl(x, y, z0, 16, d) & envelope) if envelope is not None else z_cyl(x, y, z0, 9.6, d)
+    well in which its head sits SEAT_UP above z0. The post ends at the outside of the shell: where
+    envelope gives it, or at top."""
+    body = (z_cyl(x, y, z0, 16, d) & envelope) if envelope is not None else z_cyl(x, y, z0, top, d)
     cut = z_cyl(x, y, z0 - 0.6, z0 + SEAT_UP + 0.05, SHANK_D) + z_cyl(x, y, z0 + SEAT_UP, 30, WELL_D)
     return body, cut
 
@@ -429,7 +435,7 @@ def build():
     for x, y in LOWER_HOLES:                                          # H1, H2: our posts in place of SummerCart64's
         add, cut = front_post(x, y)
         front = front + add - cut
-        add, cut = back_post(x, y, zb, POST_B_D)
+        add, cut = back_post(x, y, zb, POST_B_D, top=LOWER_POST_TOP)   # level with the floor of the recess
         back = back + add - cut
     for x, y in PIN_HOLES:                                            # registration pins through board holes H3, H4
         front = front + z_cyl(x, y, -6.5, -zb, PIN_POST_D) + z_cyl(x, y, -zb, zb + PIN_UP, PIN_D)

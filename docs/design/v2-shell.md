@@ -327,3 +327,11 @@ The owner chose one of his own logo files (warning triangle with a bolt, and the
 He also pointed out that the USB-C opening was a placeholder: a plain 13 x 7 window. It is now a recess with rounded ends for the plug's overmold and an opening with rounded ends around the receptacle (values in the table above). The model's receptacle does not touch the shell.
 
 Pictures: [shell-back.png](../../mechanical/sn64-v2-shell/shell-back.png), [shell-logo-back.png](../../mechanical/sn64-v2-shell/shell-logo-back.png), [shell-iso-back.png](../../mechanical/sn64-v2-shell/shell-iso-back.png), [shell-usb.png](../../mechanical/sn64-v2-shell/shell-usb.png), [shell-right.png](../../mechanical/sn64-v2-shell/shell-right.png). The `fit-*.png` pictures were made before these two changes and do not show them.
+
+## The two lower screw posts end level with the recess (2026-10-01)
+
+The owner saw two cylinders standing out of the stepped-in corners at the bottom of the back, where the two lower screws are: "those should be flush with the indented portion".
+
+The back of an N64 cartridge is stepped in round its two lower screws, and SummerCart64's back half has that recess. Its floor is 5.6 mm from the board's mid-plane (5.0 in SummerCart64's own frame, measured on the STEP file), 4.0 mm below the back face. Our two replacement posts were drawn to the back face at 9.6, so they stood 4.0 mm out of the recess. They now end at 5.6, level with its floor, as SummerCart64's own bosses do (`LOWER_POST_TOP` in the script). The screw head still sits 2.5 mm above the board, so it is 2.5 mm below the recess floor.
+
+Checked in the model: at both posts the solid ends at 5.6; both halves are single valid solids. Pictures: [shell-back.png](../../mechanical/sn64-v2-shell/shell-back.png), [shell-iso-back.png](../../mechanical/sn64-v2-shell/shell-iso-back.png). Nothing printed.

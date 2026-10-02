@@ -51,6 +51,8 @@ Two timing details make this match a real 5A22 at the pins:
 1. **Look-ahead.** Ownership is decided from the core's strobes, which are one clock ahead of the registered socket strobes. The turnaround therefore completes before the strobe edge reaches the cartridge: write data is stable when /WR falls, and the octet is already listening when /RD falls.
 2. **Data hold.** The FPGA keeps driving for one clock after the socket-side write strobe rises, so a cartridge that latches on the rising edge sees stable data.
 
+3. **DMA and HDMA (2026-10-01).** During a copy a read strobe on one side and a write strobe on the other are low together, and whoever answers the read owns D0-7. A copy from the cartridge to the picture chip (`/RD` and `/PAWR` low) is the cartridge's byte, so the octet listens. A copy from a console device to the cartridge (`/PARD` and `/WR` low) is the console's byte, so the octet drives. `/RD` names the cartridge as the source unless WRAM answers; `/PARD` names a console device at `$2100`-`$2183`, or something on the cartridge side above that. Until this day every write strobe made the octet drive: a copy out of the cartridge ROM had two drivers and the picture chip got the console's own stale byte. Found by the first run of a real program ([game-simulation.md](game-simulation.md)); the fault build `SN64_FAULT_DMA_DRIVE` puts the old behaviour back.
+
 Internal CPU-register reads are **not** driven onto the socket, as the [evidence audit](bus-electrical-evidence.md) requires. While the octet is released the core sees `$FF`; this only happens during the turnaround clock, never as a substitute for a cartridge response inside a read window.
 
 ## Verification
@@ -69,7 +71,7 @@ Limits: this is a behavioural model. It has no analog levels, translator propaga
 ## Still open (from the bridge contract)
 
 1. CIC lock (SuperCIC-derived), EXPAND bias, cartridge reset sensing into the core, and analog audio: separate designs.
-2. HDMA and PPU/APU responder cases in the bus model; B-bus reads that an external device answers.
+2. HDMA and PPU/APU responder cases in the bus model; B-bus reads that an external device answers. A-to-B copies from the cartridge are now exercised by real programs ([game-simulation.md](game-simulation.md)); B-to-A copies from a device on the cartridge side are decoded but not exercised.
 3. Hardware fault gating: connect `bus_permit` to the rail monitor and eFuse fault outputs; the bridge currently exposes the input only.
 4. Real timing: translator delays, socket loading, and measured setup/hold at the socket on a prototype.
 5. Physical bring-up order from the [acceptance register](../requirements.md) §13 before any real cartridge.

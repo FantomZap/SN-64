@@ -1,0 +1,106 @@
+{
+ "board": "sn64-v2.kicad_pcb",
+ "ports": 111,
+ "checks": [
+  {
+   "check": "every port of sn64_board_top has a ball, and no ball is given twice",
+   "result": "pass",
+   "detail": "111 ports; missing []; unknown []"
+  },
+  {
+   "check": "43 cartridge outputs reach their own socket pin through a channel that points to the cartridge",
+   "result": "pass",
+   "detail": ""
+  },
+  {
+   "check": "D0-D7 reach their socket pins through one byte whose direction is data_dir and whose enable is data_oe_n",
+   "result": "pass",
+   "detail": ""
+  },
+  {
+   "check": "the three level-shifter enables are pulled to 3.3 V, so the socket is released until the FPGA drives them",
+   "result": "pass",
+   "detail": "[[('R210', '100k', 'FPGA_3V3')], [('R211', '100k', 'FPGA_3V3')], [('R212', '100k', 'FPGA_3V3')]]"
+  },
+  {
+   "check": "data_dir is pulled low, so the data byte points away from the cartridge until the FPGA drives it",
+   "result": "pass",
+   "detail": "[('R213', '100k', 'GND')]"
+  },
+  {
+   "check": "5 cartridge inputs come from their own socket pin through a channel that points to the FPGA",
+   "result": "pass",
+   "detail": ""
+  },
+  {
+   "check": "the open-drain pulls (CIC data, /RESET, PROGRAMN) go through the SN74LVC07A to the right pins, with pull-ups",
+   "result": "pass",
+   "detail": ""
+  },
+  {
+   "check": "4 level shifters: A side on 3.3 V, B side on the cartridge 5 V, eight grounds each",
+   "result": "pass",
+   "detail": ""
+  },
+  {
+   "check": "socket +5 V pins on the switched cartridge supply, socket grounds on ground",
+   "result": "pass",
+   "detail": "socket +5 V net SNES_5V_CART, switch ['U12'] output SNES_5V_CART"
+  },
+  {
+   "check": "the cartridge switch is off until the FPGA turns it on (enable pulled low, driven by cart_5v_enable)",
+   "result": "pass",
+   "detail": "[('R319', '100k', 'GND')]"
+  },
+  {
+   "check": "27 N64 signals on their own edge fingers; 3.3 V fingers feed the power mux; 12 V fingers left open",
+   "result": "pass",
+   "detail": ""
+  },
+  {
+   "check": "configuration flash on the configuration balls; CFG = 010 (master SPI); DONE, INITN, PROGRAMN pulled up",
+   "result": "pass",
+   "detail": ""
+  },
+  {
+   "check": "the 27 MHz oscillator output is on the osc_27 ball and the supervisor output on board_reset_n",
+   "result": "pass",
+   "detail": "['X1'] ['U3']"
+  },
+  {
+   "check": "USB: D+ and D- through series resistors to the FPGA, 1.5 k pull-up from usb_pu on D+, 5.1 k on each CC pin",
+   "result": "pass",
+   "detail": ""
+  },
+  {
+   "check": "telemetry converter on the I2C ports with pull-ups; its channel 3 on the cartridge rail (20 k / 10 k), as the cartridge check needs",
+   "result": "pass",
+   "detail": ""
+  },
+  {
+   "check": "cartridge sound: each socket pin through a capacitor and a resistor to its comparator ball, feedback through an RC to the other ball",
+   "result": "pass",
+   "detail": ""
+  },
+  {
+   "check": "every pad of the board is on the net the schematic gives it (176 parts)",
+   "result": "pass",
+   "detail": ""
+  },
+  {
+   "check": "FPGA supply and ground balls on their rails, ports on user I/O balls, configuration, clock and comparator balls as the Lattice table names them",
+   "result": "pass",
+   "detail": ""
+  },
+  {
+   "check": "no FPGA ball carries a signal that the logic has no port for (JTAG and the two comparator return balls apart)",
+   "result": "pass",
+   "detail": ""
+  }
+ ],
+ "summary": {
+  "pass": 19,
+  "fail": 0,
+  "skipped": 0
+ }
+}

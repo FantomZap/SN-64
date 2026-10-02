@@ -13,6 +13,14 @@
 //     shared bus as on a real SNES. Released during external reads and idle.
 //     Never driven from an internal CPU-register read (unsupported by
 //     evidence; docs/design/bus-electrical-evidence.md).
+//   * DMA and HDMA: a read strobe on one side and a write strobe on the other
+//     are low together, and whoever answers the read owns D0-7. A copy from
+//     the cartridge to the PPU (/RD and /PAWR low) is the cartridge's byte:
+//     the octet listens. A copy from a console device to the cartridge (/PARD
+//     and /WR low) is the console's byte: the octet drives. Until 2026-10-01
+//     every write strobe made the octet drive, so a copy out of the cartridge
+//     ROM had two drivers and the PPU received the console's own stale byte;
+//     found when the first real program was run (fpga/tests/tb_game.sv).
 //   * The data octet is enabled one clock AFTER the strobe it belongs to
 //     starts and disabled one clock AFTER the strobe ends (data hold), and
 //     every drive<->listen change passes through at least one released clock
@@ -70,6 +78,18 @@ module sn64_cart_bridge (
     // same edge with no combinational skew, and hold while released.
     // ---------------------------------------------------------------------
     reg internal_q;   // registered copy of the WRAM source-valid flag
+    reg external_q;   // registered copy of "the byte on the bus is not the console's"
+    // Who answers a read. /RD names an A-side source: the cartridge, unless WRAM answers. /PARD
+    // names a B-side source: a console device at $2100-$2183 (PPU, APU, the WRAM port), or
+    // something on the cartridge or expansion side above that.
+`ifdef SN64_FAULT_DMA_DRIVE
+    // Fault injection for the benches only: every write strobe drives, as before 2026-10-01.
+    wire source_external = 1'b0;
+`else
+    wire b_console = core_pa < 8'h84;
+    wire source_external = (!core_rd_n && !core_internal_valid) ||
+                           (!core_prd_n && !b_console && !core_internal_valid);
+`endif
     always @(posedge clk) begin
         if (!permit) begin
             cart_address  <= 24'h0;
@@ -80,6 +100,7 @@ module sn64_cart_bridge (
             cart_refresh  <= 1'b0; cart_phi2 <= 1'b0;
             cart_data_out <= 8'hFF;
             internal_q    <= 1'b0;
+            external_q    <= 1'b0;
         end else begin
             cart_address  <= core_address;
             cart_pa       <= core_pa;
@@ -91,6 +112,7 @@ module sn64_cart_bridge (
             cart_phi2     <= core_phi2;
             cart_data_out <= core_data_out;
             internal_q    <= core_internal_valid;
+            external_q    <= source_external;
         end
     end
 
@@ -100,13 +122,13 @@ module sn64_cart_bridge (
     // BEFORE the strobe edge reaches the cartridge: write data is stable when
     // /WR falls, and the octet is listening when /RD falls, as on a real 5A22.
     // ---------------------------------------------------------------------
-    wire write_next    = permit && (!core_wr_n || !core_pwr_n);
+    wire write_next    = permit && (!core_wr_n || !core_pwr_n) && !source_external;
     wire internal_next = permit && core_internal_valid && (!core_rd_n || !core_prd_n);
     wire drive_ahead   = write_next || internal_next;
 
     // Keep driving until one clock after the socket-side strobe has risen
     // (data hold for the cartridge latch), then release.
-    wire write_now    = permit && (!cart_wr_n || !cart_pwr_n);
+    wire write_now    = permit && (!cart_wr_n || !cart_pwr_n) && !external_q;
     wire internal_now = permit && internal_q && (!cart_rd_n || !cart_prd_n);
     reg  hold_q;
     always @(posedge clk) hold_q <= permit && (write_now || internal_now);
