@@ -1,4 +1,4 @@
-# SN64 v2: manufacturing files
+# SN64 v1 board (files named sn64-v2): manufacturing files
 
 Made by `hardware/sn64-v2/tools/make_production_v2.py` on 2026-10-02. **For a quotation. Not released for manufacture, and nothing has been sent to a maker.**
 
@@ -11,7 +11,7 @@ Made by `hardware/sn64-v2/tools/make_production_v2.py` on 2026-10-02. **For a qu
 | Board | 111 x 70.5 mm, 6 copper layers, 1.2 mm, 4034 tracks, 1118 vias, 7914 mm of track |
 | Parts | 187 placed by the assembler (50 top, 137 bottom), 49 different part numbers, 1123 surface-mount pads |
 | KiCad's rule check | no error, no open connection, no difference from the schematic. 199 notes, all about the solder mask being open across the row of edge fingers, which is on purpose |
-| Board file SHA-256 | `283edae5c7c5b9651912d3ca833729b8793f4835c9da396bbae7a32776a4b36d` |
+| Board file SHA-256 | `f3772975f0fafee3ca76cd3fb921d42bc9b4c6c78519a39c791a751b6c180cca` |
 | Netlist SHA-256 | `6276e53528ba6e029613c16fdd0a94bbb332e3b5ce6e2f32d474de5d7584c80c` |
 
 The top face in these files (F.Cu) is the back of the cartridge. The bottom face (B.Cu) is the label side, which faces the player.

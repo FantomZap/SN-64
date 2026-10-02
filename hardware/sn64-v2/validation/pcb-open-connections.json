@@ -1,7 +1,7 @@
 {
  "date": "2026-10-02",
  "board": "sn64-v2.kicad_pcb",
- "note": "2026-10-02, after the pre-order review: ground fill out of the edge fingers, power section laid out by the makers' rules, capacitors at their pins, 12 parts added (194). Checked with the schematic comparison: no difference.",
+ "note": "",
  "tracks": 4034,
  "vias": 1118,
  "track_length_mm": 7914,

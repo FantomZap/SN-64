@@ -633,3 +633,12 @@ The owner: "do everything except sending the files to pcbway because i need a qu
 **A lesson about how the work was run.** The quote files were ready early. The layout faults then took several hours that the owner had not asked for, and he said so. From now on: report a finding with a time estimate and let him choose before spending hours on it.
 
 **Tools added:** `apply_finger_clearance_v2.py`, `apply_review_fixes_v2.py`, `apply_power_layout_v2.py`, `make_power_plan.py`, `power_paths_v2.py`, `trim_leftovers_v2.py`, `tidy_silk_v2.py`, `sync_board_fields_v2.py`, `make_production_v2.py`, `fpga/tools/pack_bitstream.py`. The placement generator `build_v2_pcb.py` no longer makes this board; the board file is the source.
+
+## 2026-10-02 — logos on the board, red mask, quote sheet corrected
+
+The owner: "i want my sn64 and fantomzap logos screenprinted on there somewhere", "i want red btw", and of the board's name: "its actually v1 technically".
+
+- `hardware/sn64-v2/tools/add_logo_silk_v2.py` prints the one-colour SN64 logo (the plain version, made for small sizes) and the FantomZap logo on the silkscreen of the back face, right of the FPGA, 30 mm wide each. The outlines come straight from the files under `assets/logo/`. The FantomZap name and logo are the owner's and are not under the open licences (`NOTICE` item 3).
+- Board rule check with the schematic comparison after it: no error, no open connection, no difference, the same 199 notes at the edge fingers. No copper, hole or part was touched, so the wiring check, the board run and the shell fit stand as they are.
+- Quote sheet and fabrication notes: solder mask red; inner copper 1 oz (PCBWay's form offers nothing thinner for inner layers; the sheet said 0.5 oz); the titles call the board v1, the file names keep `sn64-v2`.
+- Manufacturing files and the two board pictures remade. Nothing has been sent to PCBWay.

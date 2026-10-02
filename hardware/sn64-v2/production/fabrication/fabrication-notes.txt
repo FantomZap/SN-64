@@ -1,4 +1,4 @@
-SN64 v2 main board: fabrication notes
+SN64 v1 main board (files named sn64-v2): fabrication notes
 Made 2026-10-02 for a quotation. Board file sn64-v2.kicad_pcb.
 
 1. Layers: 6. Order from the top:
@@ -9,7 +9,7 @@ Made 2026-10-02 for a quotation. Board file sn64-v2.kicad_pcb.
       In4.Cu  inner 4: signals and the 1.1 V area
       B.Cu    bottom copper: the label side of the cartridge
 2. Size 111 x 70.5 mm, routed outline (Edge.Cuts). Finished thickness 1.2 mm.
-3. Material FR-4, Tg 150 C or higher. Copper 1 oz finished on the outer layers, 0.5 oz on the inner layers.
+3. Material FR-4, Tg 150 C or higher. Copper 1 oz finished on the outer layers, 1 oz on the inner layers.
    Stack-up: the maker's standard for 6 layers at this thickness. No impedance control.
 4. Smallest track 0.10 mm, smallest clearance 0.1 mm.
 5. Holes:
@@ -31,6 +31,6 @@ Made 2026-10-02 for a quotation. Board file sn64-v2.kicad_pcb.
 9. Edge connector: 50 gold fingers, 25 on each face, at the bottom edge. Surface finish immersion gold (ENIG)
    on the whole board. Bevel 45 degrees on the finger edge. The solder mask is open across the whole
    row of fingers on purpose. No copper lies between the fingers or on the inner layers under them.
-10. Solder mask on both faces, silkscreen on both faces. Smallest silkscreen text 0.8 mm high, 0.15 mm line.
+10. Solder mask on both faces, silkscreen on both faces, white. Solder mask red. Smallest silkscreen text 0.8 mm high, 0.15 mm line.
 11. Electrical test of every board against sn64-v2.d356 (IPC-D-356).
 12. For assembly: tooling rails and fiducials may be added by the maker. The board itself has none.

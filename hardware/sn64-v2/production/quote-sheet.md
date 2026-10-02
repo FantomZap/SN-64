@@ -1,4 +1,4 @@
-# SN64 v2: what to enter for a PCBWay quote
+# SN64 v1 board (files named sn64-v2): what to enter for a PCBWay quote
 
 Written by `hardware/sn64-v2/tools/make_production_v2.py` on 2026-10-02 from the board file. Every number below is read from the board.
 **Nothing has been sent to PCBWay.** The files are for a price. Before an order the list at the end still applies.
@@ -15,13 +15,13 @@ Written by `hardware/sn64-v2/tools/make_production_v2.py` on 2026-10-02 from the
 | Thickness | 1.2 mm | the console's slot. SummerCart64 uses the same |
 | Min track / spacing | 4/4 mil | the board's smallest track is 0.10 mm and its smallest gap 0.1 mm |
 | Min hole size | 0.2 mm | 1118 vias: 802 x 0.45 mm pad on 0.20 mm hole, 310 x 0.50 mm pad on 0.20 mm hole, 6 x 0.60 mm pad on 0.30 mm hole |
-| Solder mask | any colour | green is the cheapest and quickest |
+| Solder mask | red | chosen by the owner, 2026-10-02 |
 | Silkscreen | white | |
 | Edge connector | Yes | the 50 gold fingers |
 | Bevelling | 45 degrees | SummerCart64's build guide |
 | Surface finish | Immersion gold (ENIG) | the fingers and the 381-ball chip. SummerCart64 orders ENIG. Hard gold on the fingers lasts longer and costs much more |
 | Via process | Tenting vias | set on the board |
-| Finished copper | 1 oz outer, 0.5 oz inner | 0.1 mm tracks need the thin inner copper |
+| Finished copper | 1 oz outer, 1 oz inner | the form offers nothing thinner for the inner layers |
 | Stack-up | their standard one, no impedance control | |
 
 ## 2. Four things to put in the remarks box

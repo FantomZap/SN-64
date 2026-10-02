@@ -184,11 +184,11 @@ def size(text):
 
 def write_notes(path, facts, stats, date):
     holes = stats['drill_holes']
-    lines = ['SN64 v2 main board: fabrication notes', 'Made %s for a quotation. Board file sn64-v2.kicad_pcb.' % date, '',
+    lines = ['SN64 v1 main board (files named sn64-v2): fabrication notes', 'Made %s for a quotation. Board file sn64-v2.kicad_pcb.' % date, '',
              '1. Layers: %d. Order from the top:' % facts['layers']]
     lines += ['      %-7s %s' % (n, u) for n, u in LAYER_USE]
     lines += ['2. Size %g x %g mm, routed outline (Edge.Cuts). Finished thickness %.1f mm.' % (size(stats['board']['width']), size(stats['board']['height']), facts['thickness']),
-              '3. Material FR-4, Tg 150 C or higher. Copper 1 oz finished on the outer layers, 0.5 oz on the inner layers.',
+              '3. Material FR-4, Tg 150 C or higher. Copper 1 oz finished on the outer layers, 1 oz on the inner layers.',
               '   Stack-up: the maker\'s standard for 6 layers at this thickness. No impedance control.',
               '4. Smallest track %.2f mm, smallest clearance %g mm.' % (facts['min_track'], size(stats['board']['min_track_clearance'])),
               '5. Holes:']
@@ -208,7 +208,7 @@ def write_notes(path, facts, stats, date):
               '9. Edge connector: 50 gold fingers, 25 on each face, at the bottom edge. Surface finish immersion gold (ENIG)',
               '   on the whole board. Bevel 45 degrees on the finger edge. The solder mask is open across the whole',
               '   row of fingers on purpose. No copper lies between the fingers or on the inner layers under them.',
-              '10. Solder mask on both faces, silkscreen on both faces. Smallest silkscreen text 0.8 mm high, 0.15 mm line.',
+              '10. Solder mask on both faces, silkscreen on both faces, white. Solder mask red. Smallest silkscreen text 0.8 mm high, 0.15 mm line.',
               '11. Electrical test of every board against sn64-v2.d356 (IPC-D-356).',
               '12. For assembly: tooling rails and fiducials may be added by the maker. The board itself has none.', '']
     Path(path).write_text('\n'.join(lines), encoding='utf-8', newline='\n')
@@ -323,7 +323,7 @@ def describe(name):
     return ''
 
 
-QUOTE = """# SN64 v2: what to enter for a PCBWay quote
+QUOTE = """# SN64 v1 board (files named sn64-v2): what to enter for a PCBWay quote
 
 Written by `hardware/sn64-v2/tools/make_production_v2.py` on {date} from the board file. Every number below is read from the board.
 **Nothing has been sent to PCBWay.** The files are for a price. Before an order the list at the end still applies.
@@ -340,13 +340,13 @@ Written by `hardware/sn64-v2/tools/make_production_v2.py` on {date} from the boa
 | Thickness | {t} mm | the console's slot. SummerCart64 uses the same |
 | Min track / spacing | 4/4 mil | the board's smallest track is {min_track} mm and its smallest gap {min_clear} mm |
 | Min hole size | 0.2 mm | {vias} vias: {via_text} |
-| Solder mask | any colour | green is the cheapest and quickest |
+| Solder mask | red | chosen by the owner, 2026-10-02 |
 | Silkscreen | white | |
 | Edge connector | Yes | the 50 gold fingers |
 | Bevelling | 45 degrees | SummerCart64's build guide |
 | Surface finish | Immersion gold (ENIG) | the fingers and the 381-ball chip. SummerCart64 orders ENIG. Hard gold on the fingers lasts longer and costs much more |
 | Via process | Tenting vias | set on the board |
-| Finished copper | 1 oz outer, 0.5 oz inner | 0.1 mm tracks need the thin inner copper |
+| Finished copper | 1 oz outer, 1 oz inner | the form offers nothing thinner for the inner layers |
 | Stack-up | their standard one, no impedance control | |
 
 ## 2. Four things to put in the remarks box
@@ -386,7 +386,7 @@ Six layers. Gold fingers with a bevel. ENIG. Parts on both faces. A 381-ball chi
 Sources for PCBWay's limits and SummerCart64's order settings, and what the review behind these files found: [pre-order-review.md](../../../docs/design/pre-order-review.md).
 """.replace('{name}', NAME)
 
-README = """# SN64 v2: manufacturing files
+README = """# SN64 v1 board (files named sn64-v2): manufacturing files
 
 Made by `hardware/sn64-v2/tools/make_production_v2.py` on {date}. **For a quotation. Not released for manufacture, and nothing has been sent to a maker.**
 
