@@ -214,16 +214,41 @@ Result: 3,891 tracks, 1,108 vias, 7,938 mm, 217 of 217 signal nets fully connect
 error, no open connection.** The pad nets did not change, so the wiring check (22 of 22, 25 of 25)
 and the simulated board are the same as before.
 
-What the check still warns about, none of it a connection:
+What the check still warned about after that, none of it a connection: 225 silkscreen warnings, 199
+solder-mask notes at the N64 edge fingers (the mask is open across the whole row on purpose, as on
+SummerCart64's edge), and 12 vias and 2 track ends it called dangling. The next section took the first
+and the last away.
 
-- 225 silkscreen warnings: text over pads and over other text. For the hand pass.
-- 199 solder-mask warnings, all at the N64 edge fingers. The mask is open across the whole row of
-  fingers on purpose, as on SummerCart64's edge.
-- 12 vias and 2 track ends it calls dangling: leftovers of the first routing, fan-out vias the
-  router did not use and vias inside pads. On a copy of the board all 14 were removed and no
-  connection opened, so none of them carries a line. They are still on the board, because the job
-  does not end there. Behind them stand the short stubs that led to those vias, and among the next
-  round of reports was a 4.5 mm stretch of N64_AD10 that runs on past a junction. KiCad calls it a
-  track with a loose end; removing it opened the net. Tidying these means shortening tracks to
-  their last junction, not deleting them. That is for the hand pass. Where they are, they join
-  nothing and harm nothing.
+## The pre-order review (v2, 2026-10-02)
+
+Write-up of the findings: [pre-order-review.md](pre-order-review.md). What it taught about the tools:
+
+- **Leftovers.** `trim_leftovers_v2.py` removes what KiCad calls dangling without opening anything: a
+  via with two track ends of one layer inside it is replaced by a short track first; a track with a
+  free end is cut back to its last junction and removed whole only if nothing touches it beyond its
+  joined end; a piece no longer than it is wide, lying in the copper it joins, goes. It does one pass
+  for each report. The caller refills, checks, and throws a pass away if a connection opens
+  (`build/route-v2/trim/loop.sh` on the owner's PC is that loop).
+- **Board and schematic.** A board placed by a script has no library names, no part numbers and no
+  links to its symbols. `sync_board_fields_v2.py` gives it them, after it has compared every pad's net
+  with the netlist. A field added from python is visible on the silkscreen until it is hidden.
+- **A footprint that differs from its library on purpose** (the N64 edge's outline, the USB-C
+  receptacle's silkscreen at the board's edge) is adapted when `build_v2_schematic.py` copies the
+  libraries, so that KiCad's comparison of board and library stays empty.
+- **Fills are not clearances.** The keep-out strips between the edge fingers kept tracks and vias out
+  and let the ground fill in. A rule area that forbids fills is a separate setting
+  (`apply_finger_clearance_v2.py`).
+- **A placement by attraction is not a layout.** The parts of the power section had been put where
+  their nets pulled them and wired like signals. `make_power_plan.py` describes each converter with
+  its capacitors and coil as one group in the chip's own frame; `apply_power_layout_v2.py` clears the
+  corner, places, draws the supply tracks from pad to pad and leaves the small lines to the router.
+  Outside the corner only the copper in the way of a moved part is taken up (`fit`).
+- **The router.** A net's old trunk is kept where it leaves the cleared corner, and the router joins
+  to it; trimmed back to an inner ball of the FPGA, a line could not be laid again. The nets of a
+  part that moves elsewhere are trimmed everywhere, or their dead trunks block the new place. Of the
+  three orderings only `inside_out` joined all 32 nets; `mps` and `bus` each left one open. Power
+  nets take a width each (`--power-nets A B --power-nets-widths 0.5 0.5`).
+- **`add_plane_vias_v2.py`** gives a pad no via when a track of its net already touches it. A group of
+  pads joined by hand-drawn track needs its plane via in the plan.
+- **Where it is crowded**, look for a via place before choosing a part's place (the supervisor beside
+  the measuring chip had none within 3 mm on either face and was moved 10 mm).

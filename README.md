@@ -43,6 +43,7 @@ Every target in the original specification remains in scope, including PAL, prot
 - [A real game through the simulated SN64](docs/design/game-simulation.md)
 - [A game through the board's own wiring](docs/design/board-simulation.md)
 - [Is the v2 board right? What has been checked, and what has not](docs/design/board-verification.md)
+- [Pre-order review of the v2 board: what it found, the quote files, what only hardware can settle](docs/design/pre-order-review.md)
 - [The USB loader chip: how a blank board gets its first load](docs/design/usb-loader.md)
 - [Cartridge interface schematic sheet](docs/design/cart-interface-schematic.md)
 - [FPGA schematic sheet and board pinout](docs/design/fpga-schematic.md)

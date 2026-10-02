@@ -185,9 +185,9 @@ Not checked, because no simulation here can:
 
 ## Open
 
-- VBUS has 15.8 µF on it by the numbers on the parts (C301, C302, C304, C41). USB allows a device
-  10 µF at plug-in. Capacitors of this kind lose a good part of their value at 5 V, and PCs are
-  tolerant, but it should be settled before an order. This is older than the loader chip.
+- Settled on 2026-10-02: VBUS had 15.8 µF on it by the numbers on the parts, where USB allows a
+  device 10 µF at plug-in. C301 is now 2.2 µF and C304 4.7 µF: 8.0 µF in all
+  ([pre-order-review.md](pre-order-review.md)).
 - The chip tells the PC it draws at most 90 mA (its factory setting). A board fed only from USB
   draws more. PCs do not usually act on that number. It can be changed in the chip with FTDI's tool.
 - The five JTAG pads stay as a second way in.

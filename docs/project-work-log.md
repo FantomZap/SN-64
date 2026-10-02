@@ -592,3 +592,44 @@ The board run is quicker without the USB clocks: Hello World took 279 s where it
 - The rule check still warns, about nothing that is a connection: 225 times about silkscreen text, 199 times about the mask at the N64 edge fingers, which is open across the row on purpose, and about 12 vias and 2 track ends left from the first routing. Removing those 14 on a copy opened nothing, but the stubs behind them have to be shortened, not deleted: one of them carries a line past a junction. For the hand pass.
 - VBUS carries 15.8 µF by the numbers on its capacitors; USB allows a device 10 µF at plug-in. Older than this change; to settle before an order.
 - The four JTAG lines are 85 to 125 mm long. Expected to be fine at the speed the PC drives them; to watch on the first board.
+
+## 2026-10-02 — pre-order review: quote files, and four faults no simulation shows
+
+The owner: "do everything except sending the files to pcbway because i need a quote from them first. you also need to ensure the usbc that we will use fits the hole you made, or rather vice versa". Write-up: [design/pre-order-review.md](design/pre-order-review.md). Nothing was sent to PCBWay.
+
+**Made.**
+
+- Manufacturing files and a sheet of values for PCBWay's forms: [hardware/sn64-v2/production](../hardware/sn64-v2/production) (`tools/make_production_v2.py`).
+- A maker's part number on every bought part.
+- The USB-C port in the shell from the receptacle's drawing, the USB-IF plug limits and SummerCart64's port; fit checked in CAD.
+- `fpga/tools/pack_bitstream.py`: the FPGA image packed for a fast load, and the flash content as one file.
+
+**Found and corrected on the board.**
+
+| Fault | Correction |
+|---|---|
+| Ground fill between the N64 edge fingers and across the tip, inside the bare gold area | a rule area keeps fills out; the ground plane now reaches the ground fingers' vias |
+| Power section laid out like signal wiring: capacitors 7 to 10 mm from the converters, coil currents through 0.15 mm tracks | laid out again by the makers' layout rules |
+| Small capacitors in clumps, up to 36 mm from their chips | each at the pin it serves; the wiring check measures it |
+| 5 V converter's enable tied straight to its supply; no small capacitor at its pins | R321 (10 k), C324, C325 |
+| One capacitor for two supply pins at each level shifter; 100 nF where the measuring chip asks for 1 µF on each supply pin | C213 to C220; C35 now 1 µF, C46 added |
+| Measuring chip's footprint with the wrong exposed pad | footprint changed, two lines laid again |
+| 15.8 µF on the USB supply; a green lamp that 3.3 V cannot light | 8.0 µF; a yellow-green lamp |
+| 14 routing leftovers, 225 silkscreen warnings, 218 differences between board records and schematic | removed, tidied, synced |
+
+**Evidence.**
+
+| Check | Result |
+|---|---|
+| Schematic rule check | 0 errors, 13 warnings; 194 parts |
+| Board rule check with the schematic comparison | no error, no open connection, no difference; 199 notes, all at the edge fingers; 218 of 218 signal nets; 4,034 tracks, 1,118 vias, 7,914 mm |
+| Wiring check | 24 of 24; 29 of 29 deliberate mistakes caught (2 checks and 4 mistakes are new) |
+| Hello World through the new board, 30 pictures | 173 pixels lit as before; ends with DONE (`board-hello6`) |
+| Every part against both shell halves | 307 solids, none touches. A first place for one capacitor touched the lower wall by 0.04 mm³ and was moved |
+| Logic | not changed; its suite, game runs and timing stand |
+
+**Not known until hardware or PCBWay answers:** how long a console waits before it first asks the cartridge (the FPGA is ready about 0.1 s after power-on); starting from an M64's limited cartridge supply, and power for a flash cartridge there; PCBWay's answer on 85 vias in pads, 802 vias with a 0.125 mm ring and one narrow oval hole; the cartridge socket against its footprint.
+
+**A lesson about how the work was run.** The quote files were ready early. The layout faults then took several hours that the owner had not asked for, and he said so. From now on: report a finding with a time estimate and let him choose before spending hours on it.
+
+**Tools added:** `apply_finger_clearance_v2.py`, `apply_review_fixes_v2.py`, `apply_power_layout_v2.py`, `make_power_plan.py`, `power_paths_v2.py`, `trim_leftovers_v2.py`, `tidy_silk_v2.py`, `sync_board_fields_v2.py`, `make_production_v2.py`, `fpga/tools/pack_bitstream.py`. The placement generator `build_v2_pcb.py` no longer makes this board; the board file is the source.

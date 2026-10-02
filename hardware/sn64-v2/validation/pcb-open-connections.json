@@ -1,19 +1,14 @@
 {
  "date": "2026-10-02",
- "board": "hardware/sn64-v2/sn64-v2.kicad_pcb",
- "note": "single vertical board for the shorter mushroom-cap tower shell: top edge 60 mm above the shoulders, SNES socket J2 straddling it (pins 1-31 on B.Cu), USB-C 32.5 mm above the shoulders on the -X edge (the player's right) since 2026-10-02 with the loader chip U13 (FT231XS) behind it (apply_usb_loader_v2.py); mounting holes H1, H2, H5, H6 are 4.0 mm for the shell's through-hole posts, H3 and H4 are 2.5 mm for its registration pins; 2026-10-02: U204 byte 2 enable on SENSE_OE_N with R214, U6 ADDR open (apply_enable_fix_v2.py); the converter's 3.3 V pin joined, a leftover via removed, flash D2 routed together with its neighbours DONE and flash D0 at the corner of the ball grid, and five ground pads that had a single thermal spoke joined to the ground area solidly (close_open_items_v2.py); the 12 vias and 2 track ends the check calls dangling are leftovers of the first routing: removing them on a copy opened no connection, but the stubs behind them need shortening to their last junction, not deleting (docs/design/pcb-routing.md)",
- "tracks": 3891,
- "vias": 1108,
- "track_length_mm": 7938,
- "signal_nets_fully_connected": "217 of 217",
+ "board": "sn64-v2.kicad_pcb",
+ "note": "2026-10-02, after the pre-order review: ground fill out of the edge fingers, power section laid out by the makers' rules, capacitors at their pins, 12 parts added (194). Checked with the schematic comparison: no difference.",
+ "tracks": 4034,
+ "vias": 1118,
+ "track_length_mm": 7914,
+ "signal_nets_fully_connected": "218 of 218",
  "drc_errors": {},
  "drc_warnings": {
-  "silk_edge_clearance": 3,
-  "silk_over_copper": 95,
-  "silk_overlap": 127,
-  "solder_mask_bridge": 199,
-  "track_dangling": 2,
-  "via_dangling": 12
+  "solder_mask_bridge": 199
  },
  "unconnected_items": 0,
  "open_items_for_hand_routing": []

@@ -124,8 +124,8 @@ CERN-OHL-S-2.0), so the shell model is CERN-OHL-S-2.0 too (`mechanical/README.md
 | Socket nose | 94.9 x 8.75, 10.55 high, slot 90.5 long with a key in each PCB gap | SNES Jr connector model (sourced, a different connector of the same family) |
 | Board top edge | 60 | socket underside 0.5 above it |
 | Cartridge | US shape: 135.4 wide, middle 92.2 x 19.9 x 87.5, sides 17.0 x 84.2; seat at 66.5, top at 154.0 | NESdev forum measurements (community, "a little rough") |
-| USB-C port, recess | 13 x 7 with rounded ends, 1.0 deep, in the side wall at 32.5, 8.3 above the console top | plug overmold 12.35 x 6.5 at most **assumed**; depth chosen so the overmold ends 0.9 above the recess floor |
-| USB-C port, opening | 9.6 x 3.8 with rounded ends through the 1.0 rim that is left | receptacle 8.94 x 3.16 (JAE drawing SJ122205, sourced) plus 0.33 all round (**assumed** clearance) |
+| USB-C port, recess | 14.54 x 8.0 with 2.0 corners, 1.0 deep, in the side wall at 32.5, 7.5 above the console top | SummerCart64's own port for the same receptacle (its shell STEP, sourced); the largest plug overmold the standard allows, 12.35 x 6.5 (USB-IF compliance document rev 1.2, figure B-1, sourced), goes in with 0.75 to spare; the mated overmold ends 0.6 to 1.2 above the recess floor (derived) |
+| USB-C port, opening | 9.94 x 4.16 with rounded ends through the 1.0 rim that is left | receptacle 8.94 x 3.16 +-0.15 (JAE drawing SJ122205 rev 2, sourced) plus 0.5 all round (derived: 0.35 left at the drawing's largest receptacle) |
 | Plug against the wall | receptacle face 2.06 behind the outer surface; mated overmold 1.95 in front of the receptacle | wall 2.0 (model); 6.65 plug length less 4.7 engagement (JAE drawing, sourced) |
 | Back logo pocket | 102.4 x 19.0, 0.6 deep, centred on the cap's back face 12.25 above the board's top edge; artwork 88.4 x 14.6 | owner's logo; same height and depth as the front pocket |
 | Back logo detail at this size | triangle border 1.1, letter strokes 1.2 to 1.4; sharp tips under 0.7; tightest gaps under 0.35 | measured on the traced outlines |
@@ -292,7 +292,11 @@ groups, which carry the cartridge audio inputs (pins 31 and 62, used by FXPAK Pr
   measured; what a part wider than the hole can meet on the way down is not.
 - SFC and PAL cartridges are 130 mm wide against the 136.6 mm pocket: guide ribs to centre them.
 - Pocket depth against grip: the cartridge must still be easy to pull out by its top.
-- USB-C port in plastic: the 1.0 mm rim around the opening and the 0.33 mm clearance are untried.
+- USB-C port in plastic: the 1.0 mm rim around the opening and the 0.5 mm clearance are untried.
+  Since 2026-10-02 the port's sizes come from the receptacle's drawing, the USB-IF plug limits and
+  SummerCart64's port ([pre-order-review.md](pre-order-review.md), picture
+  [usb-port-fit.png](../../mechanical/sn64-v2-shell/usb-port-fit.png)); the earlier 13 x 7 recess with
+  rounded ends would not have taken the largest overmold at its corners.
   Try real cables, including ones with a thick overmold.
 - Back logo against the process: its tips and its tightest gaps (under 0.35 mm) will fill in on a
   filament printer; the strokes themselves (1.1 mm and up) hold.

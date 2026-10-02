@@ -383,7 +383,7 @@ Six layers. Gold fingers with a bevel. ENIG. Parts on both faces. A 381-ball chi
 - The SNES socket's footprint waits for a measured sample of the socket. The price does not depend on it.
 - The open points in [board-verification.md](../../../docs/design/board-verification.md) under "Still open".
 
-Sources for PCBWay's limits and SummerCart64's order settings are listed in [board-verification.md](../../../docs/design/board-verification.md).
+Sources for PCBWay's limits and SummerCart64's order settings, and what the review behind these files found: [pre-order-review.md](../../../docs/design/pre-order-review.md).
 """.replace('{name}', NAME)
 
 README = """# SN64 v2: manufacturing files

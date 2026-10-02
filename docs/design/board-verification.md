@@ -1,6 +1,6 @@
 # Is the v2 board right? What has been checked, and what has not
 
-**Status (2026-10-02): not ready to order. The wiring is traced and passes, and a real game runs through a model of the board. Reading the makers' data sheets found two wiring mistakes, both corrected. A blank board can now be loaded over USB through a loader chip on the board; that way in has not met hardware. KiCad's rule check of the copper lists no error and no open connection since the same day. The socket footprint has not met a real socket.**
+**Status (2026-10-02, after the pre-order review): the files for a price quote are ready; not ready to order. The wiring is traced and passes, and a real game runs through a model of the board. The pre-order review ([pre-order-review.md](pre-order-review.md)) found faults in the layout that no simulation here shows: ground copper between the edge fingers, a power section laid out like signal wiring, capacitors far from their chips, and three more rules of the makers' data sheets. All are corrected on the board. What is left needs a real socket, a real console or PCBWay's answer: the list at the end.**
 
 The owner's question: can the board be ordered without it turning out a paperweight? This note keeps the answer in one place. It lists every kind of mistake that would ruin a board, what checks it, and how far that check has got. "Passed" below always means the named check on the PC, never a test on hardware.
 
@@ -17,22 +17,24 @@ The owner's question: can the board be ordered without it turning out a paperwei
 
 | Mistake that would ruin a board | Check | State |
 |---|---|---|
-| A signal on the wrong FPGA ball, level-shifter pin, socket pin or edge finger | [verify_board_wiring.py](../../hardware/sn64-v2/tools/verify_board_wiring.py): traces every port from its ball through the level shifter to the connector pin, in the board file itself | **22 of 22 pass; 25 of 25 deliberate mistakes caught** |
+| A signal on the wrong FPGA ball, level-shifter pin, socket pin or edge finger | [verify_board_wiring.py](../../hardware/sn64-v2/tools/verify_board_wiring.py): traces every port from its ball through the level shifter to the connector pin, in the board file itself | **24 of 24 pass; 29 of 29 deliberate mistakes caught** |
 | The same, with everything working together | [board-simulation.md](board-simulation.md): the owner's game through a model of the board made from the board file, cartridge and N64 plugged in by pin number | **a game boots and plays; two deliberately mis-wired boards are refused** |
 | A level-shifter byte pointing the wrong way, or enabled when it must not be | both of the above | pass, after the correction of 2026-10-02 |
-| Board and schematic disagree | wiring check: every pad's net compared with the schematic's list | pass (182 parts) |
+| Board and schematic disagree | wiring check: every pad's net compared with the schematic's list | pass (194 parts); KiCad's own comparison of board and schematic lists no difference |
 | FPGA supply, ground, configuration, clock balls wrong | wiring check, against Lattice's pin-out table | pass |
 | A part's pin numbers differ from its maker's sheet | each sheet read again, pin by pin, against the board | **done from the makers' sheets for 12 kinds of part and from the supplier's data for one; all agree** (table below). One small part not re-read |
-| A part is wired against a rule of its sheet | the same reading | **two found, both corrected** (below) |
-| Copper does not join what it should, or joins what it should not | KiCad's design-rule check | **pass since 2026-10-02: no error, no open connection, 217 of 217 signal nets complete** (`validation/pcb-open-connections.json`). The last three connections and the five thermal-relief errors: [pcb-routing.md](pcb-routing.md) |
+| A part is wired against a rule of its sheet | the same reading | **two found on 2026-10-02 and corrected (below); three more found in the pre-order review the same day, in the layout and application sections of the sheets, and corrected** ([pre-order-review.md](pre-order-review.md)): a resistor in the 5 V converter's enable line, a small capacitor at its pins, 1 µF at each supply pin of the measuring chip |
+| A converter's capacitors and coil are too far from it, or a chip's capacitor is not at its pin | wiring check: the distance from each of 40 capacitors to the pin it serves; [power_paths_v2.py](../../hardware/sn64-v2/tools/power_paths_v2.py): the narrowest track on each supply path | **pass since the re-layout of 2026-10-02**: 3.5 mm at most with four named exceptions; no supply path narrower than 0.25 mm |
+| Bare copper where the console's connector slides | the edge fingers looked at layer by layer | **pass since 2026-10-02**: no fill in the finger zone, no inner copper under the fingers ([apply_finger_clearance_v2.py](../../hardware/sn64-v2/tools/apply_finger_clearance_v2.py) checks both before it saves) |
+| Copper does not join what it should, or joins what it should not | KiCad's design-rule check | **pass: no error, no open connection, 218 of 218 signal nets complete, and no warning other than the 199 notes at the edge fingers** (`validation/pcb-open-connections.json`) |
 | The logic does not run a game | [game-simulation.md](game-simulation.md) | a real game boots and plays; 38 of 38 judged test programs pass; three faults found and corrected |
 | The logic is too slow for the chip | route and timing check of the whole design on the board's pins | pass with the final logic: every clock, SNES master 34.6 MHz against 21.5 needed |
-| A footprint does not fit its part | KiCad library footprints for standard packages; own footprints for the socket, the N64 edge, the USB-C, the buck-boost and an inductor | **not re-checked for v2** |
+| A footprint does not fit its part | KiCad library footprints for standard packages; own footprints for the socket, the N64 edge, the USB-C, the buck-boost and an inductor | **checked on 2026-10-02 against the makers' drawings: all agree but one.** The measuring chip's footprint had the wrong exposed pad and was changed ([pre-order-review.md](pre-order-review.md)) |
 | The cartridge socket's pads do not meet a real socket's tails | none possible on the PC | **open: no socket has been measured** |
-| The socket or the N64 edge is mirrored or back to front | orientation reasoned from the SNESdev and N64brew pin-outs and SummerCart64's board (2026-09-30); the wiring check and the board run catch a mirrored net list but not a mirrored footprint. Looked at again on 2026-10-02: the board file has socket pins 1 to 31 and edge pins 1 to 25 on the face towards the player, both with pin 1 at the player's left. The SNESdev page says in so many words that pins 01 to 31 are the row nearest the console's front, drawn from the console's right side, which puts pin 1 at the left: the socket agrees. The N64brew page gives the edge's pin table but not its orientation; the edge is SummerCart64's own footprint, the same way round in SummerCart64's own shell | **socket: confirmed from the source a second time. N64 edge: by construction only; a second source is still to find** |
-| A supply gives the wrong voltage or cannot carry the load | divider values recomputed (5.0, 3.3, 1.1 V; reset threshold 3.03 V); budget from the console's 3.3 V | **budget review still to do** |
+| The socket or the N64 edge is mirrored or back to front | orientation reasoned from the SNESdev and N64brew pin-outs and SummerCart64's board (2026-09-30); the wiring check and the board run catch a mirrored net list but not a mirrored footprint. Looked at again on 2026-10-02: the board file has socket pins 1 to 31 and edge pins 1 to 25 on the face towards the player, both with pin 1 at the player's left. The SNESdev page says in so many words that pins 01 to 31 are the row nearest the console's front, drawn from the console's right side, which puts pin 1 at the left: the socket agrees. The N64brew page gives the edge's pin table but not its orientation; the edge is SummerCart64's own footprint, the same way round in SummerCart64's own shell | **socket: confirmed from the source a second time. N64 edge: confirmed on 2026-10-02 from ModRetro's drawing of the M64 main board** (`M64_MLB_SCH.pdf`, page 31: pins 1 to 25 in the row towards the front, pin 1 at the player's left) |
+| A supply gives the wrong voltage or cannot carry the load | divider values recomputed (5.0, 3.3, 1.1 V; reset threshold 3.03 V); budget from the console's 3.3 V | **estimated on 2026-10-02, not measured** ([pre-order-review.md](pre-order-review.md)): menu and plain cartridges are inside what an M64 gives; a flash cartridge on an M64 needs the USB cable |
 | A blank board cannot be loaded | a loader chip between the USB-C socket and the FPGA's JTAG port ([usb-loader.md](usb-loader.md)); the wiring check follows it pin by pin, with the pin numbers from the chip's data sheet and from the source of the PC program | **wired and checked on the PC; not tried on a board** |
-| The board breaks PCBWay's rules | the board's own rules are 0.1 mm spacing, 0.125 mm ring; PCBWay's are to be confirmed with the quote | open |
+| The board breaks PCBWay's rules | the board against the limits on PCBWay's page | **three points to ask with the quote**: 85 vias in pads, 802 vias with a 0.125 mm ring, one narrow oval hole ([quote-sheet.md](../../hardware/sn64-v2/production/quote-sheet.md)). Everything else is inside their stated limits |
 
 ## What the makers' data sheets said
 
@@ -43,17 +45,17 @@ Read on 2026-10-02 from each maker's own sheet, pin by pin, against the pads of 
 | SN74ALVC164245 level shifter (U201 to U204) | TI SCAS416Q | yes, all 48 | A side is 2.5 or 3.3 V, B side 3.3 or 5 V; direction and enable pins belong to the A supply. Section 10: power the A side first, with `/OE` pulled up to it. Section 3: the inputs of both sides are always active and must not float. A B-side pin may be at most 0.5 V above the B supply |
 | SN74LVC07A open-drain driver (U205) | TI SCAS595W | yes | |
 | TPS2553 cartridge switch (U12) | TI SLVS841F | yes; enable is active high | |
-| TLA2528 supply converter (U6) | TI SBAS961A | yes | Table 2: the I2C address is set by resistors on ADDR; with the pin open it is 0x10 |
+| TLA2528 supply converter (U6) | TI SBAS961A | yes | Table 2: the I2C address is set by resistors on ADDR; with the pin open it is 0x10. 1 µF on AVDD and on DVDD, close to the pins; AVDD is also the reference |
 | TPS3808G01 reset supervisor (U3) | TI SBVS050N | yes | timing pin open: fixed delay |
-| TPS2121 input selector (U7) | TI SLVSEA3F | yes | |
-| TPS63070 5 V converter (U8) | TI SLVSC58B | yes | |
-| TLV62569 3.3 V and 1.1 V converters (U9, U10) | TI SLVSDG1C | yes | enable must not float: it is driven by the 5 V converter's power-good with its pull-up |
+| TPS2121 input selector (U7) | TI SLVSEA3F | yes | sections 11 and 12: capacitors on IN1, IN2 and OUT as close as possible, short wide traces |
+| TPS63070 5 V converter (U8) | TI SLVSC58B | yes | 11.1: capacitors and coil as close as possible; a 0603 capacitor at the input pins and one at the output pins; EN through 10 k when tied to the supply. 7.5: it starts only from 3.0 V and may draw about 1 A while starting. PS/SYNC low is forced PWM |
+| TLV62569 3.3 V and 1.1 V converters (U9, U10) | TI SLVSDG1C | yes | enable must not float: it is driven by the 5 V converter's power-good with its pull-up. 10.1: capacitors and coil as close as possible. The supply pin's limit is 6 V |
 | W25Q128JV flash (U2) | Winbond, revision F | yes | |
-| 27 MHz oscillator (X1) | pin names from the supplier's part data (LCSC C3003262) | yes | the maker's own sheet has not been read |
+| 27 MHz oscillator (X1) | Interquip SPXO 3225 163-B | yes | land pattern as the board's; 10 mA |
 | LFE5U-85F FPGA (U1) | Lattice pin-out table | yes (wiring check) | |
 | AP2112K-2.5 regulator (U11) | Diodes DS39724 rev. 2-2 | yes | |
 | FT231XS loader chip (U13) | FTDI FT_000565 version 1.2 (read from the supplier's copy; FTDI's site did not answer) | yes, all 20 | Figure 6.1: fed from the cable, with VCCIO and RESET# on its own 3.3 V output. The four pins used for JTAG are inputs until the PC switches the chip to bit-bang mode |
-| USBLC6-2SC6 protection (U4) | not re-read: the maker's site did not answer; KiCad's library symbol | | **open** |
+| USBLC6-2SC6 protection (U4) | ST Doc ID 11265 Rev 5 (the supplier's copy) | yes | |
 
 ### The two mistakes, and what was done
 
@@ -86,7 +88,7 @@ It reads three things that are made independently of one another: the board file
 - The supply converter: address pin, I2C lines, supplies, and the cartridge supply on the input the cartridge check uses.
 - Every supply and ground ball of the FPGA.
 
-`--negative` makes 25 deliberate mistakes one at a time, among them the socket's rows exchanged, the socket mirrored, a byte pointing the wrong way, a byte enabled all the time, the converter's address pin on ground, two ports exchanged in the constraints, two JTAG lines swapped at the loader chip and the loader chip's I/O supply on the wrong rail. Each is caught.
+`--negative` makes 29 deliberate mistakes one at a time, among them the socket's rows exchanged, the socket mirrored, a byte pointing the wrong way, a byte enabled all the time, the converter's address pin on ground, two ports exchanged in the constraints, two JTAG lines swapped at the loader chip and the loader chip's I/O supply on the wrong rail. Each is caught.
 
 It says nothing about voltages, timing, footprints or whether the logic works.
 
@@ -108,15 +110,12 @@ What is not known until a board exists: that a real PC loads a real board this w
 
 | What | Who |
 |---|---|
-| The rule check's warnings, none of which changes what is connected: 225 silkscreen warnings (text over pads and over other text), 199 solder-mask warnings that are all at the N64 edge fingers, where the mask is open across the whole row on purpose, and 14 leftovers of the first routing (12 vias and 2 track ends that lead nowhere; [pcb-routing.md](pcb-routing.md) says why they are still there) | Claude |
 | Measure a real cartridge socket against the footprint | the owner: a socket sample is needed |
+| The price, and PCBWay's answer to three questions: vias in pads, the 0.125 mm ring, the narrow oval hole ([quote-sheet.md](../../hardware/sn64-v2/production/quote-sheet.md)) | the owner asks for the quote; nothing has been sent |
+| How long a console waits before it first asks the cartridge. The FPGA is ready about 0.1 s after power-on ([pre-order-review.md](pre-order-review.md)) | the first board, on an N64 and an M64 |
+| Starting from an M64's limited cartridge supply; power for a flash cartridge on an M64 | the first board |
 | Load a board over USB for the first time: the loader chip has not met hardware | the first board |
-| VBUS carries 15.8 µF by the parts' numbers; USB allows a device 10 µF at plug-in ([usb-loader.md](usb-loader.md)) | Claude |
-| Footprints of the own-drawn parts against their makers' drawings | Claude |
-| Socket and N64 edge orientation, a second time from the sources | Claude |
-| Power budget from the console's 3.3 V | Claude |
-| The one small part whose sheet was not re-read (USB protection) | Claude |
-| PCBWay's rules, production files, quote | Claude, then the owner's go-ahead |
+| The converters follow their makers' layout rules; how quiet the supplies are is not simulated | the first board |
 | Sound: the cartridge sound input adds a faint pattern to every game ([game-simulation.md](game-simulation.md)); a matter of the logic | Claude |
 
 ## Found on the way, and settled
