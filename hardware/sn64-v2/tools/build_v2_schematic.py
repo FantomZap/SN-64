@@ -1,8 +1,8 @@
 """Author the SN64 v2 schematic set (one board) from one script.
 
-v2 (2026-09-30, docs/design/v2-board.md): the FPGA absorbs the USB device, the
-clock generation, the cartridge audio ADC and the power sequencing; rail
-telemetry is one I2C ADC; the N64 edge is on the board and its bus goes straight to the
+v2 (2026-09-30, docs/design/v2-board.md): the FPGA absorbs the clock generation,
+the cartridge audio ADC and the power sequencing; rail telemetry is one I2C ADC;
+the USB port goes to a loader chip (FT231X) on the FPGA's JTAG port (2026-10-02); the N64 edge is on the board and its bus goes straight to the
 FPGA; the cartridge translators are four 16-bit parts plus one open-drain hex
 driver. Wiring is by global label so the sheets need no hierarchical pins.
 
@@ -307,7 +307,8 @@ LCSC = {  # JLC/LCSC stock snapshot 2026-09-30 (pcbparts jlc_search / mouser)
     'SN74ALVC164245DGGR': ('C7128', 14549), 'SN74LVC07APWR': ('C7809', 14747), 'TLA2528IRTER': ('C2866175', 4658),
     'TPS2121RUXR': ('C485916', 32370), 'TPS63070RNMR': ('C109322', 25100), 'TLV62569DBVR': ('C141836', 246272),
     'AP2112K-2.5TRG1': ('C51118', None), 'TPS2553DBVR': ('C55266', 59074), 'PNR4020-1R5M': ('C54620133', 7449),
-    'FNR4030S2R2MT': ('C167869', 67195), 'DX07S016JA3R1500': ('C2939926', None)}
+    'FNR4030S2R2MT': ('C167869', 67195), 'DX07S016JA3R1500': ('C2939926', None),
+    'FT231XS-R': ('C132160', 3714)}      # stock read 2026-10-02 (pcbparts jlc_get_part)
 SOCKET = {1: 'SNES_SYSTEM_CLK', 2: 'SNES_EXPAND', 3: 'SNES_PA6', 4: 'SNES_PRD_N', 5: GND, 6: 'SNES_A11', 7: 'SNES_A10', 8: 'SNES_A9',
           9: 'SNES_A8', 10: 'SNES_A7', 11: 'SNES_A6', 12: 'SNES_A5', 13: 'SNES_A4', 14: 'SNES_A3', 15: 'SNES_A2', 16: 'SNES_A1',
           17: 'SNES_A0', 18: 'SNES_IRQ_N', 19: 'SNES_D0', 20: 'SNES_D1', 21: 'SNES_D2', 22: 'SNES_D3', 23: 'SNES_RD_N',
@@ -350,7 +351,7 @@ def translator(sh, ref, a1, b1, a2, b2, dir1, oe1, dir2, oe2):
 
 
 def build_fpga_sheet(sh, balls, rows):
-    sh.note('SN64 v2 FPGA SHEET - LFE5U-85F CABGA381 (-8BG381I, Mouser stock), configuration flash, 27 MHz clock, USB device pins, '
+    sh.note('SN64 v2 FPGA SHEET - LFE5U-85F CABGA381 (-8BG381I, Mouser stock), configuration flash, 27 MHz clock, JTAG, '
             'telemetry ADC, reset supervisor.\nPin map: interfaces/fpga-pin-map.csv (tools/pin_plan.py): every signal on rings 1-3; '
             'constraints fpga/constraints/sn64_board.lpf.', 1.8)
     nets = pin_plan.fpga_nets(balls, rows)
@@ -392,12 +393,14 @@ def build_fpga_sheet(sh, balls, rows):
     sh.res('R10', '10k', GND, 'FPGA_CFG0')
     sh.res('R11', '10k', GND, 'FPGA_CFG2')
     sh.newline()
-    # JTAG service pads (no header fitted) and pulls
+    # JTAG: the USB loader chip U13 (power sheet) drives it; service pads (no header fitted) and pulls.
+    # TCK has no pull of its own in the FPGA: Lattice FPGA-TN-02039 asks for 4.7 k to ground.
     for i, net in enumerate(['JTAG_TCK', 'JTAG_TMS', 'JTAG_TDI', 'JTAG_TDO', GND], start=1):
         sh.place(f'TP{i}', 'Connector:TestPoint', net, {'1': net}, 'TestPoint:TestPoint_Pad_1.5x1.5mm')
     sh.res('R12', '4.7k', V33, 'JTAG_TDI')
     sh.res('R13', '4.7k', V33, 'JTAG_TMS')
     sh.res('R14', '4.7k', V33, 'JTAG_TDO')
+    sh.res('R41', '4.7k', GND, 'JTAG_TCK')
     sh.newline()
     # 27 MHz oscillator (all clocks come from the FPGA PLLs: docs/design/v2-board.md)
     sh.place('X1', 'Oscillator:ASE-xxxMHz', '27MHz 1631-27005-BTBEYA', {'1': V33, '2': GND, '3': 'OSC_27', '4': V33},
@@ -416,11 +419,6 @@ def build_fpga_sheet(sh, balls, rows):
     # Status LED
     sh.place('D1', 'Device:LED', 'LED green 0603', {'1': 'LED_K', '2': V33}, 'LED_SMD:LED_0603_1608Metric')
     sh.res('R18', '1k', 'LED_K', 'LED')
-    sh.newline()
-    # USB device: D+/D- straight to the FPGA (OrangeCrab / TinyFPGA practice): 22R series, 1.5k pull-up switched by USB_PU
-    sh.res('R19', '22', 'USB_DP', 'USB_DP_F')
-    sh.res('R20', '22', 'USB_DN', 'USB_DN_F')
-    sh.res('R21', '1.5k', 'USB_PU', 'USB_DP')
     sh.newline()
     # Telemetry ADC: TLA2528 (8 ch, 12 bit, I2C). AVDD is the reference, so FPGA_3V3 itself is watched by U3.
     sh.place('U6', 'SN64_V2:TLA2528RTE', 'TLA2528IRTER',
@@ -487,7 +485,9 @@ def build_cart_sheet(sh):
     sh.cap('C209', '22uF 10V', CART5, GND, C0805); sh.cap('C210', '22uF 10V', CART5, GND, C0805)
     sh.newline()
     # Open-drain driver at 3.3 V, outputs pulled to 5 V (LVC07A outputs are 5.5 V tolerant)
-    gates = [('PROGRAMN_PULL', 'FPGA_PROGRAMN'), ('CIC_DATA0_OD', 'SNES_CIC_DATA0'), ('CIC_DATA1_OD', 'SNES_CIC_DATA1'),
+    # Gate 1 pulled PROGRAMN for the FPGA's own USB device until 2026-10-02; it is unused now (input on
+    # ground, output open, like gates 5 and 6). A reload after an update is asked for through JTAG.
+    gates = [(GND, None), ('CIC_DATA0_OD', 'SNES_CIC_DATA0'), ('CIC_DATA1_OD', 'SNES_CIC_DATA1'),
              ('RESET_PULL_OD', 'SNES_RESET_N'), (GND, None), (GND, None)]
     pinmap = [('1', '2'), ('3', '4'), ('5', '6'), ('9', '8'), ('11', '10'), ('13', '12')]
     fields = {'Datasheet': 'https://www.ti.com/lit/ds/symlink/sn74lvc07a.pdf', 'LCSC': LCSC['SN74LVC07APWR'][0], 'MPN': 'SN74LVC07APWR'}
@@ -495,8 +495,8 @@ def build_cart_sheet(sh):
         sh.place('U205', '74xx:74LS07', 'SN74LVC07APWR', {i: ni, o: no}, 'Package_SO:TSSOP-14_4.4x5mm_P0.65mm', fields, unit=u)
     sh.place('U205', '74xx:74LS07', 'SN74LVC07APWR', {'7': GND, '14': V33}, 'Package_SO:TSSOP-14_4.4x5mm_P0.65mm', fields, unit=7)
     sh.cap('C211', '100nF', V33, GND)
-    for i, net in enumerate(['PROGRAMN_PULL', 'CIC_DATA0_OD', 'CIC_DATA1_OD', 'RESET_PULL_OD'], start=201):
-        sh.res(f'R{i}', '10k', V33, net)            # released until the FPGA drives
+    for i, net in enumerate(['CIC_DATA0_OD', 'CIC_DATA1_OD', 'RESET_PULL_OD'], start=202):
+        sh.res(f'R{i}', '10k', V33, net)            # released until the FPGA drives (R201 went with the PROGRAMN gate)
     sh.newline()
     # Cartridge-side pulls (5 V) and translator defaults (disabled until the FPGA drives)
     sh.res('R205', '4.7k', CART5, 'SNES_CIC_DATA0'); sh.res('R206', '4.7k', CART5, 'SNES_CIC_DATA1')
@@ -516,7 +516,8 @@ def build_cart_sheet(sh):
 
 def build_power_sheet(sh):
     sh.note('SN64 v2 POWER SHEET - TPS2121 input mux (USB priority) -> TPS63070 buck-boost 5V_SYS -> TLV62569 x2 (3V3, 1V1), '
-            'AP2112K-2.5 LDO (2V5), TPS2553 cartridge switch, USB-C receptacle. Converter values are the v1 ones (verified pin tables).', 1.8)
+            'AP2112K-2.5 LDO (2V5), TPS2553 cartridge switch, USB-C receptacle with the loader chip (FT231X on the FPGA JTAG port). '
+            'Converter values are the v1 ones (verified pin tables).', 1.8)
     # USB-C receptacle (v1 J101 wiring), ESD, Rd
     sh.place('J101', 'SN64_USB:USB_C_Receptacle_USB2.0', 'DX07S016JA3R1500',
              {'A1': GND, 'A4': VBUS, 'A5': 'USB_CC1', 'A6': 'USB_DP', 'A7': 'USB_DN', 'A8': None, 'A9': VBUS, 'A12': GND,
@@ -526,6 +527,29 @@ def build_power_sheet(sh):
              'Package_TO_SOT_SMD:SOT-23-6', {'LCSC': LCSC['USBLC6-2SC6'][0], 'MPN': 'USBLC6-2SC6'})
     sh.res('R301', '5.1k 1%', GND, 'USB_CC1'); sh.res('R302', '5.1k 1%', GND, 'USB_CC2')
     sh.cap('C301', '4.7uF 10V', VBUS, GND, C0805); sh.cap('C302', '1uF 10V', VBUS, GND)
+    sh.newline()
+    # USB loader chip (owner, 2026-10-02): FTDI FT231X as a USB-to-JTAG bridge, wired like the ULX3S
+    # board so that openFPGALoader's "ulx3s" entry drives it as it comes from the factory:
+    #   TCK = DSR# (pin 7), TMS = DCD# (pin 8), TDI = RI# (pin 5), TDO = CTS# (pin 9)
+    # (openFPGALoader src/board.hpp, commit 676e53ec; emard/ulx3s usb.sch, commit 6a92cec6). All four
+    # are inputs of the chip until the PC switches it to bit-bang mode, so it leaves the JTAG lines
+    # alone at any other time. Power as in FTDI's bus-powered circuit (FT_000565 v1.2, figure 6.1):
+    # VCC from VBUS, VCCIO and RESET# on the chip's own 3.3 V output, 27 R in series with each data
+    # line and 47 pF to ground on the connector side. With no cable the chip has no supply at all.
+    # The serial pins and the CBUS pins are not used.
+    sh.place('U13', 'Interface_USB:FT231XS', 'FT231XS-R',
+             {'1': None, '2': None, '3': 'FT_3V3', '4': None, '5': 'JTAG_TDI', '6': GND, '7': 'JTAG_TCK', '8': 'JTAG_TMS',
+              '9': 'JTAG_TDO', '10': None, '11': 'USB_DP_F', '12': 'USB_DN_F', '13': 'FT_3V3', '14': 'FT_3V3', '15': VBUS,
+              '16': GND, '17': None, '18': None, '19': None, '20': None},
+             'Package_SO:SSOP-20_3.9x8.7mm_P0.635mm',
+             {'Datasheet': 'https://www.ftdichip.com/Support/Documents/DataSheets/ICs/DS_FT231X.pdf', 'LCSC': LCSC['FT231XS-R'][0], 'MPN': 'FT231XS-R',
+              'Note': 'USB loader: JTAG on DSR#/DCD#/RI#/CTS# as on the ULX3S (openFPGALoader -b ulx3s); factory settings, no programming of the chip'})
+    sh.res('R19', '27', 'USB_DP', 'USB_DP_F')
+    sh.res('R20', '27', 'USB_DN', 'USB_DN_F')
+    sh.cap('C44', '47pF 50V C0G', 'USB_DP', GND); sh.cap('C45', '47pF 50V C0G', 'USB_DN', GND)
+    sh.cap('C41', '100nF 16V X7R', VBUS, GND)                  # VCC, pin 15
+    sh.cap('C42', '100nF 16V X7R', 'FT_3V3', GND)              # 3V3OUT, pin 13
+    sh.cap('C43', '100nF 16V X7R', 'FT_3V3', GND)              # VCCIO, pin 3
     sh.newline()
     # Input mux: IN1 = USB (priority when VBUS > 4.0 V: PR1 divider 274k/100k, VREF 1.06 V), IN2 = host 3.3 V
     # (CP2 divider 182k/100k: IN2 usable above 3.0 V), OV1/OV2 grounded (unused), ILM 44.2k = 2.5 A, SS 1 nF, ST -> FPGA.

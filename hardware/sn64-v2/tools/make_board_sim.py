@@ -30,7 +30,9 @@ What becomes what:
               table pairs with it
   converter   the voltage on each input pin is worked out from the resistors on that pin's net
   left out    capacitors on supplies, inductors, the converters that make the supplies, the ESD
-              part, the USB socket (no cable), test points, mounting holes
+              part, the USB socket and its loader chip (no cable: the chip has no supply and its
+              pins are open; the JTAG port it drives is no part of the logic), test points,
+              mounting holes
 """
 import argparse
 import csv
@@ -308,6 +310,12 @@ def main():
         elif 'TPS3808' in v:
             body.append('    bm_tps3808 %s (%s);' % (ref, pins(ref, [1])))
             report['parts'][ref] = 'reset supervisor'
+        elif 'FT231X' in v:
+            # The USB loader chip takes its supply from the cable, and there is none here: its pins are
+            # open. What it drives, the FPGA's JTAG port, is no port of the logic.
+            if RAIL_VOLTS.get(pads['15']) != 0.0:
+                sys.exit('%s: the loader chip is not on the USB supply (%s); it would need a model' % (ref, pads['15']))
+            report['left_out'][ref] = v + ' (USB loader chip: no cable, so no supply; its pins are open)'
         elif ref.startswith('U') and ref not in (u1, switch, adc):
             report['left_out'][ref] = v + ' (makes or guards a supply)'
 

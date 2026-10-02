@@ -3,7 +3,8 @@
 **Status (2026-10-01): two halves with screw posts for the board, checked in CAD only. Nothing has
 been printed or tried on parts, and several sizes are still assumptions (see "Open"). The console's
 top surface is a measured height. The owner approved a 10 mm shorter geometry on 2026-10-01 and the
-board was refitted to it the same day, so shell and board agree.**
+board was refitted to it the same day. On 2026-10-02 the USB-C port moved to the player's right, on
+the shell and on the board, so shell and board agree.**
 
 Owner's direction, in order: one continuous vertical item with the SNES cartridge upright on top (a
 first model with the cartridge flat on a shelf was rejected on sight); a mushroom cap so the shell
@@ -35,8 +36,9 @@ Frame: X across the board, Y up with 0 at the N64 tongue shoulders, Z out of the
 face. This is SummerCart64's own shell frame moved 0.6 mm in Z; its two mounting bosses are at
 (+-47.5, -3.25), where our board has H1 and H2. F.Cu faces the back of the console (the N64 edge's
 pins 1-25 are on B.Cu and pin 1 is on the front row of the slot), so +Z is the screw side of the
-cartridge and the label side is -Z. A player sees the label side, and the USB-C (board +X) is on
-their left. The exported files are turned so viewers see Z up.
+cartridge and the label side is -Z. A player sees the label side, and the USB-C (board -X) is on
+their right (owner, 2026-10-02; it was at +X, on their left, before). The exported files are turned
+so viewers see Z up.
 
 License: the lower body and the outline are derived from SummerCart64's shell
 (`references/downloads/summercart64/hw/shell/injection mold/sc64_shell.stp`, commit a1e7996d,
@@ -71,8 +73,8 @@ CERN-OHL-S-2.0), so the shell model is CERN-OHL-S-2.0 too (`mechanical/README.md
   no region tabs, so Super Famicom and PAL cartridges (about 6 mm narrower, same connector) go in
   too.
 - **USB-C** in the side wall of the stem, centre 32.5 mm above the shoulders: 8 mm above the
-  console's top surface and 5 mm below the flare. It is on the board's +X side, which is the
-  player's left. The port has two steps with rounded ends (owner, 2026-10-01: the plain window
+  console's top surface and 5 mm below the flare. It is on the board's -X side, which is the
+  player's right (owner, 2026-10-02: "put the usb on the right side of the cart"). The port has two steps with rounded ends (owner, 2026-10-01: the plain window
   was a placeholder): a recess for the cable plug's overmold, and through its floor an opening
   just larger than the receptacle's face. The recess is needed, not decoration: the receptacle's
   face is 2.06 mm behind the wall's outer surface, and a mated plug's overmold stops 1.95 mm in
@@ -290,13 +292,6 @@ groups, which carry the cartridge audio inputs (pins 31 and 62, used by FXPAK Pr
   measured; what a part wider than the hole can meet on the way down is not.
 - SFC and PAL cartridges are 130 mm wide against the 136.6 mm pocket: guide ribs to centre them.
 - Pocket depth against grip: the cartridge must still be easy to pull out by its top.
-- **USB-C on the other side.** The owner would rather have the port on the player's right
-  (2026-10-01) and accepts the left if the move is costly. It is not a board redesign but it is not
-  free either: on the other side the open-drain driver U205 and two capacitors (C209, C212) sit
-  where the receptacle and its protection part would go, so the two corners trade places, about
-  twenty nets are routed again, and the USB data pair either runs about 95 mm across the board to
-  its series resistors or the FPGA's USB pins move. Not done; waiting for his word. The shell
-  script has `USB_SIDE` for it.
 - USB-C port in plastic: the 1.0 mm rim around the opening and the 0.33 mm clearance are untried.
   Try real cables, including ones with a thick overmold.
 - Back logo against the process: its tips and its tightest gaps (under 0.35 mm) will fill in on a
@@ -335,3 +330,29 @@ The owner saw two cylinders standing out of the stepped-in corners at the bottom
 The back of an N64 cartridge is stepped in round its two lower screws, and SummerCart64's back half has that recess. Its floor is 5.6 mm from the board's mid-plane (5.0 in SummerCart64's own frame, measured on the STEP file), 4.0 mm below the back face. Our two replacement posts were drawn to the back face at 9.6, so they stood 4.0 mm out of the recess. They now end at 5.6, level with its floor, as SummerCart64's own bosses do (`LOWER_POST_TOP` in the script). The screw head still sits 2.5 mm above the board, so it is 2.5 mm below the recess floor.
 
 Checked in the model: at both posts the solid ends at 5.6; both halves are single valid solids. Pictures: [shell-back.png](../../mechanical/sn64-v2-shell/shell-back.png), [shell-iso-back.png](../../mechanical/sn64-v2-shell/shell-iso-back.png). Nothing printed.
+
+## 2026-10-02: the USB-C port on the player's right
+
+The owner, with the decision on the USB loader chip: "put the usb on the right side of the cart".
+
+- **Shell.** `USB_SIDE = -1` in the script. The stem is the same on both sides at that height, so the
+  recess and the opening are the mirror image of what was there and nothing else moved. Checked in
+  the model: both halves are single valid solids; the recess is 13.0 x 7.0 and the opening 9.6 x 3.8
+  in the -X wall; no opening is left in the +X wall; the receptacle does not touch the shell.
+- **Board.** The receptacle, its protection part and the VBUS capacitor are on the -X edge at the same
+  height, with the loader chip behind them on the label side ([usb-loader.md](usb-loader.md),
+  `hardware/sn64-v2/tools/apply_usb_loader_v2.py`). The outline did not change: it was already the
+  same left and right.
+- **Fit.** The board's own 3D file with every part model was put into the shell model again. No part
+  on the left or the right third of the board touches either half; the bare board and the socket do
+  not either. The loader chip's model stands 1.2 mm off the label side of the board; the shell
+  leaves 5.8 mm there and under the small parts around it. The receptacle has no 3D model in the
+  board file, so its fit is the shell script's own box, as before.
+- **Pictures.** Drawn again: `shell-front`, `shell-back`, `shell-right` (now the player's right, with
+  the port), `shell-bottom`, `shell-iso`, `shell-iso-back`, `shell-low`, `shell-port`, `shell-pocket`,
+  `shell-usb`, `halves-open`, `half-front-with-board`, `section-centre` and the four `fit-*` views.
+  Left as they were, because what they show did not change: `shell-logo`, `shell-logo-back`,
+  `section-screw-post`. `compare-70-vs-60` is the record of the shortening of 2026-10-01 and still
+  shows the port where it was then.
+
+Nothing has been printed. The open items about the port in plastic stand as they were.

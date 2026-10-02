@@ -492,6 +492,8 @@ A picture has 16.7 ms at 60 Hz. ares counts the processor's time only roughly, s
 
 **2026-10-02:** the credits roll gained two entries (the free test programs, the ares emulator). ROM 163,840 bytes, SHA-256 `f601658de41924e0776d60e85c05e68ba05d75f1c3bf1ddd9edcc603d644a718`, 157,551 bytes used, 104,593 free; host tests 1,065 checks; CIC-6102 check OK. The board-level run reads the first and last 32 words of this image out of the flash model through the cartridge port ([board-simulation.md](board-simulation.md)).
 
+**2026-10-02, later:** the credits roll lost the TinyFPGA entry (the FPGA has no USB device any more) and gained openFPGALoader, the program that loads SN64 over USB; the ULX3S entry now names the loader chip's wiring ([usb-loader.md](usb-loader.md)). ROM 163,840 bytes, SHA-256 `2b3f2c8d60d8e8ecf35a0feb066a3c8edfdc4c94ea458da3d3cc2221bb56e461`, 157,583 bytes used, 104,561 free; host tests 1,065 checks; CIC-6102 check OK.
+
 ### Running it in ares
 
 ```

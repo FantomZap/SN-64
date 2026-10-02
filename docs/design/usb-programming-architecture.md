@@ -1,5 +1,8 @@
 # USB-C initial programming and recovery architecture
 
+> **This note describes the first board (`hardware/sn64`).** The v2 board does the same job with one
+> FT231X chip and no isolator: see [usb-loader.md](usb-loader.md) (2026-10-02).
+
 The first SN64 revision must have a **side-mounted USB-C data port for initial loading from a blank board and later updates**. This is an explicit user requirement. The implemented circuit draft uses an FT232HL hardware USB/MPSSE bridge, with an independently powered USB interface and default-disabled JTAG isolation. Its USB enumeration must not depend on the main FPGA image or MCU firmware. The main SNES FPGA, its configuration flash, and their final power and pin assignments remain unselected; this document does not claim a complete working programming path.
 
 ## Reuse decision and source pins

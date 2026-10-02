@@ -41,6 +41,7 @@ On a board this fault would have meant garbled or black pictures in nearly every
 | 65816 instruction test "ADC" | All eight rows of its last table say PASS. |
 | The set of 49 free test programs | 38 judged, 38 pass; 11 looked at. See "The test set" below. |
 | The same two images through the board's own wiring | [board-simulation.md](board-simulation.md) |
+| Super Mario World again on 2026-10-02, after the USB logic was taken out of the FPGA | The same 660 pictures: all 33 that are written are identical file for file, and the sound is identical byte for byte. The counts are the same too: 18,347,598 ROM reads, 351,408 sound samples. |
 
 Controller input reached the game: the Start and A presses in the run came from the N64 side's controller image through the mailbox and the SNES controller port logic.
 

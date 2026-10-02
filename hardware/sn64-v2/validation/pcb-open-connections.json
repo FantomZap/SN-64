@@ -1,125 +1,20 @@
 {
  "date": "2026-10-02",
  "board": "hardware/sn64-v2/sn64-v2.kicad_pcb",
- "note": "single vertical board for the shorter mushroom-cap tower shell: top edge 60 mm above the shoulders, SNES socket J2 straddling it (pins 1-31 on B.Cu), USB-C 32.5 mm above the shoulders; mounting holes H1, H2, H5, H6 are 4.0 mm for the shell's through-hole posts, H3 and H4 are 2.5 mm for its registration pins; 2026-10-02: U204 byte 2 enable on SENSE_OE_N with R214, U6 ADDR open (apply_enable_fix_v2.py); DRC errors are single-spoke thermal reliefs",
- "tracks": 3596,
- "vias": 1059,
- "track_length_mm": 7576,
- "signal_nets_fully_connected": "213 of 218",
- "drc_errors": {
-  "starved_thermal": 6
- },
+ "note": "single vertical board for the shorter mushroom-cap tower shell: top edge 60 mm above the shoulders, SNES socket J2 straddling it (pins 1-31 on B.Cu), USB-C 32.5 mm above the shoulders on the -X edge (the player's right) since 2026-10-02 with the loader chip U13 (FT231XS) behind it (apply_usb_loader_v2.py); mounting holes H1, H2, H5, H6 are 4.0 mm for the shell's through-hole posts, H3 and H4 are 2.5 mm for its registration pins; 2026-10-02: U204 byte 2 enable on SENSE_OE_N with R214, U6 ADDR open (apply_enable_fix_v2.py); the converter's 3.3 V pin joined, a leftover via removed, flash D2 routed together with its neighbours DONE and flash D0 at the corner of the ball grid, and five ground pads that had a single thermal spoke joined to the ground area solidly (close_open_items_v2.py); the 12 vias and 2 track ends the check calls dangling are leftovers of the first routing: removing them on a copy opened no connection, but the stubs behind them need shortening to their last junction, not deleting (docs/design/pcb-routing.md)",
+ "tracks": 3891,
+ "vias": 1108,
+ "track_length_mm": 7938,
+ "signal_nets_fully_connected": "217 of 217",
+ "drc_errors": {},
  "drc_warnings": {
   "silk_edge_clearance": 3,
-  "silk_over_copper": 92,
-  "silk_overlap": 122,
+  "silk_over_copper": 95,
+  "silk_overlap": 127,
   "solder_mask_bridge": 199,
-  "track_dangling": 3,
-  "via_dangling": 19
+  "track_dangling": 2,
+  "via_dangling": 12
  },
- "unconnected_items": 6,
- "open_items_for_hand_routing": [
-  {
-   "nets": [
-    "FPGA_3V3"
-   ],
-   "items": [
-    "Pad 10 [FPGA_3V3] of U6 on F.Cu",
-    "Track [FPGA_3V3] on B.Cu, length 1.1000 mm"
-   ],
-   "from": {
-    "x": -14.9375,
-    "y": -17.25
-   },
-   "to": {
-    "x": -15.325,
-    "y": -16.0
-   }
-  },
-  {
-   "nets": [
-    "N64_JOYBUS"
-   ],
-   "items": [
-    "Track [N64_JOYBUS] on B.Cu, length 0.2828 mm",
-    "Via [N64_JOYBUS] on F.Cu - B.Cu"
-   ],
-   "from": {
-    "x": 1.5,
-    "y": -12.3
-   },
-   "to": {
-    "x": 0.0,
-    "y": -13.0
-   }
-  },
-  {
-   "nets": [
-    "N64_AD6"
-   ],
-   "items": [
-    "Track [N64_AD6] on F.Cu, length 0.2828 mm",
-    "Track [N64_AD6] on F.Cu, length 4.2000 mm"
-   ],
-   "from": {
-    "x": -1.4,
-    "y": -14.2
-   },
-   "to": {
-    "x": -5.0,
-    "y": 6.0
-   }
-  },
-  {
-   "nets": [
-    "USB_DP_F"
-   ],
-   "items": [
-    "Pad C12 [USB_DP_F] of U1 on F.Cu",
-    "Via [USB_DP_F] on F.Cu - B.Cu"
-   ],
-   "from": {
-    "x": -1.2,
-    "y": -16.0
-   },
-   "to": {
-    "x": 40.325,
-    "y": -21.0
-   }
-  },
-  {
-   "nets": [
-    "USB_PU"
-   ],
-   "items": [
-    "Pad C14 [USB_PU] of U1 on F.Cu",
-    "Via [USB_PU] on F.Cu - B.Cu"
-   ],
-   "from": {
-    "x": -2.8,
-    "y": -16.0
-   },
-   "to": {
-    "x": 38.175,
-    "y": -23.0
-   }
-  },
-  {
-   "nets": [
-    "FLASH_D2"
-   ],
-   "items": [
-    "Track [FLASH_D2] on B.Cu, length 3.1113 mm",
-    "Pad Y2 [FLASH_D2] of U1 on F.Cu"
-   ],
-   "from": {
-    "x": 18.6,
-    "y": -35.7
-   },
-   "to": {
-    "x": 6.8,
-    "y": -29.6
-   }
-  }
- ]
+ "unconnected_items": 0,
+ "open_items_for_hand_routing": []
 }

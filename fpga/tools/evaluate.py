@@ -14,7 +14,6 @@ import shutil
 import subprocess
 
 from prepare_core import prepare, ROOT
-from prepare_flash_pads import generate as prepare_flash_pads
 
 
 def sha(path):
@@ -176,9 +175,8 @@ def main():
         run('frame-window-phase-no-restart', [str(fwp_obj / ('Vtb_frame_window.exe' if os.name == 'nt' else 'Vtb_frame_window')), '+pwd=5', '+rls=1'],
             'FAIL: tb_frame_window: FRAME_PHASE')
         report['simulation']['injected_frame_phase_fault'] = 'Rejected: a frame position that is not restarted at each frame start is detected'
-        prepare_flash_pads()
         # Bootstrap ROM window from the configuration flash: SummerCart64 memory_flash (unmodified) + QSPI flash model.
-        flash_sources = n64_common + ['build/generated/summercart64/memory_flash_dq.sv',
+        flash_sources = n64_common + ['fpga/vendor/summercart64/fw/rtl/memory/memory_flash.sv',
                                       'fpga/rtl/sn64_bootrom_flash.sv', 'fpga/tests/tb_bootrom_flash.sv']
         flash_obj = obj / 'bootrom-flash'
         run('bootrom-flash-build', [verilator, '--binary', '--timing', '--build-jobs', '16', '-Wno-fatal',

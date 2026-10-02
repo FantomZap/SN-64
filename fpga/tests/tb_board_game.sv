@@ -4,7 +4,7 @@
 //
 // tb_game.sv runs a game through the logic (sn64_top) with the cartridge and the N64 joined to
 // it signal by signal. Here the logic is the board's real top level (sn64_board_top: the PLLs,
-// the USB part, the supply watcher, the boot ROM in the flash), on its balls in a copy of the
+// the supply watcher, the boot ROM in the flash), on its balls in a copy of the
 // board: build/board-sim/sn64_board_netlist.sv, which hardware/sn64-v2/tools/make_board_sim.py
 // writes from the board file's own connection list, with a model of each part on its pads
 // (board_models.sv, ecp5_sim_stubs.sv). The cartridge is plugged into the socket's pins by their

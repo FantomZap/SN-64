@@ -4,7 +4,7 @@ Rings are counted from the package edge (ring 1 = outermost). v1 used 122 signal
 balls spread over rings 1-5; here signals are packed onto rings 1-3 so rings 1-2
 escape on the surface without a via and the inner rings are left to power/ground.
 Bank sides (package top view, A1 corner top-left; footprint at 0 degrees):
-  banks 0/1 top    -> riser socket (N64 bus), USB, housekeeping
+  banks 0/1 top    -> N64 bus, housekeeping
   banks 7/6 left   -> cartridge address and control (translators U201/U202)
   banks 2/3 right  -> cartridge data, PA, CIC, sense inputs, audio ADC (U203/U204)
   bank 8 bottom    -> sysCONFIG: SPI flash, DONE/INITN/PROGRAMN, CFG, JTAG (fixed balls)
@@ -54,10 +54,14 @@ N64 = ([(f'n64_ad[{i}]', f'N64_AD{i}', 'LVCMOS33') for i in range(16)] +
         ('n64_int_n', 'N64_INT_N', 'LVCMOS33'), ('n64_cic_clk', 'N64_CIC_CLK', 'LVCMOS33'),
         ('n64_cic_dq', 'N64_CIC_DATA', 'LVCMOS33'), ('n64_si_clk', 'N64_PIF_CLK', 'LVCMOS33'),
         ('n64_si_dq', 'N64_JOYBUS', 'LVCMOS33')])
-HOUSE = [('usb_dp', 'USB_DP_F', 'LVCMOS33'), ('usb_dn', 'USB_DN_F', 'LVCMOS33'), ('usb_pu', 'USB_PU', 'LVCMOS33'),
+# FREE keeps a ball unused without moving the signals after it in the list. C12, C13 and C14 carried the
+# FPGA's own USB device and C9 its reboot line until 2026-10-02 (the loader chip on the JTAG port does
+# both jobs now); the routed board keeps every other signal on its ball.
+FREE = ('', '', '')
+HOUSE = [FREE, FREE, FREE,
          ('adc_scl', 'ADC_SCL', 'LVCMOS33'), ('adc_sda', 'ADC_SDA', 'LVCMOS33'),
          ('efuse_fault_n', 'EFUSE_FAULT_N', 'LVCMOS33'), ('board_reset_n', 'BOARD_RESET_N', 'LVCMOS33'),
-         ('cart_5v_enable', 'CART_5V_EN', 'LVCMOS33'), ('programn_od', 'PROGRAMN_PULL', 'LVCMOS33'),
+         ('cart_5v_enable', 'CART_5V_EN', 'LVCMOS33'), FREE,
          ('led_status', 'LED', 'LVCMOS33'), ('mux_status', 'MUX_ST', 'LVCMOS33')]
 LEFT = ([(f'cart_address[{i}]', f'L_A{i}', 'LVCMOS33') for i in range(24)] +
         [('cart_rd_n', 'L_RD_N', 'LVCMOS33'), ('cart_wr_n', 'L_WR_N', 'LVCMOS33'), ('cart_prd_n', 'L_PRD_N', 'LVCMOS33'),
@@ -110,7 +114,8 @@ def plan():
         cands = candidates(banks)
         assert len(cands) >= len(signals), (banks, len(cands), len(signals))
         for (port, net, io), ball in zip(signals, cands):
-            taken[ball] = (port, net, io)
+            if port:                             # FREE: the ball is passed over and stays unused
+                taken[ball] = (port, net, io)
 
     # LVDS pairs first (both balls on the outer rings of the right banks)
     for port, net_p, net_n in RIGHT_PAIRS:
@@ -186,7 +191,7 @@ def write_outputs(rows):
         else:
             pull = 'UP' if port in ('n64_cic_clk', 'n64_cic_dq', 'n64_int_n', 'n64_read_n', 'n64_write_n', 'n64_aleh', 'n64_si_dq',
                                     'efuse_fault_n', 'board_reset_n', 'cart_irq_n') else \
-                   'DOWN' if port in ('n64_reset_n', 'n64_nmi_n', 'n64_alel', 'n64_si_clk', 'usb_pu',
+                   'DOWN' if port in ('n64_reset_n', 'n64_nmi_n', 'n64_alel', 'n64_si_clk',
                                       # lines that nobody drives while a level shifter octet is off: its A-side
                                       # inputs and the FPGA's must not float (TI SCAS416Q, section 3)
                                       'cic_data0_in', 'cic_data1_in', 'cart_reset_n_sense') or port.startswith('cart_data[') else 'NONE'

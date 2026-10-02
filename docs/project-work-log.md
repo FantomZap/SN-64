@@ -546,3 +546,49 @@ Both were carried into the routed board by a script that changes only the copper
 - The cartridge sound input still adds a faint pattern to every game; a gate in the logic is still to do.
 
 What stands between the design and an order is in [board-verification.md](design/board-verification.md).
+
+## 2026-10-02 — the USB loader chip, the port on the player's right, and no USB logic in the FPGA
+
+The morning's board-level run had found that a blank v2 board could not be loaded over USB: the port was logic inside the FPGA, and a blank FPGA has none. Three ways out were put to the owner. His answer: "Add back just the usb loader chip and put the usb on the right side of the cart". Asked whether the FPGA's own USB logic could stay in unused, to save the test runs: "no i want it clean so remove it".
+
+**The loader chip.** An FTDI FT231XS (U13) between the USB-C socket and the FPGA's JTAG port, which works on a blank FPGA. It is wired like the open ULX3S board, so openFPGALoader drives it as it is (`-b ulx3s`) and the chip needs no programming: TCK on DSR#, TMS on DCD#, TDI on RI#, TDO on CTS#. The pin numbers are from FTDI's data sheet, the assignment from the PC program's source and the ULX3S schematic, and the wiring check holds the board to both. The chip is fed from the cable, with its I/O supply and its reset on its own 3.3 V output, as the data sheet draws it; with no cable it has no supply. Six small parts came with it: five capacitors, and the pull-down on TCK that Lattice's guide asks for and the board did not have. Write-up: [usb-loader.md](design/usb-loader.md).
+
+**The FPGA.** The USB device, its two clocks, its share of the flash and the reboot line are gone from the logic, with the TinyFPGA core and the two tools that prepared it. The flash reader is SummerCart64's controller unmodified again. 28,955 LUT4 (30,820 before), 12,966 flip-flops (13,489), 107 pins (111), 4 clocks (6).
+
+**The board.** `apply_usb_loader_v2.py` carried it into the routed board: the socket, its protection part and the VBUS capacitor to the other edge; the loader chip and its parts on the back behind them; the open-drain driver 5 mm toward the middle; R21 and R201 removed; the copper of the four freed FPGA balls removed. KiCadRoutingTools routed the 19 nets that changed with everything else locked. A keep-out now stops tracks under the socket's metal body (the first run had put a JTAG line there). The supply's way from the socket to the input switch is 55 mm, where it was 104 mm. With the room the old USB copper left, the router also finished N64 AD6, which had been open since the first routing. Method and lessons: [pcb-routing.md](design/pcb-routing.md).
+
+**The last open connections.** After that change KiCad's check still listed three open connections and five thermal-relief errors, all older than it, and each connection was needed. `close_open_items_v2.py` closed them the same day. The N64 controller line had been complete all along: the check was reporting a via with no track on it. The supply converter's 3.3 V pin had no copper: 2.4 mm of track. The flash data line D2 sits on a ball in the corner of the FPGA and was boxed in by its two neighbours; the router laid the three together in a few seconds. Five ground pads that had room for one thermal spoke only are joined to the ground area solidly: 2.07 mm of copper against the pad where there was 0.30 mm. The check now lists **no error and no open connection, 217 of 217 signal nets complete**. The pad nets did not change, so the wiring check and the simulated board are the same.
+
+One mistake of mine on the way, caught by the check: the router had ended two tracks inside one via, 0.2 mm apart, so that the via's copper was all that joined them. KiCad calls such a via dangling. My tidy pass removed it and cut the line it had just routed. It happened on a scratch copy; the pass now puts a short track where such a via was, and the rule is in [pcb-routing.md](design/pcb-routing.md): after any tidy pass the count of open connections must not have risen.
+
+**The shell.** The port's recess and opening are on the player's right (`USB_SIDE = -1`); nothing else moved. The board's own 3D file was put into the shell again: nothing touches. Pictures redrawn ([v2-shell.md](design/v2-shell.md)).
+
+**Evidence.**
+
+| Check | Result |
+|---|---|
+| Schematic rule check | 0 errors, 13 warnings (unchanged); 182 parts |
+| Wiring check | 22 of 22; 25 of 25 deliberate mistakes caught, five of them new for the loader chip |
+| Board rule check | no error, no open connection, 217 of 217 signal nets complete; 3,891 tracks, 1,108 vias, 7,938 mm. In the morning: 6 thermal-relief errors and 6 open connections |
+| `evaluate.py --mode sim` | passes: 44 entries, 92 commands |
+| Route and timing | every clock passes: host 101.2 MHz (61.7 needed), SNES master 34.6 MHz (21.5 needed) |
+| Game through the logic, 660 pictures | the same as before the change: all 33 pictures identical file for file, the sound identical byte for byte |
+| The 49 test programs | not run again: the SNES logic under them did not change, and the game run is identical byte for byte |
+| Hello World through the new board, 30 pictures | 173 pixels lit as before; same start-up times; power-off in the right order; nothing missed |
+| Super Mario World through the new board, 240 pictures | Region NTSC by the key chip: 678 rounds through the board's open-drain lines, no mismatch. The game runs 456 ms after Play. The opening screen at picture 100 with 301 pixels lit, as on the board before. 240 pictures, none missed, none fetched twice, no two drivers on the data lines, no loose pins, LED lit. Power-off: `/RESET` low after 2.4 µs, pins let go after 1.0 ms, 5 V below 4.5 V after 2.4 ms, no battery RAM write. 12 of the 12 pictures written are the same, file for file, as the run on the board before the change. |
+| Board with the converter's address pin on ground | refused at 40.5 ms |
+| Board with the socket-to-FPGA byte enabled all the time | refused at 1.0 ms |
+| Cartridge back to front, on the new board | **Refused**: the cartridge check gives up after 4.0 s with the rail at about 464 mV; the 5 V is never switched on. |
+| Boot program | rebuilt for the credits: 163,840 bytes, SHA-256 `2b3f2c8d60d8e8ecf35a0feb066a3c8edfdc4c94ea458da3d3cc2221bb56e461`; host tests 1,065 checks |
+
+The board run is quicker without the USB clocks: Hello World took 279 s where it took 438 s.
+
+**Credits.** The TinyFPGA row is gone with the core. The ULX3S row names the loader chip's wiring. openFPGALoader is among the tools.
+
+**Not known until a board exists:** that a real PC loads a real board through the chip. Neither the chip nor the FPGA's JTAG port is in any simulation here.
+
+**Found and not settled:**
+
+- The rule check still warns, about nothing that is a connection: 225 times about silkscreen text, 199 times about the mask at the N64 edge fingers, which is open across the row on purpose, and about 12 vias and 2 track ends left from the first routing. Removing those 14 on a copy opened nothing, but the stubs behind them have to be shortened, not deleted: one of them carries a line past a junction. For the hand pass.
+- VBUS carries 15.8 µF by the numbers on its capacitors; USB allows a device 10 µF at plug-in. Older than this change; to settle before an order.
+- The four JTAG lines are 85 to 125 mm long. Expected to be fine at the speed the PC drives them; to watch on the first board.

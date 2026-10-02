@@ -1,9 +1,11 @@
 # SN64 v2 board: schematic write-up and rationale
 
-**Status (2026-10-01): draft 0.1 on branch `v2`. One board. Schematic complete (ERC 0 errors), FPGA
+**Status (2026-10-02): draft 0.1 on branch `v2`. One board. Schematic complete (ERC 0 errors), FPGA
 logic simulated and routed with timing met, board refitted to the upright tower shell with the
-socket on its top edge and shortened by 10 mm on 2026-10-01 (213 of 218 signal nets fully connected).
-Not fabrication-ready: see "Open items".**
+socket on its top edge and shortened by 10 mm on 2026-10-01. Since 2026-10-02 the USB-C port is on
+the player's right with a loader chip behind it, and the FPGA has no USB logic of its own
+(217 of 217 signal nets fully connected; KiCad's rule check lists no error and no open
+connection). Not fabrication-ready: see "Open items".**
 
 v1 (`hardware/sn64/`) turned every line of the specification into its own chip: six window
 comparators, a temperature switch, a USB-C controller, three eFuses, a clock synthesiser, two
@@ -15,12 +17,12 @@ layout disappears.
 
 | | v1 | v2 (main + riser) |
 |---|---|---|
-| ICs | 47 | 16 (FPGA, flash, 4 translators, hex driver, ADC, supervisor, USB ESD, mux, buck-boost, 2 bucks, LDO, cart switch) |
-| Resistors | 136 + 13 arrays | 62 |
-| Capacitors | 162 | 79 |
+| ICs | 47 | 17 (FPGA, flash, 4 translators, hex driver, ADC, supervisor, USB loader, USB ESD, mux, buck-boost, 2 bucks, LDO, cart switch) |
+| Resistors | 136 + 13 arrays | 71 and one thermistor |
+| Capacitors | 162 | 80 |
 | Other (inductors, oscillators, crystals, MOSFETs, LEDs, beads) | 22 | 5 (3 inductors, 1 oscillator, 1 LED) |
-| Placed parts | 380 | 176 |
-| FPGA signal balls | 122 over rings 1-5 | 111, all on rings 1-3 |
+| Placed parts | 380 | 182 (counted from the netlist on 2026-10-02, with 3 connectors and 5 test pads) |
+| FPGA signal balls | 122 over rings 1-5 | 107, all on rings 1-3 |
 | FPGA fan-out vias | 326 | 210 |
 | Boards | 2 (main + socket board, 80-pin joint) | 1 |
 
@@ -46,15 +48,17 @@ from 70 to 60 mm, USB-C from 50 to 32.5 mm. The board is now 111 mm wide and 70.
 tongue tip to the top edge.
 
 Layout is the horizontal v2 layout turned 180 degrees: FPGA banks 0/1 face the N64 edge, the
-translator row sits between the FPGA and the socket edge, USB-C on the right edge 32.5 mm above the
-shoulders (the player's left), power lower left.
+translator row sits between the FPGA and the socket edge, power lower left. The USB-C is on the
+board's -X edge, 32.5 mm above the shoulders: the player's right (owner, 2026-10-02; it was on the
++X edge, his left, until then). The loader chip is behind it on the other face
+([usb-loader.md](usb-loader.md)).
 
 ## What moved into the FPGA (LFE5U-85F-8BG381I, the grade in stock)
 
 | Function | v1 parts | v2 | Where |
 |---|---|---|---|
-| Clocks | Si5351A + 25 MHz crystal, 25 MHz and 12.288 MHz oscillators, I2C start-up machine | One 27 MHz oscillator; three PLLs (feedback from CLKOS). Since 2026-10-01 the two game PLLs make twice the SNES master and `sn64_clock_pace` halves it, so the game can be slowed in 0.5 ppm steps for the frame lock ([frame-lock.md](frame-lock.md)): NTSC 42.954545 MHz (27/2 x 5 x 7 / 11), master 21.477273 MHz exact; PAL 42.564706 MHz (27/5 x 2 x 67 / 17), master 21.282353 MHz (+46 ppm against 21.28137; it was -27 ppm with the undoubled setting). 48 / 61.71 / 12 MHz for USB and the host side from one 432 MHz VCO | `fpga/rtl/sn64_board_top.sv` |
-| USB programming and recovery | FT232H, 12 MHz crystal, EEPROM, 3.3 V LDO, 4-bit isolator, second ESD part | Full-speed USB device on two FPGA pins running the TinyFPGA bootloader protocol (`tinyprog` reads, erases, writes the flash and reboots the FPGA); 22 R series, 1.5 k pull-up switched by the FPGA; one ESD part | `fpga/rtl/sn64_usb_prog.sv`, vendor `fpga/vendor/tinyfpga-bootloader` (Apache-2.0) |
+| Clocks | Si5351A + 25 MHz crystal, 25 MHz and 12.288 MHz oscillators, I2C start-up machine | One 27 MHz oscillator; three PLLs (feedback from CLKOS). Since 2026-10-01 the two game PLLs make twice the SNES master and `sn64_clock_pace` halves it, so the game can be slowed in 0.5 ppm steps for the frame lock ([frame-lock.md](frame-lock.md)): NTSC 42.954545 MHz (27/2 x 5 x 7 / 11), master 21.477273 MHz exact; PAL 42.564706 MHz (27/5 x 2 x 67 / 17), master 21.282353 MHz (+46 ppm against 21.28137; it was -27 ppm with the undoubled setting). 61.71 MHz for the host side from a 432 MHz VCO (it also made 48 and 12 MHz for the FPGA's USB device until that went on 2026-10-02) | `fpga/rtl/sn64_board_top.sv` |
+| USB programming and recovery | FT232H, 12 MHz crystal, EEPROM, 3.3 V LDO, 4-bit isolator, second ESD part | **Not in the FPGA since 2026-10-02.** v2 first put a USB device into the FPGA (TinyFPGA protocol on two pins). The board-level run showed that a blank board could then not be loaded over USB, and the owner asked for a loader chip. It is one FT231X on the FPGA's JTAG port: no crystal, no EEPROM, no regulator and no isolator, because its four JTAG pins are inputs until the PC asks for them | [usb-loader.md](usb-loader.md) |
 | Rail and temperature telemetry, USB-C detection | 6 x TPS3700, TPS3808, TMP302, TUSB320, 8 x BSS138, ~45 resistors | TLA2528 8-channel I2C ADC read by the FPGA, thresholds in logic; NTC for temperature; CC1/CC2 read directly (Rd resistors do the Type-C sink job); TPS3808 kept as the pre-configuration reset supervisor | `fpga/rtl/sn64_rail_monitor.sv` |
 | Cartridge audio ADC | PCM1808 + 12.288 MHz oscillator + bead | First-order sigma-delta per channel: LVDS input pair as the comparator, 10 k / 1 nF integrator on a feedback pin, 2048-clock boxcar (~30 kHz, ~10 bits) | `fpga/rtl/sn64_sd_adc.sv` |
 | Power sequencing and priority | MOSFET level shifters, eFuse enable logic | FPGA drives the cartridge switch enable; the input mux has its own priority logic | `sn64_power_sequencer.sv` (unchanged) |
@@ -74,7 +78,12 @@ shoulders (the player's left), power lower left.
   and carried an EXPAND sense that nothing read
   ([board-verification.md](board-verification.md)); EXPAND keeps its pull-up.
 - **SN74LVC07A hex open-drain driver** at 3.3 V with 5 V pull-ups for the lines the FPGA only ever
-  pulls low: PROGRAMN (reboot after a USB update), SNES_CIC_DATA0/1, SNES_RESET_N.
+  pulls low: SNES_CIC_DATA0/1 and SNES_RESET_N. Its fourth gate pulled PROGRAMN for the FPGA's own
+  USB device; that gate is tied off since 2026-10-02 (a gate left on PROGRAMN with its input low
+  would keep the FPGA from ever loading: the wiring check has a rule for it).
+- **USB loader chip** FT231XS with two 27 ohm resistors, two 47 pF and three 100 nF capacitors, as
+  FTDI's data sheet draws it and as the ULX3S board has it. It is fed from the cable, so it has no
+  supply at all while the board runs in a console ([usb-loader.md](usb-loader.md)).
 - **Power**: TPS2121 mux (USB has priority above 4.0 V, host 3.3 V otherwise, 2.5 A limit),
   TPS63070 buck-boost to 5 V (v1 values), TLV62569 bucks for 3.3 V and 1.1 V (v1 values), AP2112K
   LDO for 2.5 V (about 20 mW traded for an inductor and three parts), TPS2553 cartridge switch
@@ -98,26 +107,26 @@ shoulders (the player's left), power lower left.
 | Pin plan | `hardware/sn64-v2/tools/pin_plan.py` -> `interfaces/fpga-pin-map.csv`, `fpga/constraints/sn64_board.lpf` |
 | Sheets | `sn64-v2.kicad_sch` (root), `fpga.kicad_sch`, `cart.kicad_sch`, `power.kicad_sch` |
 | Libraries | `libraries/SN64_V2.kicad_sym` (TPS2121, TLA2528, TPS2553 drawn from the TI pin tables), `libraries/SN64_V2.pretty` (straddle socket footprint from `tools/make_socket_footprint.py`), `libraries/3d/` (socket model from `tools/socket_3d_model.py`), v1 libraries reused unchanged; `libraries/v2-provenance.json` |
-| Boards | `build_v2_pcb.py` (placement), `prepare_route_v2.py` (fan-out, planes), `apply_netclasses_v2.py`, `finish_route_v2.py`, `add_plane_vias_v2.py`, `refit_tower_v2.py` (tower refit), `apply_enable_fix_v2.py` (the schematic change of 2026-10-02 carried into the routed board), `report_board_v2.py` (DRC summary); router KiCadRoutingTools (see `docs/design/pcb-routing.md`) |
-| Checks | `validation/erc.json` (0 errors, 13 warnings: unused translator pins tied to ground), `validation/*.xml` netlists, `validation/pcb-drc.json`; `export_board_nets.py` then `verify_board_wiring.py` (21 checks, `--negative` 20 deliberate mistakes; [board-verification.md](board-verification.md)) and `make_board_sim.py` (the board as a simulation netlist; [board-simulation.md](board-simulation.md)) |
-| FPGA | `fpga/tools/evaluate.py --mode sim` (all benches pass, new `tb_sd_adc`); `fpga/tools/route_top.py --top board --speed 8` routes with every clock passing timing (`fpga/reports/v2-board-route.json`, rerun 2026-10-01 with the cartridge check: 30.2k LUT4, 203/208 block RAMs, 111 I/O) |
+| Boards | `build_v2_pcb.py` (placement), `prepare_route_v2.py` (fan-out, planes), `apply_netclasses_v2.py`, `finish_route_v2.py`, `add_plane_vias_v2.py`, `refit_tower_v2.py` (tower refit), `apply_enable_fix_v2.py` and `apply_usb_loader_v2.py` (the two schematic changes of 2026-10-02 carried into the routed board), `close_open_items_v2.py` (the last three open connections and five thermal-relief errors, the same day), `report_board_v2.py` (DRC summary); router KiCadRoutingTools (see `docs/design/pcb-routing.md`) |
+| Checks | `validation/erc.json` (0 errors, 13 warnings: unused translator pins tied to ground), `validation/*.xml` netlists, `validation/pcb-drc.json`; `export_board_nets.py` then `verify_board_wiring.py` (22 checks, `--negative` 25 deliberate mistakes; [board-verification.md](board-verification.md)) and `make_board_sim.py` (the board as a simulation netlist; [board-simulation.md](board-simulation.md)) |
+| FPGA | `fpga/tools/evaluate.py --mode sim` (all benches pass, new `tb_sd_adc`); `fpga/tools/route_top.py --top board --speed 8` routes with every clock passing timing (`fpga/reports/v2-board-route.json`, rerun 2026-10-02 without the USB logic: 29.0k LUT4, 203/208 block RAMs, 107 I/O) |
 
 ## Provisional values (to confirm at review or bring-up)
 
 TPS2553 RILIM 24.9 k (1.04 A nominal, 0.96 to 1.12 A by the SLVS841F equations; the choice of limit is provisional); TPS2121 CSS 1 nF; decoupling counts; sigma-delta RC 10 k / 1 nF;
 NTC part and its threshold; TLA2528 register map (SBAS961A, manual mode; its I2C address 0x10 is
 the sheet's value for the ADDR pin left open, as the board now has it); TLA2528
-footprint exposed-pad size; USB pull-up switched only after PLL lock.
+footprint exposed-pad size.
 
 ## Open items
 
-- Routing after the refit to the shorter shell and the change of 2026-10-02: 213 of 218 signal nets fully connected, 6 unconnected items (FLASH_D2, FPGA_3V3 at the converter's supply pin, N64_AD6, N64_JOYBUS, USB_DP_F, USB_PU); DRC errors: 6 starved_thermal. Remaining items are listed in `validation/pcb-open-connections.json` for hand routing in KiCad. **Each of the six is needed for the board to work; none may be left.**
-- The first load of a blank board (2026-10-02): the USB port is part of the FPGA's logic, so a board with an empty flash cannot be loaded over USB. The ways in are the five JTAG pads or a flash programmed before assembly. The specification asks for blank-target loading over USB; the owner has to decide ([board-verification.md](board-verification.md), "The first load").
+- Routing after the changes of 2026-10-02: 3,891 tracks, 1,108 vias, 7,938 mm; 217 of 217 signal nets fully connected; KiCad's rule check lists no error and no open connection (`validation/pcb-open-connections.json`). After the loader-chip change three connections were still open (FLASH_D2, FPGA_3V3 at the converter's supply pin, N64_JOYBUS) and five ground pads had a single thermal spoke; `tools/close_open_items_v2.py` closed them the same day ([pcb-routing.md](pcb-routing.md)). Of the six open connections of the morning, two ended with the FPGA's USB pins and N64_AD6 was routed once their copper was gone. Still to tidy, none of it a connection: 225 silkscreen warnings (text over pads and over other text), 199 solder-mask warnings that are all at the N64 edge fingers, where the mask is open across the whole row on purpose, and 14 leftovers of the first routing.
+- The first load of a blank board: settled on 2026-10-02 with the loader chip ([usb-loader.md](usb-loader.md)). It has not been tried on hardware.
 - Shell: envelope model only (`docs/design/v2-shell.md`, `mechanical/sn64-v2-shell/`): upright tower, socket ears screwed to brackets in the shell. The board was refitted to it on 2026-09-30 (socket on the top edge, outline widened for the USB-C, USB-C above the console's top) and to the 10 mm shorter shell on 2026-10-01 (top edge at 60 mm, USB-C at 32.5 mm).
 - Mounting holes (2026-10-01): H1, H2, H5 and H6 are 4.0 mm (KiCad `MountingHole_4mm`, set by `tools/set_mounting_holes_v2.py`) because the shell's screw posts pass through the board there; H3 and H4 stay 2.5 mm for the shell's two registration pins, which sit at different heights so the board cannot go in back to front. No copper is within 4.5 mm of the four larger holes; the checks are unchanged (6 starved thermals, 6 open items).
 - Cartridge check (2026-10-01): before the cartridge's 5 V is switched on, the FPGA uses the telemetry ADC's channel 3 as an output so that R30 feeds 0.165 mA into the rail, and reads the rail back; a cartridge that is in back to front holds it at about half a volt ([reversed-cartridge-detection.md](reversed-cartridge-detection.md)). No part, pin or trace was added. Simulated only. To do on a real board: measure real cartridges both ways round in check-only mode and set the threshold; if the gap is thin, lower R30 and R31 together for more test current.
 - PCBWay: annular ring (6 mil) and spacing (5 mil) against the 0.125 / 0.1 mm rules, as in v1.
 - Four-layer trial: with 210 fan-out vias and signals on the outer rings a four-layer stack may
   route; not tried yet.
-- USB flash access blocks the boot-ROM window while a transfer runs: update from the boot menu or
-  with the console off.
+- A load over USB empties the FPGA while it runs, so a console that is on loses the cartridge:
+  load with the console off.

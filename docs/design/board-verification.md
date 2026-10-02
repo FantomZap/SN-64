@@ -1,6 +1,6 @@
 # Is the v2 board right? What has been checked, and what has not
 
-**Status (2026-10-02): not ready to order. The wiring is traced and passes, and a real game runs through a model of the board. Reading the makers' data sheets found two wiring mistakes, both corrected. The layout is unfinished, the socket footprint has not met a real socket, and the first load of a blank board is undecided.**
+**Status (2026-10-02): not ready to order. The wiring is traced and passes, and a real game runs through a model of the board. Reading the makers' data sheets found two wiring mistakes, both corrected. A blank board can now be loaded over USB through a loader chip on the board; that way in has not met hardware. KiCad's rule check of the copper lists no error and no open connection since the same day. The socket footprint has not met a real socket.**
 
 The owner's question: can the board be ordered without it turning out a paperweight? This note keeps the answer in one place. It lists every kind of mistake that would ruin a board, what checks it, and how far that check has got. "Passed" below always means the named check on the PC, never a test on hardware.
 
@@ -8,30 +8,30 @@ The owner's question: can the board be ordered without it turning out a paperwei
 
 | | After the board is made |
 |---|---|
-| The FPGA's logic | Can be corrected: it is loaded through the USB port. The faults found by the game runs were of this kind. |
+| The FPGA's logic | Can be corrected: it is loaded through the USB port, also when the board is blank. The faults found by the game runs were of this kind. |
 | Which pin goes where, the parts, the copper, the connectors' shape and position | Cannot. These are what the checks below are for. |
 | The FPGA's configuration pins, the flash, the supplies, the JTAG pads | Cannot, and nothing else can be corrected without them: they are the way in. |
-| The USB port | Its wiring cannot. And on this board the USB port only works once the FPGA has been loaded: see "The first load" below. |
+| The USB port and its loader chip | Their wiring cannot. Since 2026-10-02 the port no longer depends on the FPGA's logic: see "The first load" below. |
 
 ## The checks
 
 | Mistake that would ruin a board | Check | State |
 |---|---|---|
-| A signal on the wrong FPGA ball, level-shifter pin, socket pin or edge finger | [verify_board_wiring.py](../../hardware/sn64-v2/tools/verify_board_wiring.py): traces every port from its ball through the level shifter to the connector pin, in the board file itself | **21 of 21 pass; 20 of 20 deliberate mistakes caught** |
+| A signal on the wrong FPGA ball, level-shifter pin, socket pin or edge finger | [verify_board_wiring.py](../../hardware/sn64-v2/tools/verify_board_wiring.py): traces every port from its ball through the level shifter to the connector pin, in the board file itself | **22 of 22 pass; 25 of 25 deliberate mistakes caught** |
 | The same, with everything working together | [board-simulation.md](board-simulation.md): the owner's game through a model of the board made from the board file, cartridge and N64 plugged in by pin number | **a game boots and plays; two deliberately mis-wired boards are refused** |
 | A level-shifter byte pointing the wrong way, or enabled when it must not be | both of the above | pass, after the correction of 2026-10-02 |
-| Board and schematic disagree | wiring check: every pad's net compared with the schematic's list | pass (177 parts) |
+| Board and schematic disagree | wiring check: every pad's net compared with the schematic's list | pass (182 parts) |
 | FPGA supply, ground, configuration, clock balls wrong | wiring check, against Lattice's pin-out table | pass |
-| A part's pin numbers differ from its maker's sheet | each sheet read again, pin by pin, against the board | **done from the makers' sheets for 11 kinds of part and from the supplier's data for one; all agree** (table below). One small part not re-read |
+| A part's pin numbers differ from its maker's sheet | each sheet read again, pin by pin, against the board | **done from the makers' sheets for 12 kinds of part and from the supplier's data for one; all agree** (table below). One small part not re-read |
 | A part is wired against a rule of its sheet | the same reading | **two found, both corrected** (below) |
-| Copper does not join what it should, or joins what it should not | KiCad's design-rule check | **6 connections still not routed, 6 thermal-relief errors** (`validation/pcb-open-connections.json`) |
+| Copper does not join what it should, or joins what it should not | KiCad's design-rule check | **pass since 2026-10-02: no error, no open connection, 217 of 217 signal nets complete** (`validation/pcb-open-connections.json`). The last three connections and the five thermal-relief errors: [pcb-routing.md](pcb-routing.md) |
 | The logic does not run a game | [game-simulation.md](game-simulation.md) | a real game boots and plays; 38 of 38 judged test programs pass; three faults found and corrected |
-| The logic is too slow for the chip | route and timing check of the whole design on the board's pins | pass with the final logic: every clock, SNES master 36.6 MHz against 21.5 needed |
+| The logic is too slow for the chip | route and timing check of the whole design on the board's pins | pass with the final logic: every clock, SNES master 34.6 MHz against 21.5 needed |
 | A footprint does not fit its part | KiCad library footprints for standard packages; own footprints for the socket, the N64 edge, the USB-C, the buck-boost and an inductor | **not re-checked for v2** |
 | The cartridge socket's pads do not meet a real socket's tails | none possible on the PC | **open: no socket has been measured** |
 | The socket or the N64 edge is mirrored or back to front | orientation reasoned from the SNESdev and N64brew pin-outs and SummerCart64's board (2026-09-30); the wiring check and the board run catch a mirrored net list but not a mirrored footprint. Looked at again on 2026-10-02: the board file has socket pins 1 to 31 and edge pins 1 to 25 on the face towards the player, both with pin 1 at the player's left. The SNESdev page says in so many words that pins 01 to 31 are the row nearest the console's front, drawn from the console's right side, which puts pin 1 at the left: the socket agrees. The N64brew page gives the edge's pin table but not its orientation; the edge is SummerCart64's own footprint, the same way round in SummerCart64's own shell | **socket: confirmed from the source a second time. N64 edge: by construction only; a second source is still to find** |
 | A supply gives the wrong voltage or cannot carry the load | divider values recomputed (5.0, 3.3, 1.1 V; reset threshold 3.03 V); budget from the console's 3.3 V | **budget review still to do** |
-| A blank board cannot be loaded | see "The first load" | **open: the owner's decision** |
+| A blank board cannot be loaded | a loader chip between the USB-C socket and the FPGA's JTAG port ([usb-loader.md](usb-loader.md)); the wiring check follows it pin by pin, with the pin numbers from the chip's data sheet and from the source of the PC program | **wired and checked on the PC; not tried on a board** |
 | The board breaks PCBWay's rules | the board's own rules are 0.1 mm spacing, 0.125 mm ring; PCBWay's are to be confirmed with the quote | open |
 
 ## What the makers' data sheets said
@@ -52,6 +52,7 @@ Read on 2026-10-02 from each maker's own sheet, pin by pin, against the pads of 
 | 27 MHz oscillator (X1) | pin names from the supplier's part data (LCSC C3003262) | yes | the maker's own sheet has not been read |
 | LFE5U-85F FPGA (U1) | Lattice pin-out table | yes (wiring check) | |
 | AP2112K-2.5 regulator (U11) | Diodes DS39724 rev. 2-2 | yes | |
+| FT231XS loader chip (U13) | FTDI FT_000565 version 1.2 (read from the supplier's copy; FTDI's site did not answer) | yes, all 20 | Figure 6.1: fed from the cable, with VCCIO and RESET# on its own 3.3 V output. The four pins used for JTAG are inputs until the PC switches the chip to bit-bang mode |
 | USBLC6-2SC6 protection (U4) | not re-read: the maker's site did not answer; KiCad's library symbol | | **open** |
 
 ### The two mistakes, and what was done
@@ -76,36 +77,41 @@ Both changes were carried into the routed board by [apply_enable_fix_v2.py](../.
 
 It reads three things that are made independently of one another: the board file (which pad is on which net), the FPGA constraints (which port is on which ball), and the two connector tables that v1 drew from other people's working boards (OpenSFC, sd2snes and the Sanni reader for the SNES socket; SummerCart64 and ModRetro's schematics for the N64 edge). A port passes when its ball's net reaches the connector pin that carries that signal on a real console, through a level-shifter channel that points the right way and is switched by the right port.
 
-- 43 outputs to the cartridge, D0 to D7 both ways, 4 inputs from it, 3 open-drain pulls and PROGRAMN.
+- 43 outputs to the cartridge, D0 to D7 both ways, 4 inputs from it, 3 open-drain pulls; unused open-drain gates tied off, and none on PROGRAMN.
 - Every level-shifter enable driven by the FPGA and pulled up; no pin that can float for long left open.
 - 27 signals on the N64 edge, its supply fingers and the unused 12 V fingers.
-- The flash on the configuration balls, the mode pins, the clock, the reset supervisor, the USB pins and their resistors, the cartridge sound input.
+- The flash on the configuration balls, the mode pins, the clock, the reset supervisor, the cartridge sound input.
+- USB: D+ and D− through their resistors to the loader chip and to nothing else, the chip's supply pins as its data sheet draws them.
+- JTAG: the loader chip's four pins on the FPGA's JTAG balls in the order the PC program drives them, the pulls on the four lines, and nothing else on them.
 - The supply converter: address pin, I2C lines, supplies, and the cartridge supply on the input the cartridge check uses.
 - Every supply and ground ball of the FPGA.
 
-`--negative` makes 20 deliberate mistakes one at a time, among them the socket's rows exchanged, the socket mirrored, a byte pointing the wrong way, a byte enabled all the time, the converter's address pin on ground and two ports exchanged in the constraints. Each is caught.
+`--negative` makes 25 deliberate mistakes one at a time, among them the socket's rows exchanged, the socket mirrored, a byte pointing the wrong way, a byte enabled all the time, the converter's address pin on ground, two ports exchanged in the constraints, two JTAG lines swapped at the loader chip and the loader chip's I/O supply on the wrong rail. Each is caught.
 
 It says nothing about voltages, timing, footprints or whether the logic works.
 
 ## The first load
 
-On the v2 board the USB port is part of the FPGA's logic. A board that comes from the factory with an empty flash has no logic, so its USB port does nothing. The first load has to come another way:
+**Settled on 2026-10-02.** Until then the USB port was part of the FPGA's logic. A board that comes from the factory with an empty flash has no logic, so its USB port did nothing, and the first load would have had to come another way. The board-level run brought this to light. The three ways that were put to the owner:
 
-| Way | What it needs |
-|---|---|
-| PCBWay programs the flash chip before it is soldered | their programming service, and a file from us |
-| The five JTAG pads on the board | a JTAG adapter and five wires or spring pins |
-| A USB-to-JTAG chip on the board, as v1 had | a chip and its parts added back; the owner's decision |
+| Way | What it needs | |
+|---|---|---|
+| PCBWay programs the flash chip before it is soldered | their programming service, and a file from us | not chosen |
+| The five JTAG pads on the board | a JTAG adapter and five wires or spring pins | kept as a second way in |
+| A USB-to-JTAG chip on the board | a chip and its few parts | **chosen**: "Add back just the usb loader chip" |
 
-After a first load, updates go over USB. If an update ever breaks the USB part of the logic, the way back is the JTAG pads again. The specification asks for loading a blank board over USB; v2 as drawn does not do that. This is the owner's decision and is open.
+The chip is an FTDI FT231X between the USB-C socket and the FPGA's JTAG port, wired like the open ULX3S board so that openFPGALoader drives it as it is ([usb-loader.md](usb-loader.md)). It loads a blank board, every later update, and a board whose image has gone bad. The FPGA's own USB logic was taken out at the owner's word ("i want it clean so remove it").
+
+What is not known until a board exists: that a real PC loads a real board this way. Neither the chip nor the JTAG port is in any simulation here.
 
 ## Still open before an order
 
 | What | Who |
 |---|---|
-| Finish the six connections that are not routed: the converter's supply pin, a flash data line, USB D+ and its pull-up, N64 AD6 and the N64 controller line. And the six thermal-relief errors | Claude |
+| The rule check's warnings, none of which changes what is connected: 225 silkscreen warnings (text over pads and over other text), 199 solder-mask warnings that are all at the N64 edge fingers, where the mask is open across the whole row on purpose, and 14 leftovers of the first routing (12 vias and 2 track ends that lead nowhere; [pcb-routing.md](pcb-routing.md) says why they are still there) | Claude |
 | Measure a real cartridge socket against the footprint | the owner: a socket sample is needed |
-| The first load of a blank board | the owner |
+| Load a board over USB for the first time: the loader chip has not met hardware | the first board |
+| VBUS carries 15.8 µF by the parts' numbers; USB allows a device 10 µF at plug-in ([usb-loader.md](usb-loader.md)) | Claude |
 | Footprints of the own-drawn parts against their makers' drawings | Claude |
 | Socket and N64 edge orientation, a second time from the sources | Claude |
 | Power budget from the console's 3.3 V | Claude |
@@ -114,6 +120,8 @@ After a first load, updates go over USB. If an update ever breaks the USB part o
 | Sound: the cartridge sound input adds a faint pattern to every game ([game-simulation.md](game-simulation.md)); a matter of the logic | Claude |
 
 ## Found on the way, and settled
+
+- **A blank board could not be loaded over USB** (found by the board-level run, 2026-10-02). Settled the same day by the owner: a loader chip on the board, and the USB-C port on the player's right ([usb-loader.md](usb-loader.md)).
 
 - **The status LED** lights when its FPGA pin is low; the logic drove it high in a game. Corrected in the logic on 2026-10-02; the board run checks that it is lit in a game.
 - **The cartridge's control lines have no pull resistors on the 5 V side.** The logic now drives them at rest whenever the cartridge has its 5 V, and holds `/RESET` low for 1 ms before it lets them go at power-off ([board-simulation.md](board-simulation.md)). While the cartridge is off, neither it nor that side of the level shifters has a supply.

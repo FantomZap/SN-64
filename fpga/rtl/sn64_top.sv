@@ -55,9 +55,7 @@ module sn64_top #(
     output wire        flash_cs_n,                 // CSSPIN
     inout  wire [3:0]  flash_dq,                   // MOSI/D0, MISO/D1, D2/WP#, D3/HOLD#
 
-    // ---------------- Si5351 I2C and SNES clock control ----------------
-    input  wire        ext_spi_sel_req, ext_spi_sck, ext_spi_cs_n, ext_spi_mosi,   // v2 USB programmer
-    output wire        ext_spi_miso, ext_spi_active,
+    // ---------------- Clocks ready, telemetry health and SNES clock control ----------------
     input  wire        pll_locked,                 // board: every PLL locked (v2: no external clock chip)
     input  wire        monitor_error,              // board: telemetry ADC not answering
     output reg         snes_clk_run,               // board: start the SNES master clock domain
@@ -126,8 +124,6 @@ module sn64_top #(
         .n64_pi_ad(n64_ad),
         .rom_we(rom_we), .rom_waddr(rom_waddr), .rom_wdata(rom_wdata),
         .flash_sck(flash_sck), .flash_cs_n(flash_cs_n), .flash_dq(flash_dq),
-        .ext_spi_sel_req(ext_spi_sel_req), .ext_spi_sck(ext_spi_sck), .ext_spi_cs_n(ext_spi_cs_n), .ext_spi_mosi(ext_spi_mosi),
-        .ext_spi_miso(ext_spi_miso), .ext_spi_active(ext_spi_active),
         .joy1_buttons(joy1_h), .joy2_buttons(joy2_h), .joy1_stick_x(stick_x_h), .joy1_stick_y(stick_y_h),
         .run_request(run_req_h), .soft_reset(soft_reset_h), .region_mode(region_mode_h), .mailbox_seq(seq_h),
         .cart_check_mode(check_mode_h), .cart_check(cart_check_h), .pace_rate(snes_pace),

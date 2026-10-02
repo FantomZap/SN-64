@@ -1,7 +1,7 @@
 {
     "$schema": "https://schemas.kicad.org/erc.v1.json",
     "coordinate_units": "mm",
-    "date": "2026-10-02T00:18:19",
+    "date": "2026-10-02T10:09:09",
     "ignored_checks": [
         {
             "description": "Global label only appears once in the schematic",
@@ -56,7 +56,7 @@
                             "description": "Symbol #FLG1 Pin 1 [Power output, Line]",
                             "pos": {
                                 "x": 0.2794,
-                                "y": 5.3213
+                                "y": 4.9276
                             },
                             "uuid": "38f2208a-5feb-5a1d-a1fa-55845df48d4a"
                         }
@@ -79,7 +79,7 @@
                             "description": "Symbol #FLG1 Pin 1 [Power output, Line]",
                             "pos": {
                                 "x": 0.2794,
-                                "y": 5.3213
+                                "y": 4.9276
                             },
                             "uuid": "38f2208a-5feb-5a1d-a1fa-55845df48d4a"
                         }
@@ -102,7 +102,7 @@
                             "description": "Symbol #FLG1 Pin 1 [Power output, Line]",
                             "pos": {
                                 "x": 0.2794,
-                                "y": 5.3213
+                                "y": 4.9276
                             },
                             "uuid": "38f2208a-5feb-5a1d-a1fa-55845df48d4a"
                         }
@@ -125,7 +125,7 @@
                             "description": "Symbol #FLG1 Pin 1 [Power output, Line]",
                             "pos": {
                                 "x": 0.2794,
-                                "y": 5.3213
+                                "y": 4.9276
                             },
                             "uuid": "38f2208a-5feb-5a1d-a1fa-55845df48d4a"
                         }
@@ -148,7 +148,7 @@
                             "description": "Symbol #FLG1 Pin 1 [Power output, Line]",
                             "pos": {
                                 "x": 0.2794,
-                                "y": 5.3213
+                                "y": 4.9276
                             },
                             "uuid": "38f2208a-5feb-5a1d-a1fa-55845df48d4a"
                         }
@@ -171,7 +171,7 @@
                             "description": "Symbol #FLG1 Pin 1 [Power output, Line]",
                             "pos": {
                                 "x": 0.2794,
-                                "y": 5.3213
+                                "y": 4.9276
                             },
                             "uuid": "38f2208a-5feb-5a1d-a1fa-55845df48d4a"
                         }
@@ -194,7 +194,7 @@
                             "description": "Symbol #FLG1 Pin 1 [Power output, Line]",
                             "pos": {
                                 "x": 0.2794,
-                                "y": 5.3213
+                                "y": 4.9276
                             },
                             "uuid": "38f2208a-5feb-5a1d-a1fa-55845df48d4a"
                         }
@@ -217,7 +217,7 @@
                             "description": "Symbol #FLG1 Pin 1 [Power output, Line]",
                             "pos": {
                                 "x": 0.2794,
-                                "y": 5.3213
+                                "y": 4.9276
                             },
                             "uuid": "38f2208a-5feb-5a1d-a1fa-55845df48d4a"
                         }
@@ -240,7 +240,7 @@
                             "description": "Symbol #FLG1 Pin 1 [Power output, Line]",
                             "pos": {
                                 "x": 0.2794,
-                                "y": 5.3213
+                                "y": 4.9276
                             },
                             "uuid": "38f2208a-5feb-5a1d-a1fa-55845df48d4a"
                         }
@@ -263,7 +263,7 @@
                             "description": "Symbol #FLG1 Pin 1 [Power output, Line]",
                             "pos": {
                                 "x": 0.2794,
-                                "y": 5.3213
+                                "y": 4.9276
                             },
                             "uuid": "38f2208a-5feb-5a1d-a1fa-55845df48d4a"
                         }
@@ -286,7 +286,7 @@
                             "description": "Symbol #FLG1 Pin 1 [Power output, Line]",
                             "pos": {
                                 "x": 0.2794,
-                                "y": 5.3213
+                                "y": 4.9276
                             },
                             "uuid": "38f2208a-5feb-5a1d-a1fa-55845df48d4a"
                         }
@@ -309,7 +309,7 @@
                             "description": "Symbol #FLG1 Pin 1 [Power output, Line]",
                             "pos": {
                                 "x": 0.2794,
-                                "y": 5.3213
+                                "y": 4.9276
                             },
                             "uuid": "38f2208a-5feb-5a1d-a1fa-55845df48d4a"
                         }
@@ -332,7 +332,7 @@
                             "description": "Symbol #FLG1 Pin 1 [Power output, Line]",
                             "pos": {
                                 "x": 0.2794,
-                                "y": 5.3213
+                                "y": 4.9276
                             },
                             "uuid": "38f2208a-5feb-5a1d-a1fa-55845df48d4a"
                         }

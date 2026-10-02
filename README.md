@@ -12,7 +12,7 @@ Independent static checks on the integrated schematic: ERC 0 errors; 30 interfac
 
 Every target in the original specification remains in scope, including PAL, protection, save integrity, telemetry, independent recovery, factory testing, and the additional requirements. The SNES picture and sound go to the console over the cartridge bus and appear on the console's own output (M64 HDMI, N64 AV jack); the adapter has no video output of its own. M64's reserved contacts stay isolated.
 
-**v2 (branch `v2`, 2026-09-30):** a second board set that keeps every specification target and moves the USB device, clock generation, cartridge-audio ADC and rail telemetry into the FPGA, with a passive N64 riser carrying only the bus. 177 parts on the main board against 380, 16 chips against 47, FPGA signals on the outer three ball rings. Generated schematic (ERC 0 errors), simulated logic, scripted placement and autorouting. See [v2 board write-up](docs/design/v2-board.md); not fabrication-ready.
+**v2 (branch `v2`, 2026-09-30):** a second board set that keeps every specification target and moves the clock generation, cartridge-audio ADC and rail telemetry into the FPGA, on one board that stands in the console's slot. 182 parts against 380, 17 chips against 47, FPGA signals on the outer three ball rings. The USB-C port is on the player's right and loads the board, blank or not, through a small loader chip on the FPGA's JTAG port ([USB loader](docs/design/usb-loader.md), 2026-10-02). Generated schematic (ERC 0 errors), simulated logic, scripted placement and autorouting. See [v2 board write-up](docs/design/v2-board.md); not fabrication-ready.
 
 ## Documents
 
@@ -43,6 +43,7 @@ Every target in the original specification remains in scope, including PAL, prot
 - [A real game through the simulated SN64](docs/design/game-simulation.md)
 - [A game through the board's own wiring](docs/design/board-simulation.md)
 - [Is the v2 board right? What has been checked, and what has not](docs/design/board-verification.md)
+- [The USB loader chip: how a blank board gets its first load](docs/design/usb-loader.md)
 - [Cartridge interface schematic sheet](docs/design/cart-interface-schematic.md)
 - [FPGA schematic sheet and board pinout](docs/design/fpga-schematic.md)
 - [Power schematic sheet](docs/design/power-schematic.md)

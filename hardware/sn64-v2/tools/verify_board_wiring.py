@@ -49,6 +49,15 @@ FLASH = {'cs': '1', 'd1': '2', 'd2': '3', 'gnd': '4', 'd0': '5', 'clk': '6', 'd3
 # ECP5 CABGA381 configuration balls (Lattice pin-out CSV, bank 8) and what must hang on them.
 CONFIG_BALLS = {'cclk': 'U3', 'csspin': 'R2', 'd0': 'W2', 'd1': 'V2', 'd2': 'Y2', 'd3': 'W1',
                 'done': 'Y3', 'initn': 'V3', 'programn': 'W3', 'cfg0': 'U4', 'cfg1': 'T4', 'cfg2': 'R4'}
+JTAG_BALLS = {'tck': 'T5', 'tms': 'U5', 'tdi': 'R5', 'tdo': 'V4'}
+# FT231XS (FTDI FT_000565 v1.2, table 3.5 and 3.6), SSOP-20: the USB loader chip.
+FT231X = {'dtr': '1', 'rts': '2', 'vccio': '3', 'rxd': '4', 'ri': '5', 'dsr': '7', 'dcd': '8', 'cts': '9',
+          'usbdp': '11', 'usbdm': '12', '3v3out': '13', 'reset': '14', 'vcc': '15', 'txd': '20'}
+FT231X_GND, FT231X_CBUS = ['6', '16'], ['18', '17', '10', '19']
+# The pins openFPGALoader moves for its board entry "ulx3s" (src/board.hpp at commit 676e53ec:
+# JTAG_BITBANG_BOARD("ulx3s", "", "ft231X", ..., FT232RL_DCD, FT232RL_DSR, FT232RL_RI, FT232RL_CTS, ...)
+# in the order TMS, TCK, TDI, TDO). The ULX3S schematic (emard/ulx3s usb.sch, commit 6a92cec6) agrees.
+LOADER_JTAG = {'tms': 'dcd', 'tck': 'dsr', 'tdi': 'ri', 'tdo': 'cts'}
 
 # ---- what each FPGA port has to reach --------------------------------------------------------
 SNES_OUT = ([('cart_address[%d]' % i, 'A%d' % i, 'ctl_oe_n') for i in range(24)] +
@@ -317,14 +326,24 @@ def run_checks(b, snes, n64, schematic, lattice):
             bad.append('%s: %s has no pull-up to the cartridge 5 V' % (port, out))
         if not any(o == v33 for _, _, o in b.two_pin(net, 'R')):
             bad.append('%s: its driver input %s has no pull-up, so it would pull while the FPGA is not configured' % (port, net))
-    net = b.port_net('programn_od')
-    ins = [(r, p) for r, p in b.on(net) if r in od and p in LVC07]
-    if len(ins) != 1 or b.net(ins[0][0], LVC07[ins[0][1]]) != b.net('U1', CONFIG_BALLS['programn']):
-        bad.append('programn_od does not reach the PROGRAMN ball through an open-drain buffer')
+    driven = {b.port_net(port) for port, _ in SNES_PULL}
+    programn = b.net('U1', CONFIG_BALLS['programn'])
     for r in od:
         if b.net(r, '14') != v33 or b.net(r, '7') != gnd:
             bad.append('%s supply pins: %s / %s' % (r, b.net(r, '14'), b.net(r, '7')))
-    check('the open-drain pulls (CIC data, /RESET, PROGRAMN) go through the SN74LVC07A to the right pins, with pull-ups', not bad, '; '.join(bad[:6]))
+        for i, o in LVC07.items():
+            if b.net(r, i) in driven:
+                continue
+            # a gate the logic does not drive: input tied, output on nothing. On PROGRAMN it would hold
+            # the FPGA unconfigured for ever (the gate that pulled PROGRAMN went with the FPGA's USB part).
+            if b.net(r, i) not in (gnd, v33):
+                bad.append('%s pin %s: input of an unused gate on %s' % (r, i, b.net(r, i)))
+            if not b.open(r, o):
+                bad.append('%s pin %s: output of an unused gate on %s' % (r, o, b.net(r, o)))
+    if any(r in od for r, _ in b.on(programn)):
+        bad.append('an open-drain gate is on the PROGRAMN ball')
+    check('the open-drain pulls (CIC data, /RESET) go through the SN74LVC07A to the right pins, with pull-ups; '
+          'unused gates are tied off and none is on PROGRAMN', not bad, '; '.join(bad[:6]))
 
     # 6. Level-shifter supplies.
     bad = []
@@ -394,28 +413,76 @@ def run_checks(b, snes, n64, schematic, lattice):
           len(osc) == 1 and b.net(osc[0], '3') == b.port_net('osc_27') and len(sup) == 1 and b.net(sup[0], '1') == b.port_net('board_reset_n'),
           '%s %s' % (osc, sup))
 
-    # 11. USB.
+    # 11. USB: the connector's data lines go to the loader chip and nowhere else.
     bad = []
     usb = sorted(r for r, comp in b.c.items() if r.startswith('J') and r not in ('J1', 'J2'))
-    if len(usb) != 1:
-        bad.append('USB connectors: %s' % usb)
+    ft = sorted(r for r, comp in b.c.items() if 'FT231X' in comp['value'])
+    if len(usb) != 1 or len(ft) != 1:
+        bad.append('USB connectors: %s, loader chips: %s' % (usb, ft))
     else:
-        j = usb[0]
+        j, u = usb[0], ft[0]
         dp, dn = {b.net(j, 'A6'), b.net(j, 'B6')}, {b.net(j, 'A7'), b.net(j, 'B7')}
-        if len(dp) != 1 or len(dn) != 1 or dp == dn:
-            bad.append('D+ %s D- %s' % (dp, dn))
+        vbus = {b.net(j, x) for x in ('A4', 'A9', 'B4', 'B9')}
+        if len(dp) != 1 or len(dn) != 1 or dp == dn or len(vbus) != 1:
+            bad.append('D+ %s D- %s VBUS %s' % (dp, dn, vbus))
         else:
-            dp, dn = dp.pop(), dn.pop()
-            if b.port_net('usb_dp') not in [o for _, _, o in b.two_pin(dp, 'R')]:
-                bad.append('usb_dp does not reach D+ through a series resistor')
-            if b.port_net('usb_dn') not in [o for _, _, o in b.two_pin(dn, 'R')]:
-                bad.append('usb_dn does not reach D- through a series resistor')
-            if b.port_net('usb_pu') not in [o for _, v, o in b.two_pin(dp, 'R') if v.startswith('1.5k')]:
-                bad.append('no 1.5 k from usb_pu to D+')
+            dp, dn, vbus = dp.pop(), dn.pop(), vbus.pop()
+            for line, name, pin in ((dp, 'D+', 'usbdp'), (dn, 'D-', 'usbdm')):
+                ser = [(v, o) for _, v, o in b.two_pin(line, 'R')]
+                if [o for v, o in ser if v.startswith('27')] != [b.net(u, FT231X[pin])]:
+                    bad.append('%s does not reach the chip pin %s through one 27 ohm resistor (%s)' % (name, pin.upper(), ser))
+                if not any(v.startswith('47pF') and o == gnd for _, v, o in b.two_pin(line, 'C')):
+                    bad.append('%s has no 47 pF to ground' % name)
+                if any(r == 'U1' for r, _ in b.on(line)) or any(r == 'U1' for r, _ in b.on(b.net(u, FT231X[pin]))):
+                    bad.append('%s reaches an FPGA ball' % name)
+            if b.net(u, FT231X['vcc']) != vbus:
+                bad.append('chip VCC on %s, not on the connector VBUS %s' % (b.net(u, FT231X['vcc']), vbus))
+            if not any(o == gnd for _, _, o in b.two_pin(vbus, 'C')):
+                bad.append('no capacitor from VBUS to ground')
+            own = b.net(u, FT231X['3v3out'])
+            # FT_000565 figure 6.1: VCCIO and RESET# on the chip's own 3.3 V output. On another supply the
+            # chip's pins would stay powered while its core is not, and could drive the JTAG lines.
+            if b.net(u, FT231X['vccio']) != own or b.net(u, FT231X['reset']) != own or own in (gnd, v33, vbus):
+                bad.append('3V3OUT %s, VCCIO %s, RESET# %s' % (own, b.net(u, FT231X['vccio']), b.net(u, FT231X['reset'])))
+            if [r for r, _ in b.on(own) if not (r == u or r.startswith('C'))]:
+                bad.append('something else hangs on the chip 3.3 V output: %s' % b.on(own))
+            if not any(o == gnd for _, _, o in b.two_pin(own, 'C')):
+                bad.append('no capacitor on the chip 3.3 V output')
+            if any(b.net(u, g) != gnd for g in FT231X_GND):
+                bad.append('chip ground pins')
+            for name in ('dtr', 'rts', 'rxd', 'txd'):
+                if not b.open(u, FT231X[name]):
+                    bad.append('chip pin %s is not open (%s)' % (name.upper(), b.net(u, FT231X[name])))
+            if any(not b.open(u, c) for c in FT231X_CBUS):
+                bad.append('a CBUS pin is not open')
         for cc in ('A5', 'B5'):
             if not any(v.startswith('5.1k') and o == gnd for _, v, o in b.two_pin(b.net(j, cc), 'R')):
                 bad.append('%s has no 5.1 k to ground' % cc)
-    check('USB: D+ and D- through series resistors to the FPGA, 1.5 k pull-up from usb_pu on D+, 5.1 k on each CC pin', not bad, '; '.join(bad[:6]))
+    check('USB: D+ and D- each through 27 ohm to the loader chip and to nothing else, 47 pF on each; the chip on VBUS with '
+          'VCCIO and RESET# on its own 3.3 V output; its serial and CBUS pins open; 5.1 k on each CC pin', not bad, '; '.join(bad[:6]))
+
+    # 11b. JTAG: the loader chip's four pins on the FPGA's JTAG balls, as the PC tool expects them.
+    bad = []
+    if len(ft) == 1:
+        u = ft[0]
+        for sig, ball in JTAG_BALLS.items():
+            net = b.net('U1', ball)
+            pin = FT231X[LOADER_JTAG[sig]]
+            if b.net(u, pin) != net or not net or net.startswith('unconnected'):
+                bad.append('%s: FPGA ball %s on %s, chip pin %s (%s#) on %s' % (sig.upper(), ball, net, pin, LOADER_JTAG[sig].upper(), b.net(u, pin)))
+                continue
+            others = [(r, q) for r, q in b.on(net) if r not in ('U1', u) and not r.startswith(('R', 'TP'))]
+            if others:
+                bad.append('%s also reaches %s' % (sig.upper(), others))
+            if not b.on(net, 'TP'):
+                bad.append('%s has no test pad' % sig.upper())
+            pulls = [o for _, _, o in b.two_pin(net, 'R')]
+            if pulls != ([gnd] if sig == 'tck' else [v33]):
+                bad.append('%s pulls: %s (TCK wants one resistor to ground, the others one to 3.3 V)' % (sig.upper(), pulls))
+    else:
+        bad.append('no loader chip')
+    check('JTAG: the loader chip is on the FPGA JTAG balls as openFPGALoader drives it (TCK = DSR#, TMS = DCD#, TDI = RI#, '
+          'TDO = CTS#), nothing else is; TMS, TDI, TDO pulled up, TCK pulled down, a test pad on each', not bad, '; '.join(bad[:6]))
 
     # 12. Telemetry converter and the cartridge check's test current.
     bad = []
@@ -491,6 +558,9 @@ def run_checks(b, snes, n64, schematic, lattice):
             d = lattice.get(CONFIG_BALLS[name], {'fn': '', 'dual': ''})
             if word not in (d['fn'] + ' ' + d['dual']).replace('/', ' / '):
                 bad.append('ball %s is not %s in the table (%s %s)' % (CONFIG_BALLS[name], word, d['fn'], d['dual']))
+        for sig, ball in JTAG_BALLS.items():
+            if lattice.get(ball, {'fn': ''})['fn'] != sig.upper():
+                bad.append('ball %s is not %s in the table (%s)' % (ball, sig.upper(), lattice.get(ball, {'fn': ''})['fn']))
         d = lattice.get(b.lpf.get('osc_27', ''), {'dual': ''})
         if 'PCLK' not in d['dual']:
             bad.append('osc_27 is on %s, which is not a clock input ball (%s)' % (b.lpf.get('osc_27'), d['dual']))
@@ -560,6 +630,11 @@ MISTAKES = [
     ('configuration mode pin pulled the wrong way', lambda d, l: [d['components'][r]['pads'].update({p: 'GND' if n == 'FPGA_3V3' else n for p, n in d['components'][r]['pads'].items()})
                                                                   for r in ('R6',)]),
     ('USB data lines swapped at the connector', lambda d, l: [swap(d, ('J101', 'A6'), ('J101', 'A7')), swap(d, ('J101', 'B6'), ('J101', 'B7'))]),
+    ('JTAG clock and mode select swapped at the loader chip', lambda d, l: swap(d, ('U13', '7'), ('U13', '8'))),
+    ('JTAG data in and data out swapped at the loader chip', lambda d, l: swap(d, ('U13', '5'), ('U13', '9'))),
+    ('loader chip I/O supply on the board 3.3 V', lambda d, l: d['components']['U13']['pads'].__setitem__('3', 'FPGA_3V3')),
+    ('JTAG clock pulled up instead of down', lambda d, l: d['components']['R41']['pads'].__setitem__('1', 'FPGA_3V3')),
+    ('an unused open-drain gate left on PROGRAMN', lambda d, l: d['components']['U205']['pads'].__setitem__('2', 'FPGA_PROGRAMN')),
     ('open-drain driver output on the wrong socket pin', lambda d, l: swap(d, ('U205', '4'), ('U205', '6'))),
     ('cartridge 5 V switch enabled by default', lambda d, l: [d['components'][r]['pads'].update({p: 'FPGA_3V3' if n == 'GND' else n for p, n in d['components'][r]['pads'].items()})
                                                               for r in ('R319',)]),

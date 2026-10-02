@@ -69,7 +69,7 @@
 | Fault messages | Each power fault gets a sentence and what to do, as the reversed-cartridge screen has | menu |
 | Self test | One screen that runs the checks in turn: rails, lockout chip, cartridge check, controllers. Also the base for the factory test the spec asks for | menu, some FPGA |
 | Service screen | Exists: the cartridge check's test tools. Other test tools would go here | menu |
-| Update mode | "Restart into USB update": the FPGA can already restart itself on command | FPGA and menu |
+| Update mode | Dropped on 2026-10-02: updates go through the USB loader chip with no help from the menu, and the FPGA can no longer restart itself ([usb-loader.md](usb-loader.md)) | nothing |
 
 ## Repackaging the menu
 

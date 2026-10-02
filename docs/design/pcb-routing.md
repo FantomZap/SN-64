@@ -122,3 +122,108 @@ what it used); run DRC against the board's own project file.
 The second v2 refit (shorter shell, 2026-10-01) used the same recipe on 64 nets, with the socket nets squeezed into 8 mm between the translator row and the socket pads. With the default `--ordering mps` the router finished 63 and left the corner pad's net (the cartridge master clock) boxed in by its six neighbours. `--ordering bus` routed all 64 on the same three layers (157 new vias); `--ordering inside_out` also routed all 64 (173 vias), and so did `mps` with In4.Cu added as a fourth layer (102 vias). The `bus` result is the one on the board. Each run takes under a minute, so trying the orderings costs nothing. Scratch DRC runs need the board's `.kicad_dru` copied beside the board as well as its `.kicad_pro`; without it the USB-C receptacle's edge rule is missing and a false edge-clearance error appears.
 
 `finish_route_v2.py` removes its own pours before adding them again, and in KiCad 10's python a `board.Remove()` breaks the lookups that follow in the same process, so the script fails on a board that already has pours. Use `--refill-only` to keep the pours and just refill every zone, for example after a hole size changes (used on 2026-10-01 for the 4.0 mm mounting holes).
+
+## Moving a connector and adding a chip on the routed board (v2, 2026-10-02)
+
+The USB-C receptacle went from one edge of the board to the other, a loader chip with six new small
+parts was added behind it, a neighbouring chip moved 5 mm, and four FPGA balls lost their nets
+([usb-loader.md](usb-loader.md)). `hardware/sn64-v2/tools/apply_usb_loader_v2.py` does it in stages,
+and the rest of the routing is untouched. The router call is the one of the refit above, with
+`--nets` set to the 19 names the `place` stage writes out, `--power-nets USB_VBUS` and
+`--ordering bus`.
+
+| Stage | What it does |
+|---|---|
+| `clear` | removes the copper of the nets that end; trims the nets that lose or move a pad back to the first junction that still serves a pad; removes the plane stubs and vias of the pads that move; removes the two parts that go |
+| `place` | pads take their nets from the netlist; new parts added, moved parts moved; a keep-out under the receptacle's metal body |
+| `add_plane_vias_v2.py` | ground and 3.3 V vias for the new and moved parts, **before** routing |
+| `lock` | every track and via locked |
+| KiCadRoutingTools | routes the 19 nets that changed: all 19, in about 5 s, with each of three orderings (74, 78 and 81 vias); the final run, with the keep-out, used `bus` (76 vias) |
+| `unlock`, refill, KiCad's rule check | |
+| `tidy` | removes the vias and track ends that KiCad's check reports as leading nowhere on those nets; repeated until none is left (two passes, five items) |
+
+What was learned:
+
+- **Plane vias first, when the area is open.** On the dense first board, vias placed before routing
+  took the room the router needed. Here the area was open, and adding them after routing left two
+  ground pins of the new parts without a spot. Before routing, every one found a place.
+- **Trim by centre lines, not by copper.** A trace end counts as joined to another trace only when
+  it lies on that trace's centre line. The first version counted any point inside the other trace's
+  width and left a chain of 0.1 mm segments of a 0.4 mm supply trace standing, each "held" by the
+  next.
+- **Let KiCad say what is loose.** A first tidy stage judged loose ends itself and removed two good
+  traces whose ends sit 0.015 mm outside their pad. KiCad counts overlapping copper as joined. The
+  stage now removes only what KiCad's own report lists, with one exception found the same day
+  (next section): a via with two track ends inside it stays.
+- **Keep the router out from under metal.** The receptacle's footprint has no keep-out of its own,
+  and the first run put a JTAG line under its body on the component side. The board now has a
+  keep-out there (no tracks, no vias).
+- **Freed room can finish old work.** With the four FPGA balls' fan-out gone, the router finished
+  N64_AD6, which had been open since the first routing. N64_JOYBUS and FLASH_D2 were closed the
+  same day (next section).
+
+Result of this step: 3,861 tracks, 1,102 vias, 215 of 217 signal nets fully connected, 3 open
+connections (FLASH_D2, N64_JOYBUS, a 3.3 V pin of the supply converter), 5 thermal-relief errors,
+no other error.
+
+## Closing the last open connections (v2, 2026-10-02)
+
+Each of the three connections was needed for the board to work.
+`hardware/sn64-v2/tools/close_open_items_v2.py` closes them and the five thermal-relief errors, in
+stages; each stage refuses a board that already has its change.
+
+| Stage | What it does |
+|---|---|
+| `small` | **N64_JOYBUS**: the line from the FPGA ball to the edge finger was complete all along. The check was reporting a via of that net with no track on it, left from the first routing. Removed. **FPGA_3V3** at the supply converter's digital supply pin (U6 pad 10): the pad had no copper at all. 2.4 mm of 0.15 mm track on the component side joins it to the 3.3 V via beside it |
+| `corner-clear` | **FLASH_D2** at FPGA ball Y2. The ball is in the corner of the grid and was boxed in by the ways out of its two neighbours, DONE (ball Y3) and flash D0 (ball W2). With those in place the router could not reach it, on three layers or on four. The stage removes the copper of the three nets and locks everything else |
+| KiCadRoutingTools | lays the three nets together: all three, with each of the three orderings. `mps` is on the board |
+| `corner-tidy` | unlock; one via replaced by a short track (below) |
+| `solid` | five ground pads had one thermal spoke where the rule asks for two: the four ground pads of the USB-C socket and one ground pad of the input switch U7. Their neighbours leave no room for a second spoke. They are now joined to the ground area without spokes |
+
+| Net | Before | After |
+|---|---|---|
+| FLASH_D2 | 8.5 mm, not complete | 25.1 mm, 2 vias |
+| FLASH_D0 | 24.1 mm, 3 vias | 41.1 mm, 5 vias |
+| FPGA_DONE | 17.7 mm, 2 vias | 33.8 mm, 6 vias; 32.6 mm of it 0.1 mm wide, the router's narrowest step, as 468 mm of the board already is |
+
+The flash is read at about 31 MHz. The longest of its data lines is now 41 mm, a quarter of a
+nanosecond of travel against a clock period of 32 ns.
+
+| Ground pad | Ground copper against the pad's edge, before | After |
+|---|---|---|
+| USB-C socket, each of its two ground pad places (A1 with B12, A12 with B1) | 0.30 mm, one spoke | 2.07 mm, three sides |
+| Input switch U7, pad 5 | 0.19 mm | 0.99 mm |
+
+What was learned:
+
+- **A via that KiCad calls dangling can be carrying the line.** The router sometimes ends two
+  tracks of one layer inside the same via, a fifth of a millimetre apart, so that the via's copper
+  is all that joins them. KiCad reports that via as joined on one layer only. The first tidy pass
+  took it for a leftover, removed it, and cut the line that had just been routed; the check then
+  listed a new open connection, and the pass after it removed more. The stage now puts a short track
+  where such a via was, and removes a via only when one track end or none lies inside it. The tidy
+  stage of `apply_usb_loader_v2.py` has the same guard now. The test after every pass is the count
+  of open connections: it must not rise.
+- **Route a boxed-in ball together with its neighbours.** Adding a fourth layer did not help, and
+  neither did another ordering, while the neighbours' copper stood. Taking three nets up and laying
+  them again took the router a few seconds.
+- **A pad that cannot have two spokes can have none.** A solid joint gives more copper than the one
+  spoke did, and the parts are soldered in an oven, where a small pad on a ground area is no trouble.
+
+Result: 3,891 tracks, 1,108 vias, 7,938 mm, 217 of 217 signal nets fully connected. KiCad's rule check: **no
+error, no open connection.** The pad nets did not change, so the wiring check (22 of 22, 25 of 25)
+and the simulated board are the same as before.
+
+What the check still warns about, none of it a connection:
+
+- 225 silkscreen warnings: text over pads and over other text. For the hand pass.
+- 199 solder-mask warnings, all at the N64 edge fingers. The mask is open across the whole row of
+  fingers on purpose, as on SummerCart64's edge.
+- 12 vias and 2 track ends it calls dangling: leftovers of the first routing, fan-out vias the
+  router did not use and vias inside pads. On a copy of the board all 14 were removed and no
+  connection opened, so none of them carries a line. They are still on the board, because the job
+  does not end there. Behind them stand the short stubs that led to those vias, and among the next
+  round of reports was a 4.5 mm stretch of N64_AD10 that runs on past a junction. KiCad calls it a
+  track with a loose end; removing it opened the net. Tidying these means shortening tracks to
+  their last junction, not deleting them. That is for the hand pass. Where they are, they join
+  nothing and harm nothing.

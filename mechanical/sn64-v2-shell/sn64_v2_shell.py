@@ -45,7 +45,8 @@ Frame (the KiCad board view): X across the board, Y up with 0 at the N64 tongue 
 the board's F.Cu face. This is SummerCart64's own shell frame moved +0.6 mm in Z (its board lies
 z -1.2..0, ours -0.6..0.6); its mounting bosses are at (+-47.5, -3.25) like our H1/H2. F.Cu faces
 the BACK of the console, so +Z is the screw side of the cartridge and the label side is -Z; a
-player sees the -Z side and the USB-C (at +X) on their left. Exported files are turned +90 degrees
+player sees the -Z side and the USB-C (at -X) on their right (owner, 2026-10-02: "put the usb on the
+right side of the cart"; it was at +X, their left, before). Exported files are turned +90 degrees
 about X so a viewer sees Z up (FreeCAD "Front" looks at the back of the console, "Rear" at the
 label side).
 
@@ -128,7 +129,7 @@ PLUG_W, PLUG_T = 13.0, 7.0               # recess for the cable plug's overmold 
 # receptacle's face. JAE drawing SJ122205 (docs/design/usb-connector-mechanics.md): receptacle 8.94 x
 # 3.16; a mated plug's overmold stops 1.95 in front of the receptacle. The receptacle's face is 2.06
 # behind the wall's outer surface here, so without the recess a plug would stop 0.1 short of home.
-USB_SIDE = 1                            # +1: board +X, the player's left; -1 if the port moves to the other side
+USB_SIDE = -1                           # -1: board -X, the player's right (owner, 2026-10-02); +1 was the left
 USB_RECESS_DEPTH = 1.0                  # leaves a 1.0 rim around the opening; the overmold ends 0.9 above its floor
 USB_OPEN_CLR = 0.33                     # opening larger than the receptacle's face all round
 CAP_WALL, POCKET_CLR_X, POCKET_CLR_Z, POCKET_R = 5.0, 0.6, 0.3, 1.0

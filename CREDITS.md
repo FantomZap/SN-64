@@ -14,7 +14,6 @@ Work that is included in this repository or that SN64's own files are derived fr
 | [SummerCart64](https://github.com/Polprzewodnikowy/SummerCart64) | Mateusz Faderewski (Polprzewodnikowy) and contributors | N64 cartridge-bus controller logic (`fpga/vendor/summercart64`); the N64 cartridge-edge footprint and board profile; the USB circuit of the first board; the N64 cartridge shell the v2 shell's lower body is taken from | GPL-3.0 (logic and software), CERN-OHL-S-2.0 (hardware) |
 | [SERV](https://github.com/olofk/serv) | Olof Kindgren | The small RISC-V core that runs the N64 lockout (CIC) firmware, via SummerCart64 | ISC |
 | [UltraCIC_C](https://github.com/jago85/UltraCIC_C) | Jan Goldacker (jago85); adapted in SummerCart64 by Mateusz Faderewski | The N64 lockout (CIC) firmware | MIT |
-| [TinyFPGA Bootloader](https://github.com/tinyfpga/TinyFPGA-Bootloader) | TinyFPGA | USB device and flash bridge used to program and recover the board over USB-C (v2, `fpga/vendor/tinyfpga-bootloader`) | Apache-2.0 |
 | [OpenSFC](https://github.com/starlightk7/OpenSFC) | starlightk7 | SNES cartridge socket geometry (pin positions, body, mounting holes) and the SHVC-CPU-01 netlist used to check pin identities and orientation | CERN-OHL-S-2.0 |
 | [Open Source Cartridge Reader](https://github.com/sanni/cartreader) | sanni and contributors | SNES slot footprint in the first board's library | CC BY 4.0 |
 | [KiCad libraries](https://www.kicad.org/libraries/license/) | The KiCad library contributors | Schematic symbols and footprints | CC BY-SA 4.0 with the KiCad library exception |
@@ -27,7 +26,7 @@ Nothing from these is copied into SN64, but the design depends on what they made
 | Project | By | What it gave SN64 | Licence |
 |---|---|---|---|
 | [sd2snes / FXPAK](https://github.com/mrehkopf/sd2snes) | Maximilian Rehkopf (ikari_01) and contributors | The cartridge edge of a real cartridge board, the level-translator approach, and SuperCIC, whose lock behaviour SN64's SNES lockout follows | GPL-2.0 |
-| [ULX3S](https://github.com/emard/ulx3s) | EMARD and Radiona.org | ECP5 power and flash circuit practice | MIT |
+| [ULX3S](https://github.com/emard/ulx3s) | EMARD and Radiona.org | ECP5 power and flash circuit practice, and the way its USB loader chip (FT231X) is joined to the FPGA's JTAG port, which SN64's loader follows pin for pin | MIT |
 | [kicad-snn-cpu-01](https://github.com/qwertymodo/kicad-snn-cpu-01) | qwertymodo | The SNES Jr cartridge connector model used for the socket nose dimensions | CERN-OHL-S-2.0 |
 | [NESdev forum](https://forums.nesdev.org/viewtopic.php?t=23890) | rainwarrior | Caliper measurements of a US SNES cartridge, used for the cartridge in the shell model | forum post |
 | [SNESdev Wiki](https://snes.nesdev.org/wiki/Cartridge_connector) and [N64brew Wiki](https://n64brew.dev/wiki/Game_Pak) | Their contributors | Cartridge connector pinouts and orientation for both consoles | wiki content |
@@ -42,7 +41,9 @@ Nothing from these is copied into SN64, but the design depends on what they made
 
 KiCad, the OSS CAD Suite (Yosys, nextpnr, Verilator and their contributors),
 [KiCadRoutingTools](https://github.com/drandyhaas/KiCadRoutingTools) by drandyhaas, Freerouting,
-build123d, FreeCAD and the [ares](https://ares-emu.net) emulator.
+build123d, FreeCAD, the [ares](https://ares-emu.net) emulator, and
+[openFPGALoader](https://github.com/trabucayre/openFPGALoader) by trabucayre and contributors, the
+program that loads SN64 over USB.
 
 Exact revisions, hashes and what was changed are recorded beside the material: `fpga/vendor/*/provenance.json`,
 `hardware/sn64/THIRD_PARTY.md`, `hardware/sn64/libraries/*provenance.json`, `mechanical/README.md` and

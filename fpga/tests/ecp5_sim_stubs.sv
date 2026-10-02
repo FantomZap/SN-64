@@ -52,8 +52,11 @@ module EHXPLLL #(
     always begin if (!running) @(posedge running); #(vco * CLKOP_DIV / 2.0) CLKOP = ~CLKOP; end
     wire run_os = running && (FEEDBK_PATH != "CLKOS" || $test$plusargs("pll_feedback_clock"));
     always begin if (!run_os) @(posedge run_os); #(vco * CLKOS_DIV / 2.0) CLKOS = ~CLKOS; end
-    always begin if (!running) @(posedge running); #(vco * CLKOS2_DIV / 2.0) CLKOS2 = ~CLKOS2; end
-    always begin if (!running) @(posedge running); #(vco * CLKOS3_DIV / 2.0) CLKOS3 = ~CLKOS3; end
+    // An output that is not enabled stays low: it would only add events.
+    wire run_os2 = running && (CLKOS2_ENABLE == "ENABLED");
+    wire run_os3 = running && (CLKOS3_ENABLE == "ENABLED");
+    always begin if (!run_os2) @(posedge run_os2); #(vco * CLKOS2_DIV / 2.0) CLKOS2 = ~CLKOS2; end
+    always begin if (!run_os3) @(posedge run_os3); #(vco * CLKOS3_DIV / 2.0) CLKOS3 = ~CLKOS3; end
     // verilator lint_on ZERODLY
 endmodule
 

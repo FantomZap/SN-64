@@ -239,6 +239,10 @@
   "DX07S016JA3R1500": [
    "C2939926",
    null
+  ],
+  "FT231XS-R": [
+   "C132160",
+   3714
   ]
  },
  "provisional_values": [
@@ -511,6 +515,11 @@
     "Resistor_SMD:R_0603_1608Metric"
    ],
    [
+    "R41",
+    "4.7k",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
     "X1",
     "27MHz 1631-27005-BTBEYA",
     "Oscillator:Oscillator_SMD_Abracon_ASE-4Pin_3.2x2.5mm"
@@ -553,21 +562,6 @@
    [
     "R18",
     "1k",
-    "Resistor_SMD:R_0603_1608Metric"
-   ],
-   [
-    "R19",
-    "22",
-    "Resistor_SMD:R_0603_1608Metric"
-   ],
-   [
-    "R20",
-    "22",
-    "Resistor_SMD:R_0603_1608Metric"
-   ],
-   [
-    "R21",
-    "1.5k",
     "Resistor_SMD:R_0603_1608Metric"
    ],
    [
@@ -796,11 +790,6 @@
     "Capacitor_SMD:C_0603_1608Metric"
    ],
    [
-    "R201",
-    "10k",
-    "Resistor_SMD:R_0603_1608Metric"
-   ],
-   [
     "R202",
     "10k",
     "Resistor_SMD:R_0603_1608Metric"
@@ -903,6 +892,46 @@
    [
     "C302",
     "1uF 10V",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "U13",
+    "FT231XS-R",
+    "Package_SO:SSOP-20_3.9x8.7mm_P0.635mm"
+   ],
+   [
+    "R19",
+    "27",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "R20",
+    "27",
+    "Resistor_SMD:R_0603_1608Metric"
+   ],
+   [
+    "C44",
+    "47pF 50V C0G",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C45",
+    "47pF 50V C0G",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C41",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C42",
+    "100nF 16V X7R",
+    "Capacitor_SMD:C_0603_1608Metric"
+   ],
+   [
+    "C43",
+    "100nF 16V X7R",
     "Capacitor_SMD:C_0603_1608Metric"
    ],
    [

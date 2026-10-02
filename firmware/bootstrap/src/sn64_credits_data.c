@@ -32,8 +32,6 @@ const char *const sn64_credits_lines[] = {
     "  Jan Goldacker (jago85); adapted in",
     "    SummerCart64 by Mateusz",
     "    Faderewski",
-    "TinyFPGA Bootloader",
-    "  TinyFPGA",
     "OpenSFC",
     "  starlightk7",
     "Open Source Cartridge Reader",
@@ -77,7 +75,10 @@ const char *const sn64_credits_lines[] = {
     "nextpnr, Verilator and their",
     "contributors), KiCadRoutingTools by",
     "drandyhaas, Freerouting, build123d,",
-    "FreeCAD and the ares emulator.",
+    "FreeCAD, the ares emulator, and",
+    "openFPGALoader by trabucayre and",
+    "contributors, the program that loads",
+    "SN64 over USB.",
     "",
     "",
     "Engineer: Claude (AI by Anthropic)",
@@ -89,9 +90,9 @@ const char *const sn64_credits_lines[] = {
 // What each line is (sn64_credit_kind_t): the screen colours it by that.
 const unsigned char sn64_credits_kind[] = {
     1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 3, 2, 3, 3, 2, 3, 3, 3, 2, 3, 2, 3,
-    3, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 3, 0, 1, 1, 0, 2, 3, 3, 2, 3, 2, 3, 2,
-    3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 0, 1, 0, 3, 3, 3, 3, 3, 0, 0,
-    4, 4, 4, 4,
+    3, 3, 2, 3, 2, 3, 2, 3, 2, 3, 3, 0, 1, 1, 0, 2, 3, 3, 2, 3, 2, 3, 2, 3, 2,
+    3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 2, 3, 0, 1, 0, 3, 3, 3, 3, 3, 3, 3, 3, 0,
+    0, 4, 4, 4, 4,
 };
 
-const int sn64_credits_count = 79;
+const int sn64_credits_count = 80;

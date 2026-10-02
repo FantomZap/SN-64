@@ -10,8 +10,8 @@ board file wires it (fpga/tests/tb_board_game.sv).
 --board needs the board's connection list turned into a simulation first:
   <KiCad's python> hardware/sn64-v2/tools/export_board_nets.py
   python hardware/sn64-v2/tools/make_board_sim.py
-and the two generated vendor copies (fpga/tools/prepare_flash_pads.py, prepare_usb_core.py; both
-are run by evaluate.py). It uses its own build directory: <build-dir>-board.
+and evaluate.py run once (it makes the generated copies of the core and of the N64 key chip).
+It uses its own build directory: <build-dir>-board.
 
 The image must be without a copier header. The board kind (LoROM or HiROM), the size of the
 battery RAM and the region are read from the image's own header unless given. Outputs in --out
@@ -53,8 +53,8 @@ SOURCES = ['-Ibuild/generated/snestang/src', '-Ibuild/generated/snestang/src/spc
            'fpga/rtl/sn64_clock_pace.sv', 'fpga/rtl/sn64_top.sv', 'fpga/tests/tb_game.sv']
 # The board bench: the same logic under the board's real top level, the stand-ins for the FPGA's
 # own cells, the part models and the board's connection list.
-BOARD_ONLY = ['-I{board}', 'build/generated/summercart64/memory_flash_dq.sv', 'fpga/rtl/sn64_bootrom_flash.sv',
-              'fpga/rtl/sn64_rail_monitor.sv', 'fpga/rtl/sn64_usb_prog.sv', 'fpga/rtl/sn64_board_top.sv',
+BOARD_ONLY = ['-I{board}', 'fpga/vendor/summercart64/fw/rtl/memory/memory_flash.sv', 'fpga/rtl/sn64_bootrom_flash.sv',
+              'fpga/rtl/sn64_rail_monitor.sv', 'fpga/rtl/sn64_board_top.sv',
               'fpga/tests/ecp5_sim_stubs.sv', 'fpga/tests/tb_bootrom_flash.sv', 'fpga/tests/board_models.sv',
               '{board}/sn64_board_netlist.sv', 'fpga/tests/tb_board_game.sv']
 
@@ -163,12 +163,11 @@ def main():
         'fpga/tests/tb_game.sv', 'fpga/tests/snes_key_cic_model.svh']
     sources = SOURCES
     if args.board:
-        usb = sorted(f.relative_to(ROOT).as_posix() for f in (ROOT / 'build/generated/tinyfpga').glob('*.v'))
         board_dir = Path(args.board_dir).as_posix().rstrip('/')
-        if not usb or not (ROOT / board_dir / 'sn64_board_netlist.sv').exists():
-            sys.exit('--board: run export_board_nets.py and make_board_sim.py first, and evaluate.py once for the generated vendor copies')
+        if not (ROOT / board_dir / 'sn64_board_netlist.sv').exists():
+            sys.exit('--board: run export_board_nets.py and make_board_sim.py first')
         board_only = [f.replace('{board}', board_dir) for f in BOARD_ONLY]
-        sources = SOURCES[:-1] + usb + board_only
+        sources = SOURCES[:-1] + board_only
         watched = watched[:-2] + [f for f in board_only if f.startswith(('fpga/tests/', board_dir + '/'))] + [
             'fpga/tests/snes_key_cic_model.svh', board_dir + '/board_pins.svh']
     want = {'threads': args.threads, 'sources': {s: hashlib.sha256((ROOT / s).read_bytes()).hexdigest() for s in watched}}

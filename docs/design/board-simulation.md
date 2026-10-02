@@ -10,7 +10,7 @@ This run puts the board between them.
 
 | | Logic run ([tb_game.sv](../../fpga/tests/tb_game.sv)) | Board run ([tb_board_game.sv](../../fpga/tests/tb_board_game.sv)) |
 |---|---|---|
-| Logic under test | `sn64_top` | `sn64_board_top`, the top level that is loaded into the FPGA: PLLs, USB part, supply watcher, boot program in the flash |
+| Logic under test | `sn64_top` | `sn64_board_top`, the top level that is loaded into the FPGA: PLLs, supply watcher, boot program in the flash |
 | Clocks | made by the bench | one 27 MHz oscillator model; everything else from the logic's own PLL settings |
 | Cartridge | joined to the logic's signals | on the socket's 62 pins by number |
 | N64 | joined to the logic's signals | on the edge's 50 fingers by number |
@@ -41,7 +41,7 @@ What becomes what:
 | The cartridge sound network | worked out from its resistors and capacitor: which comparator pin has the feedback, its time constant, the reference level |
 | The converter's address pin | the address that wiring gives by the data sheet's table. A wiring the table does not list: the model answers at no address |
 | The FPGA's PLLs, clock select and flash clock cell | stand-ins that give the frequencies the logic's own settings ask for ([ecp5_sim_stubs.sv](../../fpga/tests/ecp5_sim_stubs.sv)) |
-| Left out | capacitors on supplies, inductors, the converters that make the supplies, the ESD part, the USB socket. No USB cable is plugged in |
+| Left out | capacitors on supplies, inductors, the converters that make the supplies, the ESD part, the USB socket and its loader chip. No USB cable is plugged in, so the loader chip has no supply and its pins are open |
 
 The bench then plugs a cartridge into the socket and an N64 onto the edge, using the two connector tables that were drawn from other people's working boards (`hardware/sn64/interfaces/snes-pin-map.csv`, `n64-pin-map.csv`). The cartridge model lives only while it has its 5 V, and its battery RAM takes a write only while `/RESET` is high, as a real cartridge's guard does.
 
@@ -85,6 +85,10 @@ At the end it powers the cartridge off the way the menu does and checks the orde
 | The cartridge plugged in back to front | corrected board, corrected logic | **Refused**: the cartridge check gives up after its 4.0 s limit with the rail at 0.46 V; fault 0x01; the 5 V is never switched on. |
 | A board with the converter's address pin on ground | deliberate mistake | **Refused**: 40 ms after Play the status word still says the converter does not answer; the cartridge is never powered. |
 | A board with the socket-to-FPGA byte enabled all the time | deliberate mistake | **Refused** at 1.0 ms: a level shifter byte is enabled while its 5 V side has no supply. |
+| Hello World, 30 pictures | the board of 2026-10-02 with the loader chip and the port moved; logic without USB | Same picture: 173 pixels lit. The same times as before to the hundredth of a millisecond: identity read at 0.405 ms, 5 V on at 384.71 ms, the game running at 450.62 ms. Power-off in the same order. Nothing missed. |
+| Super Mario World, 240 pictures, key CIC | the same | Region NTSC by the key chip: 678 rounds through the board's open-drain lines, no mismatch. The game runs 456 ms after Play. The opening screen at picture 100 with 301 pixels lit, as on the board before. 240 pictures, none missed, none fetched twice, no two drivers on the data lines, no loose pins, LED lit. Power-off: `/RESET` low after 2.4 µs, pins let go after 1.0 ms, 5 V below 4.5 V after 2.4 ms, no battery RAM write. 12 of the 12 pictures written are the same, file for file, as the run on the board before the change. |
+| The cartridge plugged in back to front | the same | **Refused**: the cartridge check gives up after 4.0 s with the rail at about 464 mV; the 5 V is never switched on. |
+| The two deliberate mistakes again | the same board with each mistake put back | **Refused**, at 40.5 ms (address pin) and at 1.0 ms (byte always on). |
 
 Pictures of the owner's game are not in this repository.
 
@@ -105,15 +109,17 @@ Pictures of the owner's game are not in this repository.
 
 ## What it cannot show
 
-- **Copper.** The netlist says which pad is on which net. Whether the copper really joins those pads, and nothing else, is KiCad's design-rule check. Six connections are still not routed ([board-verification.md](board-verification.md)).
+- **Copper.** The netlist says which pad is on which net. Whether the copper really joins those pads, and nothing else, is KiCad's design-rule check. Since 2026-10-02 that check lists no error and no open connection ([board-verification.md](board-verification.md)).
 - **Anything electrical.** The part models are ideal: no voltages, currents, delays or edges. A part that behaves outside its data sheet, a marginal level, a supply that sags: none of that is here.
 - **Footprints.** A pad that is on the right net but in the wrong place for the part.
 - **The real cartridge and the real console.** Both are models written from the same understanding as the logic.
-- **USB.** No host model is plugged in. The USB pins idle as a real board's would.
+- **Loading over USB.** No cable is plugged in. The loader chip and the FPGA's JTAG port are not modelled, so this run says nothing about whether a PC can load the board ([usb-loader.md](usb-loader.md)).
 
 ## Speed
 
 About 0.4 seconds of computing for a millisecond on the board: 3 minutes for the start-up, 7 seconds for each picture, one processor core for each run. The 240-picture run took 31 minutes; the 660-picture run, with other runs going beside it, 87 minutes.
+
+Since the USB logic and its two clocks went (2026-10-02) the board run is quicker: about 0.3 seconds for a millisecond. Hello World with 30 pictures took 279 seconds where it took 438; the 240-picture run took 21 minutes.
 
 ## How to run it
 

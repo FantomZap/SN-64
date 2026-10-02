@@ -49,12 +49,11 @@ def main():
              ['fpga/rtl/sn64_cdc.sv', 'fpga/rtl/sn64_power_sequencer.sv',
               'fpga/rtl/sn64_snes_cic_lock.sv', 'fpga/vendor/snestang-controller/src/controller_adapter.sv',
               'fpga/rtl/sn64_snes_joypad.sv', 'fpga/rtl/sn64_header_probe.sv', 'fpga/rtl/sn64_frame_window.sv',
-              'build/generated/summercart64/memory_flash_dq.sv', 'fpga/rtl/sn64_bootrom_flash.sv',
+              'fpga/vendor/summercart64/fw/rtl/memory/memory_flash.sv', 'fpga/rtl/sn64_bootrom_flash.sv',
               'fpga/rtl/sn64_sd_adc.sv', 'fpga/rtl/sn64_audio_mix.sv', 'fpga/rtl/sn64_top.sv'])
     top = 'sn64_board_top' if args.top == 'board' else 'sn64_pnr_wrap'
     if args.top == 'board':
-        files += ['fpga/rtl/sn64_rail_monitor.sv', 'fpga/rtl/sn64_usb_prog.sv', 'fpga/rtl/sn64_clock_pace.sv'] + \
-                 rel(sorted((ROOT / 'build/generated/tinyfpga').glob('*.v')))   # fpga/tools/prepare_usb_core.py
+        files += ['fpga/rtl/sn64_rail_monitor.sv', 'fpga/rtl/sn64_clock_pace.sv']
     files.append(args.top_file or f'fpga/rtl/{top}.sv')
     lpf = args.lpf or ('fpga/constraints/sn64_board.lpf' if args.top == 'board' else 'fpga/constraints/sn64_trial.lpf')
     netlist = out / f'{top}.json'

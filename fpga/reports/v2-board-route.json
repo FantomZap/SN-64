@@ -1,97 +1,87 @@
 {
-  "top": "sn64_board_top",
-  "speed_grade": "8",
-  "lpf": "fpga/constraints/sn64_board.lpf",
-  "synthesis_cells": {
-    "TRELLIS_FF": 13489,
-    "EHXPLLL": 3,
-    "DCSC": 1,
-    "USRMCLK": 1,
-    "DP16KD": 203,
-    "MULT18X18D": 19,
-    "LUT4": 30820
+ "top": "sn64_board_top",
+ "speed_grade": "8",
+ "lpf": "fpga/constraints/sn64_board.lpf",
+ "synthesis_cells": {
+  "TRELLIS_FF": 12966,
+  "EHXPLLL": 3,
+  "DCSC": 1,
+  "USRMCLK": 1,
+  "DP16KD": 203,
+  "MULT18X18D": 19,
+  "LUT4": 28955
+ },
+ "nextpnr_exit": 0,
+ "max_frequency": {
+  "clk_host": {
+   "achieved_mhz": 101.24,
+   "required_mhz": 61.72,
+   "result": "PASS"
   },
-  "nextpnr_exit": 0,
-  "max_frequency": {
-    "clk_usb48": {
-      "achieved_mhz": 185.15,
-      "required_mhz": 48.0,
-      "result": "PASS"
-    },
-    "clk_usb12": {
-      "achieved_mhz": 95.27,
-      "required_mhz": 12.0,
-      "result": "PASS"
-    },
-    "clk_host": {
-      "achieved_mhz": 105.21,
-      "required_mhz": 61.72,
-      "result": "PASS"
-    },
-    "clk_snes2": {
-      "achieved_mhz": 329.92,
-      "required_mhz": 42.96,
-      "result": "PASS"
-    },
-    "clk_snes": {
-      "achieved_mhz": 36.56,
-      "required_mhz": 21.48,
-      "result": "PASS"
-    },
-    "osc_27": {
-      "achieved_mhz": 84.25,
-      "required_mhz": 27.0,
-      "result": "PASS"
-    }
+  "clk_snes2": {
+   "achieved_mhz": 358.81,
+   "required_mhz": 42.96,
+   "result": "PASS"
   },
-  "logs": [
-    "build/route-board/synth.log",
-    "build/route-board/pnr.log"
-  ],
-  "dcs_modes": {
-    "DCS0": "NEG"
+  "clk_snes": {
+   "achieved_mhz": 34.56,
+   "required_mhz": 21.48,
+   "result": "PASS"
   },
-  "utilisation": {
-    "TRELLIS_IO": {
-      "used": 111,
-      "available": 365
-    },
-    "DCCA": {
-      "used": 7,
-      "available": 56
-    },
-    "DP16KD": {
-      "used": 203,
-      "available": 208
-    },
-    "MULT18X18D": {
-      "used": 19,
-      "available": 156
-    },
-    "EHXPLLL": {
-      "used": 3,
-      "available": 4
-    },
-    "USRMCLK": {
-      "used": 1,
-      "available": 1
-    },
-    "DCSC": {
-      "used": 1,
-      "available": 2
-    },
-    "TRELLIS_FF": {
-      "used": 13489,
-      "available": 83640
-    },
-    "TRELLIS_COMB": {
-      "used": 35674,
-      "available": 83640
-    },
-    "TRELLIS_RAMW": {
-      "used": 66,
-      "available": 10455
-    }
+  "osc_27": {
+   "achieved_mhz": 76.59,
+   "required_mhz": 27.0,
+   "result": "PASS"
+  }
+ },
+ "logs": [
+  "build/route-board/synth.log",
+  "build/route-board/pnr.log"
+ ],
+ "dcs_modes": {
+  "DCS0": "NEG"
+ },
+ "utilisation": {
+  "TRELLIS_IO": {
+   "used": 107,
+   "available": 365
   },
-  "note": "2026-10-02, after the board-level run: socket pins held at rest while the cartridge has its 5 V, /RESET held 1 ms before the 5 V is switched off, the socket-to-FPGA level shifter byte enabled by sense_oe_n, status LED active low, pad pulls on the data and sense lines. the two game PLLs make twice the SNES master and sn64_clock_pace halves it (clk_snes2 = doubled clock, clk_snes = master, constrained by name in sn64_board.lpf). dcs_modes is the clock select mode as it went into the configuration (NEG asked for; it is read from the cell's attribute). Feasibility run: internal timing on the real pinout, no board-level I/O timing."
+  "DCCA": {
+   "used": 5,
+   "available": 56
+  },
+  "DP16KD": {
+   "used": 203,
+   "available": 208
+  },
+  "MULT18X18D": {
+   "used": 19,
+   "available": 156
+  },
+  "EHXPLLL": {
+   "used": 3,
+   "available": 4
+  },
+  "USRMCLK": {
+   "used": 1,
+   "available": 1
+  },
+  "DCSC": {
+   "used": 1,
+   "available": 2
+  },
+  "TRELLIS_FF": {
+   "used": 12966,
+   "available": 83640
+  },
+  "TRELLIS_COMB": {
+   "used": 33382,
+   "available": 83640
+  },
+  "TRELLIS_RAMW": {
+   "used": 46,
+   "available": 10455
+  }
+ },
+ "note": "2026-10-02, after the USB device was taken out of the logic (the board's loader chip reaches the FPGA through JTAG): no USB clocks, the host PLL makes only the 61.7 MHz clock, the flash reader is SummerCart64's memory_flash unmodified again, no reboot line on PROGRAMN. Before that, the same day: socket pins held at rest while the cartridge has its 5 V, /RESET held 1 ms before the 5 V is switched off, the socket-to-FPGA level shifter byte enabled by sense_oe_n, status LED active low, pad pulls on the data and sense lines. the two game PLLs make twice the SNES master and sn64_clock_pace halves it (clk_snes2 = doubled clock, clk_snes = master, constrained by name in sn64_board.lpf). dcs_modes is the clock select mode as it went into the configuration (NEG asked for; it is read from the cell's attribute). Feasibility run: internal timing on the real pinout, no board-level I/O timing."
 }

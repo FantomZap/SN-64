@@ -276,7 +276,6 @@ module tb_system;
         .n64_ad(ad), .n64_cic_clk(1'b1), .n64_si_clk(1'b0), .n64_cic_dq(n64_cic_dq),
         .rom_we(1'b0), .rom_waddr(4'd0), .rom_wdata(16'd0),
         .pll_locked(1'b1), .monitor_error(1'b0), .snes_clk_run(snes_clk_run), .region_pal(region_pal), .snes_pace(snes_pace),
-        .ext_spi_sel_req(1'b0), .ext_spi_sck(1'b0), .ext_spi_cs_n(1'b1), .ext_spi_mosi(1'b0), .ext_spi_miso(), .ext_spi_active(),
         .host_3v3_ok(1'b1), .fpga_rails_ok(1'b1), .cart_5v_ok(cart_5v_ok), .iface_rail_ok(iface_rail_ok),
         .efuse_fault_n(1'b1), .overtemp(1'b0), .cart_5v_enable(cart_5v_enable), .iface_rail_enable(iface_rail_enable),
         .cart_probe_req(), .cart_probe_active(1'b0), .cart_probe_strobe(1'b0), .cart_probe_code(12'd0),   // check not built in

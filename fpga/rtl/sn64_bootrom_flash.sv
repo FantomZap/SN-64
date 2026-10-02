@@ -34,13 +34,7 @@ module sn64_bootrom_flash #(
 
     output wire       flash_sck_pin,             // only meaningful when USE_USRMCLK = 0
     output wire       flash_cs_n,
-    inout  wire [3:0] flash_dq,                  // D0/MOSI, D1/MISO, D2/WP#, D3/HOLD# (QE must be set in the flash)
-    // v2: USB programmer (sn64_usb_prog) borrows the flash. It asks with ext_sel_req (its CS low);
-    // ownership is granted between the reader's transactions and the reader is held in reset meanwhile.
-    input  wire       ext_sel_req,
-    input  wire       ext_sck, ext_cs_n, ext_mosi,
-    output wire       ext_miso,
-    output reg        ext_active
+    inout  wire [3:0] flash_dq                   // D0/MOSI, D1/MISO, D2/WP#, D3/HOLD# (QE must be set in the flash)
 );
     // Elaboration checks: the offset must be window-aligned and the window must
     // fit in the 24-bit (16 MiB) address space memory_flash uses.
@@ -78,30 +72,19 @@ module sn64_bootrom_flash #(
     assign mem_bus.ack   = flash_bus.ack | write_ack;
     assign mem_bus.rdata = flash_bus.rdata;
 
-    wire flash_sck, int_cs_n, int_oe_s, int_oe_q; wire [3:0] int_dq_out;
+    wire flash_sck;
 
-    // Ownership: grant when the reader is between transactions (CS high), release when the programmer's CS rises.
-    always @(posedge clk) begin
-        if (reset) ext_active <= 1'b0;
-        else if (!ext_active && ext_sel_req && int_cs_n) ext_active <= 1'b1;
-        else if (ext_active && !ext_sel_req) ext_active <= 1'b0;
-    end
-
-    memory_flash_dq u_mem (
-        .clk(clk), .reset(reset | ext_active),
+    // The reader is the only user of the flash pins. The flash is written from outside the logic:
+    // the board's USB loader chip reaches it through the FPGA's own JTAG port (docs/design/v2-board.md).
+    memory_flash u_mem (
+        .clk(clk), .reset(reset),
         .flash_scb(flash_scb),
         .mem_bus(flash_bus),
         .flash_clk(flash_sck),
-        .flash_cs(int_cs_n),
-        .flash_dq_out_o(int_dq_out), .flash_dq_oe_s_o(int_oe_s), .flash_dq_oe_q_o(int_oe_q), .flash_dq_i(flash_dq));
+        .flash_cs(flash_cs_n),
+        .flash_dq(flash_dq));
 
-    // One driver per pad: the programmer (single SPI on D0, reads D1) or the reader (single/quad).
-    assign flash_cs_n  = ext_active ? ext_cs_n : int_cs_n;
-    assign flash_dq[0] = ext_active ? ext_mosi : (int_oe_s ? int_dq_out[0] : 1'bz);
-    assign flash_dq[3:1] = (!ext_active && int_oe_q) ? int_dq_out[3:1] : 3'bz;
-    assign ext_miso    = flash_dq[1];
-
-    sn64_flash_mclk #(.USE_USRMCLK(USE_USRMCLK)) u_mclk (.sck(ext_active ? ext_sck : flash_sck), .sck_pin(flash_sck_pin));
+    sn64_flash_mclk #(.USE_USRMCLK(USE_USRMCLK)) u_mclk (.sck(flash_sck), .sck_pin(flash_sck_pin));
 endmodule
 
 // SCK output abstraction.

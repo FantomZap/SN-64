@@ -1,11 +1,11 @@
 {
  "board": "sn64-v2.kicad_pcb",
- "ports": 111,
+ "ports": 107,
  "checks": [
   {
    "check": "every port of sn64_board_top has a ball, and no ball is given twice",
    "result": "pass",
-   "detail": "111 ports; missing []; unknown []"
+   "detail": "107 ports; missing []; unknown []"
   },
   {
    "check": "43 cartridge outputs reach their own socket pin through a channel that points to the cartridge",
@@ -43,7 +43,7 @@
    "detail": ""
   },
   {
-   "check": "the open-drain pulls (CIC data, /RESET, PROGRAMN) go through the SN74LVC07A to the right pins, with pull-ups",
+   "check": "the open-drain pulls (CIC data, /RESET) go through the SN74LVC07A to the right pins, with pull-ups; unused gates are tied off and none is on PROGRAMN",
    "result": "pass",
    "detail": ""
   },
@@ -78,7 +78,12 @@
    "detail": "['X1'] ['U3']"
   },
   {
-   "check": "USB: D+ and D- through series resistors to the FPGA, 1.5 k pull-up from usb_pu on D+, 5.1 k on each CC pin",
+   "check": "USB: D+ and D- each through 27 ohm to the loader chip and to nothing else, 47 pF on each; the chip on VBUS with VCCIO and RESET# on its own 3.3 V output; its serial and CBUS pins open; 5.1 k on each CC pin",
+   "result": "pass",
+   "detail": ""
+  },
+  {
+   "check": "JTAG: the loader chip is on the FPGA JTAG balls as openFPGALoader drives it (TCK = DSR#, TMS = DCD#, TDI = RI#, TDO = CTS#), nothing else is; TMS, TDI, TDO pulled up, TCK pulled down, a test pad on each",
    "result": "pass",
    "detail": ""
   },
@@ -93,7 +98,7 @@
    "detail": ""
   },
   {
-   "check": "every pad of the board is on the net the schematic gives it (177 parts)",
+   "check": "every pad of the board is on the net the schematic gives it (182 parts)",
    "result": "pass",
    "detail": ""
   },
@@ -109,7 +114,7 @@
   }
  ],
  "summary": {
-  "pass": 21,
+  "pass": 22,
   "fail": 0,
   "skipped": 0
  }

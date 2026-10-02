@@ -1,3 +1,0 @@
-Vendored from https://github.com/tinyfpga/TinyFPGA-Bootloader (Apache-2.0), commit 97f6353540bf7c0d27f5612f202b48f41da75299, fetched 2026-09-30.
-Only LICENSE, README.md and common/ are kept (the USB full-speed device, CDC serial control endpoint and SPI-flash bridge).
-The board tops, tests and the tinyprog programmer are upstream. fpga/tools/prepare_usb_core.py makes the synthesis copies.

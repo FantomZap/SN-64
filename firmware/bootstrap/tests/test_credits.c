@@ -73,9 +73,9 @@ int main(void)
     {
         static const char *const people[] = {
             "nand2mario", "Sergiy Dvodnenko", "gyurco", "Mateusz Faderewski", "Olof Kindgren", "Jan Goldacker",
-            "TinyFPGA", "starlightk7", "sanni", "KiCad library contributors", "DragonMinded", "Maximilian Rehkopf",
+            "starlightk7", "sanni", "KiCad library contributors", "DragonMinded", "Maximilian Rehkopf",
             "EMARD", "qwertymodo", "rainwarrior", "rgalland", "raphnet", "Michael Hirschmugl", "usagi_", "ModRetro",
-            "drandyhaas",
+            "drandyhaas", "trabucayre",
         };
         int missing = 0;
         for (unsigned i = 0; i < sizeof(people) / sizeof(people[0]); i++)
