@@ -67,7 +67,7 @@ CERN-OHL-S-2.0), so the shell model is CERN-OHL-S-2.0 too (`mechanical/README.md
   is drawn for the copy that is on sale, with ears (owner: "Just use whichever sounds best"): its rows
   are about 4.5 to 5 mm apart and the board is 1.2 mm thick, so each row of tails is bent in about
   1.9 mm to reach the pads.
-- **Ears** have free room in the shell, 1 mm below them, 0.8 mm above and 2.8 mm past their tips
+- **Ears** have free room in the shell, 1 mm below them, 0.8 mm above and 3.2 mm past their tips
   (owner, 2026-10-02: "we only need there to be room for the ears. Its held in at registration points
   and with screws already"). The socket is held by its soldered legs and the board by the shell's
   pins and screws. Until 2026-10-02 the ears were screwed from above at 95 mm, the original console
@@ -119,12 +119,12 @@ CERN-OHL-S-2.0), so the shell model is CERN-OHL-S-2.0 too (`mechanical/README.md
 | Real shell kept up to | 24.5 above the shoulders | below SummerCart64's side openings |
 | Flare | 44 to 60, S-curve | starts 5 above the USB-C window (owner), ends at the board's top edge |
 | Cap | 146.6 x 30.5, front corners 9, back corners 6, centred on the pocket | pocket + 5 wall |
-| Cartridge pocket | 136.6 x 20.5, floor at 66.5 (socket shoulder), 1.45 off-centre toward the label side | US cartridge 135.4 x 19.9 (measured, community) + 0.6 / 0.3 clearance; offset **assumed** |
+| Cartridge pocket | 137.4 x 21.9, floor at 66.5 (socket shoulder), 1.45 off-centre toward the label side | US cartridge 135.4 x 19.9 (measured, community) + 1.0 clearance all round (0.6 / 0.3 until 2026-10-02: widened so the cartridge finds the socket even if the assumed offset is a millimetre out); offset **assumed** |
 | Rim | 88.0 at the centre, 82.0 at the ends, fillet 2.5 | assumed |
 | Wall | 2.0 body and stem, 2.0 to 2.9 through the flare, 5.0 around the pocket | SummerCart64 2.0; rest assumed |
 | Console top surface | 17.7 above the shoulders | **measured by the owner (2026-10-01)**: 30 mm from the top surface down to the floor of the cartridge hole, N64 and M64; the shell bottom is 12.31 below the shoulders |
 | Socket body | opening in the cap floor 99.5 x 11.75: fits the original console part, 99.0 x 11.25 | OpenSFC console footprint (sourced) |
-| Socket on sale, with ears | 137 x 21 x 9 overall, 97 x 9 body; ears 4.0 thick at the base; free room 1.0 below, 0.8 above, 2.8 past their tips each side | seller's figures (Amazon B0H35742NX); ear thickness read from the listing's photograph, **assumed** |
+| Socket on sale, with ears | 137 x 21 x 9 overall, 97 x 9 body; ears 4.0 thick at the base; free room 1.0 below, 0.8 above, 3.2 past their tips each side | seller's figures (Amazon B0H35742NX); ear thickness read from the listing's photograph, **assumed** |
 | Socket base | 6 high | **assumed**; a marketplace listing gives 21 mm overall |
 | Socket nose | 94.9 x 8.75, 10.55 high, slot 90.5 long with a key in each PCB gap | SNES Jr connector model (sourced, a different connector of the same family) |
 | Board top edge | 60 | socket underside 0.5 above it |

@@ -164,7 +164,7 @@ USB_SIDE = -1                           # -1: board -X, the player's right (owne
 USB_RECESS_DEPTH = 1.0                  # leaves a 1.0 rim around the opening; the overmold ends 0.6 to 1.2 above its floor
 USB_OPEN_CLR = 0.5                      # opening larger than the receptacle's face all round: USB_FIT, and 0.15 for
                                         # the tallest receptacle, rounded up
-CAP_WALL, POCKET_CLR_X, POCKET_CLR_Z, POCKET_R = 5.0, 0.6, 0.3, 1.0
+CAP_WALL, POCKET_CLR_X, POCKET_CLR_Z, POCKET_R = 5.0, 1.0, 1.0, 1.0   # 1.0 all round since 2026-10-02 (was 0.6 / 0.3): the cartridge finds the socket even if CART_BACK_TO_PCB is off by a millimetre
 # cartridge unknowns, to be replaced by two caliper readings on a real cartridge
 CART_BACK_TO_PCB = 8.5                  # back face to the PCB mid-plane (ASSUMED: PCB centred in the side sections,
                                         # back face flat, the middle section proud on the label side)
