@@ -108,9 +108,11 @@ SOCK_L, SOCK_D, PIN_SPAN = 99.0, 11.25, 85.0   # original console socket (OpenSF
 # The socket on sale, the copy with ears (owner, 2026-10-02: "Just use whichever sounds best"). Seller's figures
 # 137 x 21 x 9 mm with ears, 97 x 21 x 9 without (Amazon B0H35742NX). Leg rows about 4.5 mm apart by a buyer's
 # ruler, 5.0 in Sanni's footprint drawn for this part (AtariAge forum t=291886). The ears are flat tabs at the
-# base; their thickness, about 4 mm, is read from the listing's photograph (ASSUMED). The shell holds the ears
-# between the brackets and the cap floor, so where the holes in them are does not matter.
-SOCK_SALE_L, SOCK_SALE_D, EAR_SPAN, EAR_T, EAR_ROOM, ROW_Z = 97.0, 9.0, 137.0, 4.0, 4.5, 2.5
+# base; their thickness, about 4 mm, is read from the listing's photograph (ASSUMED). The socket is held by its
+# legs on the board, and the board by the shell's pins and screws (owner, 2026-10-02: "we only need there to be
+# room for the ears"): the shell leaves the ears free room, 1 mm below them and 0.8 mm above.
+SOCK_SALE_L, SOCK_SALE_D, EAR_SPAN, EAR_T, ROW_Z = 97.0, 9.0, 137.0, 4.0, 2.5
+EAR_BELOW, EAR_ABOVE = 1.0, 4.8          # the ears' room, from the socket's underside down and up
 USB_W, USB_D, USB_H, USB_H_TOL = 8.94, 6.9, 3.16, 0.15    # receptacle: face width, depth, height (JAE SJ122205)
 USB_CENTRE_UP, USB_OVERHANG = 1.58, 0.5                   # centre above the board; face beyond the board's edge
 USB_MATE_GAP, USB_MATE_TOL = 1.95, 0.3                    # overmold to the receptacle's face when mated: 6.65 +-0.1 less 4.7 +-0.2
@@ -506,7 +508,8 @@ def build():
              + prism(Y_F1 + 1, Y_TOP - WALL, CAP_I))
     upper = outer - inner - pocket
     upper = upper - box(0, Y_TOP - WALL - 1, Y_TOP + 1, 0, SOCK_L + 0.5, SOCK_D + 0.5)          # socket opening
-    upper = upper - box(0, Y_TOP - WALL - 0.5, Y_SOCK0 + EAR_ROOM, 0, EAR_SPAN + 2.0, SOCK_SALE_D + 1.0)   # room for the ears
+    ear_room = box(0, Y_SOCK0 - EAR_BELOW, Y_SOCK0 + EAR_ABOVE, 0, EAR_SPAN + 2.0, SOCK_SALE_D + 1.0)
+    upper = upper - ear_room                                                                    # room for the ears
     upper = upper - usb_port()
     logo = logo_recess(ZC - CAP_HT)
     if logo is not None:
@@ -527,6 +530,7 @@ def build():
     for s in (-1, 1):
         blk = box(s * (x0 + x1) / 2, Y_SOCK0 - 10, Y_SOCK0, 0, x1 - x0, 2 * BRACKET_Z)
         blocks = blk if blocks is None else blocks + blk
+    blocks = blocks - ear_room
     room = (prism(Y_CUT, Y_F0 + 1, inset(STEM_I, BRACKET_GAP))
             + flare(Y_F0 + 1, Y_F1 + 1, inset(STEM_I, BRACKET_GAP), inset(CAP_I, BRACKET_GAP))
             + prism(Y_F1 + 1, Y_TOP - WALL, inset(CAP_I, BRACKET_GAP)))
@@ -613,7 +617,7 @@ def interface_checks():
         "PCB edge margin beyond the outer contacts": round(tab0 + EDGE_TAB_W - (PIN_X[0] + 0.75), 2),
         "nose clearance in the card-edge hole, each side (width, thickness)": (round((HOLE_W - NOSE_L) / 2, 2), round((HOLE_T - NOSE_D) / 2, 2)),
         "socket base wider than the hole, each side (width, thickness); below 0 the cartridge rests on the pocket floor around it": (round((SOCK_SALE_L - HOLE_W) / 2, 2), round((SOCK_SALE_D - HOLE_T) / 2, 2)),
-        "ears: room above them, room past their tips each side": (round(EAR_ROOM - EAR_T, 2), round(CAP_HW - 2 - EAR_SPAN / 2, 2)),
+        "ears: room below them, above them, past their tips each side": (EAR_BELOW, round(EAR_ABOVE - EAR_T, 2), round(CAP_HW - 2 - EAR_SPAN / 2, 2)),
         "contact slot engagement on the PCB": round(NOSE_H - CART_EDGE_RECESS, 2),
         "pocket clearance each side (width, thickness)": (POCKET_CLR_X, POCKET_CLR_Z),
         "pocket and cap offset toward the label side": round(-ZC, 2),
