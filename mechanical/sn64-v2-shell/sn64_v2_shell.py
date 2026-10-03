@@ -104,7 +104,13 @@ SC64_REL = "references/downloads/summercart64/hw/shell/injection mold/sc64_shell
 SC64_ROOTS = ("", "../../")             # repository root (cwd) or the script folder
 DZ = 0.6                                # SummerCart64 shell frame -> board mid-plane at z = 0
 BOARD_T, TONGUE_W, TONGUE_H, BOARD_W_SLOT = 1.2, 64.5, 10.5, 101.8
-SOCK_L, SOCK_D, EAR_X, EAR_HOLE, ROW_Z, PIN_SPAN = 99.0, 11.25, 47.5, 3.2, 3.5, 85.0
+SOCK_L, SOCK_D, PIN_SPAN = 99.0, 11.25, 85.0   # original console socket (OpenSFC): the opening in the cap floor fits it
+# The socket on sale, the copy with ears (owner, 2026-10-02: "Just use whichever sounds best"). Seller's figures
+# 137 x 21 x 9 mm with ears, 97 x 21 x 9 without (Amazon B0H35742NX). Leg rows about 4.5 mm apart by a buyer's
+# ruler, 5.0 in Sanni's footprint drawn for this part (AtariAge forum t=291886). The ears are flat tabs at the
+# base; their thickness, about 4 mm, is read from the listing's photograph (ASSUMED). The shell holds the ears
+# between the brackets and the cap floor, so where the holes in them are does not matter.
+SOCK_SALE_L, SOCK_SALE_D, EAR_SPAN, EAR_T, EAR_ROOM, ROW_Z = 97.0, 9.0, 137.0, 4.0, 4.5, 2.5
 USB_W, USB_D, USB_H, USB_H_TOL = 8.94, 6.9, 3.16, 0.15    # receptacle: face width, depth, height (JAE SJ122205)
 USB_CENTRE_UP, USB_OVERHANG = 1.58, 0.5                   # centre above the board; face beyond the board's edge
 USB_MATE_GAP, USB_MATE_TOL = 1.95, 0.3                    # overmold to the receptacle's face when mated: 6.65 +-0.1 less 4.7 +-0.2
@@ -500,6 +506,7 @@ def build():
              + prism(Y_F1 + 1, Y_TOP - WALL, CAP_I))
     upper = outer - inner - pocket
     upper = upper - box(0, Y_TOP - WALL - 1, Y_TOP + 1, 0, SOCK_L + 0.5, SOCK_D + 0.5)          # socket opening
+    upper = upper - box(0, Y_TOP - WALL - 0.5, Y_SOCK0 + EAR_ROOM, 0, EAR_SPAN + 2.0, SOCK_SALE_D + 1.0)   # room for the ears
     upper = upper - usb_port()
     logo = logo_recess(ZC - CAP_HT)
     if logo is not None:
@@ -519,7 +526,6 @@ def build():
     blocks = None
     for s in (-1, 1):
         blk = box(s * (x0 + x1) / 2, Y_SOCK0 - 10, Y_SOCK0, 0, x1 - x0, 2 * BRACKET_Z)
-        blk = blk - y_cyl(s * EAR_X, Y_SOCK0 - 8, Y_SOCK0 + 1, 0, 2.5)                           # ear screw pilot
         blocks = blk if blocks is None else blocks + blk
     room = (prism(Y_CUT, Y_F0 + 1, inset(STEM_I, BRACKET_GAP))
             + flare(Y_F0 + 1, Y_F1 + 1, inset(STEM_I, BRACKET_GAP), inset(CAP_I, BRACKET_GAP))
@@ -550,12 +556,12 @@ def build():
     for x, y in PIN_HOLES:                                                                # registration holes H3, H4
         board = board - z_cyl(x, y, -1, 1, 2.5)
 
-    socket = box(0, Y_SOCK0, Y_TOP, 0, SOCK_L, SOCK_D) + box(0, Y_TOP, Y_TOP + NOSE_H, 0, NOSE_L, NOSE_D)
+    socket = (box(0, Y_SOCK0, Y_TOP, 0, SOCK_SALE_L, SOCK_SALE_D) + box(0, Y_SOCK0, Y_SOCK0 + EAR_T, 0, EAR_SPAN, SOCK_SALE_D)
+              + box(0, Y_TOP, Y_TOP + NOSE_H, 0, NOSE_L, NOSE_D))                                # the copy on sale, with its ears
     slot_y0 = Y_TOP + CART_EDGE_RECESS                                                          # the PCB edge bottoms here
     socket = socket - box(0, slot_y0, Y_TOP + NOSE_H + 1, 0, EDGE_EXT_W + 0.6, 1.6)             # cartridge slot
     for s in (-1, 1):
         socket = socket + box(s * (EDGE_W + EDGE_GAP) / 2, slot_y0, Y_TOP + NOSE_H, 0, EDGE_GAP - 0.6, 1.6)  # key in the PCB gap
-        socket = socket - y_cyl(s * EAR_X, Y_SOCK0 - 1, Y_TOP + 1, 0, EAR_HOLE)
         z_in, z_out = BOARD_T / 2, ROW_Z + TAIL_T / 2                                            # tails, one strip per row
         socket = socket + box(0, Y_BOARD_TOP, Y_SOCK0, s * (z_in + z_out) / 2, PIN_SPAN + 1.5, z_out - z_in)
         socket = socket + box(0, Y_BOARD_TOP - TAIL_LAP, Y_SOCK0, s * (z_in + TAIL_T / 2), PIN_SPAN + 1.5, TAIL_T)
@@ -606,7 +612,8 @@ def interface_checks():
         "socket contacts on the cartridge's PCB edge": f"{sum(on_edge)} of {len(PIN_X)} per side",
         "PCB edge margin beyond the outer contacts": round(tab0 + EDGE_TAB_W - (PIN_X[0] + 0.75), 2),
         "nose clearance in the card-edge hole, each side (width, thickness)": (round((HOLE_W - NOSE_L) / 2, 2), round((HOLE_T - NOSE_D) / 2, 2)),
-        "socket base wider than the hole, each side (width, thickness)": (round((SOCK_L - HOLE_W) / 2, 2), round((SOCK_D - HOLE_T) / 2, 2)),
+        "socket base wider than the hole, each side (width, thickness); below 0 the cartridge rests on the pocket floor around it": (round((SOCK_SALE_L - HOLE_W) / 2, 2), round((SOCK_SALE_D - HOLE_T) / 2, 2)),
+        "ears: room above them, room past their tips each side": (round(EAR_ROOM - EAR_T, 2), round(CAP_HW - 2 - EAR_SPAN / 2, 2)),
         "contact slot engagement on the PCB": round(NOSE_H - CART_EDGE_RECESS, 2),
         "pocket clearance each side (width, thickness)": (POCKET_CLR_X, POCKET_CLR_Z),
         "pocket and cap offset toward the label side": round(-ZC, 2),

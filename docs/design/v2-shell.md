@@ -63,11 +63,14 @@ CERN-OHL-S-2.0), so the shell model is CERN-OHL-S-2.0 too (`mechanical/README.md
   0.8 mm chamfer.
 - **Socket**: the 62-contact console-replacement SNES/SFC socket with ears on the board's top edge,
   tails on pads on both faces: pins 1-31 on B.Cu (toward the front of the console and the cartridge
-  label, pin 1 at the left end seen from the front), pins 32-62 on F.Cu. Its rows are 7.0 mm apart
-  and the board is 1.2 mm thick, so the tails do not reach the faces as supplied; the owner will
-  adapt the board footprint to the measured sample.
-- **Ears** rest on two brackets in the shell and are screwed from above, so the shell carries the
-  cartridge insertion force and the solder joints carry none.
+  label, pin 1 at the left end seen from the front), pins 32-62 on F.Cu. Since 2026-10-02 the shell
+  is drawn for the copy that is on sale, with ears (owner: "Just use whichever sounds best"): its rows
+  are about 4.5 to 5 mm apart and the board is 1.2 mm thick, so each row of tails is bent in about
+  1.9 mm to reach the pads.
+- **Ears** rest on two brackets in the shell, with the cap floor 0.5 mm above them, so the shell
+  carries the cartridge insertion force and the solder joints carry none. No screw goes through the
+  ears, so where their holes are does not matter (picture `socket-ear-section.png`). Until
+  2026-10-02 they were screwed from above at 95 mm, the original console part's holes.
 - **Cartridge** stands in the cap's pocket, held on all four sides, its bottom face on the pocket
   floor, which is level with the socket shoulder. The pocket is sized for the US cartridge and has
   no region tabs, so Super Famicom and PAL cartridges (about 6 mm narrower, same connector) go in
@@ -119,7 +122,8 @@ CERN-OHL-S-2.0), so the shell model is CERN-OHL-S-2.0 too (`mechanical/README.md
 | Rim | 88.0 at the centre, 82.0 at the ends, fillet 2.5 | assumed |
 | Wall | 2.0 body and stem, 2.0 to 2.9 through the flare, 5.0 around the pocket | SummerCart64 2.0; rest assumed |
 | Console top surface | 17.7 above the shoulders | **measured by the owner (2026-10-01)**: 30 mm from the top surface down to the floor of the cartridge hole, N64 and M64; the shell bottom is 12.31 below the shoulders |
-| Socket body | 99.0 x 11.25, ear holes 3.2 at 95.0 | OpenSFC console footprint (sourced) |
+| Socket body | opening in the cap floor 99.5 x 11.75: fits the original console part, 99.0 x 11.25 | OpenSFC console footprint (sourced) |
+| Socket on sale, with ears | 137 x 21 x 9 overall, 97 x 9 body; ears 4.0 thick at the base, resting on the brackets; room above them 4.5, 2.8 past their tips each side | seller's figures (Amazon B0H35742NX); ear thickness read from the listing's photograph, **assumed** |
 | Socket base | 6 high | **assumed**; a marketplace listing gives 21 mm overall |
 | Socket nose | 94.9 x 8.75, 10.55 high, slot 90.5 long with a key in each PCB gap | SNES Jr connector model (sourced, a different connector of the same family) |
 | Board top edge | 60 | socket underside 0.5 above it |
@@ -284,7 +288,7 @@ No drawing and no 3D model of the socket that is on sale was found this time eit
 | Pitch 2.5 mm, not 2.54 | [NESdev forum, "SNES Edge Connector"](https://forums.nesdev.org/viewtopic.php?t=11389); [shmups forum](https://shmups.system11.org/viewtopic.php?t=53375) | agrees with the board's pads |
 | The sockets on sale have their two leg rows closer together than the original console part: "about 4.5 mm" against "about 6 mm" (one buyer, by ruler); a second buyer found the same and bent all 62 legs outward to fit a console | [AtariAge forum](https://forums.atariage.com/topic/291886-snes-solder-type-cartridge-slot-replacement/); shmups forum as above | agrees with Sanni's 5.0 mm footprint, which was drawn for the part on sale. The 7.0 mm of OpenSFC is the original SHVC console part, which is no longer made. On this board the legs go to pads on the two faces of a 1.2 mm board, so each row comes in about 1.9 mm, not 2.9 mm |
 | Overall size 137 x 21 x 9 mm with ears, 97 x 21 x 9 mm without | [Amazon B0H35742NX](https://www.amazon.com/SNES-Game-Slot-Connector-Replacement/dp/B0H35742NX), seller's figures | the 21 mm height is the figure already used |
-| The ears are flat tabs at the base that reach out about 19 mm beyond each end of the body, with their holes near the tips | the same listing's photograph | **the shell does not match this**: it has the ear holes at 95.0 mm (`EAR_X = 47.5`), inside the body's length, from the original console footprint. The brackets and the two cap screws at 57.5 have to be drawn again from a sample. The inner width at the board's top edge is 142.6 mm, so a 137 mm part goes in with 2.8 mm each side by the seller's rounded figure |
+| The ears are flat tabs at the base that reach out about 19 mm beyond each end of the body, with their holes near the tips | the same listing's photograph | the shell had the ear holes at 95.0 mm, inside the body's length, from the original console footprint. **Changed the same day:** the ears now rest on the brackets under the cap floor and no screw goes through them. The inner width at the board's top edge is 142.6 mm, so a 137 mm part goes in with 2.8 mm each side by the seller's rounded figure |
 
 Still not published anywhere found: the leg length, the ear holes' positions and size, the base height, how deep a cartridge seats. A sample is still needed for the shell. For the board the lookup is good news: the pad pattern agrees with both footprints and the legs need a smaller bend than was planned.
 
@@ -327,8 +331,9 @@ Still not published anywhere found: the leg length, the ear holes' positions and
 - Socket legs: the two rows are 7.0 mm apart and the pads are on the faces of a 1.2 mm board, so each
   row has to come in 2.9 mm. The owner plans a double bend. That takes about 5 to 6 mm of leg, and
   the leg length is unknown until a sample is measured.
-- The ear screws go in from above through the cartridge pocket; their size and the ears' own shape
-  wait for the sample.
+- The ears' thickness, 4.0 mm, is read from a photograph. The room above them is 4.5 mm: a thicker ear
+  does not fit, a thinner one leaves the socket free to lift by the difference. Check with the first
+  socket and change `EAR_T` and `EAR_ROOM`.
 - Board: the right side notch is 1.3 mm higher than SummerCart64's; correct the outline so an
   unmodified SummerCart64 lower shell fits, or keep the trimmed post.
 
