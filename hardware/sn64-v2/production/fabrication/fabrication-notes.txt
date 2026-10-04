@@ -1,5 +1,5 @@
 SN64 v1 main board (files named sn64-v2): fabrication notes
-Made 2026-10-02 for a quotation. Board file sn64-v2.kicad_pcb.
+Made 2026-10-04 for a quotation. Board file sn64-v2.kicad_pcb.
 
 1. Layers: 6. Order from the top:
       F.Cu    top copper: the back face of the cartridge

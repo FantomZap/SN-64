@@ -113,6 +113,8 @@ def package(fp):
 
 def substitute(ref, part):
     kind = natural(ref)[0]
+    if ref == 'U1':                 # timing passes at speed grade 6 (fpga/reports/v2-route-speed6.json), so any grade will do
+        return 'yes: any LFE5U-85F in caBGA-381: LFE5U-85F-6BG381, -7BG381 or -8BG381, C or I'
     if kind == 'C':
         return 'yes: same value, size and dielectric, same voltage or higher'
     if kind == 'R':

@@ -1,0 +1,45 @@
+{
+  "top": "sn64_board_top",
+  "speed_grade": "6",
+  "lpf": "fpga/constraints/sn64_board.lpf",
+  "synthesis_cells": {
+    "TRELLIS_FF": 12966,
+    "EHXPLLL": 3,
+    "DCSC": 1,
+    "USRMCLK": 1,
+    "DP16KD": 203,
+    "MULT18X18D": 19,
+    "LUT4": 28955
+  },
+  "nextpnr_exit": 0,
+  "max_frequency": {
+    "clk_host": {
+      "achieved_mhz": 66.89,
+      "required_mhz": 61.72,
+      "result": "PASS"
+    },
+    "clk_snes2": {
+      "achieved_mhz": 250.19,
+      "required_mhz": 42.96,
+      "result": "PASS"
+    },
+    "clk_snes": {
+      "achieved_mhz": 29.02,
+      "required_mhz": 21.48,
+      "result": "PASS"
+    },
+    "osc_27": {
+      "achieved_mhz": 62.0,
+      "required_mhz": 27.0,
+      "result": "PASS"
+    }
+  },
+  "logs": [
+    "build/route-board-speed6/synth.log",
+    "build/route-board-speed6/pnr.log"
+  ],
+  "dcs_modes": {
+    "DCS0": "NEG"
+  },
+  "note": "Run of 2026-10-03: the board top level routed for the slowest speed grade, so that an FPGA of any grade (6, 7 or 8) may be fitted. Build the released image at speed 6."
+}

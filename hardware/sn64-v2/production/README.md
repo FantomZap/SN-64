@@ -1,6 +1,6 @@
 # SN64 v1 board (files named sn64-v2): manufacturing files
 
-Made by `hardware/sn64-v2/tools/make_production_v2.py` on 2026-10-02. **For a quotation. Not released for manufacture, and nothing has been sent to a maker.**
+Made by `hardware/sn64-v2/tools/make_production_v2.py` on 2026-10-04. **For a quotation. Not released for manufacture, and nothing has been sent to a maker.**
 
 - The SNES socket's footprint (J2) waits for a measured sample of the socket.
 - No board has been built. What has and has not been checked is in [board-verification.md](../../../docs/design/board-verification.md).

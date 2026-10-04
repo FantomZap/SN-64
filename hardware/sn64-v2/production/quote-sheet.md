@@ -1,6 +1,6 @@
 # SN64 v1 board (files named sn64-v2): what to enter for a PCBWay quote
 
-Written by `hardware/sn64-v2/tools/make_production_v2.py` on 2026-10-02 from the board file. Every number below is read from the board.
+Written by `hardware/sn64-v2/tools/make_production_v2.py` on 2026-10-04 from the board file. Every number below is read from the board.
 **Nothing has been sent to PCBWay.** The files are for a price. Before an order the list at the end still applies.
 
 ## 1. The bare board (PCBWay's "PCB Instant Quote")

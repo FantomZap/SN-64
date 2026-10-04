@@ -34,7 +34,7 @@ Item,Designator,Qty,Manufacturer,Mfg Part #,Description / Value,Package / Footpr
 33,R316,1,YAGEO,RT0603BRD07120KL,120 k 0.1 % 25 ppm thin film 0603,0603,SMD,bottom,C705720,"yes: same value, size and tolerance",
 34,R318,1,UNI-ROYAL,0603WAF2492T5E,24.9 k 1 % 0603,0603,SMD,bottom,C25962,"yes: same value, size and tolerance",
 35,RT1,1,Sunlord,SDNT1608X103F3950FTF,"NTC 10 k 1 %, B(25/50) 3950 K 1 %, 0603",0603,SMD,bottom,C279936,"yes: 10 k, 1 %, B(25/50) 3950 K, 0603",
-36,U1,1,Lattice Semiconductor,LFE5U-85F-8BG381I,"LFE5U-85F-8BG381I. ECP5 FPGA, 84K LUTs, 1.2V, BGA-381","caBGA-381, 0.8 mm pitch",SMD,top,Mouser 842-LFE5U85F8BG381I,no,
+36,U1,1,Lattice Semiconductor,LFE5U-85F-8BG381I,"LFE5U-85F-8BG381I. ECP5 FPGA, 84K LUTs, 1.2V, BGA-381","caBGA-381, 0.8 mm pitch",SMD,top,Mouser 842-LFE5U85F8BG381I,"yes: any LFE5U-85F in caBGA-381: LFE5U-85F-6BG381, -7BG381 or -8BG381, C or I",
 37,U2,1,Winbond,W25Q128JVSIQ,"W25Q128JVSIQ. 128Mbit / 16MiB Serial Flash Memory, Standard/Dual/Quad SPI, 2.7-3.6V, SOIC-8","SOIC-8, 5.3 mm body",SMD,top,C97521,no,
 38,U3,1,Texas Instruments,TPS3808G01DBVR,"TPS3808G01DBVR. Low-Quiescent-Current, Programmable-Delay Supervisory Circuit, SOT-23-6",SOT-23-6,SMD,top,C19653,no,
 39,U4,1,STMicroelectronics,USBLC6-2SC6,"USBLC6-2SC6. Very low capacitance ESD protection diode, 2 data-line, SOT-23-6",SOT-23-6,SMD,top,C7519,no,
